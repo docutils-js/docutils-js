@@ -1,0 +1,117 @@
+import { TransformSpec }  from './index';
+import { createReadStream } from 'fs';
+import ErrorOutput from './ErrorOutput';
+
+class Input extends TransformSpec {
+    constructor({source, sourcePath, encoding, errorHandler}) {
+	super();
+	this.encoding = encoding;
+	this.errorHandler=errorHandler;
+	this.source = source;
+	this.sourcePath = sourcePath;
+	if(!sourcePath) {
+	    this.sourcePath = this.defaultSourcePath;
+	}
+	this.successfulEncoding = undefined;
+    }
+
+    async read() {
+	throw new Error("not implemented");
+    }
+
+    decode(data) {
+	return data;
+    }
+}
+
+class Output extends TransformSpec {
+    constructor(destination, destinationPath, encoding, errorHandler) {
+	super({});
+	this.encoding = encoding;
+	this.errorHandler = errorHandler || 'strict'
+	this.destination = destination;
+	this.destinationPath = destinationPath;
+	if(!destinationPath) {
+	    this.destinationPath = this.defaultDestinationPath;
+	}
+    }
+
+    write(data) {
+	console.log(`writing data ${data}`);
+    }
+
+    encode(data) {
+    }
+}
+
+export class FileInput extends Input {
+    constructor(args) {
+	super(args);
+	let { source, sourcePath, encoding, errorHandler, autoClose,
+	      mode } = args;
+	if(source === undefined && sourcePath === undefined) {
+	    throw new Error("fail")
+	}
+	
+	console.log(`woah ${args} ${source} ${sourcePath}`)
+	if(autoClose === undefined) {
+	    autoClose = true;
+	}
+	if(mode === undefined) {
+	    mode = 'r';
+	}
+	
+	this.autoClose = autoClose;
+	this._stderr = new ErrorOutput()
+	if(!source) {
+	    if(sourcePath) {
+		try {
+		    console.log('creating read steram');
+		    this.source = createReadStream(sourcePath);
+		}
+		catch(error) {
+		    console.log(error.stack);
+		    throw error;
+		}
+	    } else {
+		this.source = process.stdin;
+	    }
+	} else {
+	    
+	    // ??
+	}
+	if(!sourcePath) {
+	    this.sourcePath = this.source.name;
+	}
+    }
+
+    async read() {
+	let data;
+	try {
+	    /* reading ? */
+	    if(this.source === process.stdin) {
+		// do stuff
+	    } else {
+		data = this.source.read();
+		console.log(`got ${data}`);
+	    }
+	} catch(error) {
+	    throw error;
+	}
+	return this.decode(data)
+    }
+
+    readLines() {
+	return this.read().splitlines(true);
+    }
+
+    close() {
+	if(this.source !== process.stdin) {
+	    this.source.close();
+	}
+    }
+}
+
+export class FileOutput extends Output {
+    
+}

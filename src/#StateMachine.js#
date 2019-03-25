@@ -1,0 +1,106 @@
+class StateMachine {
+    /* 
+        Initialize a `StateMachine` object; add state objects.
+
+       Parameters:
+
+        - `state_classes`: a list of `State` (sub)classes.
+        - `initial_state`: a string, the class name of the initial state.
+        - `debug`: a boolean; produce verbose output if true (nonzero).
+	*/
+
+    constructor(stateClasses, initialState, debug) {
+	if(debug === undefined) {
+	    debug = false;
+	}
+	this.inputLines = undefined;
+	this.inputOffset = 0;
+	this.line = undefined;
+	this.lineOffset = -1;
+	this.debug = debug;
+	this.initialState = initialState;
+	this.currentState = initialState;
+	this.states = {};
+	this.addStates(stateClasses);
+	this.observers = []
+	//       self._stderr = ErrorOutput()
+    }
+
+    unlink() {
+	Object.values(this.states).forEach(s => s.unlink());
+	this.states = undefined;
+    }
+
+    run(inputLines, inputOffset = 0, context, inputSource, initialState) {
+	/*
+        Run the state machine on `input_lines`. Return results (a list).
+
+        Reset `self.line_offset` and `self.current_state`. Run the
+        beginning-of-file transition. Input one line at a time and check for a
+        matching transition. If a match is found, call the transition method
+        and possibly change the state. Store the context returned by the
+        transition method to be passed on to the next transition matched.
+        Accumulate the results returned by the transition methods in a list.
+        Run the end-of-file transition. Finally, return the accumulated
+        results.
+
+        Parameters:
+
+        - `input_lines`: a list of strings without newlines, or `StringList`.
+        - `input_offset`: the line offset of `input_lines` from the beginning
+          of the file.
+        - `context`: application-specific storage.
+        - `input_source`: name or path of source of `input_lines`.
+        - `initial_state`: name of initial state.
+	*/
+	this.runtimeInit();
+	//if isinstance(input_lines, StringList):
+	//self.input_lines = input_lines
+	//else:
+	//self.input_lines = StringList(input_lines, source=input_source)
+	this.inputLines = inputLines;
+	this.lineOffset = -1;
+	this.currentState = initialState || this.initialState;
+	let transitions = undefined;
+	const results = [];
+	let state = this.getState();
+	let nextState;
+	try {
+	    [ context, result ] = state.bof(context);
+	    results.push(result);
+	    while(true) {
+		try {
+		    try {
+			this.nextLine();
+			[ context, nextState, result ] = this.checkLine(context, state, transitions);
+		    }
+		    catch(error) {
+		    }
+		}
+		catch(error) {
+		}
+	    }
+	}
+	catch(error) {
+	}
+	this.observers = [];
+	return results;
+    }
+
+    addStates(stateClasses) {
+	// stub
+    }
+
+    runtimeInit() {
+	Object.values(this.states).forEach(s => s.runtimeInit());
+    }
+
+    getState(nextState) {
+	if(nextState) {
+	    this.currentState = nextState;
+	}
+	
+	    
+}
+
+export default StateMachine;
