@@ -45,6 +45,7 @@ class Output extends TransformSpec {
 }
 
 export class FileInput extends Input {
+    /* ew, too much logic for a constructor, with side effects and shit! */
     constructor(args) {
 	super(args);
 	let { source, sourcePath, encoding, errorHandler, autoClose,
@@ -66,7 +67,7 @@ export class FileInput extends Input {
 	if(!source) {
 	    if(sourcePath) {
 		try {
-		    console.log('creating read steram');
+		    console.log('creating read stream');
 		    this.source = createReadStream(sourcePath);
 		}
 		catch(error) {
@@ -85,7 +86,9 @@ export class FileInput extends Input {
 	}
     }
 
-    async read() {
+    /* Read and decode a single file and return the data (Unicode string).
+     */
+    read(cb) {
 	let data;
 	try {
 	    /* reading ? */
@@ -93,12 +96,17 @@ export class FileInput extends Input {
 		// do stuff
 	    } else {
 		data = this.source.read();
-		console.log(`got ${data}`);
+		if(data === null) {
+		    console.log("read returned null ?");
+		}
+		cb(data);
 	    }
 	} catch(error) {
 	    throw error;
 	}
-	return this.decode(data)
+
+
+
     }
 
     readLines() {

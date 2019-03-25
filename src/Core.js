@@ -133,8 +133,9 @@ class Publisher {
 	this.document.transformer.populateFromComponents(this.source, this.reader, this.reader.parser, this.writer, this.destination);
 	this.document.transformer.applyTransforms();
     }
-    
-    async publish(args) {
+
+    /* This doesnt seem to return anything ? */
+    publish(args, cb) {
 	const {argv, usage, description, settingsSpec, settingsOverrides, configSection, enableExitStatus } = args;
 	let exit = undefined;
 	try {
@@ -146,19 +147,29 @@ class Publisher {
 
 	    //KM
 	    console.log('about to call read');
-	    this.document = await this.reader.read(this.source,
-						   this.parser,
-						   this.settings)
-	    if(!this.document) {
-		throw new Error("need document");
-	    }
-	    this.applyTransforms()
-	    const output = this.writer.write(this.document, this.destination)
-	    this.writer.assembleParts();
+	    /* we may need to change semantics here !! */
+
+	    this.reader.read(
+		this.source, this.parser, this.settings,
+		((error, document) => {
+		    if(error) {
+			console.log(error);
+			return;
+		    }
+		    this.document = document;
+		    if(!document) {
+			throw new Error("need document");
+		    }
+		    this.applyTransforms()
+		    const output =
+			  this.writer.write(this.document, this.destination)
+		    this.writer.assembleParts();
+		    console.log('derp here');
+		    cb(output);
+		}).bind(this));
 	} catch(error) {
 	    console.log(error.stack);
 	}
-					  
     }
 }
 
@@ -166,7 +177,7 @@ export const defaultUsage = '%prog [options] [<source> [<destination>]]'
 export const defaultDescription = ('Reads from <source> (default is stdin) and writes to <destination> (default is stdout).  See <http://docutils.sf.net/docs/user/config.html> for the full reference.')
 
 
-export async function publishCmdLine(args) {
+export function publishCmdLine(args, cb) {
     const _defaults = { readerName: 'standalone',
 			parserName: 'restructuredtext',
 			usage: defaultUsage,
@@ -179,5 +190,5 @@ export async function publishCmdLine(args) {
     console.log(`argv is ${argv}`);
     const pub = new Publisher({reader, parser, writer, settings});
     pub.setComponents(readerName, parserName, writerName);
-    return pub.publish({argv, usage, description, settingsSpec, settingsOverrides, configSection, enableExitStatus });
+    pub.publish({argv, usage, description, settingsSpec, settingsOverrides, configSection, enableExitStatus }, cb);
 }

@@ -455,3 +455,14 @@ export class StateWS extends State {
 	return [ context, nextState, results ];
     }
 }
+
+export function string2lines(astring, args) {
+    let { tabWidth, convertWhitespace, whitespace } = args;
+    if(whitespace === undefined) {
+    }
+    if(tabWidth === undefined) {
+	tabWidth = 8;
+    }
+    /* fo a bunch of stuff */
+    return astring.split('\n').map(x => x);
+}

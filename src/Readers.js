@@ -24,14 +24,15 @@ export class Reader extends Component {
 
     setParser(parserName) {
 	const ParserClass = parsers.getParserClass(parserName).Parser;
-	this.parser = new ParserClass();
+	this.parser = new ParserClass({});
     }
 
     /**
       * Magic read method. Returns document. Clearly this is meant to read
       * the stream in its entirety?
+      * we may have to change api semantics!
       */
-    async read(source, parser, settings) {
+    read(source, parser, settings, cb) {
 	this.source = source;
 	if(!this.parser) {
 	    this.parser = parser;
@@ -42,20 +43,27 @@ export class Reader extends Component {
 	    throw new AssertError("Need source");
 	}
 
-	console.log("derp");
-	let input;
-	
-	input = await this.source.read();
-	this.input = input;
-	console.log('my input is ' + this.input);
-	await this.parse();
-	return this.document;
+	this.source.read((error, data) =>
+			 {
+			     if(error) {
+				 console.log(error.stack);
+				 cb(error);
+				 return;
+			     }
+			     console.log(data);
+			     this.parse();
+			     cb(undefined, this.document);
+			 });
     }
 
-    async parse() {
+    parse() {
 	const document = this.newDocument({});
 	this.document = document;
-	await this.parser.parse(this.input, document);
+	if(!this.input) {
+	    throw new Error("need input");
+	}
+	
+	this.parser.parse(this.input, document);
 	document.currentSource = document.currentLine = undefined;
     }
 

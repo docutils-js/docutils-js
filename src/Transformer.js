@@ -14,8 +14,6 @@ export default class Transformer {
 	    if(!component) {
 		continue;
 	    }
-	    console.log(`component is `);
-	    console.log(component);
 	    this.addTransforms(component.getTransforms())
 	    this.components[component.componentType] = component
 	}

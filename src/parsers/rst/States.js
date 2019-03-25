@@ -47,6 +47,8 @@ class NestedStateMachine extends StateMachineWS {
 class RSTState extends StateWS {
     constructor(stateMachine, debug) {
 	super(stateMachine, debug);
+	/* does it really help to have Body as a string? */
+	console.log(`in RSTState`);
 	this.nestedSmKwargs = { stateClasses, initialState: 'Body' };
     }
 
@@ -154,7 +156,32 @@ class RSTState extends StateWS {
     }
 }
 
-	
+class Body extends RSTState {
+    constructor(args) {
+	super(args);
+	const pats = { }
+	const _enum = { }
+
+	pats['nonalphanum7bit'] = '[!-/:-@[-`{-~]'
+	pats['alpha'] = '[a-zA-Z]'
+	pats['alphanum'] = '[a-zA-Z0-9]'
+	pats['alphanumplus'] = '[a-zA-Z0-9_-]'
+	//' % enum.sequencepats)
+	pats['enum'] = `(${arabic}|${loweralpha}|${upperalpha}|${lowerroman}|${upperroman}|#)`
+
+	this.pats = pats;
+	this.patterns = { 'bullet': '[-+*\u2022\u2023\u2043]( +|$)',
+			};
+	this.initialTransitions = ['bullet'];
+    }
+
+    indent(match, context, nextState) {
+	/* match is not match!! */
+    }
+    
+}
+
+export const stateClasses = [Body];
 					    
 					     
 		
