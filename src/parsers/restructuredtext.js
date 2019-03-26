@@ -20,9 +20,9 @@ export class Parser extends BaseParser {
 	this.inliner = args.inliner;
     }
     
-    async parse(inputstring, document) {
+    parse(inputstring, document) {
 	if(!inputstring) {
-	    throw new Error("need input");
+	    throw new Error("need input for rst parser");
 	}
 	
 	this.setupParse(inputstring, document);
@@ -33,8 +33,8 @@ export class Parser extends BaseParser {
 	const inputlines = statemachine.string2lines(
 	    inputstring, { tabWidth: document.settings.tabWidth,
 			   convertWhitespace: true });
-	await this.stateMachine.run(inputlines, document, inliner)
-	await this.finishParse()
+	this.stateMachine.run({inputlines, document, inliner: this.inliner})
+	this.finishParse()
     }
 }
 

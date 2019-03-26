@@ -1,9 +1,15 @@
 import { StateMachineWS, StateWS } from '../../StateMachine';
+import * as languages from '../../languages'
+
+export class Inliner {
+    initCustomizations(settings) {
+    }
+}
 
 export class RSTStateMachine extends StateMachineWS {
     run({inputLines, document, inputOffset, matchTitles, inliner}) {
 	if(matchTitles === undefined) {
-	    matchTitles = True;
+	    matchTitles = true;
 	}
 	this.language = languages.getLanguage(document.settings.languageCode)
 	self.matchTitles = matchTitles;

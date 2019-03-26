@@ -1,3 +1,1 @@
-export default {
-    getLanguage: () => { },
-};
+exports.getLanguage = () => { }

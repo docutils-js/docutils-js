@@ -50,7 +50,7 @@ export class Reader extends Component {
 				 cb(error);
 				 return;
 			     }
-			     console.log(data);
+			     this.input = data;
 			     this.parse();
 			     cb(undefined, this.document);
 			 });
@@ -60,7 +60,7 @@ export class Reader extends Component {
 	const document = this.newDocument({});
 	this.document = document;
 	if(!this.input) {
-	    throw new Error("need input");
+	    throw new Error("need input, i have " + this.input);
 	}
 	
 	this.parser.parse(this.input, document);

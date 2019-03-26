@@ -68,7 +68,7 @@ export class FileInput extends Input {
 	    if(sourcePath) {
 		try {
 		    console.log('creating read stream');
-		    this.source = createReadStream(sourcePath);
+		    this.source = createReadStream(sourcePath, { encoding: 'utf8' });
 		}
 		catch(error) {
 		    console.log(error.stack);
@@ -89,6 +89,7 @@ export class FileInput extends Input {
     /* Read and decode a single file and return the data (Unicode string).
      */
     read(cb) {
+	setTimeout(() => {
 	let data;
 	try {
 	    /* reading ? */
@@ -99,14 +100,13 @@ export class FileInput extends Input {
 		if(data === null) {
 		    console.log("read returned null ?");
 		}
-		cb(data);
+		console.log(`${data}`);
+		cb(undefined, data);
 	    }
 	} catch(error) {
 	    throw error;
 	}
-
-
-
+	}, 100);
     }
 
     readLines() {

@@ -35,6 +35,7 @@ class Publisher {
 	this.settings = settings;
     }
 
+    /* Does having a reader help us at all ? */
     setReader(readerName, parser, parserName) {
 	const readerClass = readers.getReaderClass(readerName)
 	this.reader = new readerClass(parser, parserName)

@@ -31,7 +31,7 @@ export class StateMachine {
 	this.states = undefined;
     }
 
-    run({ inputLines, inputOffset, context, inputSource, initialStat}) {
+    run({ inputLines, inputOffset, context, inputSource, initialState}) {
 	/*
         Run the state machine on `input_lines`. Return results (a list).
 
@@ -100,6 +100,7 @@ export class StateMachine {
 	    }
 	    this.currentState = nextState;
 	}
+	console.log(this.states);
 	if(!this.states.hasOwnProperty(self.currentState)) {
 	    throw new UnknownStateError(self.currentState);
 	}
@@ -457,6 +458,11 @@ export class StateWS extends State {
 }
 
 export function string2lines(astring, args) {
+    if(!astring) {
+	astring = "";
+    }
+    console.log(astring);
+    
     let { tabWidth, convertWhitespace, whitespace } = args;
     if(whitespace === undefined) {
     }
