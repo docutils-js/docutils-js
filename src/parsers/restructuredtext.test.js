@@ -1,7 +1,10 @@
-const x = require('./restructuredtext');
+import { Parser } from './restructuredtext';
+import { newDocument } from '../utils'
 
 test('1', () => {
-    console.log(x);
+    const p = new Parser({});
+    p.parse('poop', newDocument({sourcePath: '' }, {}));
+    
 });
 
     

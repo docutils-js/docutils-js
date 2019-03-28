@@ -54,7 +54,6 @@ export class FileInput extends Input {
 	    throw new Error("fail")
 	}
 	
-	console.log(`woah ${args} ${source} ${sourcePath}`)
 	if(autoClose === undefined) {
 	    autoClose = true;
 	}
@@ -67,7 +66,6 @@ export class FileInput extends Input {
 	if(!source) {
 	    if(sourcePath) {
 		try {
-		    console.log('creating read stream');
 		    this.source = createReadStream(sourcePath, { encoding: 'utf8' });
 		}
 		catch(error) {
@@ -100,7 +98,6 @@ export class FileInput extends Input {
 		if(data === null) {
 		    console.log("read returned null ?");
 		}
-		console.log(`${data}`);
 		cb(undefined, data);
 	    }
 	} catch(error) {

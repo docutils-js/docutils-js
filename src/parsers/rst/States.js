@@ -27,6 +27,9 @@ export class RSTStateMachine extends StateMachineWS {
 	this.reporter = this.memo.reporter
 	this.node = document
 	results = super.run({inputLines, inputOffset, inputSource: document.source});
+	if(results.length !== 0) {
+	    throw new Error("should be o");
+	}
 	self.node = self.memo = undefined;
     }
 }
@@ -51,16 +54,15 @@ class NestedStateMachine extends StateMachineWS {
 }
 
 class RSTState extends StateWS {
-    constructor(stateMachine, debug) {
-	super(stateMachine, debug);
+    constructor(args) {
+	super(args);
 	/* does it really help to have Body as a string? */
-	console.log(`in RSTState`);
 	this.nestedSmKwargs = { stateClasses, initialState: 'Body' };
     }
 
     runtimeInit() {
 	super.runtimeInit();
-	const memo = this.stateMachine.me2mo;
+	const memo = this.stateMachine.memo;
 	this.memo = memo;
 	this.reporter = memo.reporter;
 	this.inliner = memo.inliner;
@@ -110,7 +112,7 @@ class RSTState extends StateWS {
 	}
 	
 	if(!stateMachine) {
-	    stateMachine = stateMachineClass({debug:this.debug,
+	    stateMachine = new stateMachineClass({debug:this.debug,
 					      ...stateMachineKwags});
 	}
 	stateMachine.run({block, inputOffset, memo: this.memo,
@@ -163,8 +165,9 @@ class RSTState extends StateWS {
 }
 
 class Body extends RSTState {
+    initialTransitions = ['bullet']//,  'enumerator', 'field_marker', 'option_marker', 'doctest', 'line_block', 'grid_table_top', 'simple_table_top', 'explicit_markup', 'anonymous', 'line', 'text')
     constructor(args) {
-	super(args);
+	super({ ...args, initialTransitions: ['bullet'] });
 	const pats = { }
 	const _enum = { }
 
@@ -172,8 +175,6 @@ class Body extends RSTState {
 	pats['alpha'] = '[a-zA-Z]'
 	pats['alphanum'] = '[a-zA-Z0-9]'
 	pats['alphanumplus'] = '[a-zA-Z0-9_-]'
-	//' % enum.sequencepats)
-	pats['enum'] = `(${arabic}|${loweralpha}|${upperalpha}|${lowerroman}|${upperroman}|#)`
 
 	this.pats = pats;
 	this.patterns = { 'bullet': '[-+*\u2022\u2023\u2043]( +|$)',

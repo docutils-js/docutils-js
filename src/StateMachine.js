@@ -1,6 +1,11 @@
 import UnknownStateError from './UnknownStateError';
 import ErrorOutput from './ErrorOutput';
 
+function __getClass(object) {
+  return Object.prototype.toString.call(object)
+    .match(/^\[object\s(.*)\]$/)[1];
+};
+
 export class StateMachine {
     /* 
         Initialize a `StateMachine` object; add state objects.
@@ -100,7 +105,6 @@ export class StateMachine {
 	    }
 	    this.currentState = nextState;
 	}
-	console.log(this.states);
 	if(!this.states.hasOwnProperty(self.currentState)) {
 	    throw new UnknownStateError(self.currentState);
 	}
@@ -233,18 +237,27 @@ export class StateMachine {
 	return [ src, srcline ]
     }
 
-insertInput(inputLines, source) {
-}
+    insertInput(inputLines, source) {
+    }
 
-getTextBlock() {
-}
-checkLine() {
-}
-addState() {
-}
+    getTextBlock() {
+    }
+    checkLine() {
+    }
+
+    addState(stateClass) {
+	const stateName = stateClass.name;
+	console.log(`adding state ${stateName}`);
+
+	if(this.states.hasOwnProperty(stateName)) {
+	    throw new DuplicateStateError(stateName);
+	}
+	const r = new stateClass({ stateMachine: this, debug: this.debug });
+	this.states[stateName] = r;
+    }
 
     addStates(stateClasses) {
-	stateClasses.forEach(this.addState);
+	stateClasses.forEach(this.addState.bind(this));
     }
 
     runtimeInit() {
@@ -276,18 +289,26 @@ addState() {
 }
 
 export class State {
-    constructor(stateMachine,debug) {
+    constructor(args) {
+	const { stateMachine,debug } = args;
 	this.transitionOrder = []
 	this.transitions = {}
+	this.patterns = {}
+	this.initialTransitions = args.initialTransitions;
+	this.wsInitialTransitions = args.wsInitialTransitions;
 	this.addInitialTransitions()
+	if(!stateMachine) {
+	    throw new Error("Need statemachine");
+	}
+	
 	this.stateMachine = stateMachine;
 	this.debug = debug;
 	if(!this.nestedSm){
-	    this.nestedSm = this.stateMachine.__class__;
+	    this.nestedSm = this.stateMachine.constructor;
 	}
 	if(!this.nestedSmKwargs) {
-	    this.nestedSmKwargs = { stateClasses: [this.__class__],
-				    initialState: this.__class__.__name__};
+	    this.nestedSmKwargs = { stateClasses: [this.constructor],
+				    initialState: this.constructor.name };
 	}
     }
 
@@ -307,16 +328,18 @@ export class State {
     }
 
     addTransitions(names, transitions) {
-	names.forEach(name => {
+	names.forEach((name => {
 	    if(this.transitons.includes(name)) {
 		throw new DuplicateTransitionError(name);
 	    }
 	    if(!transitions.includes(name)) {
 		throw new UnknownTrransitionError(name);
 	    }
-	});
+	}).bind(this));
 	this.transitionOrder.push(...names);
-	this.transitions.update(transitions);
+	Object.keys(transitions).forEach( key => {
+	    this.transitions[key] = transitions[key];
+	});
     }
 
     addTransition(name, transition) {
@@ -326,9 +349,36 @@ export class State {
     }
 
     makeTransition(name, nextState) {
+	if(nextState === undefined) {
+	    nextState = this.name;
+	}
+
+	let pattern = this.patterns[name];
+	if(!(pattern instanceof RegExp)) {
+	    pattern = new RegExp(pattern);
+	}
+	const method = this[name];
+	
+	return [pattern, method, nextState];
     }
 
     makeTransitions(nameList) {
+	const names = [];
+	const transitions = {};
+	if(!Array.isArray(nameList)) {
+	    console.log('warning, not an array');
+	    throw new Error('not array');
+	}
+	
+	for(let namestate of nameList) {
+	    if(namestate instanceof String) {
+		transitions[namestate] = this.makeTransition(namestate)
+		names.push(namestate);
+	    } else {
+		transitions[namestate[0]] = this.makeTransition(...namestate);
+	    }
+	}
+	return [names, transitions]
     }
 
     noMatch(context, transitions) {
@@ -402,8 +452,8 @@ export class StateMachineWS extends StateMachine {
 }
 
 export class StateWS extends State {
-    constructor(stateMachine, debug) {
-	super(stateMachine, debug);
+    constructor(args) {
+	super({ wsInitialTransitions: ['blank', 'indent'], ...args})
 	if(!this.indentSm) {
 	    this.indentSm = this.nestedSm;
 	}
@@ -423,8 +473,8 @@ export class StateWS extends State {
 	    this.patterns = {}
 	}
 	this.patterns = { ...this.patterns, ... this.wsPatterns };
-	const [ names, transitions ] = this.makeTransitions(this.wsInitiaTransitions);
-	this.addTransitions(names, transtions);
+	const [ names, transitions ] = this.makeTransitions(this.wsInitialTransitions);
+	this.addTransitions(names, transitions);
     }
 
     blank(match, context, nextState) {
@@ -461,7 +511,6 @@ export function string2lines(astring, args) {
     if(!astring) {
 	astring = "";
     }
-    console.log(astring);
     
     let { tabWidth, convertWhitespace, whitespace } = args;
     if(whitespace === undefined) {

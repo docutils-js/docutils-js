@@ -21,6 +21,7 @@ export class Parser extends BaseParser {
     }
     
     parse(inputstring, document) {
+	console.log(`in parse with ${inputstring}`);
 	if(!inputstring) {
 	    throw new Error("need input for rst parser");
 	}
@@ -30,10 +31,10 @@ export class Parser extends BaseParser {
 	    stateClasses: this.stateClasses,
 	    initialState:this.initialState,
 	    debug: document.reporter.debugFlag})
-	const inputlines = statemachine.string2lines(
+	const inputLines = statemachine.string2lines(
 	    inputstring, { tabWidth: document.settings.tabWidth,
 			   convertWhitespace: true });
-	this.stateMachine.run({inputlines, document, inliner: this.inliner})
+	this.stateMachine.run({inputLines, document, inliner: this.inliner})
 	this.finishParse()
     }
 }
