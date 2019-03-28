@@ -18,6 +18,7 @@ export class StateMachine {
 	*/
 
     constructor({ stateClasses, initialState, debug }) {
+	debug = true;
 	this.inputLines = undefined;
 	this.inputOffset = 0;
 	this.line = undefined;
@@ -65,7 +66,11 @@ export class StateMachine {
 	//self.input_lines = StringList(input_lines, source=input_source)
 	this.inputLines = inputLines;
 	this.lineOffset = -1;
+	
 	this.currentState = initialState || this.initialState;
+	if(!this.currentState) {
+	    console.log('No current state');
+	}
 	let transitions = undefined;
 	const results = [];
 	let state = this.getState();
@@ -100,22 +105,22 @@ export class StateMachine {
       */
     getState(nextState) {
 	if(nextState) {
-	    if(this.debug && nextState !== this.currentState) {
+	    if(/*this.debug && */nextState !== this.currentState) {
 		console.log(`StateMachine.getState: changing state from "${this.currentState}" to "${nextState}" (input line ${this.absLineNumber()})`);
 	    }
 	    this.currentState = nextState;
 	}
-	if(!this.states.hasOwnProperty(self.currentState)) {
-	    throw new UnknownStateError(self.currentState);
+	if(!this.states.hasOwnProperty(this.currentState)) {
+	    throw new UnknownStateError(this.currentState);
 	}
-	return this.states[self.currentState];
+	return this.states[this.currentState];
     }
 
     /* Load `self.line` with the `n`'th next line and return it.*/
     nextLine(n=1) {
 	this.lineOffset += n;
 	if(this.lineOffset >= this.inputLines.length) {
-	    self.line = null;
+	    this.line = null;
 	    this.notifyObservers()
 	    throw EOFError;
 	}
@@ -126,11 +131,11 @@ export class StateMachine {
     }
 
     isNextLineBlank() {
-	return !(this.inputLines[self.lineOffset + 1].trim());
+	return !(this.inputLines[this.lineOffset + 1].trim());
     }
     
     atEof() {
-	return this.lineOffset >= self.inputLines.length - 1
+	return this.lineOffset >= this.inputLines.length - 1
     }
 
     atBof() {
@@ -151,7 +156,7 @@ export class StateMachine {
     gotoLine(lineOffset) {
 	this.lineOffset = lineOffset - this.inputOffset;
 	this.line = this.inputLines[this.lineOffset]
-	self.notifyObservers()
+	this.notifyObservers()
 	return this.line
     }
 
@@ -184,7 +189,7 @@ export class StateMachine {
     }
 
     atEof() {
-	return this.lineOffset >= self.inputLines.length - 1
+	return this.lineOffset >= this.inputLines.length - 1
     }
 
     atBof() {
@@ -205,7 +210,7 @@ export class StateMachine {
     gotoLine(lineOffset) {
 	this.lineOffset = lineOffset - this.inputOffset;
 	this.line = this.inputLines[this.lineOffset]
-	self.notifyObservers()
+	this.notifyObservers()
 	return this.line
     }
 

@@ -37,6 +37,7 @@ class Publisher {
 
     /* Does having a reader help us at all ? */
     setReader(readerName, parser, parserName) {
+	console.log('set reder');
 	const readerClass = readers.getReaderClass(readerName)
 	this.reader = new readerClass(parser, parserName)
 	this.parser = this.reader.parser
@@ -147,7 +148,7 @@ class Publisher {
 	    this.setIO();
 
 	    //KM
-	    console.log('about to call read');
+	    console.log('*** about to call read');
 	    /* we may need to change semantics here !! */
 
 	    this.reader.read(
@@ -188,7 +189,6 @@ export function publishCmdLine(args, cb) {
     const { reader, readerName, parser, parserName, writer, writerName,
       settings, settingsSpec, settingsOverrides, configSection,
 	    enableExitStatus, argv, usage, description } = args;
-    console.log(`argv is ${argv}`);
     const pub = new Publisher({reader, parser, writer, settings});
     pub.setComponents(readerName, parserName, writerName);
     pub.publish({argv, usage, description, settingsSpec, settingsOverrides, configSection, enableExitStatus }, cb);

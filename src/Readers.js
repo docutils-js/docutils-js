@@ -1,5 +1,5 @@
-import Component from './Component';
 import parsers from './parsers';
+import { Component } from './index';
 import AssertError from './AssertError';
 import utils from './utils';
 import universal from './transforms/universal';
@@ -24,6 +24,7 @@ export class Reader extends Component {
 
     setParser(parserName) {
 	const ParserClass = parsers.getParserClass(parserName).Parser;
+	console.log('in setparser');
 	this.parser = new ParserClass({});
     }
 
@@ -38,7 +39,6 @@ export class Reader extends Component {
 	    this.parser = parser;
 	}
 	this.settings = settings;
-	console.log(this.source.source.readable);
 	if(!this.source) {
 	    throw new AssertError("Need source");
 	}
@@ -56,6 +56,8 @@ export class Reader extends Component {
 			 });
     }
 
+    /* Delegates to this.parser, providing arguments
+       based on instance variables */
     parse() {
 	const document = this.newDocument({});
 	this.document = document;

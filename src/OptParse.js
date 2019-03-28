@@ -27,9 +27,9 @@ export class OptionParser {
 
     parseArgs(args, values) {
 	/* no idea what is what */
-	console.log(`in base opton parser`);
+//	console.log(`in base opton parser`);
 	const rargs = this._getArgs(args);
-	console.log(`my rargs is ${rargs}`);
+//	console.log(`my rargs is ${rargs}`);
 	if(values === undefined) {
 	    values = this.getDefaultValues();
 	}

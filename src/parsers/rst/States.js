@@ -26,7 +26,7 @@ export class RSTStateMachine extends StateMachineWS {
 	this.attachObserver(document.noteSource);
 	this.reporter = this.memo.reporter
 	this.node = document
-	results = super.run({inputLines, inputOffset, inputSource: document.source});
+	const results = super.run({inputLines, inputOffset, inputSource: document.source});
 	if(results.length !== 0) {
 	    throw new Error("should be o");
 	}

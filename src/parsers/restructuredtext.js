@@ -12,6 +12,7 @@ export class Parser extends BaseParser {
 	} else {
 	    this.initialState = 'Body';
 	}
+	console.log(`setting initial state to ${this.initialState}`);
 	this.stateClasses = states.stateClasses;
 	if(!this.stateClasses) {
 	    throw new Error("probably need this");
@@ -21,6 +22,7 @@ export class Parser extends BaseParser {
     }
     
     parse(inputstring, document) {
+//	throw new Error("go awy");
 	console.log(`in parse with ${inputstring}`);
 	if(!inputstring) {
 	    throw new Error("need input for rst parser");
@@ -29,11 +31,12 @@ export class Parser extends BaseParser {
 	this.setupParse(inputstring, document);
 	this.stateMachine = new states.RSTStateMachine({
 	    stateClasses: this.stateClasses,
-	    initialState:this.initialState,
-	    debug: document.reporter.debugFlag})
+	    initialState: this.initialState,
+	    debug: true});//document.reporter.debugFlag})
 	const inputLines = statemachine.string2lines(
 	    inputstring, { tabWidth: document.settings.tabWidth,
 			   convertWhitespace: true });
+	console.log(`initial state is ${this.initialState}`);
 	this.stateMachine.run({inputLines, document, inliner: this.inliner})
 	this.finishParse()
     }

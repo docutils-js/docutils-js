@@ -1,7 +1,5 @@
 import languages from './languages';
-import Component from './Component';
-
-import * as docutils from './index'
+import { Component, __version__ } from './index';
 
 export function getWriterClass(readerName) {
     return require(`./writers/${readerName}.js`).default;
@@ -31,7 +29,7 @@ export class Writer extends Component {
     assembleParts() {
 	this.parts.whole= this.output;
 	this.parts.encoding = this.document.settings.outputEncoding;
-	this.parts.version = docutils.__version__;
+	this.parts.version = __version__;
     }
 }
 

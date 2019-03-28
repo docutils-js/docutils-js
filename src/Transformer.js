@@ -20,15 +20,17 @@ export default class Transformer {
 	this.sorted = 0
 	const urr = []
 	for( let i of components ) {
+	    console.log(i);
 	    urr.push(i.unknownReferenceResolvers);
 	}
+	console.log('urr is ')
 	console.log(urr);
-	decoratedList = urr.map(f => [f.priority, f]);
+	const decoratedList = urr.map(f => [f.priority, f]);
 	decoratedList.sort()
-	this.unknownReferenceResolvers.push(...decorated_list.map(f => f[1]));
+	this.unknownReferenceResolvers.push(...decoratedList.map(f => f[1]));
     }
     applyTransforms() {
-	throw new Error("poo")
+//	throw new Error("poo")
     }
 
     addTransforms() {
