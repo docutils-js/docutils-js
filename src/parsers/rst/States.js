@@ -268,7 +268,7 @@ class Body extends RSTState {
         if not blank_finish:
             self.parent += self.unindent_warning('Bullet list')
         */
-        return [], nextState, []
+        return [[], nextState, []]
 
     }
     
