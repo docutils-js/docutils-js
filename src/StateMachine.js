@@ -294,7 +294,7 @@ export class StateMachine {
 	    //	    console.log(method);
 	    console.log(`checkLine: ${name} ${pattern} ${nextState}`);
 	    const r = pattern.exec(this.line);
-	    if(r.length) {
+	    if(r) {
 		return method(r, context, nextState);
 	    }
 	}
