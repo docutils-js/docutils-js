@@ -20,7 +20,7 @@ export default class Transformer {
 	this.sorted = 0
 	const urr = []
 	for( let i of components ) {
-	    console.log(i);
+//	    console.log(i);
 	    urr.push(i.unknownReferenceResolvers);
 	}
 	console.log('urr is ')

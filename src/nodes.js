@@ -174,6 +174,11 @@ export class Element extends Node {
 	this.children.push(item)
     }
 
+    add(item) {
+	this.append(item);
+    }
+    
+
     setupChild(child) {
 	child.parent = this;
 	if(this.document) {
@@ -182,7 +187,7 @@ export class Element extends Node {
 		child.source = this.document.currentSource;
 	    }
 	    if(child.line === undefined) {
-		child.line = this.document.this.currentLine;
+		child.line = this.document.currentLine;
 	    }
 	}
     }
@@ -414,6 +419,8 @@ export class document extends Element {
     }
 }
 
+export class bullet_list extends Element { // Sequential
+}
 
 export default {
     document,

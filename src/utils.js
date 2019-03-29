@@ -5,6 +5,10 @@ function newReporter({sourcePath}, settings) {
 	debug(msg) {
 	    console.log(`debug: ${msg}`);
 	}
+	severe(msg) {
+	    console.log(`severe: ${msg}`);
+	}
+	
     }
 }
 

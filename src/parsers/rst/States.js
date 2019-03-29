@@ -1,5 +1,62 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 import { StateMachineWS, StateWS } from '../../StateMachine';
 import * as languages from '../../languages'
+import * as nodes from '../../nodes';
 
 export class Inliner {
     initCustomizations(settings) {
@@ -23,10 +80,12 @@ export class RSTStateMachine extends StateMachineWS {
 		      sectionBubbleUpKludge: false,
 		      inliner };
 	this.document = document;
-	this.attachObserver(document.noteSource);
+	this.attachObserver(document.noteSource.bind(document));
 	this.reporter = this.memo.reporter
 	this.node = document
+	console.log('calling super.run');
 	const results = super.run({inputLines, inputOffset, inputSource: document.source});
+	console.log(results);
 	if(results.length !== 0) {
 	    throw new Error("should be o");
 	}
@@ -42,7 +101,7 @@ class NestedStateMachine extends StateMachineWS {
 	this.matchTitles = matchTitles;
 	this.memo = memo;
 	this.document = memo.document
-	this.attachObserver(this.document.noteSource);
+	this.attachObserver(this.document.noteSource.bind(this.document));
 	this.reporter = memo.reporter;
 	this.language = memo.language;
 	this.node = node;
@@ -82,8 +141,8 @@ class RSTState extends StateWS {
 	}
     }
 
-    noMatch(context, transitins) {
-	this.reporter.severe(`Internal error: no transition pattern match.  State: "${this.__class__.__name__}"; transitions: ${transitions}; context: ${context}; current line: ${this.stateMachine.line}.`);
+    noMatch(context, transitions) {
+	this.reporter.severe(`Internal error: no transition pattern match.  State: "${this.constructor.name}"; transitions: ${transitions}; context: ${context}; current line: ${this.stateMachine.line}.`);
 	return [ context, null, [] ];
     }
 
@@ -177,13 +236,40 @@ class Body extends RSTState {
 	pats['alphanumplus'] = '[a-zA-Z0-9_-]'
 
 	this.pats = pats;
+	this.initialTransitions = ['bullet'];
+    }
+
+    _init() {
+	super._init();
 	this.patterns = { 'bullet': '[-+*\u2022\u2023\u2043]( +|$)',
 			};
-	this.initialTransitions = ['bullet'];
     }
 
     indent(match, context, nextState) {
 	/* match is not match!! */
+    }
+
+    bullet(match, context, nextState)
+    {
+	const bulletlist = new nodes.bullet_list();
+        [bulletlist.source,
+         bulletlist.line] = this.stateMachine.getSourceAndLine()
+	this.parent.add(bulletlist);
+        bulletlist['bullet'] = match[0].substring(0, 1)
+        /*i, blank_finish = self.list_item(match.end())
+        bulletlist += i
+        offset = self.state_machine.line_offset + 1   # next line
+        new_line_offset, blank_finish = self.nested_list_parse(
+              self.state_machine.input_lines[offset:],
+              input_offset=self.state_machine.abs_line_offset() + 1,
+              node=bulletlist, initial_state='BulletList',
+              blank_finish=blank_finish)
+        self.goto_line(new_line_offset)
+        if not blank_finish:
+            self.parent += self.unindent_warning('Bullet list')
+        */
+        return [], nextState, []
+
     }
     
 }

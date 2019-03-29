@@ -1,5 +1,14 @@
 import UnknownStateError from './UnknownStateError';
 import ErrorOutput from './ErrorOutput';
+import { EOFError, InvalidArgumentsError } from './Exceptions'
+
+function isIterable(obj) {
+  // checks for null and undefined
+  if (obj == null) {
+    return false;
+  }
+  return typeof obj[Symbol.iterator] === 'function';
+}
 
 function __getClass(object) {
   return Object.prototype.toString.call(object)
@@ -38,6 +47,7 @@ export class StateMachine {
     }
 
     run({ inputLines, inputOffset, context, inputSource, initialState}) {
+	console.log('run');
 	/*
         Run the state machine on `input_lines`. Return results (a list).
 
@@ -62,6 +72,10 @@ export class StateMachine {
 	this.runtimeInit();
 	//if isinstance(input_lines, StringList):
 	//self.input_lines = input_lines
+	if(Array.isArray(inputLines)) {
+	    console.log('inputLines is an array');
+	}
+	    
 	//else:
 	//self.input_lines = StringList(input_lines, source=input_source)
 	this.inputLines = inputLines;
@@ -75,23 +89,42 @@ export class StateMachine {
 	const results = [];
 	let state = this.getState();
 	let nextState;
+	let result
 	try {
 	    [ context, result ] = state.bof(context);
+	    console.log(context);
+	    console.log(result);
 	    results.push(result);
 	    while(true) {
 		try {
 		    try {
 			this.nextLine();
-			[ context, nextState, result ] = this.checkLine(context, state, transitions);
+			const r = this.checkLine(context, state, transitions);
+			console.log(r);
+			[ context, nextState, result ] = r;
+			if(!isIterable(result)) {
+			    throw new Error("Expect iterable result, got: " + result);
+			}
+			results.push(...result);
 		    }
 		    catch(error) {
+			if(error instanceof EOFError) {
+			    result = state.eof(context);
+			    results.push(...result);
+			    break;
+			} else {
+			    throw error;
+			}
 		    }
 		}
 		catch(error) {
+		    // state correction check ?
+		    throw error;
 		}
 	    }
 	}
 	catch(error) {
+	    throw error;
 	}
 	this.observers = [];
 	return results;
@@ -122,7 +155,7 @@ export class StateMachine {
 	if(this.lineOffset >= this.inputLines.length) {
 	    this.line = null;
 	    this.notifyObservers()
-	    throw EOFError;
+	    throw new EOFError();
 	}
 	
 	this.line = this.inputLines[this.lineOffset];
@@ -247,7 +280,25 @@ export class StateMachine {
 
     getTextBlock() {
     }
-    checkLine() {
+    checkLine(context, state, transitions) {
+	if(transitions === undefined) {
+	    transitions = state.transitionOrder;
+	}
+	let stateCorrection = true;
+//	if(transitions.length === 0) {
+//	    throw new Error("no transitions");
+//	}
+			   
+	for(let name of transitions) {
+	    const [ pattern, method, nextState ] = state.transitions[name];
+	    //	    console.log(method);
+	    console.log(`checkLine: ${name} ${pattern} ${nextState}`);
+	    const r = pattern.exec(this.line);
+	    if(r.length) {
+		return method(r, context, nextState);
+	    }
+	}
+	return state.noMatch(context, transitions);
     }
 
     addState(stateClass) {
@@ -282,14 +333,14 @@ export class StateMachine {
     }
 
     notifyObservers() {
-	this.observers.forEach(o =>  {
-	    let info;
+	for(let observer of this.observers) {
+	    let info = [];
 	    try {
 		 info = this.inputLines.info(this.lineOffset);
 	    } catch(err) {
 	    }
-	    o(...info);
-	});
+	    observer(...info);
+	}
     }
 }
 
@@ -301,7 +352,8 @@ export class State {
 	this.patterns = {}
 	this.initialTransitions = args.initialTransitions;
 	this.wsInitialTransitions = args.wsInitialTransitions;
-	this.addInitialTransitions()
+	    this._init();
+	    this.addInitialTransitions()
 	if(!stateMachine) {
 	    throw new Error("Need statemachine");
 	}
@@ -315,6 +367,9 @@ export class State {
 	    this.nestedSmKwargs = { stateClasses: [this.constructor],
 				    initialState: this.constructor.name };
 	}
+    }
+
+    _init() {
     }
 
     runtimeInit() {
@@ -333,11 +388,12 @@ export class State {
     }
 
     addTransitions(names, transitions) {
+	console.log(this.transitions);
 	names.forEach((name => {
-	    if(this.transitons.includes(name)) {
+	    if(name in this.transitions) {
 		throw new DuplicateTransitionError(name);
 	    }
-	    if(!transitions.includes(name)) {
+	    if(!(name in transitions)) {
 		throw new UnknownTrransitionError(name);
 	    }
 	}).bind(this));
@@ -354,16 +410,21 @@ export class State {
     }
 
     makeTransition(name, nextState) {
+	if(name == null) {
+	    throw new InvalidArgumentsError('need transition name');
+	}
+	console.log(`makeTransition ${name} ${nextState}`);
 	if(nextState === undefined) {
-	    nextState = this.name;
+	    nextState = this.name; //?
 	}
 
 	let pattern = this.patterns[name];
 	if(!(pattern instanceof RegExp)) {
 	    pattern = new RegExp(pattern);
 	}
-	const method = this[name];
+	const method = this[name].bind(this);
 	
+	console.log(`${pattern} ${method} ${nextState}`);
 	return [pattern, method, nextState];
     }
 
@@ -376,7 +437,11 @@ export class State {
 	}
 	
 	for(let namestate of nameList) {
-	    if(namestate instanceof String) {
+	    if(namestate == null) {
+		throw new InvalidArgumentsError("nameList contains null");
+	    }
+	    if(!Array.isArray(namestate)) {
+		console.log(namestate);
 		transitions[namestate] = this.makeTransition(namestate)
 		names.push(namestate);
 	    } else {

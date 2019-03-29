@@ -24,7 +24,6 @@ export class Reader extends Component {
 
     setParser(parserName) {
 	const ParserClass = parsers.getParserClass(parserName).Parser;
-	console.log('in setparser');
 	this.parser = new ParserClass({});
     }
 

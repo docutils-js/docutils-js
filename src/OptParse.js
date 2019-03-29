@@ -12,7 +12,7 @@ export class OptionParser {
     _processArgs(largs, rargs, values) {
 	while(rargs.length) {
 	    const arg = rargs[0];
-	    console.log(`arg is ${arg}`)
+//	    console.log(`arg is ${arg}`)
 	    if(arg === "--") {
 		rargs.splice(0);
 		return;

@@ -37,7 +37,6 @@ class Publisher {
 
     /* Does having a reader help us at all ? */
     setReader(readerName, parser, parserName) {
-	console.log('set reder');
 	const readerClass = readers.getReaderClass(readerName)
 	this.reader = new readerClass(parser, parserName)
 	this.parser = this.reader.parser
