@@ -26,7 +26,7 @@ export class Parser extends BaseParser {
     parse(inputstring, document) {
 	//	throw new Error("go awy");
 	const i = inputstring.replace(/\r?\n/g, ' / ')
-	console.log(`in parse with ${i}`);
+//	console.log(`in parse with ${i}`);
 	if(!inputstring) {
 	    throw new Error("need input for rst parser");
 	}
@@ -43,7 +43,7 @@ export class Parser extends BaseParser {
 	const inputLines = statemachine.string2lines(
 	    inputstring, { tabWidth: document.settings.tabWidth,
 			   convertWhitespace: true });
-	console.log(`initial state is ${this.initialState}`);
+//	console.log(`initial state is ${this.initialState}`);
 	this.stateMachine.run({inputLines, document, inliner: this.inliner})
 	this.finishParse()
     }

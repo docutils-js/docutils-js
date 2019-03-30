@@ -1,13 +1,165 @@
 import { StateMachineWS, StateWS } from '../../StateMachine';
 import * as languages from '../../languages'
 import * as nodes from '../../nodes';
-import { InvalidArgumentsError } from '../../Exceptions'
-
-export class Inliner {
-    initCustomizations(settings) {
-    }
+import { InvalidArgumentsError, UnimplementedError as Unimp } from '../../Exceptions'
+import { punctuation_chars } from '../../utils';
+function isIterable(obj) {
+  // checks for null and undefined
+  if (obj == null) {
+    return false;
+  }
+  return typeof obj[Symbol.iterator] === 'function';
 }
 
+function buildRegexp(definition, compile=true) {
+    const di = (isIterable(definition));
+    let [ fakeTuple, name, prefix, suffix, parts ] = definition;
+    let prefixNames = [];
+    if(Array.isArray(prefix)) {
+	prefix.shift();
+	const pr = prefix.shift();
+	prefixNames = [...prefix]
+	prefix = pr
+    }
+    let suffixNames = [];
+    if(Array.isArray(suffix)) {
+	suffix.shift();
+	const sr = suffix.shift();
+	suffixNames = [...suffix]
+	suffix = sr
+    }
+       
+    if(!fakeTuple) {
+	throw new Error();
+    }
+    const pi = isIterable(parts);
+    console.log(`buildRegexp(${name} - ${pi})`);
+    const partStrings= []
+    console.log(parts);
+    if(parts === undefined) {
+    	throw new Error();
+
+    }
+    const fakeTuple2 = parts.shift(0);
+    const groupNames = []
+    for(let part of parts) {
+	const fakeTuple3 = Array.isArray(part) ? part[0] : undefined;
+	if(fakeTuple3 === 1) {
+	    const [regexp, subGroupNames] = buildRegexp(part, null)
+	    groupNames.push(...subGroupNames)
+	    partStrings.push(regexp);
+	}else if(fakeTuple3 === 2) {
+	    part.shift();
+	    const regexp = part.shift();
+	    partStrings.push(regexp);
+		groupNames.push(...part)
+	    } else{
+		partStrings.push(part);
+	    }
+    }
+    const orGroup = partStrings.join('|')
+    const regexp = `${prefix}(${orGroup})${suffix}`;
+    groupNames.splice(0, 0, ...prefixNames, null);
+    groupNames.push(...suffixNames);
+    console.log('groupnames')
+    console.log(groupNames);
+    console.log(`regexp is ${regexp}`);
+    if(compile) {
+	return [new RegExp(regexp), groupNames]
+    }
+    else {
+	return [regexp, groupNames];
+    }
+}
+export class Inliner {
+    constructor() {
+	this.implicitDispatch = []
+    }
+    
+    initCustomizations(settings) {
+	let startStringPrefix, endStringSuffix
+	let ssn, esn ;
+	if(settings.character_level_inline_markup) {
+	    startStringPrefix =  '(^|(?<!\\x00))'
+	    ssn = [null, null]
+	    endStringSuffix = ''
+	    esn = []
+	} else {
+	    startStringPrefix = '(^|(?<=\\s|[' + 
+                punctuation_chars.openers +
+                punctuation_chars.delimiters +
+		']))'
+	    ssn = [null, null]
+            endStringSuffix = '($|(?=\\s|[\\x00' + [
+                punctuation_chars.closing_delimiters,
+                punctuation_chars.delimiters,
+                punctuation_chars.closers].join('') +
+		']))'
+	    esn = [null, null, null]
+	}
+        const parts = [1, 'initial_inline', startStringPrefix, '',
+           [0, [1, 'start', '', this.non_whitespace_after, // simple start-strings
+             [0, '\\*\\*',                // strong
+              [2, '\\*(?!\\*)', null],            // emphasis but not strong
+              '``',                  // literal
+              '_`',                  // inline internal target
+              [2, '\\|(?!\\|)'], null]            // substitution reference
+             ],
+            [1, 'whole', '', endStringSuffix, // whole constructs
+             [0, // reference name & end-string
+              [2, `(${this.simplename})(__?)`, 'refname', 'refend'], 
+              [1, 'footnotelabel', '\\[', [2, '(\\]_)', 'fnend'],
+               [0, '[0, 0-9]+',               // manually numbered
+                [2, `\\#(${this.simplename})?`, null], // auto-numbered (w/ label?)
+                '\\*',                   // auto-symbol
+                [2, `(${this.simplename})`, 'citationlabel' ]] // citation reference
+               ]
+              ]
+             ],
+            [1, 'backquote',             // interpreted text or phrase reference
+	     [2, `((:${this.simplename}:)?)`, 'role', null], // optional role
+             this.non_whitespace_after,
+             [0, [2, '`(?!`)', null]]               // but not literal
+             ]
+            ]
+           ]
+	this.startStringPrefix = startStringPrefix;
+	this.endStringSuffix = endStringSuffix;
+	this.parts = parts;
+	this.patterns = {
+	    initial: buildRegexp(parts),
+	    emphasis: new RegExp(this.nonWhitespaceEscapeBefore +
+				 '(\\*)' + endStringSuffix),
+	    strong: new RegExp(this.nonWhitespaceEscapeBefore +
+			       '(\\*\\*)' + endStringSuffix),
+//	    interpreted_or_phrase_ref: new RegExp(`${non_unescaped_whitespace_escape_before}(((:${simplename}:)?(__?)?))${endStringSuffix}`)
+	}
+    }
+    parse(text, { lineno, memo, parent}) {
+	this.reporter= memo.reporter;
+	this.document = memo.document
+	this.language= memo.language
+	this.parent = parent
+	const patternSearch = this.patterns.initial[0][Symbol.match].bind(this.patterns.initial[0]);
+	console.log(this.patterns.initial[0]);
+	const dispatch = this.dispatch
+	console.log(text.constructor.name);
+	let remaining = text;//escape2null(text)
+	const processed = []
+	const unprocessed = []
+	const messages = []
+	while(remaining) {
+	    const match = patternSearch(remaining)
+	    if(match) {
+		throw new Error(match);
+		
+	    }
+	    
+	    return [[], []]
+	}
+	return [[], []]
+    }
+}
 
 export class RSTStateMachine extends StateMachineWS {
     run({inputLines, document, inputOffset, matchTitles, inliner}) {
@@ -35,7 +187,7 @@ export class RSTStateMachine extends StateMachineWS {
 	this.node = document
 	const results = super.run({inputLines, inputOffset, inputSource: document.source});
 	if(results.length !== 0) {
-	    throw new Error("should be o");
+//	    throw new Error("should be o");
 	}
 	this.node = this.memo = undefined;
     }
@@ -190,13 +342,52 @@ class RSTState extends StateWS {
 			  node, matchTitles});
 	blankFinish = stateMachine.states[blankFinishState].blankFinish;
 	stateMachine.unlink();
-	return [stateMachine.absLineOffset(), blank_finish]
+	return [stateMachine.absLineOffset(), blankFinish]
     }
 
     section({title, source, style, lineno, messages}) {
 	if(this.checkSubsection({source, style, lineno})) {
 	    this.newSubsection({title, lineno, messages});
 	}
+    }
+
+    unindentWarning(nodeName) {
+	const lineno = this.stateMachine.absLineNumber() + 1;
+	return this.reporter.warning(`${nodeName} ends without a blank line; unexpected unindent.`, { line: lineno });
+    }
+
+    paragraph(lines, lineno) {
+	console.log(lines);
+	const data = [lines].flatMap(x => x).join("\n").replace(/\s*$/, '')
+	let text;
+	let literalnext;
+	if(/(?<!\\)(\\\\)*::$/.test(data)) {
+	    if(data.length == 2) {
+		return [[], 1]
+	    }
+	    else if(" \n".indexOf(data[length.data - 3]) !== -1) {
+		text = data.substring(0, data.length - 3).replace(/\s*$/, '')
+	    } else {
+		text = data.substring(0, data.length - 1);
+	    }
+	    literalnext = 1;
+	}else {
+	    text = data;
+	    literalnext = 0;
+	}
+	const r = this.inline_text(text, lineno)
+	console.log(r)
+	const [textnodes, messages] = r
+	console.log(data);
+	const p = new nodes.paragraph(data, '', textnodes);
+	[ p.source, p.line ] = this.stateMachine.getSourceAndLine(lineno);
+	return [[p], literalnext]
+    }
+
+    inline_text(text, lineno) {
+    	const r = this.inliner.parse(text, { lineno, memo: this.memo, parent: this.parent });
+    	console.log(r);
+    	return r;
     }
 }
 
@@ -242,7 +433,7 @@ class Body extends RSTState {
 	
 	const pats = {}
 
-	this.initialTransitions = [ 'bullet' ]
+	this.initialTransitions = [ 'bullet', 'text' ]
 	
 /*          'enumerator',
           'field_marker',
@@ -257,7 +448,9 @@ class Body extends RSTState {
             'text'*/
 
 	this.patterns = { 'bullet': '[-+*\u2022\u2023\u2043]( +|$)',
-			};
+
+
+			  'text': '' }
     }
 
     indent(match, context, nextState) {
@@ -266,15 +459,23 @@ class Body extends RSTState {
 
     bullet(match, context, nextState)
     {
-	console.log(`in bullet`);
+//	console.log(`in bullet`);
 	const bulletlist = new nodes.bullet_list();
         [bulletlist.source,
          bulletlist.line] = this.stateMachine.getSourceAndLine()
-	console.log(`${bulletlist.source} ${bulletlist.line}`);
+//	console.log(`${bulletlist.source} ${bulletlist.line}`);
+	if(!this.parent) {
+	    throw new Error("no parent");
+	}
+	
 	this.parent.add(bulletlist);
         bulletlist['bullet'] = match.result[0].substring(0, 1)
 
 	let [ i, blankFinish ] = this.list_item(match.pattern.lastIndex) /* -1 ? */
+	if(!i) {
+	    throw new Error("no node");
+	}
+	
 	bulletlist.append(i)
 	const offset = this.stateMachine.lineOffset + 1
 	let newLineOffset;
@@ -283,20 +484,20 @@ class Body extends RSTState {
 													   blankFinish });
 	this.gotoLine(newLineOffset);
 	if(!blankFinish) {
-	    this.parent.append(this.unindentWarning('Bullet list'))
+	    //this.parent.append(this.unindentWarning('Bullet list'))
 	}
         return [[], nextState, []]
     }
 
     list_item(indent) {
-	console.log(`in list_item (indent=${indent})`);
+//	console.log(`in list_item (indent=${indent})`);
 	if(indent == null) {
 	    throw new Error("Need indent") ;
 	}
 	
 	let indented, line_offset, blank_finish
         if(this.stateMachine.line.length > indent) {
-	    console.log(`get known indentd`);
+//	    console.log(`get known indentd`);
             [ indented, line_offset, blank_finish ] = 
                 this.stateMachine.getKnownIndented({indent})
         } else {
@@ -311,9 +512,62 @@ class Body extends RSTState {
 	}
         return [ listitem, blank_finish ]
     }
+
+    text(match, context, matchState) {
+	if(match.input === undefined) {
+	    throw new Error("");
+	}
+	
+	return [match.input, 'Text', []]
+    }
 }
 
 export class SpecializedBody extends Body{}
 export class BulletList extends Body{}
+export class Text extends RSTState {
+    init() {
+	this.patterns = {'underline': Body.patterns['lne'],
+			 'text': ''}
+	this.initialTransitions = [['underline', 'Body'], ['text', 'Body']];
+    }
+    
+    blank(match, context, nextState) {
+	const [ paragraph, literalnext ] = this.paragraph(context, this.stateMachine.absLineNumber() - 1)
+	this.parent.append(...paragraph);
+	if(literalnext) {
+	    this.parent.append(this.literal_Block())
+	}
+	
+	return [[], 'Body',[]]
+    }
+    eof(context) {
+	if(context != null && !isIterable(context) || context.length > 0) {
+	    return this.blank(null, context, null);
+	}
+	return []
+    }
+	    
+    indent(match, context, matchState) {
+	throw new Unimp();
+    }
+    underline(match, context, matchState) {
+	throw new Unimp();
+    }
+    text(match, context, matchState) {
+	throw new Unimp();
+    }
+    literal_block(match, context, matchState) {
+	throw new Unimp();
+    }
+    quoted_literal_block(match, context, matchState) {
+	throw new Unimp();
+    }
+    definition_list_item(match, context, matchState) {
+	throw new Unimp();
+    }
+    term(match, context, matchState) {
+	throw new Unimp();
+    }
+}
 
-export const stateClasses = [Body, BulletList];
+export const stateClasses = [Body, BulletList, Text];

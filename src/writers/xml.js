@@ -33,11 +33,24 @@ class XMLTranslator extends GenericNodeVisitor {
 	this.output.push(this.generator);
     }
     default_visit(node) {
-	if(!this.inSimple) {
+	this.simple_nodes = [nodes.TextElement]//,                    nodes.image, nodes.colspec, nodes.transition]
+	if (!this.inSimple) {
 	    this.output.push(Array(this.level + 1).join(this.indent));
-	    this.output.push(node.starttag());
-	    this.level += 1;
-	    // bla bla
+	}
+	this.output.push(node.starttag());
+	this.level += 1;
+	if (false) {//node instanceof nodes.FixedTextElement || node instanceof nodes.literal) {
+	    this.fixed_text += 1
+	} else {
+	    for (let nt of this.simple_nodes) {
+		if (node instanceof nt) {
+		    this.inSimple += 1;
+		    break;
+		}
+	    }
+	}
+	if (!this.inSimple) {
+	    this.output.push("\n")
 	}
     }
     default_departure(node) {

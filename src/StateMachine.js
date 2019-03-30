@@ -137,6 +137,7 @@ export class StateMachine {
 		    // state correction check ?
 		    throw error;
 		}
+		state=this.getState(nextState)
 	    }
 	}
 	catch(error) {
@@ -167,7 +168,7 @@ export class StateMachine {
 
     /* Load `self.line` with the `n`'th next line and return it.*/
     nextLine(n=1) {
-	console.log('*** advancing to next line');
+///	console.log('*** advancing to next line');
 	this.lineOffset += n;
 	if(this.lineOffset >= this.inputLines.length) {
 	    this.line = null;
@@ -177,7 +178,7 @@ export class StateMachine {
 	
 	this.line = this.inputLines[this.lineOffset];
 	this.notifyObservers()
-	console.log(`line is ${this.line}`);
+	console.log(`line is "${this.line}"`);
 	return this.line;
     }
 
@@ -301,7 +302,7 @@ export class StateMachine {
 	throw new Unimp();
     }
     checkLine(context, state, transitions) {
-	console.log(`checking line ${this.line}`);
+//	console.log(`checking line ${this.line}`);
 	if(transitions === undefined) {
 	    transitions = state.transitionOrder;
 	}
@@ -313,11 +314,11 @@ export class StateMachine {
 	for(let name of transitions) {
 	    const [ pattern, method, nextState ] = state.transitions[name];
 	    //	    console.log(method);
-	    console.log(`checkLine: ${name} ${pattern} ${nextState}`);
+//	    console.log(`checkLine: ${name} ${pattern} ${nextState}`);
 	    const result = pattern.exec(this.line);
 	    if(result) {
 		console.log(`pattern match for ${name}`);
-		const r = method({ pattern, result }, context, nextState);
+		const r = method({ pattern, result, input: this.line }, context, nextState);
 		console.log(`return is:`);
 		console.log(r);
 		return r;
@@ -328,7 +329,7 @@ export class StateMachine {
 
     addState(stateClass) {
 	const stateName = stateClass.name;
-	console.log(`adding state ${stateName}`);
+//	console.log(`adding state ${stateName}`);
 
 	if(this.states.hasOwnProperty(stateName)) {
 	    throw new DuplicateStateError(stateName);
@@ -446,13 +447,17 @@ export class State {
 	    throw new InvalidArgumentsError('need transition name');
 	}
 	if(nextState === undefined) {
-	    nextState = this.name; //?
+	    nextState = this.constructor.name;
 	}
 
 	let pattern = this.patterns[name];
 	if(!(pattern instanceof RegExp)) {
-	    pattern = new RegExp(pattern, 'y');
+	    pattern = new RegExp('^' + pattern, 'y');
 	}
+	if(typeof(this[name]) !== 'function') {
+	    throw new Error(`cant find method ${name} on ${this.constructor.name}`);
+	}
+	
 	const method = this[name].bind(this);
 	
 	return [pattern, method, nextState];
@@ -696,7 +701,7 @@ export class StringList extends ViewList {
 		blankFinish = ((end > start) && !this[end - 1].trim());
 		break;
 	    }
-	    const stripped = line.ltrim();
+	    const stripped = line.replace(/^\s*/, '');
 	    if(!stripped) {
 		if(untilBlank) {
 		    blankFinish = 1;
@@ -721,10 +726,11 @@ export class StringList extends ViewList {
 	    block[0] = block[0].substring(firstIndent);
 	}
 	if(indent && stripIndent) {
-	    console.log(block.constructor.name);
+//	    console.log(block.constructor.name);
 	    block.trimLeft(indent, firstIndent != null);
 	}
-	return [ block, indent ] || [0, blankFinish]
+	
+	return block.length ? [ block, indent ] : [0, blankFinish]
     }
     
     get2dBlock(top, left, bottom, right, stripIndent) {

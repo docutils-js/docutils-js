@@ -1,4 +1,5 @@
 import Transformer from './Transformer';
+import { InvalidArgumentsError} from './Exceptions';
 
 function pseudoQuoteattr(value) {
     return `"${value}"`;
@@ -91,32 +92,32 @@ export class Node {
 	    try {
 		visitor.dispatchVisit(this);
 	    } catch(error) {
-		if(error instanceof SkipNode || error instanceof SkipChildren) {
+		if (error instanceof SkipNode || error instanceof SkipChildren) {
 		    return stop;
-		} else if(error instanceof SkipDeparture) {
+		} else if (error instanceof SkipDeparture) {
 		    callDepart = false;
 		} else {
 		    throw error;
 		}
+	    }
 		
-		const children = this.children;
-		try {
-		    for(let child of [...children]) {
-			if(child.walkabout(visitor)) {
-			    stop = true;
-			    break;
-			}
-		    }
-		} catch(error) {
-		    if(!(error instanceof SkipSiblings)) {
-			throw error;
+	    const children = this.children;
+	    try {
+		for(let child of [...children]) {
+		    console.log(typeof child);
+		    console.log(Object.keys(child));
+		    if(child.walkabout(visitor)) {
+			stop = true;
+			break;
 		    }
 		}
+	    } catch(error) {
+		if(!(error instanceof SkipSiblings)) {
+		    throw error;
+		}
 	    }
-
 	} catch(error) {
-	    if(error instanceof SkipChildren) {
-	    } else if(error instanceof StopTraversal) {
+	    if(error instanceof StopTraversal) {
 		stop = true;
 	    } else {
 		throw error;
@@ -157,16 +158,17 @@ export class Element extends Node {
     constructor(rawsource, children, attributes) {
 	super();
 	this.nodeName = Symbol.for('Element');
+	this.tagname = this.constructor.name;
 	this.children = [];
 	if(children === undefined) {
 	    children = []
 	}
-	this.extend(children);
+	this.extend(...children);
 	this.attributes = { }
     }
 
-    extend(item) {
-	item.forEach(this.append.bind(this));
+    extend(...items) {
+	items.forEach(this.append.bind(this));
     }
 
     append(item) {
@@ -180,6 +182,16 @@ export class Element extends Node {
     
 
     setupChild(child) {
+	if(!(child instanceof Node)) {
+	    throw new InvalidArgumentsError("Expecting node instance")
+	}
+	
+	if(!child) {
+	    throw new InvalidArgumentsError();
+	}
+
+	console.log(typeof child);
+	console.log(Object.keys(child))
 	child.parent = this;
 	if(this.document) {
 	    child.document = this.documentl
@@ -232,6 +244,11 @@ export class Element extends Node {
     }
 }
 
+export class TextElement extends Element {
+    constructor(rawsource, text, children, attributes) {
+	super(rawsource, text !== '' ? [Text(text), ...children] : children, attributes);
+    }
+}
 
 export class document extends Element {
     constructor(settings, reporter, ...args) {
@@ -419,6 +436,7 @@ export class document extends Element {
     }
 }
 
+export class paragraph extends TextElement  { } // General
 export class bullet_list extends Element { } // Sequential
 export class list_item extends Element { }
 

@@ -141,7 +141,6 @@ class Publisher {
 	let exit = undefined;
 	try {
 	    if(this.settings === undefined) {
-		console.log('processing command line');
 		this.processCommandLine({ argv, usage, description, settingsSpec, configSection, settingsOverrides});
 	    }
 	    this.setIO();

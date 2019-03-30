@@ -9,6 +9,5 @@ const description = 'Generates Docutils-native XML from standalone ' + 'reStruct
   writerName: 'xml',
   description
 }, (...args) => {
-  done();
 });
 
