@@ -37,7 +37,7 @@ class Output extends TransformSpec {
     }
 
     write(data) {
-	console.log(`writing data ${data}`);
+	process.stdout.write(data);
     }
 
     encode(data) {

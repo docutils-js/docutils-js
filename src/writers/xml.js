@@ -64,7 +64,12 @@ class XMLTranslator extends GenericNodeVisitor {
 //	}
 	// bla
     }
-    
+    visit_Text(node) {
+	const text = node.astext()
+	this.output.push(text);
+    }
+    depart_Text(node) {
+    }
 }
 
 

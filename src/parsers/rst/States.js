@@ -21,6 +21,9 @@ function buildRegexp(definition, compile=true) {
 	prefixNames = [...prefix]
 	prefix = pr
     }
+    if(suffix === undefined) {
+    	throw new Error();
+    }
     let suffixNames = [];
     if(Array.isArray(suffix)) {
 	suffix.shift();
@@ -45,7 +48,7 @@ function buildRegexp(definition, compile=true) {
     for(let part of parts) {
 	const fakeTuple3 = Array.isArray(part) ? part[0] : undefined;
 	if(fakeTuple3 === 1) {
-	    const [regexp, subGroupNames] = buildRegexp(part, null)
+		const [regexp, subGroupNames] = buildRegexp(part, null)
 	    groupNames.push(...subGroupNames)
 	    partStrings.push(regexp);
 	}else if(fakeTuple3 === 2) {
@@ -65,7 +68,7 @@ function buildRegexp(definition, compile=true) {
     console.log(groupNames);
     console.log(`regexp is ${regexp}`);
     if(compile) {
-	return [new RegExp(regexp), groupNames]
+	return [new RegExp(regexp, 'y'), groupNames]
     }
     else {
 	return [regexp, groupNames];
@@ -74,6 +77,7 @@ function buildRegexp(definition, compile=true) {
 export class Inliner {
     constructor() {
 	this.implicitDispatch = []
+	this.non_whitespace_after = ''
     }
     
     initCustomizations(settings) {
@@ -100,7 +104,7 @@ export class Inliner {
         const parts = [1, 'initial_inline', startStringPrefix, '',
            [0, [1, 'start', '', this.non_whitespace_after, // simple start-strings
              [0, '\\*\\*',                // strong
-              [2, '\\*(?!\\*)', null],            // emphasis but not strong
+              '\\*',//[2, '\\*(?!\\*)', null],            // emphasis but not strong
               '``',                  // literal
               '_`',                  // inline internal target
               [2, '\\|(?!\\|)'], null]            // substitution reference
@@ -127,7 +131,7 @@ export class Inliner {
 	this.endStringSuffix = endStringSuffix;
 	this.parts = parts;
 	this.patterns = {
-	    initial: buildRegexp(parts),
+	    initial: buildRegexp(parts, false),
 	    emphasis: new RegExp(this.nonWhitespaceEscapeBefore +
 				 '(\\*)' + endStringSuffix),
 	    strong: new RegExp(this.nonWhitespaceEscapeBefore +
@@ -140,6 +144,7 @@ export class Inliner {
 	this.document = memo.document
 	this.language= memo.language
 	this.parent = parent
+	console.log(new RegExp(this.patterns.initial[0]));
 	const patternSearch = this.patterns.initial[0][Symbol.match].bind(this.patterns.initial[0]);
 	console.log(this.patterns.initial[0]);
 	const dispatch = this.dispatch
@@ -151,14 +156,26 @@ export class Inliner {
 	while(remaining) {
 	    const match = patternSearch(remaining)
 	    if(match) {
-		throw new Error(match);
-		
+		console.log(match);
+	    } else {
+		break;
 	    }
-	    
-	    return [[], []]
 	}
-	return [[], []]
+	if(remaining) {
+	    processed.push(...this.implicit_inline(remaining, lineno));
+	}
+	console.log(processed);
+	return [ processed, messages ]
     }
+
+    implicit_inline(text, lineno) {
+	if(!text) {
+	    return []
+	}
+	// FIXME
+	return [new nodes.Text(text, text)]
+    }
+    
 }
 
 export class RSTStateMachine extends StateMachineWS {

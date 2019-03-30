@@ -64,6 +64,7 @@ export class NodeVisitor {
 
 export class Node {
     constructor() {
+	this.tagname = this.constructor.name;
 	this.parent = undefined;
 	this.document = undefined;
 	this.source = undefined;
@@ -134,8 +135,14 @@ export class Node {
 
 function _addNodeClassNames(names, o) {
     names.forEach(_name => {
-	o[`visit_${_name}`] = _callDefaultVisit.bind(o);
-	o[`depart_${_name}`] = _callDefaultDeparture.bind(o);
+	const v = `visit_${_name}`;
+	if(!o[v]) {
+	    o[v] = _callDefaultVisit.bind(o);
+	}
+	const d =`depart_${_name}`
+	if(!o[d]){
+	    o[d] = _callDefaultDeparture.bind(o);
+	}
     });
 }
 export class GenericNodeVisitor extends NodeVisitor {
@@ -158,7 +165,6 @@ export class Element extends Node {
     constructor(rawsource, children, attributes) {
 	super();
 	this.nodeName = Symbol.for('Element');
-	this.tagname = this.constructor.name;
 	this.children = [];
 	if(children === undefined) {
 	    children = []
@@ -176,8 +182,8 @@ export class Element extends Node {
 	this.children.push(item)
     }
 
-    add(item) {
-	this.append(item);
+    add(...items) {
+	this.extend(...items);
     }
     
 
@@ -248,6 +254,19 @@ export class TextElement extends Element {
     constructor(rawsource, text, children, attributes) {
 	super(rawsource, text !== '' ? [Text(text), ...children] : children, attributes);
     }
+}
+
+export class Text extends Node {
+    constructor(data, rawsource='') {
+	super();
+	this.rawsource = rawsource;
+	this.data = data;
+	this.children = []
+    }
+    astext() {
+	return this.data;
+    }
+    
 }
 
 export class document extends Element {
@@ -422,7 +441,7 @@ export class document extends Element {
 	// copy
     }
 
-    gtDecoration() {
+    getDecoration() {
 	if(!this.decoration) {
 	    this.decoration = new decoration();
 	    let index = this.firstChildNotMatchingClass(Titular);
