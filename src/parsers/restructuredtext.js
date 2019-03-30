@@ -12,21 +12,21 @@ export class Parser extends BaseParser {
 	} else {
 	    this.initialState = 'Body';
 	}
-	console.log(`setting initial state to ${this.initialState}`);
+//	console.log(`setting initial state to ${this.initialState}`);
 	this.stateClasses = states.stateClasses;
 	if(!this.stateClasses) {
 	    throw new Error("probably need this");
 	}
-	console.log('state classes');
-	console.log(this.stateClasses);
-// ${this.stateClasses.map(x => x.constructor.name.name).join(" ")}`);
+//	console.log('state classes');
+//	console.log(this.stateClasses);
 	
 	this.inliner = args.inliner;
     }
     
     parse(inputstring, document) {
-//	throw new Error("go awy");
-	console.log(`in parse with ${inputstring}`);
+	//	throw new Error("go awy");
+	const i = inputstring.replace(/\r?\n/g, ' / ')
+	console.log(`in parse with ${i}`);
 	if(!inputstring) {
 	    throw new Error("need input for rst parser");
 	}

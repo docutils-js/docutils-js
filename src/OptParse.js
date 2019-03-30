@@ -37,6 +37,7 @@ export class OptionParser {
 	const largs = this.largs = [];
 	this.values = values;
 
+	let stop;
 	try {
 	    stop = this._processArgs(largs, rargs, values);
 	} catch(error) {

@@ -1,0 +1,14 @@
+"use strict";
+require("@babel/polyfill")
+
+var _Core = require("./lib/Core");
+
+const description = 'Generates Docutils-native XML from standalone ' + 'reStructuredText sources.  ' + _Core.defaultDescription;
+(0, _Core.publishCmdLine)({
+  argv: ['in.rst'],
+  writerName: 'xml',
+  description
+}, (...args) => {
+  done();
+});
+

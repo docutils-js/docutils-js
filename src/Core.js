@@ -147,7 +147,7 @@ class Publisher {
 	    this.setIO();
 
 	    //KM
-	    console.log('*** about to call read');
+//	    console.log('*** about to call read');
 	    /* we may need to change semantics here !! */
 
 	    this.reader.read(

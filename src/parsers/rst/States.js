@@ -19,7 +19,7 @@ export class RSTStateMachine extends StateMachineWS {
 	    matchTitles = true;
 	}
 	this.language = languages.getLanguage(document.settings.languageCode)
-	self.matchTitles = matchTitles;
+	this.matchTitles = matchTitles;
 	if(inliner === undefined) {
 	    inliner = new Inliner();
 	}
@@ -33,13 +33,11 @@ export class RSTStateMachine extends StateMachineWS {
 	this.attachObserver(document.noteSource.bind(document));
 	this.reporter = this.memo.reporter
 	this.node = document
-	console.log('calling super.run');
 	const results = super.run({inputLines, inputOffset, inputSource: document.source});
-	console.log(results);
 	if(results.length !== 0) {
 	    throw new Error("should be o");
 	}
-	self.node = self.memo = undefined;
+	this.node = this.memo = undefined;
     }
 }
 
@@ -74,7 +72,6 @@ class RSTState extends StateWS {
 	this.nestedSm = NestedStateMachine;
 	this.nestedSmCache = []
 	this.stateClasses = stateClasses;
-	console.log(stateClasses);
 	this.nestedSmKwargs = { stateClasses: this.stateClasses,
 				initialState: 'Body' };
     }
@@ -120,7 +117,6 @@ class RSTState extends StateWS {
 	   
 	let useDefault = 0;
 	if(!stateMachineClass) {
-	    console.log(`setting stateMachineClass to ${this.nestedSm.constructor.name}`);
 	    stateMachineClass = this.nestedSm;
 	    useDefault = useDefault + 1;
 	}
@@ -139,7 +135,6 @@ class RSTState extends StateWS {
 	}
 	
 	if(!stateMachine) {
-	    console.log(stateMachineKwargs);
 	    if(!stateMachineKwargs.stateClasses) {
 		throw new InvalidArgumentsError("stateClasses")
 	    }
@@ -148,7 +143,6 @@ class RSTState extends StateWS {
 //	    }
 	    stateMachine = new stateMachineClass({debug:this.debug,
 						  ...stateMachineKwargs});
-	    console.log(stateMachineClass.name);
 	}
 	stateMachine.run({inputLines: block, inputOffset, memo: this.memo,
 			  node, matchTitles});
@@ -185,7 +179,6 @@ class RSTState extends StateWS {
 	    blankFinishState = initialState;
 	}
 	if(!(blankFinishState in stateMachine.states)) {
-	    console.log(blankFinishState);
 	    throw new InvalidArgumentsError(`invalid state ${blankFinishState}`);
 	}
 	    
@@ -273,13 +266,15 @@ class Body extends RSTState {
 
     bullet(match, context, nextState)
     {
+	console.log(`in bullet`);
 	const bulletlist = new nodes.bullet_list();
         [bulletlist.source,
          bulletlist.line] = this.stateMachine.getSourceAndLine()
+	console.log(`${bulletlist.source} ${bulletlist.line}`);
 	this.parent.add(bulletlist);
         bulletlist['bullet'] = match.result[0].substring(0, 1)
 
-	const [ i, blankFinish ] = this.list_item(match.pattern.lastIndex) /* -1 ? */
+	let [ i, blankFinish ] = this.list_item(match.pattern.lastIndex) /* -1 ? */
 	bulletlist.append(i)
 	const offset = this.stateMachine.lineOffset + 1
 	let newLineOffset;
@@ -294,20 +289,23 @@ class Body extends RSTState {
     }
 
     list_item(indent) {
+	console.log(`in list_item (indent=${indent})`);
 	if(indent == null) {
 	    throw new Error("Need indent") ;
 	}
 	
 	let indented, line_offset, blank_finish
         if(this.stateMachine.line.length > indent) {
+	    console.log(`get known indentd`);
             [ indented, line_offset, blank_finish ] = 
-                this.stateMachine.getKnownIndented(indent)
+                this.stateMachine.getKnownIndented({indent})
         } else {
             [ indented, outIndent, line_offset, blank_finish ] = (
-                this.stateMachine.getFirstKnownIndented(indent))
+                this.stateMachine.getFirstKnownIndented({indent}))
 	}
         const listitem = new nodes.list_item(indented.join('\n'))
         if(indented) {
+	    console.log('nested parse');
             this.nestedParse(indented, { inputOffset: line_offset,
 					 node: listitem })
 	}

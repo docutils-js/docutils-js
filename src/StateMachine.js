@@ -1,6 +1,6 @@
 import UnknownStateError from './UnknownStateError';
 import ErrorOutput from './ErrorOutput';
-import { EOFError, InvalidArgumentsError, UnimplementedException } from './Exceptions'
+import { EOFError, InvalidArgumentsError, UnimplementedError as Unimp } from './Exceptions'
 
 
 function isIterable(obj) {
@@ -55,7 +55,6 @@ export class StateMachine {
     }
 
     run({ inputLines, inputOffset, context, inputSource, initialState}) {
-	console.log('run');
 	/*
         Run the state machine on `input_lines`. Return results (a list).
 
@@ -80,15 +79,15 @@ export class StateMachine {
 	this.runtimeInit();
 	//if isinstance(input_lines, StringList):
 	//self.input_lines = input_lines
-	if(Array.isArray(inputLines)) {
-	    console.log('inputLines is an array');
-	}
+//	if(Array.isArray(inputLines)) {
+//	    console.log('inputLines is an array');
+//	}
 	    
 	//else:
 	if(inputLines instanceof StringList) {
 //	    this.inputLines = inputLines.data;
 	    this.inputLines = inputLines;
-	    console.log(inputLines);
+//	    console.log(inputLines);
 	} else if (inputLines == null ) {
 	    throw new InvalidArgumentsError("inputLines should not be null or undefined");
 	} else {
@@ -97,7 +96,7 @@ export class StateMachine {
 		inputLines = [inputLines]
 	    }
 	    this.inputLines = new StringList(inputLines, inputSource);
-	    console.log(this.inputLines);
+//	    console.log(this.inputLines);
 	}
 	this.lineOffset = -1;
 	
@@ -112,15 +111,12 @@ export class StateMachine {
 	let result
 	try {
 	    [ context, result ] = state.bof(context);
-	    console.log(context);
-	    console.log(result);
 	    results.push(result);
 	    while(true) {
 		try {
 		    try {
 			this.nextLine();
 			const r = this.checkLine(context, state, transitions);
-			console.log(r);
 			[ context, nextState, result ] = r;
 			if(!isIterable(result)) {
 			    throw new Error("Expect iterable result, got: " + result);
@@ -171,6 +167,7 @@ export class StateMachine {
 
     /* Load `self.line` with the `n`'th next line and return it.*/
     nextLine(n=1) {
+	console.log('*** advancing to next line');
 	this.lineOffset += n;
 	if(this.lineOffset >= this.inputLines.length) {
 	    this.line = null;
@@ -180,6 +177,7 @@ export class StateMachine {
 	
 	this.line = this.inputLines[this.lineOffset];
 	this.notifyObservers()
+	console.log(`line is ${this.line}`);
 	return this.line;
     }
 
@@ -296,11 +294,14 @@ export class StateMachine {
     }
 
     insertInput(inputLines, source) {
+	throw new Unimp();
     }
 
     getTextBlock() {
+	throw new Unimp();
     }
     checkLine(context, state, transitions) {
+	console.log(`checking line ${this.line}`);
 	if(transitions === undefined) {
 	    transitions = state.transitionOrder;
 	}
@@ -315,7 +316,11 @@ export class StateMachine {
 	    console.log(`checkLine: ${name} ${pattern} ${nextState}`);
 	    const result = pattern.exec(this.line);
 	    if(result) {
-		return method({ pattern, result }, context, nextState);
+		console.log(`pattern match for ${name}`);
+		const r = method({ pattern, result }, context, nextState);
+		console.log(`return is:`);
+		console.log(r);
+		return r;
 	    }
 	}
 	return state.noMatch(context, transitions);
@@ -416,7 +421,6 @@ export class State {
     }
 
     addTransitions(names, transitions) {
-	console.log(this.transitions);
 	names.forEach((name => {
 	    if(name in this.transitions) {
 		throw new DuplicateTransitionError(name);
@@ -441,7 +445,6 @@ export class State {
 	if(name == null) {
 	    throw new InvalidArgumentsError('need transition name');
 	}
-	console.log(`makeTransition ${name} ${nextState}`);
 	if(nextState === undefined) {
 	    nextState = this.name; //?
 	}
@@ -452,7 +455,6 @@ export class State {
 	}
 	const method = this[name].bind(this);
 	
-	console.log(`${pattern} ${method} ${nextState}`);
 	return [pattern, method, nextState];
     }
 
@@ -469,7 +471,6 @@ export class State {
 		throw new InvalidArgumentsError("nameList contains null");
 	    }
 	    if(!Array.isArray(namestate)) {
-		console.log(namestate);
 		transitions[namestate] = this.makeTransition(namestate)
 		names.push(namestate);
 	    } else {
@@ -662,13 +663,15 @@ export class ViewList extends Array {
 	for(let i = start; i < end; i++) {
 	    initList.push(this[i]);
 	}
-	return new ViewList(initList);
+	return new this.constructor(initList);
     }
 }
 
 export class StringList extends ViewList {
     trimLeft(length, start, end) {
-	throw new UnimplementedException("trimLeft");
+	for(let i = start; i < end; i++) {
+	    this.data[i] = this.data[i].substring(length);
+	}
     }
     getTextBlock(start, flushLeft) {
 	throw new UnimplementedException("getTextBlock");
@@ -718,6 +721,7 @@ export class StringList extends ViewList {
 	    block[0] = block[0].substring(firstIndent);
 	}
 	if(indent && stripIndent) {
+	    console.log(block.constructor.name);
 	    block.trimLeft(indent, firstIndent != null);
 	}
 	return [ block, indent ] || [0, blankFinish]
