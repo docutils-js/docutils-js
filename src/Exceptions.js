@@ -1,8 +1,8 @@
-export class UnimplementedException extends Error {
+export class UnimplementedError extends Error {
     constructor(message, ...params) {
 	super(...params);
 	if(Error.captureStackTrace) {
-	    Error.captureStackTrace(this, UnimplementedException);
+	    Error.captureStackTrace(this, UnimplementedError);
 	}
 	this.message = message;
     }
@@ -20,7 +20,7 @@ export class EOFError extends Error {
 
 
 export class InvalidArgumentsError extends Error {
-    constructor(messag, ...params) {
+    constructor(message, ...params) {
 	super(...params);
 	if(Error.captureStackTrace) {
 	    Error.captureStackTrace(this, InvalidArgumentsError);
@@ -28,3 +28,4 @@ export class InvalidArgumentsError extends Error {
     }
 }
     
+export const InvalidArgumentError = InvalidArgumentsError

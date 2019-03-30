@@ -419,8 +419,8 @@ export class document extends Element {
     }
 }
 
-export class bullet_list extends Element { // Sequential
-}
+export class bullet_list extends Element { } // Sequential
+export class list_item extends Element { }
 
 export default {
     document,

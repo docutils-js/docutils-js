@@ -1,6 +1,7 @@
 import UnknownStateError from './UnknownStateError';
 import ErrorOutput from './ErrorOutput';
-import { EOFError, InvalidArgumentsError } from './Exceptions'
+import { EOFError, InvalidArgumentsError, UnimplementedException } from './Exceptions'
+
 
 function isIterable(obj) {
   // checks for null and undefined
@@ -27,6 +28,10 @@ export class StateMachine {
 	*/
 
     constructor({ stateClasses, initialState, debug }) {
+	if(stateClasses == null || stateClasses.length == 0) {
+	    throw new InvalidArgumentsError("stateClasses");
+	}
+	this._init();
 	debug = true;
 	this.inputLines = undefined;
 	this.inputOffset = 0;
@@ -41,6 +46,9 @@ export class StateMachine {
 	this._stderr = new ErrorOutput();
     }
 
+    _init() {
+    }
+    
     unlink() {
 	Object.values(this.states).forEach(s => s.unlink());
 	this.states = undefined;
@@ -77,8 +85,20 @@ export class StateMachine {
 	}
 	    
 	//else:
-	//self.input_lines = StringList(input_lines, source=input_source)
-	this.inputLines = inputLines;
+	if(inputLines instanceof StringList) {
+//	    this.inputLines = inputLines.data;
+	    this.inputLines = inputLines;
+	    console.log(inputLines);
+	} else if (inputLines == null ) {
+	    throw new InvalidArgumentsError("inputLines should not be null or undefined");
+	} else {
+	    //	    this.inputLines = inputLines;
+	    if(!isIterable(inputLines)) {
+		inputLines = [inputLines]
+	    }
+	    this.inputLines = new StringList(inputLines, inputSource);
+	    console.log(this.inputLines);
+	}
 	this.lineOffset = -1;
 	
 	this.currentState = initialState || this.initialState;
@@ -293,9 +313,9 @@ export class StateMachine {
 	    const [ pattern, method, nextState ] = state.transitions[name];
 	    //	    console.log(method);
 	    console.log(`checkLine: ${name} ${pattern} ${nextState}`);
-	    const r = pattern.exec(this.line);
-	    if(r) {
-		return method(r, context, nextState);
+	    const result = pattern.exec(this.line);
+	    if(result) {
+		return method({ pattern, result }, context, nextState);
 	    }
 	}
 	return state.noMatch(context, transitions);
@@ -313,6 +333,9 @@ export class StateMachine {
     }
 
     addStates(stateClasses) {
+	if(!stateClasses) {
+	    throw new Error("");
+	}
 	stateClasses.forEach(this.addState.bind(this));
     }
 
@@ -347,13 +370,14 @@ export class StateMachine {
 export class State {
     constructor(args) {
 	const { stateMachine,debug } = args;
-	this.transitionOrder = []
-	this.transitions = {}
-	this.patterns = {}
-	this.initialTransitions = args.initialTransitions;
-	this.wsInitialTransitions = args.wsInitialTransitions;
 	    this._init();
-	    this.addInitialTransitions()
+	    this.transitionOrder = []
+	this.transitions = {}
+	//this.patterns = {}
+	//this.initialTransitions = args.initialTransitions;
+	//this.wsInitialTransitions = args.wsInitialTransitions;
+
+	this.addInitialTransitions()
 	if(!stateMachine) {
 	    throw new Error("Need statemachine");
 	}
@@ -370,6 +394,10 @@ export class State {
     }
 
     _init() {
+	    /* empty */
+	this.patterns = {}
+	this.initialTransitions = null
+	this.nestedSm = null
     }
 
     runtimeInit() {
@@ -420,7 +448,7 @@ export class State {
 
 	let pattern = this.patterns[name];
 	if(!(pattern instanceof RegExp)) {
-	    pattern = new RegExp(pattern);
+	    pattern = new RegExp(pattern, 'y');
 	}
 	const method = this[name].bind(this);
 	
@@ -489,9 +517,9 @@ export class StateMachineWS extends StateMachine {
 	    stripIndent = true;
 	}
 	let offset = this.absLineOffset();
-	[ indented, indent, blankFinish ] = this.inputLines.getIndented({ lineOffset: this.lineOffset, untilBlank, stripIndent, blockIndent: indent });
+	[ indented, indent, blankFinish ] = this.inputLines.getIndented( { lineOffset: this.lineOffset, untilBlank, stripIndent, blockIndent: indent })
 	this.nextLine(indented.length - 1);
-	while(indented && !(indented[0].trim())) {
+	while(indented.length && !(indented[0].trim())) {
 	    indented.trimStart();
 	    offset = offset + 1;
 	}
@@ -523,7 +551,7 @@ export class StateMachineWS extends StateMachine {
 
 export class StateWS extends State {
     constructor(args) {
-	super({ wsInitialTransitions: ['blank', 'indent'], ...args})
+	super({ ...args})
 	if(!this.indentSm) {
 	    this.indentSm = this.nestedSm;
 	}
@@ -537,6 +565,17 @@ export class StateWS extends State {
 	    this.knownIndentSmKwargs = this.indentSmKwargs;
 	}
     }
+    _init() {
+	super._init()
+	this.indentSm = null
+	this.indentSmKwargs = null
+	this.knownIndentSm = null
+	this.knownIndentSmKwargs = null
+	this.wsPatterns = {blank: ' *$',
+			   indent:' +'}
+	this.wsInitialTransitions = ['blank', 'indent']
+    }
+    
     addInitialTransitions() {
 	super.addInitialTransitions();
 	if(!this.patterns) {
@@ -591,3 +630,107 @@ export function string2lines(astring, args) {
     /* fo a bunch of stuff */
     return astring.split('\n').map(x => x);
 }
+
+export class ViewList extends Array {
+    constructor(initlist, source, items, parent, parentOffset) {
+	super(...initlist)
+	this.items = []
+	this.parent = parent
+	this.parentOffset = parentOffset;
+
+	if(initlist instanceof ViewList) {
+//	    this.data = [...initlist.data]
+	    this.items = [...initlist.items]
+	} else if(initlist) {
+//	    this.data = [...initlist]
+	    if(items) {
+		this.items = items
+	    } else {
+		this.items = []
+		for (let i = 0; i < initlist.length; i++) {
+		    this.items.push([source, i])
+		}
+	    }
+	}
+    }
+
+    slice(start, end) {
+	const initList = [];
+	if(end == null) {
+	    end = this.length;
+	}
+	for(let i = start; i < end; i++) {
+	    initList.push(this[i]);
+	}
+	return new ViewList(initList);
+    }
+}
+
+export class StringList extends ViewList {
+    trimLeft(length, start, end) {
+	throw new UnimplementedException("trimLeft");
+    }
+    getTextBlock(start, flushLeft) {
+	throw new UnimplementedException("getTextBlock");
+    }
+    getIndented({start, untilBlank, stripIndent, blockIndent, firstIndent}) {
+    	if(start == null) {
+    		start = 0;
+	}
+	let indent = blockIndent;
+	let end = start;
+	if(blockIndent != null && firstIndent == null) {
+	    firstIndent = blockIndent;
+	}
+	if(firstIndent != null) {
+	    end = end + 1;
+	}
+	let last = this.length;
+	let blankFinish;
+	while(end < last) {
+	    const line = this[end];
+	    if(line && (line[0] != ' '  || (blockIndent != null))) { // FIXME
+		blankFinish = ((end > start) && !this[end - 1].trim());
+		break;
+	    }
+	    const stripped = line.ltrim();
+	    if(!stripped) {
+		if(untilBlank) {
+		    blankFinish = 1;
+		    break;
+		}
+	    } else if(blockIndent == null) {
+		const lineIndent = line.length - stripped.length;
+		if(indent == null) {
+		    indent = lineIndent;
+		} else {
+		    indent = min(indent, lineIndent);
+		}
+	    }
+	    end = end + 1;
+	}
+	if(end === last) {
+	    blankFinish = 1;
+	}
+	
+	const block = this.slice(start, end);
+	if(firstIndent != null && block) {
+	    block[0] = block[0].substring(firstIndent);
+	}
+	if(indent && stripIndent) {
+	    block.trimLeft(indent, firstIndent != null);
+	}
+	return [ block, indent ] || [0, blankFinish]
+    }
+    
+    get2dBlock(top, left, bottom, right, stripIndent) {
+	throw new UnimplementedException("get2dblock");
+    }
+    padDoubleWidth() {
+	throw new UnimplementedException("padDoublewidth");
+    }
+    replace() {
+	throw new UnimplementedException("replace");
+    }
+}
+

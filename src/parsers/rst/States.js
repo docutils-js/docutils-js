@@ -1,70 +1,20 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 import { StateMachineWS, StateWS } from '../../StateMachine';
 import * as languages from '../../languages'
 import * as nodes from '../../nodes';
+import { InvalidArgumentsError } from '../../Exceptions'
 
 export class Inliner {
     initCustomizations(settings) {
     }
 }
 
+
 export class RSTStateMachine extends StateMachineWS {
     run({inputLines, document, inputOffset, matchTitles, inliner}) {
+	if(!document) {
+	    throw new Error("need document");
+	}
+	
 	if(matchTitles === undefined) {
 	    matchTitles = true;
 	}
@@ -95,12 +45,20 @@ export class RSTStateMachine extends StateMachineWS {
 
 class NestedStateMachine extends StateMachineWS {
     run({inputLines, inputOffset, memo, node, matchTitles}) {
+	if(!inputLines) {
+	    throw new Error("need inputlines");
+	}
+	
 	if(matchTitles === undefined) {
 	    matchTitles = true;
 	}
 	this.matchTitles = matchTitles;
 	this.memo = memo;
 	this.document = memo.document
+	if(!this.document) {
+	    throw new Error("need document");
+	}
+
 	this.attachObserver(this.document.noteSource.bind(this.document));
 	this.reporter = memo.reporter;
 	this.language = memo.language;
@@ -108,15 +66,17 @@ class NestedStateMachine extends StateMachineWS {
 	const results = super.run({inputLines, inputOffset});
 	return results;
     }
-
-
 }
 
 class RSTState extends StateWS {
-    constructor(args) {
-	super(args);
-	/* does it really help to have Body as a string? */
-	this.nestedSmKwargs = { stateClasses, initialState: 'Body' };
+    _init() {
+	super._init();
+	this.nestedSm = NestedStateMachine;
+	this.nestedSmCache = []
+	this.stateClasses = stateClasses;
+	console.log(stateClasses);
+	this.nestedSmKwargs = { stateClasses: this.stateClasses,
+				initialState: 'Body' };
     }
 
     runtimeInit() {
@@ -150,9 +110,17 @@ class RSTState extends StateWS {
 	return [[], []]
     }
 
-    nestedParse({ block, inputOffset, node, matchTitles, stateMachineClass, stateMachineKwargs}) {
+    nestedParse(block, { inputOffset, node, matchTitles, stateMachineClass, stateMachineKwargs}) {
+	if(!this.memo || !this.memo.document) {
+	    throw new Error("need memo");
+	}
+	if(!block) {
+	    throw new Error("need block")
+	}
+	   
 	let useDefault = 0;
 	if(!stateMachineClass) {
+	    console.log(`setting stateMachineClass to ${this.nestedSm.constructor.name}`);
 	    stateMachineClass = this.nestedSm;
 	    useDefault = useDefault + 1;
 	}
@@ -171,45 +139,61 @@ class RSTState extends StateWS {
 	}
 	
 	if(!stateMachine) {
+	    console.log(stateMachineKwargs);
+	    if(!stateMachineKwargs.stateClasses) {
+		throw new InvalidArgumentsError("stateClasses")
+	    }
+//	    if(!stateMachineKwargs.document) {
+//		throw new Error("expectinf document")
+//	    }
 	    stateMachine = new stateMachineClass({debug:this.debug,
-					      ...stateMachineKwags});
+						  ...stateMachineKwargs});
+	    console.log(stateMachineClass.name);
 	}
-	stateMachine.run({block, inputOffset, memo: this.memo,
+	stateMachine.run({inputLines: block, inputOffset, memo: this.memo,
 			  node, matchTitles});
 	if(useDefault === 2) {
 	    this.nestedSmCache.push(stateMachine);
 	} else {
 	    stateMachine.unlink();
 	}
-	newOffset = stateMachine.absLineOffset();
+	const newOffset = stateMachine.absLineOffset();
 	if(block.parent && (len(block) - block_length) !== 0) {
 	    this.stateMachine.nextLine(block.length - blockLength);
 	}
 	return newOffset;
     }
 
-    nestedListParse({block, inputOffset, node, initialState,
+    nestedListParse(block, {inputOffset, node, initialState,
 		     blankFinish, blankFinishState, extraSettings,
 		     matchTitles,
 		     stateMachineClass,
 		     stateMachineKwargs}) {
-	if(!stateMachineClass) {
+	if(extraSettings == null) {
+		extraSettings = {}
+	}
+    	if(!stateMachineClass) {
 	    stateMachineClass = this.nestedSm;
 	}
 	if(!stateMachineKwargs) {
-	    state_machine_kwargs = { ... this.stateMachineKwargs };
+	    stateMachineKwargs = { ... this.nestedSmKwargs };
 	}
 	stateMachineKwargs.initialState = initialState;
 	const stateMachine = new stateMachineClass({debug: this.debug,
 						    ... stateMachineKwargs});
-	if(!blackFinishState) {
+	if(!blankFinishState) {
 	    blankFinishState = initialState;
 	}
+	if(!(blankFinishState in stateMachine.states)) {
+	    console.log(blankFinishState);
+	    throw new InvalidArgumentsError(`invalid state ${blankFinishState}`);
+	}
+	    
 	stateMachine.states[blankFinishState].blankFinish = blankFinish;
 	Object.keys(extraSettings).forEach(key => {
 	    stateMachine.states[initialState][key] = extraSettings[key];
 	});
-	stateMachine.run({block, inputOffset, memo: this.memo,
+	stateMachine.run({inputLines: block, inputOffset, memo: this.memo,
 			  node, matchTitles});
 	blankFinish = stateMachine.states[blankFinishState].blankFinish;
 	stateMachine.unlink();
@@ -224,13 +208,12 @@ class RSTState extends StateWS {
 }
 
 class Body extends RSTState {
-    initialTransitions = ['bullet']//,  'enumerator', 'field_marker', 'option_marker', 'doctest', 'line_block', 'grid_table_top', 'simple_table_top', 'explicit_markup', 'anonymous', 'line', 'text')
     constructor(args) {
 	super({ ...args, initialTransitions: ['bullet'] });
 	const pats = { }
 	const _enum = { }
 
-	pats['nonalphanum7bit'] = '[!-/:-@[-`{-~]'
+	pats['nonalphanum7bit'] = '[!-/:-@[-\`{-~]'
 	pats['alpha'] = '[a-zA-Z]'
 	pats['alphanum'] = '[a-zA-Z0-9]'
 	pats['alphanumplus'] = '[a-zA-Z0-9_-]'
@@ -241,6 +224,45 @@ class Body extends RSTState {
 
     _init() {
 	super._init();
+	//	this.doubleWidthPadChar =
+	const enum_ = { }
+	enum_.formatinfo = {
+	    parens: { prefix: '(', suffix: ')', start: 1, end: 1},
+	    rparen: { prefix: '', suffix: ')', start: 0, end: -1},
+	    period: { prefix: '', suffix: '.', start: 0, end: -1},
+	}
+	enum_.formats = Object.keys(enum_.formatinfo)
+	enum_.sequences = ['arabic', 'loweralpha', 'upperalpha',
+			       'lowerroman', 'upperroman']
+	enum_.sequencepats = {'arabic': '[0-9]+',
+                         'loweralpha': '[a-z]',
+                         'upperalpha': '[A-Z]',
+                         'lowerroman': '[ivxlcdm]+',
+                         'upperroman': '[IVXLCDM]+',}
+	enum_.converters = {}// fixme
+	enum_.sequenceregexps = {}
+	for(let sequence of enum_.sequences){
+	    enum_.sequenceregexps[sequence] = new RegExp(enum_.sequencepats[sequence] + '$', 'y')
+	}
+
+	this.enum = enum_;
+	
+	const pats = {}
+
+	this.initialTransitions = [ 'bullet' ]
+	
+/*          'enumerator',
+          'field_marker',
+          'option_marker',
+          'doctest',
+          'line_block',
+          'grid_table_top',
+          'simple_table_top',
+          'explicit_markup',
+          'anonymous',
+          'line',
+            'text'*/
+
 	this.patterns = { 'bullet': '[-+*\u2022\u2023\u2043]( +|$)',
 			};
     }
@@ -255,29 +277,45 @@ class Body extends RSTState {
         [bulletlist.source,
          bulletlist.line] = this.stateMachine.getSourceAndLine()
 	this.parent.add(bulletlist);
-        bulletlist['bullet'] = match[0].substring(0, 1)
-        /*i, blank_finish = self.list_item(match.end())
-        bulletlist += i
-        offset = self.state_machine.line_offset + 1   # next line
-        new_line_offset, blank_finish = self.nested_list_parse(
-              self.state_machine.input_lines[offset:],
-              input_offset=self.state_machine.abs_line_offset() + 1,
-              node=bulletlist, initial_state='BulletList',
-              blank_finish=blank_finish)
-        self.goto_line(new_line_offset)
-        if not blank_finish:
-            self.parent += self.unindent_warning('Bullet list')
-        */
-        return [[], nextState, []]
+        bulletlist['bullet'] = match.result[0].substring(0, 1)
 
+	const [ i, blankFinish ] = this.list_item(match.pattern.lastIndex) /* -1 ? */
+	bulletlist.append(i)
+	const offset = this.stateMachine.lineOffset + 1
+	let newLineOffset;
+	[ newLineOffset, blankFinish ] = this.nestedListParse(this.stateMachine.inputLines.slice(offset), { inputOffset: this.stateMachine.absLineOffset() + 1,
+													   node: bulletlist, initialState: 'BulletList',
+													   blankFinish });
+	this.gotoLine(newLineOffset);
+	if(!blankFinish) {
+	    this.parent.append(this.unindentWarning('Bullet list'))
+	}
+        return [[], nextState, []]
     }
-    
+
+    list_item(indent) {
+	if(indent == null) {
+	    throw new Error("Need indent") ;
+	}
+	
+	let indented, line_offset, blank_finish
+        if(this.stateMachine.line.length > indent) {
+            [ indented, line_offset, blank_finish ] = 
+                this.stateMachine.getKnownIndented(indent)
+        } else {
+            [ indented, outIndent, line_offset, blank_finish ] = (
+                this.stateMachine.getFirstKnownIndented(indent))
+	}
+        const listitem = new nodes.list_item(indented.join('\n'))
+        if(indented) {
+            this.nestedParse(indented, { inputOffset: line_offset,
+					 node: listitem })
+	}
+        return [ listitem, blank_finish ]
+    }
 }
 
-export const stateClasses = [Body];
-					    
-					     
-		
-    
-	
-    
+export class SpecializedBody extends Body{}
+export class BulletList extends Body{}
+
+export const stateClasses = [Body, BulletList];

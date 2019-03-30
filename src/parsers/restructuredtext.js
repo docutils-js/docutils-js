@@ -17,6 +17,9 @@ export class Parser extends BaseParser {
 	if(!this.stateClasses) {
 	    throw new Error("probably need this");
 	}
+	console.log('state classes');
+	console.log(this.stateClasses);
+// ${this.stateClasses.map(x => x.constructor.name.name).join(" ")}`);
 	
 	this.inliner = args.inliner;
     }
@@ -29,6 +32,10 @@ export class Parser extends BaseParser {
 	}
 	
 	this.setupParse(inputstring, document);
+	if(!this.stateClasses) {
+	    throw new Error("need classes")
+	}
+	
 	this.stateMachine = new states.RSTStateMachine({
 	    stateClasses: this.stateClasses,
 	    initialState: this.initialState,
