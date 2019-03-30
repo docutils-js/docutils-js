@@ -43,7 +43,7 @@ function buildRegexp(definition, compile=true) {
     	throw new Error();
 
     }
-    const fakeTuple2 = parts.shift(0);
+    const fakeTuple2 = parts.shift();
     const groupNames = []
     for(let part of parts) {
 	const fakeTuple3 = Array.isArray(part) ? part[0] : undefined;
@@ -60,15 +60,16 @@ function buildRegexp(definition, compile=true) {
 		partStrings.push(part);
 	    }
     }
-    const orGroup = partStrings.join('|')
+    const orGroup = partStrings.map(x => `(${x})`).join('|')
     const regexp = `${prefix}(${orGroup})${suffix}`;
+    console.log(new RegExp(regexp))
     groupNames.splice(0, 0, ...prefixNames, name);
     groupNames.push(...suffixNames);
 //    console.log('groupnames')
 //    console.log(groupNames);
 //    console.log(`regexp is ${regexp}`);
     if(compile) {
-	return [new RegExp(regexp, 'y'), groupNames]
+	return [new RegExp(regexp, 'g'), groupNames]
     }
     else {
 	return [regexp, groupNames];
@@ -101,21 +102,37 @@ export class Inliner {
 		']))'*/
 	    esn = []
 	}
-	this.simplename = '\\W+'
-	
+//	this.simplename = '(?:(?!_)\\w)+(?:[-._+:](?:(?!_)\\w)+)*'
+	this.simplename = '\\w+'
+
+	const prefix = startStringPrefix;
+	const suffix = endStringSuffix;
+/*	const initialInline =
+	      { prefix, suffix: '',
+		parts: {
+		    start: {
+			prefix: '',
+			suffix: this.non_whitespace_after,
+			parts: ['\\*\\*','\\*(?!\\*)','``','_`', '\\|(?!\\|)'],
+		    },
+		    whole: {
+			prefix: '',
+			suffix,
+			parts: 
+*/					    
         const parts = [1, 'initial_inline', startStringPrefix, '',
            [0, [1, 'start', '', this.non_whitespace_after, // simple start-strings
              [0, '\\*\\*',                // strong
               '\\*(?!\\*)',            // emphasis but not strong
               '``',                  // literal
               '_`',                  // inline internal target
-              [2, '\\|(?!\\|)'], null]            // substitution reference
+              [2, '\\|(?!\\|)', null]]            // substitution reference
              ],
             [1, 'whole', '', endStringSuffix, // whole constructs
              [0, // reference name & end-string
               [2, `(${this.simplename})(__?)`, 'refname', 'refend'], 
               [1, 'footnotelabel', '\\[', [2, '(\\]_)', 'fnend'],
-               [0, '[0, 0-9]+',               // manually numbered
+               [0, '[0-9]+',               // manually numbered
                 [2, `\\#(${this.simplename})?`, null], // auto-numbered (w/ label?)
                 '\\*',                   // auto-symbol
                 [2, `(${this.simplename})`, 'citationlabel' ]] // citation reference
@@ -132,8 +149,8 @@ export class Inliner {
 	this.startStringPrefix = startStringPrefix;
 	this.endStringSuffix = endStringSuffix;
 	this.parts = parts;
-	const build = buildRegexp(parts, true);
-	console.log(build[0]);
+//	const build = buildRegexp(parts, true);
+//	console.log(build[0]);
 	this.patterns = {
 	    initial: buildRegexp(parts), // KM
 	    emphasis: new RegExp(this.nonWhitespaceEscapeBefore +

@@ -105,8 +105,8 @@ export class Node {
 	    const children = this.children;
 	    try {
 		for(let child of [...children]) {
-		    console.log(typeof child);
-		    console.log(Object.keys(child));
+//		    console.log(typeof child);
+//		    console.log(Object.keys(child));
 		    if(child.walkabout(visitor)) {
 			stop = true;
 			break;

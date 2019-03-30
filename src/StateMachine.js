@@ -319,7 +319,7 @@ export class StateMachine {
 	    if(result) {
 		console.log(`pattern match for ${name}`);
 		const r = method({ pattern, result, input: this.line }, context, nextState);
-		console.log(`return is:`);
+		console.log(`return is >>> `);
 		console.log(r);
 		return r;
 	    }
