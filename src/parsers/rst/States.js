@@ -36,9 +36,9 @@ function buildRegexp(definition, compile=true) {
 	throw new Error();
     }
     const pi = isIterable(parts);
-    console.log(`buildRegexp(${name} - ${pi})`);
+//    console.log(`buildRegexp(${name} - ${pi})`);
     const partStrings= []
-    console.log(parts);
+//    console.log(parts);
     if(parts === undefined) {
     	throw new Error();
 
@@ -48,7 +48,7 @@ function buildRegexp(definition, compile=true) {
     for(let part of parts) {
 	const fakeTuple3 = Array.isArray(part) ? part[0] : undefined;
 	if(fakeTuple3 === 1) {
-		const [regexp, subGroupNames] = buildRegexp(part, null)
+	    const [regexp, subGroupNames] = buildRegexp(part, null)
 	    groupNames.push(...subGroupNames)
 	    partStrings.push(regexp);
 	}else if(fakeTuple3 === 2) {
@@ -62,11 +62,11 @@ function buildRegexp(definition, compile=true) {
     }
     const orGroup = partStrings.join('|')
     const regexp = `${prefix}(${orGroup})${suffix}`;
-    groupNames.splice(0, 0, ...prefixNames, null);
+    groupNames.splice(0, 0, ...prefixNames, name);
     groupNames.push(...suffixNames);
-    console.log('groupnames')
-    console.log(groupNames);
-    console.log(`regexp is ${regexp}`);
+//    console.log('groupnames')
+//    console.log(groupNames);
+//    console.log(`regexp is ${regexp}`);
     if(compile) {
 	return [new RegExp(regexp, 'y'), groupNames]
     }
@@ -89,22 +89,24 @@ export class Inliner {
 	    endStringSuffix = ''
 	    esn = []
 	} else {
-	    startStringPrefix = '(^|(?<=\\s|[' + 
+	    startStringPrefix = ''/*'(^|(?<=\\s|[' + 
                 punctuation_chars.openers +
                 punctuation_chars.delimiters +
-		']))'
-	    ssn = [null, null]
-            endStringSuffix = '($|(?=\\s|[\\x00' + [
+		']))'*/
+	    ssn = []
+            endStringSuffix = ''/*'($|(?=\\s|[\\x00' + [
                 punctuation_chars.closing_delimiters,
                 punctuation_chars.delimiters,
                 punctuation_chars.closers].join('') +
-		']))'
-	    esn = [null, null, null]
+		']))'*/
+	    esn = []
 	}
+	this.simplename = '\\W+'
+	
         const parts = [1, 'initial_inline', startStringPrefix, '',
            [0, [1, 'start', '', this.non_whitespace_after, // simple start-strings
              [0, '\\*\\*',                // strong
-              '\\*',//[2, '\\*(?!\\*)', null],            // emphasis but not strong
+              '\\*(?!\\*)',            // emphasis but not strong
               '``',                  // literal
               '_`',                  // inline internal target
               [2, '\\|(?!\\|)'], null]            // substitution reference
@@ -130,8 +132,10 @@ export class Inliner {
 	this.startStringPrefix = startStringPrefix;
 	this.endStringSuffix = endStringSuffix;
 	this.parts = parts;
+	const build = buildRegexp(parts, true);
+	console.log(build[0]);
 	this.patterns = {
-	    initial: buildRegexp(parts, false),
+	    initial: buildRegexp(parts), // KM
 	    emphasis: new RegExp(this.nonWhitespaceEscapeBefore +
 				 '(\\*)' + endStringSuffix),
 	    strong: new RegExp(this.nonWhitespaceEscapeBefore +
@@ -144,11 +148,11 @@ export class Inliner {
 	this.document = memo.document
 	this.language= memo.language
 	this.parent = parent
-	console.log(new RegExp(this.patterns.initial[0]));
+//	console.log(new RegExp(this.patterns.initial[0]));
 	const patternSearch = this.patterns.initial[0][Symbol.match].bind(this.patterns.initial[0]);
-	console.log(this.patterns.initial[0]);
+//	console.log(this.patterns.initial[0]);
 	const dispatch = this.dispatch
-	console.log(text.constructor.name);
+//	console.log(text.constructor.name);
 	let remaining = text;//escape2null(text)
 	const processed = []
 	const unprocessed = []
@@ -156,7 +160,12 @@ export class Inliner {
 	while(remaining) {
 	    const match = patternSearch(remaining)
 	    if(match) {
-		console.log(match);
+		const rr = {}
+		this.patterns.initial[1].forEach((x, index) => {
+		    rr[x] = match[index];
+		});
+		console.log(rr);
+		break;
 	    } else {
 		break;
 	    }
@@ -164,7 +173,7 @@ export class Inliner {
 	if(remaining) {
 	    processed.push(...this.implicit_inline(remaining, lineno));
 	}
-	console.log(processed);
+//	console.log(processed);
 	return [ processed, messages ]
     }
 
@@ -374,7 +383,6 @@ class RSTState extends StateWS {
     }
 
     paragraph(lines, lineno) {
-	console.log(lines);
 	const data = [lines].flatMap(x => x).join("\n").replace(/\s*$/, '')
 	let text;
 	let literalnext;
@@ -393,9 +401,7 @@ class RSTState extends StateWS {
 	    literalnext = 0;
 	}
 	const r = this.inline_text(text, lineno)
-	console.log(r)
 	const [textnodes, messages] = r
-	console.log(data);
 	const p = new nodes.paragraph(data, '', textnodes);
 	[ p.source, p.line ] = this.stateMachine.getSourceAndLine(lineno);
 	return [[p], literalnext]
@@ -403,7 +409,7 @@ class RSTState extends StateWS {
 
     inline_text(text, lineno) {
     	const r = this.inliner.parse(text, { lineno, memo: this.memo, parent: this.parent });
-    	console.log(r);
+//    	console.log(r);
     	return r;
     }
 }
