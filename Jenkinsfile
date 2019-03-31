@@ -10,7 +10,15 @@ pipeline {
 	        sh 'yarn'
 		sh 'yarn grunt'
 		sh 'node rst2xml-babel.js'
+		sh 'mkdir -p build'
+		sh 'tar --exclude node_modules --exclude build --exclude-vcs -zcv . -f build/docutils-js.tar.gz'
             }
         }
     }
+       post {
+      always {
+      archiveArtifacts artifacts: 'build/*.tar.gz', fingerprint: true
+      }
+      }
+
 }
