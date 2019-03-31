@@ -29,3 +29,15 @@ export class InvalidArgumentsError extends Error {
 }
     
 export const InvalidArgumentError = InvalidArgumentsError
+export class SystemMessage extends Error {
+    constructor(msg, level, ...params) {
+	super(...params);
+	this.message = msg.astext();
+	this.msg = msg;
+	this.level = level;
+	if(Error.captureStackTrace) {
+	    Error.captureStackTrace(this, SystemMessage);
+	}
+    }
+}
+    

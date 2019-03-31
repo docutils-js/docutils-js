@@ -13,7 +13,7 @@ export default class Writer extends Component {
 					     document.reporter);
 	this.destination = destination;
 	this.translate();
-	console.log(this.output);
+//	console.log(this.output);
 	const output = this.destination.write(this.output);
 	return output;
     }

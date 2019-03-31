@@ -119,7 +119,7 @@ strong(match, lineno) {
 	    throw new Error("")
 	}
 	
-	console.log(match);
+//	console.log(match);
         const string = match.match.input
         const matchstart = string.indexOf(match.groups.start);
 	if(matchstart == -1) {
@@ -127,11 +127,11 @@ strong(match, lineno) {
 	}
 	
         const matchend = matchstart + match.groups.start.length;
-	console.log(`${matchstart} ${matchend}`);
+//	console.log(`${matchstart} ${matchend}`);
         if(this.quoted_start(match)) {
             return [string.substring(0, matchend), [], string.substring(matchend), [], '']
 	}
-	console.log(end_pattern);
+//	console.log(end_pattern);
         const endmatch = end_pattern.exec(string.substring(matchend));
 	let text, rawsource;
         if(endmatch && endmatch.index) {  // 1 or more chars
@@ -632,7 +632,7 @@ class Body extends RSTState {
 	}
         const listitem = new nodes.list_item(indented.join('\n'))
         if(indented) {
-	    console.log('nested parse');
+//	    console.log('nested parse');
             this.nestedParse(indented, { inputOffset: line_offset,
 					 node: listitem })
 	}

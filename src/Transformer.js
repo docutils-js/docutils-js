@@ -23,8 +23,8 @@ export default class Transformer {
 //	    console.log(i);
 	    urr.push(i.unknownReferenceResolvers);
 	}
-	console.log('urr is ')
-	console.log(urr);
+//	console.log('urr is ')
+//	console.log(urr);
 	const decoratedList = urr.map(f => [f.priority, f]);
 	decoratedList.sort()
 	this.unknownReferenceResolvers.push(...decoratedList.map(f => f[1]));

@@ -38,7 +38,7 @@ export class NodeVisitor {
     dispatchVisit(node) {
 	const nodeName = node.tagname;
 	const methodName = `visit_${nodeName}`;
-	console.log(`visiting ${nodeName}`);
+//	console.log(`visiting ${nodeName}`);
 	let method = this[methodName];
 	if(!method) {
 	    console.log('selecting unknown visit');

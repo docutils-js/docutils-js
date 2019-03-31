@@ -13,7 +13,7 @@ class ReReader extends Reader {
 const _reader_aliases = {}
 
 export function getReaderClass(readerName) {
-    console.log(readerName);
+//    console.log(readerName);
     if(readerName === "standalone") {
 	return standalone.default;
     }

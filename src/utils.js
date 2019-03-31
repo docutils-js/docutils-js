@@ -1,5 +1,5 @@
 import * as nodes from './nodes';
-import { InvalidArgumentsError, UnimplementedError as Unimp } from './Exceptions'
+import { InvalidArgumentsError, SystemMessage, UnimplementedError as Unimp } from './Exceptions'
 
 export const punctuation_chars = {
     openers: '"\\\'(<\\\\[{\\u0f3a\\u0f3c\\u169b\\u2045\\u207d\\u208d\\u2329\\u2768' +
@@ -27,7 +27,10 @@ export const punctuation_chars = {
 
 export class Reporter {
     constructor(source, reportLevel, haltLevel, stream, debug, encoding,
-	       errorHandler='backslashreplace') {
+		errorHandler='backslashreplace') {
+	if(haltLevel === undefined) {
+	    haltLevel = 3;
+	}
 	this.DEBUG_LEVEL = 0
 	this.INFO_LEVEL = 1
 	this.WARNING_LEVEL = 2

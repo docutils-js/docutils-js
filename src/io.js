@@ -122,7 +122,7 @@ export class FileInput extends Input {
 	    }
 	} catch(error) {
 	    console.log(error.stack);
-	    throw error;
+	    cb(error, undefined);
 	}
 	}, 100);
     }

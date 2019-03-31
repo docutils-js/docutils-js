@@ -2,6 +2,10 @@ import UnknownStateError from './UnknownStateError';
 import ErrorOutput from './ErrorOutput';
 import { EOFError, InvalidArgumentsError, UnimplementedError as Unimp } from './Exceptions'
 
+export class TransitionCorrection extends Error {
+}
+export class StateCorrection extends Error {
+}
 
 function isIterable(obj) {
   // checks for null and undefined
@@ -134,8 +138,32 @@ export class StateMachine {
 		    }
 		}
 		catch(error) {
-		    // state correction check ?
-		    throw error;
+		    if(error instanceof TransitionCorrection) {
+			this.previousLine();
+			transitions = [error.args[0]]
+			/* if self.debug:
+                        print >>self._stderr, (
+                              '\nStateMachine.run: TransitionCorrection to '
+                              'state "%s", transition %s.'
+                              % (state.__class__.__name__, transitions[0]))*/
+			continue;
+		    } else if(error instanceof StateCorrection) {
+			this.previousLine();
+			nextState = error.args[0]
+			if(error.args.length === 1) {
+			    transitions = null;
+			} else {
+			    transitions = [error.args[1]]
+			}
+		    /*                    if self.debug:
+                        print >>self._stderr, (
+                              '\nStateMachine.run: StateCorrection to state '
+                              '"%s", transition %s.'
+                              % (next_state, transitions[0]))
+		    */
+		    } else {
+			throw error;
+		    }
 		}
 		state=this.getState(nextState)
 	    }
@@ -155,7 +183,7 @@ export class StateMachine {
       */
     getState(nextState) {
 	if(nextState) {
-	    if(/*this.debug && */nextState !== this.currentState) {
+	    if(this.debug && nextState !== this.currentState) {
 		console.log(`StateMachine.getState: changing state from "${this.currentState}" to "${nextState}" (input line ${this.absLineNumber()})`);
 	    }
 	    this.currentState = nextState;

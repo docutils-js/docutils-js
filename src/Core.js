@@ -74,7 +74,7 @@ export class Publisher {
 
 	    }
 	}
-	const optionParser = new OptionParser({components: [this.parser, this.reder, this.writer, settingsSpec],
+	const optionParser = new OptionParser({components: [this.parser, this.reader, this.writer, settingsSpec],
 					       defaults,
 					       readConfigFiles: true,
 					       usage,description });
@@ -137,7 +137,7 @@ export class Publisher {
 
     /* This doesnt seem to return anything ? */
     publish(args, cb) {
-	console.log(`publish`)
+//	console.log(`publish`)
 	const {argv, usage, description, settingsSpec, settingsOverrides, configSection, enableExitStatus } = args;
 	let exit = undefined;
 	try {
@@ -154,7 +154,7 @@ export class Publisher {
 		this.source, this.parser, this.settings,
 		((error, document) => {
 		    if(error) {
-			console.log(error);
+			cb(error, undefined);
 			return;
 		    }
 		    this.document = document;
@@ -165,10 +165,10 @@ export class Publisher {
 		    const output =
 			  this.writer.write(this.document, this.destination)
 		    this.writer.assembleParts();
-		    cb(output);
+		    cb(undefined, output);
 		}).bind(this));
 	} catch(error) {
-	    console.log(error.stack);
+	    cb(error, undefined);
 	}
     }
 }
@@ -182,7 +182,7 @@ export function publishCmdLine(args, cb) {
 			parserName: 'restructuredtext',
 			usage: defaultUsage,
 			description: defaultDescription,
-			enableExitStatu: true };
+			enableExitStatus: true };
     args = { ..._defaults, ...args }
     const { reader, readerName, parser, parserName, writer, writerName,
       settings, settingsSpec, settingsOverrides, configSection,
