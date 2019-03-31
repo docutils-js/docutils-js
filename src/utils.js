@@ -24,7 +24,7 @@ export const punctuation_chars = {
 }
 
 
-function newReporter({sourcePath}, settings) {
+export function newReporter({sourcePath}, settings) {
     return new class {
 	debug(msg) {
 	    console.log(`debug: ${msg}`);

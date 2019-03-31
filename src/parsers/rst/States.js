@@ -90,6 +90,8 @@ export class Inliner {
 	
 	this.implicitDispatch = []
 	this.non_whitespace_after = ''
+
+	this.nonWhitespaceEscapeBefore = '(?<![\\s\\x00])'
     }
 
     emphasis(match, lineno) {
@@ -98,11 +100,15 @@ export class Inliner {
     }
 
     quoted_start(match) {
-	return false;
+	return false; //fixme
     }
     
     inline_obj( match, lineno, end_pattern, nodeclass,
                 restore_backslashes=false) {
+	if(typeof nodeclass  !== 'function') {
+	    throw new Error();
+	}
+	
 	if(!(end_pattern instanceof RegExp)) {
 	    throw new Error("")
 	}
@@ -111,20 +117,23 @@ export class Inliner {
         const string = match.match.input
         const matchstart = string.indexOf(match.groups.start);
         const matchend = matchstart + match.groups.start.length;
+	console.log(`${matchstart} ${matchend}`);
         if(this.quoted_start(match)) {
             return [string.substring(0, matchend), [], string.substring(matchend), [], '']
 	}
+	console.log(end_pattern);
         const endmatch = end_pattern.exec(string.substring(matchend));
 	let text, rawsource;
-        if(endmatch && endmatch.start(1)) {  // 1 or more chars
-            const _text = endmatch.string.substring(0, endmatch.start(1));
+        if(endmatch && endmatch.index) {  // 1 or more chars
+            const _text = endmatch.input.substring(0, endmatch.index);
             text = _text;//unescape(_text, restore_backslashes)
-            const textend = matchend + endmatch.end(1)
+	    // this may not work for all situations
+            const textend = matchend + endmatch[0].length;
             rawsource = string.substring(matchstart, textend);////unescape(string[matchstart:textend], True)
-            const node = nodeclass(rawsource, text)
-            node[0].rawsource = unescape(_text, True)
+            const node = new nodeclass(rawsource, text)
+            node.children[0].rawsource = _text;//fixme unescape(_text, true)
             return [string.substr(0, matchstart), [node],
-                    string.substr(textend), [], endmatch.group(1)]
+                    string.substr(textend), [], endmatch[1]]
 	}
         text = ''//unescape(string[matchstart:matchend], true)
         rawsource = ''//unescape(string[matchstart:matchend], true)
@@ -223,7 +232,7 @@ export class Inliner {
 //	console.log(text.constructor.name);
 	let remaining = text;//escape2null(text)
 	const processed = []
-	const unprocessed = []
+	let unprocessed = []
 	const messages = []
 	while(remaining) {
 	    const match = this.patterns.initial[0].exec(remaining)
@@ -240,9 +249,9 @@ export class Inliner {
                 unprocessed.push(before)
 //                messages.add(sysmessages)
                 if(inlines) {
-                    processed.add(self.implicit_inline(''.join(unprocessed),
+                    processed.push(this.implicit_inline(unprocessed.join(''),
                                                        lineno))
-                    processed.add(inlines)
+                    processed.push(inlines)
                     unprocessed = []
 		}
 	    } else {

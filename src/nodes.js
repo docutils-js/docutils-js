@@ -1,6 +1,14 @@
 import Transformer from './Transformer';
 import { InvalidArgumentsError} from './Exceptions';
 
+function isIterable(obj) {
+  // checks for null and undefined
+  if (obj == null) {
+    return false;
+  }
+  return typeof obj[Symbol.iterator] === 'function';
+}
+
 function pseudoQuoteattr(value) {
     return `"${value}"`;
 }
@@ -252,7 +260,10 @@ export class Element extends Node {
 
 export class TextElement extends Element {
     constructor(rawsource, text, children, attributes) {
-	super(rawsource, text !== '' ? [Text(text), ...children] : children, attributes);
+	if(!children) {
+	    children = [];
+	}
+	super(rawsource, text !== '' ? [new Text(text), ...children] : children, attributes);
     }
 }
 
@@ -458,6 +469,7 @@ export class document extends Element {
 export class paragraph extends TextElement  { } // General
 export class bullet_list extends Element { } // Sequential
 export class list_item extends Element { }
+export class emphasis extends TextElement {} // Inline
 
 export default {
     document,
