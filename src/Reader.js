@@ -38,7 +38,7 @@ export default class Reader extends Component {
 	}
 	this.settings = settings;
 	if(!this.source) {
-	    throw new AssertError("Need source");
+	    throw new Error("Need source");
 	}
 
 	this.source.read((error, data) =>
@@ -57,7 +57,7 @@ export default class Reader extends Component {
     /* Delegates to this.parser, providing arguments
        based on instance variables */
     parse() {
-	const document = this.newDocument({});
+	const document = this.newDocument();
 	this.document = document;
 	if(!this.input) {
 	    throw new Error("need input, i have " + this.input);
