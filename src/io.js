@@ -44,6 +44,26 @@ class Output extends TransformSpec {
     }
 }
 
+export class StringInput extends Input {
+    read(cb) {
+	cb(undefined, this.source);
+    }
+}
+
+export class StringOutput extends Output {
+    constructor(...args) {
+	super(...args);
+	this.defaultDestinationPath = '<string>'
+    }
+    
+
+    write(data) {
+        //self.destination = self.encode(data)
+	this.destination = data;
+	return this.destination;
+    }
+}
+
 export class FileInput extends Input {
     /* ew, too much logic for a constructor, with side effects and shit! */
     constructor(args) {
@@ -101,6 +121,7 @@ export class FileInput extends Input {
 		cb(undefined, data);
 	    }
 	} catch(error) {
+	    console.log(error.stack);
 	    throw error;
 	}
 	}, 100);

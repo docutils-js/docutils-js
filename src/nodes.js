@@ -181,6 +181,16 @@ export class Element extends Node {
 	this.attributes = { }
     }
 
+    _init() {
+	super._init();
+	this.childTextSeparator = "\n\n"
+    }
+    
+
+    astext() {
+	return this.children.map(x => x.astext()).join(this.childTextSeparator);
+    }
+
     extend(...items) {
 	items.forEach(this.append.bind(this));
     }
@@ -204,8 +214,8 @@ export class Element extends Node {
 	    throw new InvalidArgumentsError();
 	}
 
-	console.log(typeof child);
-	console.log(Object.keys(child))
+//	console.log(typeof child);
+//	console.log(Object.keys(child))
 	child.parent = this;
 	if(this.document) {
 	    child.document = this.documentl
@@ -471,6 +481,11 @@ export class bullet_list extends Element { } // Sequential
 export class list_item extends Element { }
 export class emphasis extends TextElement {} // Inline
 export class strong extends TextElement {} // Inline
+export class system_message extends Element {
+    constructor(message, children, attributes) {
+	super(attributes.rawsource || '', message ? [new paragraph('', message), ...children] : children, attributes);
+    }
+}
 
 export default {
     document,

@@ -62,14 +62,14 @@ function buildRegexp(definition, compile=true) {
     }
     const orGroup = partStrings.map(x => `(${x})`).join('|')
     const regexp = `${prefix}(${orGroup})${suffix}`;
-    console.log(new RegExp(regexp))
+//    console.log(new RegExp(regexp))
     groupNames.splice(0, 0, ...prefixNames, name);
     groupNames.push(...suffixNames);
 //    console.log('groupnames')
 //    console.log(groupNames);
 //    console.log(`regexp is ${regexp}`);
     if(compile) {
-	return [new RegExp(regexp, 'g'), groupNames]
+	return [new RegExp(regexp), groupNames]
     }
     else {
 	return [regexp, groupNames];
@@ -145,11 +145,12 @@ strong(match, lineno) {
             return [string.substr(0, matchstart), [node],
                     string.substr(textend), [], endmatch[1]]
 	}
-        throw new Error("fix me");
-        text = ''//unescape(string[matchstart:matchend], true)
-        rawsource = ''//unescape(string[matchstart:matchend], true)
-        const prb = ''//this.problematic(text, rawsource, msg)
-        return [];//[string[:matchstart], [prb], string[matchend:], [msg], '']
+        const msg = this.reporter.warning(
+            `Inline ${nodeclass.constructor.name} start-string without end-string.`, { line: lineno});
+        text = string.substring(matchstart, matchend);//unescape(string[matchstart:matchend], True)
+        rawsource = text;//unescape(string[matchstart:matchend], True)
+        const prb = this.problematic(text, rawsource, msg)
+        return [string.substring(0, matchstart), [prb], string.substring(matchend), [msg], '']
     }
 
     initCustomizations(settings) {
@@ -225,9 +226,9 @@ strong(match, lineno) {
 	this.patterns = {
 	    initial: buildRegexp(parts), // KM
 	    emphasis: new RegExp(this.nonWhitespaceEscapeBefore +
-				 '(\\*)' + endStringSuffix, 'g'),
+				 '(\\*)' + endStringSuffix),
 	    strong: new RegExp(this.nonWhitespaceEscapeBefore +
-			       '(\\*\\*)' + endStringSuffix, 'g'),
+			       '(\\*\\*)' + endStringSuffix),
 //	    interpreted_or_phrase_ref: new RegExp(`${non_unescaped_whitespace_escape_before}(((:${simplename}:)?(__?)?))${endStringSuffix}`)
 	}
     }
@@ -247,7 +248,7 @@ strong(match, lineno) {
 	const messages = []
 	while(remaining) {
 	    const match = this.patterns.initial[0].exec(remaining)
-	    console.log(match);
+//	    console.log(match);
 	    if(match) {
 		const rr = {}
 		
@@ -519,7 +520,7 @@ class RSTState extends StateWS {
 
 class Body extends RSTState {
     constructor(args) {
-	super({ ...args, initialTransitions: ['bullet'] });
+	super(args);
 	const pats = { }
 	const _enum = { }
 
@@ -529,7 +530,6 @@ class Body extends RSTState {
 	pats['alphanumplus'] = '[a-zA-Z0-9_-]'
 
 	this.pats = pats;
-	this.initialTransitions = ['bullet'];
     }
 
     _init() {
@@ -558,8 +558,9 @@ class Body extends RSTState {
 	this.enum = enum_;
 	
 	const pats = {}
+	pats['nonalphanum7bit'] = '[!-/:-@[-`{-~]'
 
-	this.initialTransitions = [ 'bullet', 'text' ]
+	this.initialTransitions = [ 'bullet', 'text', 'line']
 	
 /*          'enumerator',
           'field_marker',
@@ -574,8 +575,7 @@ class Body extends RSTState {
             'text'*/
 
 	this.patterns = { 'bullet': '[-+*\u2022\u2023\u2043]( +|$)',
-
-
+			  'line': `(${pats.nonalphanum7bit})\\1* *$`,
 			  'text': '' }
     }
 
@@ -639,6 +639,30 @@ class Body extends RSTState {
         return [ listitem, blank_finish ]
     }
 
+    line(match, context, matchState) {
+        if(this.stateMachine.matchTitles) {
+            return [[match.input], 'Line', []]
+        } else if(match.match.input.trim() == '::') {
+            throw new statemachine.TransitionCorrection('text')
+        } else if(match.match.input.trim().length < 4) {
+            const msg = this.reporter.info(
+                'Unexpected possible title overline or transition.\n' +
+                "Treating it as ordinary text because it's so short.",
+                {line: self.state_machine.abs_line_number()})
+            this.parent.add(msg)
+            throw new statemachine.TransitionCorrection('text')
+	} else {
+            const blocktext = this.stateMachine.line
+            const msg = this.reporter.severe(
+                  'Unexpected section title or transition.',
+                  nodes.literal_block(blocktext, blocktext),
+                { line: self.state_machine.abs_line_number()})
+            self.parent.add(msg)
+            return [ [], next_state, [] ]
+	}
+    }
+    
+
     text(match, context, matchState) {
 	if(match.input === undefined) {
 	    throw new Error("");
@@ -648,8 +672,6 @@ class Body extends RSTState {
     }
 }
 
-export class SpecializedBody extends Body{}
-export class BulletList extends Body{}
 export class Text extends RSTState {
     init() {
 	this.patterns = {'underline': Body.patterns['lne'],
@@ -695,5 +717,69 @@ export class Text extends RSTState {
 	throw new Unimp();
     }
 }
+export class SpecializedText extends Text {
+    _init(){
+	super._init();
+	this.blank = this.invalidInput;
+	this.indent = this.invalidInput;
+	this.underline = this.invalidInput;
+	this.text = this.invalidInput;
+    }
+    
+    eof() {
+	return []
+    }
+    invalidInput() {
+	throw new EOFError();
+    }
+}
 
-export const stateClasses = [Body, BulletList, Text];
+export class Line extends SpecializedText {
+    _init() {
+	super._init();
+	this.eofcheck = 1;
+    }
+
+    eof(context) {
+	const marker = context[0].trip();
+	if(this.memo.sectionBubbleUpKludge) {
+	    this.memo.sectionBubbleUpKludge = false;
+	} else if(marker.length < 4) {
+	    this.stateCorrection(context)
+	}
+	if(this.eofcheck) {
+	    const lineno = self.stateMachine.absLineNumber() - 1
+	    const transition = nodes.transition(context[0])
+	    transition.line = lineno
+	    this.parent.add(lineno)
+	}
+	this.eofcheck = 1
+	return []
+    }
+
+    blank(match, context, nextState) {
+	throw new Unimp();
+
+    }
+
+    text(match, context, nextState) {
+	throw new Unimp();
+    }
+
+    underline(match, context, nextState) {
+	throw new Unimp();
+    }
+
+    shortOverline(context, blocktext, lineno, lines=1) {
+	throw new Unimp();
+    }
+
+    stateCorrection(context, lines=1) {
+	throw new Unimp();
+    }
+}
+    
+export class SpecializedBody extends Body{}
+export class BulletList extends Body{}
+
+export const stateClasses = [Body, BulletList, Text, Line];

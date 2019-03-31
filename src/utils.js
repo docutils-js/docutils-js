@@ -1,4 +1,5 @@
-import nodes from './nodes';
+import * as nodes from './nodes';
+import { InvalidArgumentsError, UnimplementedError as Unimp } from './Exceptions'
 
 export const punctuation_chars = {
     openers: '"\\\'(<\\\\[{\\u0f3a\\u0f3c\\u169b\\u2045\\u207d\\u208d\\u2329\\u2768' +
@@ -24,16 +25,130 @@ export const punctuation_chars = {
 }
 
 
-export function newReporter({sourcePath}, settings) {
-    return new class {
-	debug(msg) {
-	    console.log(`debug: ${msg}`);
+export class Reporter {
+    constructor(source, reportLevel, haltLevel, stream, debug, encoding,
+	       errorHandler='backslashreplace') {
+	this.DEBUG_LEVEL = 0
+	this.INFO_LEVEL = 1
+	this.WARNING_LEVEL = 2
+	this.ERROR_LEVEL = 3
+	this.SEVERE_LEVEL = 4
+	this.source = source
+	this.errorHandler = errorHandler
+	this.debugFlag = debug
+	this.reportLevel = reportLevel
+	this.haltLevel = haltLevel
+	// fixme
+	this.stream = stream
+	this.encoding = encoding; //fixme
+	this.observers = []
+	this.maxLevel = -1
+    }
+
+    setConditions() {
+	throw new Unimp();
+    }
+
+    systemMessage(level, message, children, kwargs) {
+	if(children == undefined) {
+	    children= []
 	}
-	severe(msg) {
-	    console.log(`severe: ${msg}`);
+	if(kwargs === undefined) {
+	    kwargs = {}
 	}
 	
+	if(message instanceof Error) {
+	    message = message.message;
+	}
+
+	const attributes = { ...kwargs };
+	if('base_node' in kwargs) {
+	    const [ source, line ] = getSourceLine(kwargs.base_node);
+	    delete attributes.base_node;
+	    if(source && !attributes.source) {
+		attributes.source = source;
+	    }
+	    if(line && !attributes.line) {
+		attributes.line = line;
+	    }
+	}
+	if(!('source' in attributes)) {
+	    //fixme
+	}
+	const msg = new nodes.system_message(message, children, attributes)
+	if(this.stream) {
+	    this.stream.write(msg.astext() + '\n');
+	}
+	if(this.stream && (level >= this.reportLevel ||
+			   (this.debugFlag && level == this.DEBUG_LEVEL)
+			   || level >= this.haltLevel)) {
+	    this.stream.write(msg.astext() + '\n');
+	}
+	if(level >= this.haltLevel) {
+	    throw new SystemMessage(msg, level);
+	}
+	if(level > this.debugLevel || this.debugFlag) {
+	    this.notifyObservers(msg)
+	}
+	this.maxLevel = Math.max(level, this.maxLevel)
+	return msg
     }
+
+    notifyObservers(message) {
+	this.observers.forEach(o => o(message));
+    }
+
+    attachObserver(observer) {
+	this.observers.push(observer);
+    }
+
+    debug(...args) {
+	if(this.debugFlag) {
+	    return this.systemMessage(this.debugLevel, ...args);
+	}
+    }
+    severe(...args) {
+	return this.systemMessage(this.SEVERE_LEVEL, ...args);
+    }
+}
+
+function _getCallerFile() {
+    var originalFunc = Error.prepareStackTrace;
+
+    	let callerfile;
+		let callerlineno;
+    try {
+        var err = new Error();
+
+        Error.prepareStackTrace = function (err, stack) { return stack; };
+
+	const x = err.stack.shift();
+ 	const currentfile = x.getFileName();
+	const currentlineno = x.getLineNumber();
+//	process.stderr.write(`${currentfile} ${currentlineno}\n`);
+
+        while (err.stack.length) {
+	const x2 = err.stack.shift();
+        callerfile = x2.getFileName();
+	callerlineno = x2.getLineNumber();
+
+            if(currentfile !== callerfile) break;
+            }
+    } catch (e) {
+        console.log(e);
+    }
+
+    Error.prepareStackTrace = originalFunc; 
+
+    return [callerfile, callerlineno];
+}
+
+export function newReporter({sourcePath}, settings) {
+    return new Reporter(sourcePath, settings.reportLevel,
+			settings.haltLevel,
+			settings.warningStream, settings.debug,
+			settings.error_encoding,
+			settings.error_encoding_error_handler)
 }
 
 

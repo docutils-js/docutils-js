@@ -1,10 +1,10 @@
 import readers from './Readers'
 import writers from './Writers'
-import {OptionParser} from './FrontEnd'
-import {Source} from './Sources';
+import { OptionParser } from './FrontEnd'
+import { Source } from './Sources';
 import { FileInput, FileOutput } from './io';
 
-class Publisher {
+export class Publisher {
     constructor(args) {
 	let { reader, parser, writer, source, sourceClass, destination,
 		destinationClass, settings }  = args;
@@ -137,6 +137,7 @@ class Publisher {
 
     /* This doesnt seem to return anything ? */
     publish(args, cb) {
+	console.log(`publish`)
 	const {argv, usage, description, settingsSpec, settingsOverrides, configSection, enableExitStatus } = args;
 	let exit = undefined;
 	try {
@@ -164,7 +165,6 @@ class Publisher {
 		    const output =
 			  this.writer.write(this.document, this.destination)
 		    this.writer.assembleParts();
-		    console.log('derp here');
 		    cb(output);
 		}).bind(this));
 	} catch(error) {

@@ -178,7 +178,7 @@ export class StateMachine {
 	
 	this.line = this.inputLines[this.lineOffset];
 	this.notifyObservers()
-	console.log(`line is "${this.line}"`);
+//	console.log(`line is "${this.line}"`);
 	return this.line;
     }
 
@@ -317,10 +317,10 @@ export class StateMachine {
 //	    console.log(`checkLine: ${name} ${pattern} ${nextState}`);
 	    const result = pattern.exec(this.line);
 	    if(result) {
-		console.log(`pattern match for ${name}`);
+//		console.log(`pattern match for ${name}`);
 		const r = method({ pattern, result, input: this.line }, context, nextState);
-		console.log(`return is >>> `);
-		console.log(r);
+//		console.log(`return is >>> `);
+//		console.log(r);
 		return r;
 	    }
 	}

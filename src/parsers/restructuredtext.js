@@ -25,8 +25,6 @@ export class Parser extends BaseParser {
     
     parse(inputstring, document) {
 	//	throw new Error("go awy");
-	const i = inputstring.replace(/\r?\n/g, ' / ')
-//	console.log(`in parse with ${i}`);
 	if(!inputstring) {
 	    throw new Error("need input for rst parser");
 	}

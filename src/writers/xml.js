@@ -1,4 +1,4 @@
-import { Writer as BaseWriter}from '../Writers'
+import BaseWriter from '../Writer'
 import{ GenericNodeVisitor}from '../nodes';
 import * as docutils from '../index';
 import * as nodes from '../nodes';
