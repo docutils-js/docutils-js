@@ -1,5 +1,25 @@
 import { Inliner } from './States'
 import { newDocument, newReporter } from '../../utils';
+import { Element }  from '../../nodes';
+
+function isIterable(obj) {
+  // checks for null and undefined
+  if (obj == null) {
+    return false;
+  }
+  return typeof obj[Symbol.iterator] === 'function';
+}
+
+function dumpNodes(nodes) {
+    for(let node in nodes) {
+	if(Array.isArray(node)) {
+	    dumpNodes(node);
+	    continue;
+	}
+	console.log(node.tagname);
+	dumpNodes(nodes.children);
+    }
+}
 
 test('inliner 1', () => {
     const inliner = new Inliner();
@@ -30,5 +50,25 @@ test('inliner 2', () => {
 		   
     const result = inliner.parse('I like *TV*.', {  lineno: 1, memo, parent: document });
     const [ nodes] = result;
-    console.log(nodes);
+    if(isIterable(nodes)) {
+	console.log('is iterable');
+	nodes.forEach((e, i) => {
+	    if(typeof e === 'object' && e instanceof Element) {
+		console.log(e.tagname);
+	    } else if(Array.isArray(e)) {
+		e.forEach((e2, i2) => {
+		    if(e2 instanceof Element) {
+			console.log(e.tagname);
+		    } else {
+			console.log(`    ${i2}: ${e2}`);
+		    }
+		    
+		})
+	    } else {
+		console.log(`${i}: ${e}`);
+	    }
+	});
+
+    }
+
 })

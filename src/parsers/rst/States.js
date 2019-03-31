@@ -77,8 +77,9 @@ function buildRegexp(definition, compile=true) {
 }
 export class Inliner {
     constructor() {
-	this.dispatch = {'*': this.emphasis.bind(this) };
-/*                    '**': this.strong.bind(this)
+	this.dispatch = {'*': this.emphasis.bind(this),
+			 '**': this.strong.bind(this) };
+	/*
                     '`': this.interpreted_or_phrase_ref.bind(this)
                     '``': this.literal.bind(this)
                     '_`': this.inline_internal_target.bind(this)
@@ -97,7 +98,12 @@ export class Inliner {
     emphasis(match, lineno) {
         const [ before, inlines, remaining, sysmessages, endstring ] = this.inline_obj( match, lineno, this.patterns.emphasis, nodes.emphasis )
         return [before, inlines, remaining, sysmessages]
-    }
+   }
+
+strong(match, lineno) {
+        const [ before, inlines, remaining, sysmessages, endstring ] = this.inline_obj( match, lineno, this.patterns.strong, nodes.strong )
+        return [before, inlines, remaining, sysmessages]
+   }
 
     quoted_start(match) {
 	return false; //fixme
@@ -116,6 +122,10 @@ export class Inliner {
 	console.log(match);
         const string = match.match.input
         const matchstart = string.indexOf(match.groups.start);
+	if(matchstart == -1) {
+	    throw new Error("");
+	}
+	
         const matchend = matchstart + match.groups.start.length;
 	console.log(`${matchstart} ${matchend}`);
         if(this.quoted_start(match)) {
@@ -128,13 +138,14 @@ export class Inliner {
             const _text = endmatch.input.substring(0, endmatch.index);
             text = _text;//unescape(_text, restore_backslashes)
 	    // this may not work for all situations
-            const textend = matchend + endmatch[0].length;
+            const textend = matchend + endmatch.index + endmatch[0].length;
             rawsource = string.substring(matchstart, textend);////unescape(string[matchstart:textend], True)
             const node = new nodeclass(rawsource, text)
             node.children[0].rawsource = _text;//fixme unescape(_text, true)
             return [string.substr(0, matchstart), [node],
                     string.substr(textend), [], endmatch[1]]
 	}
+        throw new Error("fix me");
         text = ''//unescape(string[matchstart:matchend], true)
         rawsource = ''//unescape(string[matchstart:matchend], true)
         const prb = ''//this.problematic(text, rawsource, msg)
@@ -244,14 +255,18 @@ export class Inliner {
 		    rr[x] = match[index];
 		});
 		const method = this.dispatch[rr.start];
-		const [ before, inlines, remaining, sysmessages ]  =
+		if(typeof method !== 'function') {
+		    throw new Error(`Invalid dispatch ${rr.start}`)
+		}
+		let before, inlines, sysmessages;
+		[ before, inlines, remaining, sysmessages ]  =
 		      method({ match, groups: rr}, lineno)
                 unprocessed.push(before)
 //                messages.add(sysmessages)
                 if(inlines) {
-                    processed.push(this.implicit_inline(unprocessed.join(''),
+                    processed.push(...this.implicit_inline(unprocessed.join(''),
                                                        lineno))
-                    processed.push(inlines)
+                    processed.push(...inlines)
                     unprocessed = []
 		}
 	    } else {

@@ -197,7 +197,7 @@ export class Element extends Node {
 
     setupChild(child) {
 	if(!(child instanceof Node)) {
-	    throw new InvalidArgumentsError("Expecting node instance")
+	    throw new InvalidArgumentsError("Expecting node instance ${child}")
 	}
 	
 	if(!child) {
@@ -470,6 +470,7 @@ export class paragraph extends TextElement  { } // General
 export class bullet_list extends Element { } // Sequential
 export class list_item extends Element { }
 export class emphasis extends TextElement {} // Inline
+export class strong extends TextElement {} // Inline
 
 export default {
     document,
