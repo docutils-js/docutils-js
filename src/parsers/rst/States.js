@@ -1,4 +1,6 @@
-import { StateMachineWS, StateWS } from '../../StateMachine';
+import * as statemachine from '../../StateMachine';
+const StateMachineWS = statemachine.StateMachineWS;
+const StateWS = statemachine.StateWS;
 import * as languages from '../../languages'
 import * as nodes from '../../nodes';
 import { InvalidArgumentsError, UnimplementedError as Unimp } from '../../Exceptions'
@@ -560,7 +562,7 @@ class Body extends RSTState {
 	const pats = {}
 	pats['nonalphanum7bit'] = '[!-/:-@[-`{-~]'
 
-	this.initialTransitions = [ 'bullet', 'text', 'line']
+	this.initialTransitions = [ 'bullet', 'line', 'text']
 	
 /*          'enumerator',
           'field_marker',
@@ -639,7 +641,7 @@ class Body extends RSTState {
         return [ listitem, blank_finish ]
     }
 
-    line(match, context, matchState) {
+    line(match, context, nextState) {
         if(this.stateMachine.matchTitles) {
             return [[match.input], 'Line', []]
         } else if(match.match.input.trim() == '::') {
@@ -663,7 +665,7 @@ class Body extends RSTState {
     }
     
 
-    text(match, context, matchState) {
+    text(match, context, nextState) {
 	if(match.input === undefined) {
 	    throw new Error("");
 	}
@@ -673,8 +675,9 @@ class Body extends RSTState {
 }
 
 export class Text extends RSTState {
-    init() {
-	this.patterns = {'underline': Body.patterns['lne'],
+    _init() {
+	super._init();
+	this.patterns = {'underline': '([!-/:-@[-\`{-~])\\1* *$',
 			 'text': ''}
 	this.initialTransitions = [['underline', 'Body'], ['text', 'Body']];
     }
@@ -695,25 +698,55 @@ export class Text extends RSTState {
 	return []
     }
 	    
-    indent(match, context, matchState) {
+    indent(match, context, nextState) {
 	throw new Unimp();
     }
-    underline(match, context, matchState) {
+    underline(match, context, nextState) {
 	throw new Unimp();
     }
-    text(match, context, matchState) {
+    text(match, context, nextState) {
+        const startline = this.stateMachine.absLineNumber() - 1
+        let msg
+	let block
+        try {
+            block = this.stateMachine.getTextBlock(undefined, true);
+	} catch(error) {
+	    if(error instanceof statemachine.UnexpectedIndentationError) {
+		let src, srcline;
+		[ block, src ,srcline ] = error.args;
+		msg = this.reporter.error('Unexpected indentation.',
+					  { source: src, line: srcline });
+	    } else {
+		throw error;
+	    }
+	}
+        const lines = [ context, ...(block ? block : [])]
+        const [ pelems, literalnext ] = this.paragraph(lines, startline)
+        this.parent.add( ...pelems)
+        //fixme this.parent.add(msg)
+        if(literalnext) {
+            try {
+                self.stateMachine.nextLine()
+	    } catch(error) {
+		if(error instanceof EOFError) {
+		} else {
+		    throw error;
+		}
+	    }
+            this.parent.append(this.literal_block())
+	}
+        return [[], nextState, []]
+    }
+    literal_block(match, context, nextState) {
 	throw new Unimp();
     }
-    literal_block(match, context, matchState) {
+    quoted_literal_block(match, context, nextState) {
 	throw new Unimp();
     }
-    quoted_literal_block(match, context, matchState) {
+    definition_list_item(match, context, nextState) {
 	throw new Unimp();
     }
-    definition_list_item(match, context, matchState) {
-	throw new Unimp();
-    }
-    term(match, context, matchState) {
+    term(match, context, nextState) {
 	throw new Unimp();
     }
 }

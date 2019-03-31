@@ -4,6 +4,8 @@ import { EOFError, InvalidArgumentsError, UnimplementedError as Unimp } from './
 
 export class TransitionCorrection extends Error {
 }
+export class UnexpectedIndentationError extends Error {
+}
 export class StateCorrection extends Error {
 }
 
@@ -36,7 +38,9 @@ export class StateMachine {
 	    throw new InvalidArgumentsError("stateClasses");
 	}
 	this._init();
-	debug = true;
+	if(!debug) {
+	    debug = false;
+	}
 	this.inputLines = undefined;
 	this.inputOffset = 0;
 	this.line = undefined;
@@ -51,6 +55,7 @@ export class StateMachine {
     }
 
     _init() {
+	// ??
     }
     
     unlink() {
@@ -58,6 +63,7 @@ export class StateMachine {
 	this.states = undefined;
     }
 
+    /* Faithful to python implementation. */
     run({ inputLines, inputOffset, context, inputSource, initialState}) {
 	/*
         Run the state machine on `input_lines`. Return results (a list).
@@ -81,21 +87,12 @@ export class StateMachine {
         - `initial_state`: name of initial state.
 	*/
 	this.runtimeInit();
-	//if isinstance(input_lines, StringList):
-	//self.input_lines = input_lines
-//	if(Array.isArray(inputLines)) {
-//	    console.log('inputLines is an array');
-//	}
-	    
-	//else:
 	if(inputLines instanceof StringList) {
-//	    this.inputLines = inputLines.data;
 	    this.inputLines = inputLines;
 //	    console.log(inputLines);
 	} else if (inputLines == null ) {
 	    throw new InvalidArgumentsError("inputLines should not be null or undefined");
 	} else {
-	    //	    this.inputLines = inputLines;
 	    if(!isIterable(inputLines)) {
 		inputLines = [inputLines]
 	    }
@@ -103,23 +100,37 @@ export class StateMachine {
 //	    console.log(this.inputLines);
 	}
 	this.lineOffset = -1;
-	
 	this.currentState = initialState || this.initialState;
 	if(!this.currentState) {
 	    console.log('No current state');
 	}
+	/*if self.debug:
+            print >>self._stderr, (
+                u'\nStateMachine.run: input_lines (line_offset=%s):\n| %s'
+                % (self.line_offset, u'\n| '.join(self.input_lines)))*/
 	let transitions = undefined;
 	const results = [];
 	let state = this.getState();
 	let nextState;
 	let result
-	try {
+	try {/*
+            if self.debug:
+                print >>self._stderr, '\nStateMachine.run: bof transition'
+	     */
 	    [ context, result ] = state.bof(context);
 	    results.push(result);
 	    while(true) {
 		try {
 		    try {
 			this.nextLine();
+/*                        if self.debug:
+                            source, offset = self.input_lines.info(
+                                self.line_offset)
+                            print >>self._stderr, (
+                                u'\nStateMachine.run: line (source=%r, '
+                                u'offset=%r):\n| %s'
+                                % (source, offset, self.line))
+*/
 			const r = this.checkLine(context, state, transitions);
 			[ context, nextState, result ] = r;
 			if(!isIterable(result)) {
@@ -165,6 +176,7 @@ export class StateMachine {
 			throw error;
 		    }
 		}
+		// transitions = undefined /* we need this somehow, its part of a try, except, else */
 		state=this.getState(nextState)
 	    }
 	}
@@ -323,11 +335,25 @@ export class StateMachine {
     }
 
     insertInput(inputLines, source) {
+	
 	throw new Unimp();
     }
 
-    getTextBlock() {
-	throw new Unimp();
+    getTextBlock(flushLeft = false) {
+	let block;
+        try {
+            block = this.inputLines.getTextBlock(self.line_offset,
+                                                 flushLeft)
+            this.nextLine(block.length - 1)
+            return block
+	}
+	catch(error) {
+	    if(error instanceof UnexpectedIndentationError) {
+		block = err.args[0]
+		this.nextLine(block.length - 1) // advance to last line of block
+	    }
+	    throw error;
+	}
     }
     checkLine(context, state, transitions) {
 //	console.log(`checking line ${this.line}`);
@@ -338,7 +364,8 @@ export class StateMachine {
 //	if(transitions.length === 0) {
 //	    throw new Error("no transitions");
 //	}
-			   
+
+	console.log(transitions);
 	for(let name of transitions) {
 	    const [ pattern, method, nextState ] = state.transitions[name];
 	    //	    console.log(method);
@@ -465,9 +492,11 @@ export class State {
     }
 
     addTransition(name, transition) {
+	throw new Unimp();
     }
 
     removeTransition(name) {
+	throw new Unimp();
     }
 
     makeTransition(name, nextState) {
@@ -480,7 +509,7 @@ export class State {
 
 	let pattern = this.patterns[name];
 	if(!(pattern instanceof RegExp)) {
-	    pattern = new RegExp('^' + pattern, 'y');
+	    pattern = new RegExp('^' + pattern);
 	}
 	if(typeof(this[name]) !== 'function') {
 	    throw new Error(`cant find method ${name} on ${this.constructor.name}`);
@@ -508,16 +537,18 @@ export class State {
 		names.push(namestate);
 	    } else {
 		transitions[namestate[0]] = this.makeTransition(...namestate);
-	    }
+                names.push(namestate[0]);
+            }
 	}
 	return [names, transitions]
     }
 
     noMatch(context, transitions) {
+	throw new Unimp();
     }
 
     bof(context) {
-
+	throw new Unimp();
     }
     eof(context) {
 	return [];
@@ -707,7 +738,21 @@ export class StringList extends ViewList {
 	}
     }
     getTextBlock(start, flushLeft) {
-	throw new UnimplementedException("getTextBlock");
+        let end = start
+        let last = this.length;
+        while(end < last) {
+            const line = this[end]
+            if(!line.trip()) {
+                break
+	    }
+            if(flushLeft && (line.substring(0, 1) === ' ')) {
+                const [source, offset] = this.info(end)
+                throw new UnexpectedIndentationError(this.slice(start, end),
+						     source, offset + 1)
+	    }
+	    end = end + 1
+	}
+	return this.slice(start, end)
     }
     getIndented({start, untilBlank, stripIndent, blockIndent, firstIndent}) {
     	if(start == null) {

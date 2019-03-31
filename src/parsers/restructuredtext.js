@@ -24,7 +24,6 @@ export class Parser extends BaseParser {
     }
     
     parse(inputstring, document) {
-	//	throw new Error("go awy");
 	if(!inputstring) {
 	    throw new Error("need input for rst parser");
 	}
@@ -37,7 +36,7 @@ export class Parser extends BaseParser {
 	this.stateMachine = new states.RSTStateMachine({
 	    stateClasses: this.stateClasses,
 	    initialState: this.initialState,
-	    debug: true});//document.reporter.debugFlag})
+	    debug: document.reporter.debugFlag})
 	const inputLines = statemachine.string2lines(
 	    inputstring, { tabWidth: document.settings.tabWidth,
 			   convertWhitespace: true });

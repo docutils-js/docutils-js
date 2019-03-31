@@ -3,8 +3,8 @@ import { newDocument } from '../utils'
 
 test('1', () => {
     const p = new Parser({});
-    p.parse('poop', newDocument({sourcePath: '' }, {}));
-    
+    const document = newDocument({sourcePath: '' }, {})
+    p.parse('123\n', document);
 });
 
     
