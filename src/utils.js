@@ -1,6 +1,13 @@
 import * as nodes from './nodes';
 import { InvalidArgumentsError, SystemMessage, UnimplementedError as Unimp } from './Exceptions'
 
+function isIterable(obj) {
+  // checks for null and undefined
+  if (obj == null) {
+    return false;
+  }
+  return typeof obj[Symbol.iterator] === 'function';
+}
 export const punctuation_chars = {
     openers: '"\\\'(<\\\\[{\\u0f3a\\u0f3c\\u169b\\u2045\\u207d\\u208d\\u2329\\u2768' +
            '\\u276a\\u276c\\u276e\\u2770\\u2772\\u2774\\u27c5\\u27e6\\u27e8\\u27ea' +
@@ -56,6 +63,9 @@ export class Reporter {
 	if(children == undefined) {
 	    children= []
 	}
+	if(!isIterable(children)) {
+	    throw new Error("Children is not iterable");
+	}
 	if(kwargs === undefined) {
 	    kwargs = {}
 	}
@@ -109,6 +119,15 @@ export class Reporter {
 	if(this.debugFlag) {
 	    return this.systemMessage(this.debugLevel, ...args);
 	}
+    }
+    info(...args) {
+	return this.systemMessage(this.INFO_LEVEL, ...args);
+    }
+    warning(...args) {
+	return this.systemMessage(this.WARNING_LEVEL, ...args);
+    }
+    error(...args) {
+	return this.systemMessage(this.ERROR_LEVEL, ...args);
     }
     severe(...args) {
 	return this.systemMessage(this.SEVERE_LEVEL, ...args);

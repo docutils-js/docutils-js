@@ -702,7 +702,17 @@ export class Text extends RSTState {
 	throw new Unimp();
     }
     underline(match, context, nextState) {
-	throw new Unimp();
+        const overline = context[0]
+        const blocktext = overline + '\n' + this.stateMachine.line
+        const lineno = this.stateMachine.absLineNumber() - 1
+//        if len(overline.rstrip()) < 4:
+//            self.short_overline(context, blocktext, lineno, 1)
+        const msg = this.reporter.error(
+              'Invalid section title or transition marker.',
+            [new nodes.literal_block(blocktext, blocktext)],
+            { line: lineno })
+        self.parent.add(msg)
+        return [[], 'Body', []]
     }
     text(match, context, nextState) {
         const startline = this.stateMachine.absLineNumber() - 1

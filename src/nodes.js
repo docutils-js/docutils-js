@@ -476,11 +476,19 @@ export class document extends Element {
     }
 }
 
+class FixedTextElement extends TextElement {
+/*    def __init__(self, rawsource='', text='', *children, **attributes):
+        TextElement.__init__(self, rawsource, text, *children, **attributes)
+        self.attributes['xml:space'] = 'preserve'
+*/
+}
+
 export class paragraph extends TextElement  { } // General
 export class bullet_list extends Element { } // Sequential
 export class list_item extends Element { }
 export class emphasis extends TextElement {} // Inline
 export class strong extends TextElement {} // Inline
+export class literal_block extends FixedTextElement {}
 export class system_message extends Element {
     constructor(message, children, attributes) {
 	super(attributes.rawsource || '', message ? [new paragraph('', message), ...children] : children, attributes);
