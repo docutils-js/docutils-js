@@ -77,10 +77,61 @@ function buildRegexp(definition, compile=true) {
 }
 export class Inliner {
     constructor() {
+	this.dispatch = {'*': this.emphasis.bind(this) };
+/*                    '**': this.strong.bind(this)
+                    '`': this.interpreted_or_phrase_ref.bind(this)
+                    '``': this.literal.bind(this)
+                    '_`': this.inline_internal_target.bind(this)
+                    ']_': this.footnote_reference.bind(this)
+                    '|': this.substitution_reference.bind(this)
+                    '_': this.reference.bind(this)
+                    '__': this.anonymous_reference.bind(this)}
+*/	
+	
 	this.implicitDispatch = []
 	this.non_whitespace_after = ''
     }
+
+    emphasis(match, lineno) {
+        const [ before, inlines, remaining, sysmessages, endstring ] = this.inline_obj( match, lineno, this.patterns.emphasis, nodes.emphasis )
+        return [before, inlines, remaining, sysmessages]
+    }
+
+    quoted_start(match) {
+	return false;
+    }
     
+    inline_obj( match, lineno, end_pattern, nodeclass,
+                restore_backslashes=false) {
+	if(!(end_pattern instanceof RegExp)) {
+	    throw new Error("")
+	}
+	
+	console.log(match);
+        const string = match.match.input
+        const matchstart = string.indexOf(match.groups.start);
+        const matchend = matchstart + match.groups.start.length;
+        if(this.quoted_start(match)) {
+            return [string.substring(0, matchend), [], string.substring(matchend), [], '']
+	}
+        const endmatch = end_pattern.exec(string.substring(matchend));
+	let text, rawsource;
+        if(endmatch && endmatch.start(1)) {  // 1 or more chars
+            const _text = endmatch.string.substring(0, endmatch.start(1));
+            text = _text;//unescape(_text, restore_backslashes)
+            const textend = matchend + endmatch.end(1)
+            rawsource = string.substring(matchstart, textend);////unescape(string[matchstart:textend], True)
+            const node = nodeclass(rawsource, text)
+            node[0].rawsource = unescape(_text, True)
+            return [string.substr(0, matchstart), [node],
+                    string.substr(textend), [], endmatch.group(1)]
+	}
+        text = ''//unescape(string[matchstart:matchend], true)
+        rawsource = ''//unescape(string[matchstart:matchend], true)
+        const prb = ''//this.problematic(text, rawsource, msg)
+        return [];//[string[:matchstart], [prb], string[matchend:], [msg], '']
+    }
+
     initCustomizations(settings) {
 	let startStringPrefix, endStringSuffix
 	let ssn, esn ;
@@ -154,9 +205,9 @@ export class Inliner {
 	this.patterns = {
 	    initial: buildRegexp(parts), // KM
 	    emphasis: new RegExp(this.nonWhitespaceEscapeBefore +
-				 '(\\*)' + endStringSuffix),
+				 '(\\*)' + endStringSuffix, 'g'),
 	    strong: new RegExp(this.nonWhitespaceEscapeBefore +
-			       '(\\*\\*)' + endStringSuffix),
+			       '(\\*\\*)' + endStringSuffix, 'g'),
 //	    interpreted_or_phrase_ref: new RegExp(`${non_unescaped_whitespace_escape_before}(((:${simplename}:)?(__?)?))${endStringSuffix}`)
 	}
     }
@@ -175,14 +226,25 @@ export class Inliner {
 	const unprocessed = []
 	const messages = []
 	while(remaining) {
-	    const match = patternSearch(remaining)
+	    const match = this.patterns.initial[0].exec(remaining)
+	    console.log(match);
 	    if(match) {
 		const rr = {}
+		
 		this.patterns.initial[1].forEach((x, index) => {
 		    rr[x] = match[index];
 		});
-		console.log(rr);
-		break;
+		const method = this.dispatch[rr.start];
+		const [ before, inlines, remaining, sysmessages ]  =
+		      method({ match, groups: rr}, lineno)
+                unprocessed.push(before)
+//                messages.add(sysmessages)
+                if(inlines) {
+                    processed.add(self.implicit_inline(''.join(unprocessed),
+                                                       lineno))
+                    processed.add(inlines)
+                    unprocessed = []
+		}
 	    } else {
 		break;
 	    }
