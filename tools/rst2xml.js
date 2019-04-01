@@ -1,3 +1,5 @@
+#!/usr/bin/node
+
 require("@babel/polyfill")
 
 var path = require('path')
@@ -32,7 +34,7 @@ function _getCallerFile() {
     return [callerfile, callerlineno];
 }
 
-var _Core = require("./lib/Core");
+var _Core = require("../lib/Core");
 
 function log(...args) {
 process.stderr.write(path.relative(__dirname,  _getCallerFile().join(':')) + ": " +args.map(x => typeof x == 'string' ? x : JSON.stringify(x)).join(' ') + "\n");

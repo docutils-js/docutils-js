@@ -13,6 +13,9 @@ function isIterable(obj) {
   return typeof obj[Symbol.iterator] === 'function';
 }
 
+function escapeRegExp(string) {
+  return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
+}
 function buildRegexp(definition, compile=true) {
     const di = (isIterable(definition));
     let [ fakeTuple, name, prefix, suffix, parts ] = definition;
@@ -561,9 +564,9 @@ class Body extends RSTState {
 	
 	const enum_ = { }
 	enum_.formatinfo = {
-	    parens: { prefix: '(', suffix: ')', start: 1, end: 1},
-	    rparen: { prefix: '', suffix: ')', start: 0, end: -1},
-	    period: { prefix: '', suffix: '.', start: 0, end: -1},
+	    parens: { prefix: '\\(', suffix: '\\)', start: 1, end: 1},
+	    rparen: { prefix: '', suffix: '\\)', start: 0, end: -1},
+	    period: { prefix: '', suffix: '\\.', start: 0, end: -1},
 	}
 	enum_.formats = Object.keys(enum_.formatinfo)
 	enum_.sequences = ['arabic', 'loweralpha', 'upperalpha',
@@ -601,9 +604,10 @@ class Body extends RSTState {
 	pats['option'] = ''//r'(%(shortopt)s|%(longopt)s)' % pats
 
 	for(let format of enum_.formats) {
-            pats[format] = ''//'(%s%s%s)' % ( //fixme
-//		[re.escape(enum.formatinfo[format].prefix),
-	    //		 pats['enum'], re.escape(enum.formatinfo[format].suffix)
+            pats[format] = '(' + 
+		[enum_.formatinfo[format].prefix,
+		 pats['enum'],
+		 enum_.formatinfo[format].suffix].join('') + ')'
 	}
 
 	this.patterns = { 'bullet': '[-+*\u2022\u2023\u2043]( +|$)',
@@ -613,7 +617,7 @@ class Body extends RSTState {
 			  'line': `(${pats.nonalphanum7bit})\\1* *$`,
 			  'text': '' ,
 			}
-	console.log(this.patterns);
+	console.log(this.enumerator);
 
 	this.initialTransitions = [ 'bullet', 'enumerator', 'line', 'text']
 /*          'enumerator',
@@ -684,9 +688,9 @@ class Body extends RSTState {
 	}
 	
 	this.parent.add(bulletlist);
-        bulletlist['bullet'] = match.result[0].substring(0, 1)
+        bulletlist.attributes['bullet'] = match.result[0].substring(0, 1)
 
-	let [ i, blankFinish ] = this.list_item(match.pattern.lastIndex) /* -1 ? */
+	let [ i, blankFinish ] = this.list_item(match.pattern.lastIndex + match.result[0].length) /* -1 ? */
 	if(!i) {
 	    throw new Error("no node");
 	}
@@ -911,6 +915,16 @@ export class Line extends SpecializedText {
 }
     
 export class SpecializedBody extends Body{}
-export class BulletList extends Body{}
+export class BulletList extends SpecializedBody {
+    bullet(match, context, nextState) {
+        if(match.result.input[0] !== this.parent.attributes['bullet']) {
+            this.invalidInput()
+	}
+        const [ listitem, blankFinish ] = this.list_item(match.result.index + match.result[0].length)
+        this.parent.add(listitem)
+        this.blankFinish = blankFinish
+        return [[], nextState, []]
+    }
+}
 
 export const stateClasses = [Body, BulletList, Text, Line];

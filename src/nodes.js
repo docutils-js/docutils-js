@@ -273,6 +273,14 @@ export class Element extends Node {
 	}
 	return atts;
     }
+    isNotDefault(key) {
+	return 1;    	
+    }
+	/*if self[key] == [] and key in self.list_attributes:
+	return 0
+	else:
+	return 1*/
+
 }
 
 export class TextElement extends Element {

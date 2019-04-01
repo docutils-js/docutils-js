@@ -342,7 +342,7 @@ export class StateMachine {
     getTextBlock(flushLeft = false) {
 	let block;
         try {
-            block = this.inputLines.getTextBlock(self.line_offset,
+            block = this.inputLines.getTextBlock(this.lineOffset,
                                                  flushLeft)
             this.nextLine(block.length - 1)
             return block
@@ -372,7 +372,7 @@ export class StateMachine {
 	    console.log(`checkLine: ${name} ${pattern} ${nextState}`);
 	    const result = pattern.exec(this.line);
 	    if(result) {
-//		console.log(`pattern match for ${name}`);
+		console.log(`pattern match for ${name}`);
 		const r = method({ pattern, result, input: this.line }, context, nextState);
 //		console.log(`return is >>> `);
 //		console.log(r);
@@ -591,7 +591,7 @@ export class StateMachineWS extends StateMachine {
 	return [ indented, offset, blankFinish ];
     }
 
-    getFirstKnownIndented({indent, untilBlank, stripIndent, stripTo}) {
+    getFirstKnownIndented({indent, untilBlank, stripIndent, stripTop}) {
 	let indented, blankFinish;
 	if(stripIndent === undefined) {
 	    stripIndent = true;
@@ -605,7 +605,7 @@ export class StateMachineWS extends StateMachine {
 	    firstIndent: indent });
 	this.nextLine(indented.length - 1);
 	if(stripTop) {
-	    while(indented.length && !(indented[0].strip())) {
+	    while(indented.length && !(indented[0].trim())) {
 		indented.tripStart();
 		offset = offset + 1;
 	    }
@@ -742,7 +742,7 @@ export class StringList extends ViewList {
         let last = this.length;
         while(end < last) {
             const line = this[end]
-            if(!line.trip()) {
+            if(!line.trim()) {
                 break
 	    }
             if(flushLeft && (line.substring(0, 1) === ' ')) {
