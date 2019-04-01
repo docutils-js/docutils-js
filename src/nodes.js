@@ -1,6 +1,27 @@
 import Transformer from './Transformer';
 import { InvalidArgumentsError} from './Exceptions';
 
+function setup_backlinkable(o) {
+    o.addBackref = (refid) => o.attributes['backrefs'].push(refid);
+}
+function makeId(string) {
+    return string;
+    /*    id = string.lower()
+    if not isinstance(id, str):
+        id = id.decode()
+    id = id.translate(_non_id_translate_digraphs)
+    id = id.translate(_non_id_translate)
+    # get rid of non-ascii characters.
+    # 'ascii' lowercase to prevent problems with turkish locale.
+    id = unicodedata.normalize('NFKD', id).\
+         encode('ascii', 'ignore').decode('ascii')
+    # shrink runs of whitespace and replace by hyphen
+    id = _non_id_chars.sub('-', ' '.join(id.split()))
+    id = _non_id_at_ends.sub('', id)
+    return str(id)
+*/
+}
+
 function isIterable(obj) {
   // checks for null and undefined
   if (obj == null) {
@@ -77,8 +98,12 @@ export class Node {
 	this.document = undefined;
 	this.source = undefined;
 	this.line = undefined;
+	this._init();
     }
 
+    _init() {
+    }
+    
     asdom() {
     }
 
@@ -179,11 +204,29 @@ export class Element extends Node {
 	}
 	this.extend(...children);
 	this.attributes = { }
+	this.listAttributes.forEach(x => {
+	    this.attributes[x] = [];
+	});
+    }
+
+    toString() {
+	if(this.children.length) {
+	    return [this.starttag(), ...this.children.map(c => c.toString()), this.endtag()].join('')
+	} else {
+	    return this.emptytag();
+	}
+    }
+
+    emptytag() {
+        return '<' + [this.tagname, ...Object.items(this.attlist()).map(([n, v]) => `${n}="${v}"`)].join(' ') + '/>';
     }
 
     _init() {
 	super._init();
 	this.childTextSeparator = "\n\n"
+	this.basicAttributes = ['ids', 'classes', 'names', 'dupnames']
+	this.localAttributes = ['backrefs',]
+	this.listAttributes = [...this.basicAttributes, ...this.localAttributes];
     }
     
 
@@ -249,7 +292,7 @@ export class Element extends Node {
 	    }
 	    // list
 	    // string
-	    parts.push(`${name}=${value}`);
+	    parts.push(`${name}="${value}"`);
 	}
 	return `<${parts.join(' ')}>`;
     }
@@ -274,13 +317,12 @@ export class Element extends Node {
 	return atts;
     }
     isNotDefault(key) {
-	return 1;    	
+	if(Array.isArray(this.attributes[key]) && this.attributes[key].length === 0 && this.listAttributes.includes(key)) {
+	   return false;
+	} else {
+	    return true;
+	}
     }
-	/*if self[key] == [] and key in self.list_attributes:
-	return 0
-	else:
-	return 1*/
-
 }
 
 export class TextElement extends Element {
@@ -341,7 +383,7 @@ export class document extends Element {
 
     setId(node, msgNode) {
 	let msg;
-	node.ids.forEach(id => {
+	node.attributes.ids.forEach(id => {
 	    if(this.ids[id] !== node) {
 		msg = self.reporter.severe(`Duplicate ID: "${id}".`);
 		if(msgnode) {
@@ -349,10 +391,10 @@ export class document extends Element {
 		}
 	    }
 	});
-	if(!node.ids){
-	    node.names.foreach(name => {
+	if(!node.attributes.ids){
+	    node.attributes.names.forEach(name => {
 		let id = this.settings.idPrefix + makeId(name);
-		if(id && !self.ids[id]){
+		if(id && !self.attributes.ids[id]){
 		}
 	    });
 	}
@@ -503,10 +545,12 @@ export class bullet_list extends Element { } // Sequential
 export class list_item extends Element { }
 export class emphasis extends TextElement {} // Inline
 export class strong extends TextElement {} // Inline
+export class problematic extends TextElement {} // Inline
 export class literal_block extends FixedTextElement {}
 export class system_message extends Element {
     constructor(message, children, attributes) {
 	super(attributes.rawsource || '', message ? [new paragraph('', message), ...children] : children, attributes);
+	setup_backlinkable(this);
     }
 }
 

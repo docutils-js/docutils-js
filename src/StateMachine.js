@@ -118,7 +118,7 @@ export class StateMachine {
                 print >>self._stderr, '\nStateMachine.run: bof transition'
 	     */
 	    [ context, result ] = state.bof(context);
-	    results.push(result);
+	    results.push(...result);
 	    while(true) {
 		try {
 		    try {
@@ -132,6 +132,9 @@ export class StateMachine {
                                 % (source, offset, self.line))
 */
 			const r = this.checkLine(context, state, transitions);
+			    if(!isIterable(r)) {
+				    throw new Error("Expect iterable result, got: " + r);
+			    }
 			[ context, nextState, result ] = r;
 			if(!isIterable(result)) {
 			    throw new Error("Expect iterable result, got: " + result);
@@ -374,6 +377,10 @@ export class StateMachine {
 	    if(result) {
 		console.log(`pattern match for ${name}`);
 		const r = method({ pattern, result, input: this.line }, context, nextState);
+		if(r === undefined) {
+			throw new Error();
+
+		}
 //		console.log(`return is >>> `);
 //		console.log(r);
 		return r;
@@ -485,7 +492,7 @@ export class State {
 		throw new UnknownTrransitionError(name);
 	    }
 	}).bind(this));
-	this.transitionOrder.push(...names);
+	this.transitionOrder.splice(0, 0, ...names);
 	Object.keys(transitions).forEach( key => {
 	    this.transitions[key] = transitions[key];
 	});
@@ -565,11 +572,11 @@ export class StateMachineWS extends StateMachine {
 	    stripIndent = true;
 	}
 	let offset = this.absLineOffset();
-	let [ indented, indent, blankFinish ] = this.inputLines.getIndented({ lineOffset: this.lineOffset, untilBlan, stripIndent});
+	let [ indented, indent, blankFinish ] = this.inputLines.getIndented({ lineOffset: this.lineOffset, untilBlank, stripIndent});
 	if(indented) {
 	    this.nextLine(indented.length - 1);
 	}
-	while(indented && !(indented[0].trim())) {
+	while(indented.length && !(indented[0].trim())) {
 	    indented.ltrim();
 	    offset = offset + 1;
 	}
@@ -770,7 +777,7 @@ export class StringList extends ViewList {
 	let blankFinish;
 	while(end < last) {
 	    const line = this[end];
-	    if(line && (line[0] != ' '  || (blockIndent != null))) { // FIXME
+	    if(line && (line[0] !== ' '  || (blockIndent != null && line.substring(0, blockIndent).trim()))) {
 		blankFinish = ((end > start) && !this[end - 1].trim());
 		break;
 	    }
@@ -803,7 +810,7 @@ export class StringList extends ViewList {
 	    block.trimLeft(indent, firstIndent != null);
 	}
 	
-	return block.length ? [ block, indent ] : [0, blankFinish]
+	return [ block, indent || 0, blankFinish]
     }
     
     get2dBlock(top, left, bottom, right, stripIndent) {

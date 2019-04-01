@@ -1,2 +1,7 @@
-* Number 1
-* Number 2
+* a bullet point
+
+  - a sub-list using "-"
+
+    + yet another sub-list
+
+  - another item

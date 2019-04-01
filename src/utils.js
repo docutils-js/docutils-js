@@ -59,12 +59,15 @@ export class Reporter {
 	throw new Unimp();
     }
 
+    /* need better system for arguments!! */
     systemMessage(level, message, children, kwargs) {
 	if(children == undefined) {
 	    children= []
 	}
 	if(!isIterable(children)) {
-	    throw new Error("Children is not iterable");
+	    //throw new Error(`Children is not iterable ${children}`);
+	    kwargs = children
+	    children = []
 	}
 	if(kwargs === undefined) {
 	    kwargs = {}

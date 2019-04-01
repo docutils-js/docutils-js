@@ -100,6 +100,14 @@ export class Inliner {
 	this.nonWhitespaceEscapeBefore = '(?<![\\s\\x00])'
     }
 
+    problematic( text, rawsource, message) {
+        const msgid = this.document.setId(message, this.parent)
+        const problematic = new nodes.problematic(rawsource, text, [], {refid: msgid})
+        const prbid = this.document.setId(problematic)
+        message.addBackref(prbid)
+        return problematic
+    }
+
     emphasis(match, lineno) {
         const [ before, inlines, remaining, sysmessages, endstring ] = this.inline_obj( match, lineno, this.patterns.emphasis, nodes.emphasis )
         return [before, inlines, remaining, sysmessages]
@@ -635,9 +643,69 @@ class Body extends RSTState {
     }
 
     indent(match, context, nextState) {
-	/* match is not match!! */
+        const [indented, indent, lineOffset, blankFinish ] =
+              this.stateMachine.getIndented({})
+        const elements = this.block_quote(indented, lineOffset)
+        this.parent.add(elements)
+        if(!blankFinish) {
+            this.parent.add(this.unindentWarning('Block quote'))
+	}
+        return [context, nextState, []]
     }
 
+    block_quote(indented, lineOffset) {
+	const elements = []
+        while(indented.length) {
+            const [blockquote_lines,
+             attribution_lines,
+             attribution_offset,
+             indented,
+             new_line_offset] = this.split_attribution(indented, lineOffset)
+            const blockquote = nodes.block_quote()
+            this.nestedParse(blockquote_lines, lineOffset, blockquote)
+            elements.push(blockquote)
+            if(attribution_lines) { // fixme
+                const [ attribution, messages ] = this.parse_attribution(attribution_lines, attribution_offset)
+                blockquote.add(attribution)
+                elements.add(messages)
+	    }
+            lineOffset = new_line_offset
+            while(indented.length && !indented[0]) {
+                indented = indented.slice(1);
+                lineOffset += 1
+	    }
+	}
+        return elements
+    }
+
+    split_attribution(indented, lineOffset) {
+        let blank
+        let nonblank_seen = false
+        for(let i = 0; i < indented.length; i++) {
+            const line = indented[i].trimRight()
+            if(line) {
+                if(nonblank_seen && blank === i - 1) {
+                    match = this.attribution_pattern.exec(line)
+                    if(match) {
+			const [ attribution_end, indent ] = this.check_attribution(indented, i)
+                        if(attribution_end) {
+                            const a_lines = indented.slice(i, attribution_end)
+                            a_lines.trimLeft(match.index + match[0].length, undefined, 1) // end=1 check fixme
+                            a_lines.trimLeft(indent, 1)
+                            return (indented.slice(undefined, i), a_lines,
+                                    i, indented.slice(attribution_end),
+                                    lineOffset + attribution_end)
+			}
+		    }
+		}
+                nonblank_seen = true
+	    } else {
+                blank = i
+	    }
+	}
+        return [indented, null, null, null, null]
+    }
+    
     enumerator(match, context, nextState) {
         const [ format, sequence, text, ordinal ] = this.parseEnumerator(match)
         if(!this.isEnumeratedListItem(ordinal, sequence, format)) {
@@ -658,10 +726,12 @@ class Body extends RSTState {
                 `Enumerated list start value not ordinal-1: "${text}" (ordinal ${ordinal})`)
             this.parent.add(msg)
 	}
-        const [ listitem, blank_finish ] = this.list_item(match.match.index + match.match[0].length)
+        let listitem, blankFinish;
+        [ listitem, blankFinish ] = this.list_item(match.match.index + match.match[0].length)
         enumlist.add(listitem)
         const offset = this.stateMachine.lineOffset + 1   // next line
-        const [ newlineOffset, blankFinish ] = this.nestedListParse(
+		let newlineOffset;
+        [ newlineOffset, blankFinish ] = this.nestedListParse(
             this.stateMachine.inputLines.slice(offset),
 		{ inputOffset: this.stateMachine.absLineOffset() + 1,
             node: enumlist, initialState: 'EnumeratedList',
@@ -725,7 +795,7 @@ class Body extends RSTState {
 	}
         const listitem = new nodes.list_item(indented.join('\n'))
         if(indented) {
-//	    console.log('nested parse');
+//	    console.log('xnested parse');
             this.nestedParse(indented, { inputOffset: line_offset,
 					 node: listitem })
 	}
@@ -785,7 +855,7 @@ export class Text extends RSTState {
     }
     eof(context) {
 	if(context != null && !isIterable(context) || context.length > 0) {
-	    return this.blank(null, context, null);
+	    this.blank(null, context, null);
 	}
 	return []
     }
@@ -793,19 +863,45 @@ export class Text extends RSTState {
     indent(match, context, nextState) {
 	throw new Unimp();
     }
+
     underline(match, context, nextState) {
-        const overline = context[0]
-        const blocktext = overline + '\n' + this.stateMachine.line
-        const lineno = this.stateMachine.absLineNumber() - 1
-//        if len(overline.rstrip()) < 4:
-//            self.short_overline(context, blocktext, lineno, 1)
-        const msg = this.reporter.error(
-              'Invalid section title or transition marker.',
-            [new nodes.literal_block(blocktext, blocktext)],
-            { line: lineno })
-        self.parent.add(msg)
-        return [[], 'Body', []]
+        const lineno = this.stateMachine.absLineNumber()
+        const title = context[0].trimRight()
+        const underline = match.result.input.trimRight()
+        const source = title + '\n' + underline
+        const messages = []
+        if(column_width(title) > underline.length) {
+            if(underline.length < 4) {
+                if(this.stateMachine.matchTitles) {
+                    const msg = this.reporter.info(
+                        'Possible title underline, too short for the title.\n'+
+                        "Treating it as ordinary text because it's so short.", [], { line: lineno })
+                    this.parent.add(msg)
+                    throw new statemachine.TransitionCorrection('text')
+		}
+	    } else {
+                const blocktext = context[0] + '\n' + this.stateMachine.line
+                const msg = this.reporter.warning('Title underline too short.',
+                    [new nodes.literal_block(blocktext, blocktext)], line=lineno)
+                messages.push(msg)
+	    }
+	}
+        if(!this.stateMachine.matchTitles) {
+            const blocktext = context[0] + '\n' + this.stateMachine.line
+            // We need get_source_and_line() here to report correctly
+            const [ src, srcline ] = this.stateMachine.getSourceAndLine()
+            const msg = self.reporter.severe('Unexpected section title.',
+					     [nodes.literal_block(blocktext, blocktext)], { source: src, line: srcline })
+            this.parent.add(messages)
+            this.parent.add(msg)
+            return [], next_state, []
+	}
+        const style = underline[0]
+        context.splice(0, context.length);
+        this.section(title, source, style, lineno - 1, messages)
+        return [], next_state, []
     }
+    
     text(match, context, nextState) {
         const startline = this.stateMachine.absLineNumber() - 1
         let msg
@@ -928,3 +1024,18 @@ export class BulletList extends SpecializedBody {
 }
 
 export const stateClasses = [Body, BulletList, Text, Line];
+
+/*    underline(match, context, nextState) {
+        const overline = context[0]
+        const blocktext = overline + '\n' + this.stateMachine.line
+        const lineno = this.stateMachine.absLineNumber() - 1
+//        if len(overline.rstrip()) < 4:
+//            self.short_overline(context, blocktext, lineno, 1)
+        const msg = this.reporter.error(
+              'Invalid section title or transition marker.',
+            [new nodes.literal_block(blocktext, blocktext)],
+            { line: lineno })
+        self.parent.add(msg)
+        return [[], 'Body', []]
+    }
+*/
