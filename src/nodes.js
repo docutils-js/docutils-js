@@ -200,8 +200,15 @@ export class Element extends Node {
 	this.children.push(item)
     }
 
-    add(...items) {
-	this.extend(...items);
+    add(item, ...args) {
+	if(args.length !== 0) {
+	    throw new Error("");
+	}
+	if(Array.isArray(item)) {
+	    this.extend(...item);
+	} else {
+	    this.append(item);
+	}
     }
     
 

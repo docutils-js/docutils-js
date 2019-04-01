@@ -24,7 +24,7 @@ test('cmdline', (done) => {
 		       done();
 		   })
 });
-test('1',  () => {
+test.skip('1',  () => {
     const settings = { ...defaultSettings }
     const args = { ...defaultArgs }
 

@@ -520,6 +520,27 @@ class RSTState extends StateWS {
     }
 }
 
+function _loweralpha_to_int()
+{
+}
+
+function _upperalpha_to_int()
+{
+}
+
+function _uppseralpha_to_int()
+{
+}
+
+function _lowerroman_to_int()
+{
+}
+
+function _upperroman_to_int()
+{
+}
+
+
 class Body extends RSTState {
     constructor(args) {
 	super(args);
@@ -536,7 +557,8 @@ class Body extends RSTState {
 
     _init() {
 	super._init();
-	//	this.doubleWidthPadChar =
+//	this.doubleWidthPadChar = tableparser.TableParser.doubleWidthPadChar
+	
 	const enum_ = { }
 	enum_.formatinfo = {
 	    parens: { prefix: '(', suffix: ')', start: 1, end: 1},
@@ -551,19 +573,49 @@ class Body extends RSTState {
                          'upperalpha': '[A-Z]',
                          'lowerroman': '[ivxlcdm]+',
                          'upperroman': '[IVXLCDM]+',}
-	enum_.converters = {}// fixme
+	enum_.converters = {'arabic': parseInt,
+                       'loweralpha': _loweralpha_to_int,
+                       'upperalpha': _upperalpha_to_int,
+                       'lowerroman': _lowerroman_to_int,
+			    'upperroman': _upperroman_to_int }
+	
 	enum_.sequenceregexps = {}
 	for(let sequence of enum_.sequences){
-	    enum_.sequenceregexps[sequence] = new RegExp(enum_.sequencepats[sequence] + '$', 'y')
+	    enum_.sequenceregexps[sequence] = new RegExp(enum_.sequencepats[sequence] + '$')
 	}
-
 	this.enum = enum_;
+
+	this.gridTableTopPat = new RegExp('\\+-[-+]+-\\+ *$')
+	this.simpleTableTopPat = new RegExp('=+( +=+)+ *$')
 	
 	const pats = {}
 	pats['nonalphanum7bit'] = '[!-/:-@[-`{-~]'
+	pats['alpha'] = '[a-zA-Z]'
+	pats['alphanum'] = '[a-zA-Z0-9]'
+	pats['alphanumplus'] = '[a-zA-Z0-9_-]'
+	pats['enum'] = ''//('(%(arabic)s|%(loweralpha)s|%(upperalpha)s|%(lowerroman)s' +'|%(upperroman)s|#)' % enum.sequencepats)
+	pats['optname'] = ''//'%(alphanum)s%(alphanumplus)s*' % pats
+	pats['optarg'] = ''//'(%(alpha)s%(alphanumplus)s*|<[^<>]+>)' % pats
+	pats['shortopt'] = ''//r'(-|\+)%(alphanum)s( ?%(optarg)s)?' % pats
+	pats['longopt'] = ''//r'(--|/)%(optname)s([ =]%(optarg)s)?' % pats
+	pats['option'] = ''//r'(%(shortopt)s|%(longopt)s)' % pats
 
-	this.initialTransitions = [ 'bullet', 'line', 'text']
-	
+	for(let format of enum_.formats) {
+            pats[format] = ''//'(%s%s%s)' % ( //fixme
+//		[re.escape(enum.formatinfo[format].prefix),
+	    //		 pats['enum'], re.escape(enum.formatinfo[format].suffix)
+	}
+
+	this.patterns = { 'bullet': '[-+*\u2022\u2023\u2043]( +|$)',
+			  'enumerator': `(${pats.parens}|${pats.rparen}|${pats.period})( +|$)`,
+			  'grid_table_top': this.gridTableTopPat,
+			  'simple_table_top': this.simpleTableTopPat,
+			  'line': `(${pats.nonalphanum7bit})\\1* *$`,
+			  'text': '' ,
+			}
+	console.log(this.patterns);
+
+	this.initialTransitions = [ 'bullet', 'enumerator', 'line', 'text']
 /*          'enumerator',
           'field_marker',
           'option_marker',
@@ -576,15 +628,50 @@ class Body extends RSTState {
           'line',
             'text'*/
 
-	this.patterns = { 'bullet': '[-+*\u2022\u2023\u2043]( +|$)',
-			  'line': `(${pats.nonalphanum7bit})\\1* *$`,
-			  'text': '' }
     }
 
     indent(match, context, nextState) {
 	/* match is not match!! */
     }
 
+    enumerator(match, context, nextState) {
+        const [ format, sequence, text, ordinal ] = this.parseEnumerator(match)
+        if(!this.isEnumeratedListItem(ordinal, sequence, format)) {
+            throw new statemachine.TransitionCorrection('text')
+	}
+        const enumlist = nodes.enumerated_list()
+        this.parent.add(enumlist)
+        if(sequence === '#') {
+            enumlist.enumtype = 'arabic'
+        } else {
+            enumlist.enumtype = sequence
+	}
+        enumlist['prefix'] = this.enum.formatinfo[format].prefix
+        enumlist['suffix'] = this.enum.formatinfo[format].suffix
+        if(ordinal !== 1) {
+            enumlist['start'] = ordinal
+            const msg = self.reporter.info(
+                `Enumerated list start value not ordinal-1: "${text}" (ordinal ${ordinal})`)
+            this.parent.add(msg)
+	}
+        const [ listitem, blank_finish ] = this.list_item(match.match.index + match.match[0].length)
+        enumlist.add(listitem)
+        const offset = this.stateMachine.lineOffset + 1   // next line
+        const [ newlineOffset, blankFinish ] = this.nestedListParse(
+            this.stateMachine.inputLines.slice(offset),
+		{ inputOffset: this.stateMachine.absLineOffset() + 1,
+            node: enumlist, initialState: 'EnumeratedList',
+            blankFinish,
+            extraSettings: {'lastordinal': ordinal,
+                           'format': format,
+                           'auto': sequence === '#'}})
+	this.gotoLine(newlineOffset)
+	if(!blankFinish) {
+            this.parent.add(this.unindent_warning('Enumerated list'))
+	}
+        return[[], nextState, []]
+    }
+    
     bullet(match, context, nextState)
     {
 //	console.log(`in bullet`);
@@ -642,6 +729,7 @@ class Body extends RSTState {
     }
 
     line(match, context, nextState) {
+	console.log(line);
         if(this.stateMachine.matchTitles) {
             return [[match.input], 'Line', []]
         } else if(match.match.input.trim() == '::') {

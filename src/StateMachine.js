@@ -356,7 +356,7 @@ export class StateMachine {
 	}
     }
     checkLine(context, state, transitions) {
-//	console.log(`checking line ${this.line}`);
+	console.log(`checking line ${this.line}`);
 	if(transitions === undefined) {
 	    transitions = state.transitionOrder;
 	}
@@ -369,7 +369,7 @@ export class StateMachine {
 	for(let name of transitions) {
 	    const [ pattern, method, nextState ] = state.transitions[name];
 	    //	    console.log(method);
-//	    console.log(`checkLine: ${name} ${pattern} ${nextState}`);
+	    console.log(`checkLine: ${name} ${pattern} ${nextState}`);
 	    const result = pattern.exec(this.line);
 	    if(result) {
 //		console.log(`pattern match for ${name}`);
