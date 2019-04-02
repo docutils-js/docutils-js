@@ -22,6 +22,7 @@ export class EOFError extends Error {
 export class InvalidArgumentsError extends Error {
     constructor(message, ...params) {
 	super(...params);
+	this.message = message;
 	if(Error.captureStackTrace) {
 	    Error.captureStackTrace(this, InvalidArgumentsError);
 	}

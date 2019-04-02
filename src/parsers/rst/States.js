@@ -2,7 +2,9 @@ import * as statemachine from '../../StateMachine';
 import * as languages from '../../languages';
 import * as nodes from '../../nodes';
 import { InvalidArgumentsError, UnimplementedError as Unimp } from '../../Exceptions';
-import { punctuation_chars } from '../../utils';
+import { punctuation_chars, column_width } from '../../utils';
+
+const normalize_name = (x) => x;
 
 const { StateMachineWS } = statemachine;
 const { StateWS } = statemachine;
@@ -528,6 +530,73 @@ matchTitles,
         }
     }
 
+    checkSubsection({source, style, lineno}) {
+        const memo = this.memo
+        const title_styles = memo.titleStyles
+        const mylevel = memo.sectionLevel
+	let level = 0;
+	level = title_styles.indexOf(style) + 1
+	if(level == 0) {
+            if(title_styles.length == memo.sectionLevel) { // new subsection
+                title_styles.push(style)
+                return 1
+	    } else {
+                this.parent.add(this.title_inconsistent(source, lineno))
+                return None
+	    }
+	}
+        if(level <= mylevel) {//            // sibling or supersection
+            memo.sectionLevel = level   // bubble up to parent section
+            if(style.length === 2) {
+                memo.sectionBubbleUpKludge = True
+            // back up 2 lines for underline title, 3 for overline title
+		this.stateMachine.previousLine(style.length + 1)
+		throw new EOFError()    // let parent section re-evaluate
+	    }
+	}
+	
+	if(level === mylevel + 1) {        // immediate subsection
+            return 1
+	} else {
+            this.parent.add(this.title_inconsistent(source, lineno))
+            return undefined;
+	}
+    }
+
+    title_inconsistent( sourcetext, lineno)  {
+	const error = this.reporter.severe(
+            'Title level inconsistent:', [new nodes.literal_block('', sourcetext)], { line: lineno });
+        return error
+    }
+
+
+    newSubsection({title, lineno, messages}) {
+        const memo = this.memo
+        const mylevel = memo.sectionLevel
+        memo.sectionLevel += 1
+        const section_node = new nodes.section()
+        this.parent.add(section_node)
+        const [ textnodes, title_messages ] = this.inline_text(title, lineno)
+        const titlenode = new nodes.title(title, '', textnodes)
+        const name = normalize_name(titlenode.astext())
+        section_node.attributes['names'].push(name)
+        section_node.add(titlenode)
+        section_node.add(messages)
+        section_node.add(title_messages)
+        this.document.noteImplicitTarget(section_node, section_node)
+        const offset = this.stateMachine.lineOffset + 1
+        const absoffset = this.stateMachine.absLineOffset() + 1
+        const newabsoffset = this.nestedParse(
+            this.stateMachine.inputLines.slice(offset), {inputOffset: absoffset,
+							 node: section_node, matchTitles: true})
+        this.gotoLine(newabsoffset)
+        if(memo.sectionLevel <= mylevel) {
+            throw new EOFError()
+	}
+	
+            memo.sectionLevel = mylevel
+    }
+
     unindentWarning(nodeName) {
         const lineno = this.stateMachine.absLineNumber() + 1;
         return this.reporter.warning(`${nodeName} ends without a blank line; unexpected unindent.`, { line: lineno });
@@ -884,7 +953,7 @@ blank_finish;
             throw new Error('');
         }
 
-        return [match.input, 'Text', []];
+        return [[match.input], 'Text', []];
     }
 }
 
@@ -935,6 +1004,9 @@ export class Text extends RSTState {
     }
 
     underline(match, context, nextState) {
+	if(!Array.isArray(context)) {
+	    throw new Error("Context should be array");
+	}
         const lineno = this.stateMachine.absLineNumber();
         const title = context[0].trimRight();
         const underline = match.result.input.trimRight();
@@ -968,9 +1040,10 @@ export class Text extends RSTState {
             return [], next_state, [];
         }
         const style = underline[0];
-        context.splice(0, context.length);
-        this.section(title, source, style, lineno - 1, messages);
-        return [], next_state, [];
+	context.length = 0;
+        this.section({title, source, style, lineno: lineno - 1, messages});
+
+        return [[], nextState, []];
     }
 
     text(match, context, nextState) {

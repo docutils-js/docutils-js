@@ -123,6 +123,10 @@ export class StateMachine {
                 print >>self._stderr, '\nStateMachine.run: bof transition'
              */
             [context, result] = state.bof(context);
+	    if(!Array.isArray(context)) {
+		throw new Error('expecting array');
+	    }
+	    console.log(context);
             results.push(...result);
             while (true) {
                 try {
@@ -136,11 +140,19 @@ export class StateMachine {
                                 u'offset=%r):\n| %s'
                                 % (source, offset, self.line))
 */
+			console.log(context);
+			if(!Array.isArray(context)) {
+			    throw new Error("context should be array");
+			}
+
                         const r = this.checkLine(context, state, transitions);
-                            if (!isIterable(r)) {
-                                    throw new Error(`Expect iterable result, got: ${r}`);
-                            }
+                        if (!isIterable(r)) {
+                            throw new Error(`Expect iterable result, got: ${r}`);
+                        }
                         [context, nextState, result] = r;
+			if(!Array.isArray(context)) {
+			    throw new Error("context should be array");
+			}
                         if (!isIterable(result)) {
                             throw new Error(`Expect iterable result, got: ${result}`);
                         }
@@ -362,6 +374,9 @@ src;
     }
 
     checkLine(context, state, transitions) {
+	if(!Array.isArray(context)) {
+	    throw new Error("context should be array");
+	}
         console.log(`checking line ${this.line}`);
         if (transitions === undefined) {
             transitions = state.transitionOrder;
@@ -378,7 +393,7 @@ src;
 //          console.log(`checkLine: ${name} ${pattern} ${nextState}`);
             const result = pattern.exec(this.line);
             if (result) {
-//              console.log(`pattern match for ${name}`);
+              console.log(`pattern match for ${name}`);
                 const r = method({ pattern, result, input: this.line }, context, nextState);
                 if (r === undefined) {
                         throw new Error();

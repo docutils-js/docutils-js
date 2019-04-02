@@ -15,15 +15,20 @@ const defaultSettings = {
 //    debug: true,
 };
 
-test('cmdline', (done) => {
+test('cmdline', () => {
     const description = ('Generates Docutils-native XML from standalone '+
 			     'reStructuredText sources.  ' + defaultDescription)
     
-    publishCmdLine({ argv: ['in.rst'], writerName: 'xml', description },
-		   (...args) => {
-		       done();
-		   })
-    
+    return new Promise((resolve, reject)=>{
+	publishCmdLine({ argv: ['in.rst'], writerName: 'xml', description },
+		       (error) => {
+			   if(error) {
+			       reject(error);
+			       return;
+			   }
+			   resolve();
+		       });
+    });
 });
 test.skip('1',  () => {
     const settings = { ...defaultSettings }
@@ -46,7 +51,7 @@ test.skip('1',  () => {
     });
 })
 
-test.each([//['Title', "Title\n=====\nParagraph."],
+test.each([['Title', "Title\n=====\nParagraph."],
 	   ['Emphasis', "*hello*"],
 	   ['Emphasis surrounded by text', "stuff *hello* things"],
 	   ['Emphasis preceded by text', "stuff *hello*"],

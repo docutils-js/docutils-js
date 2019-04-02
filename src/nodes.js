@@ -257,7 +257,7 @@ export class Element extends Node {
 
     setupChild(child) {
 	if(!(child instanceof Node)) {
-	    throw new InvalidArgumentsError("Expecting node instance ${child}")
+	    throw new InvalidArgumentsError(`Expecting node instance ${child}`)
 	}
 	
 	if(!child) {
@@ -413,7 +413,7 @@ export class document extends Element {
     
     noteImplicitTarget(target, msgnode) {
 	const id = this.setId(target, msgnode);
-	this.setNameIdMap(target, id, msgnode, explicit);
+	this.setNameIdMap(target, id, msgnode);
     }
 
     noteRefName(node) {
@@ -539,6 +539,9 @@ class FixedTextElement extends TextElement {
         self.attributes['xml:space'] = 'preserve'
 */
 }
+
+export class section extends Element { } // Structural
+export class title extends TextElement { } // Titular, Prebib
 
 export class paragraph extends TextElement  { } // General
 export class bullet_list extends Element { } // Sequential
