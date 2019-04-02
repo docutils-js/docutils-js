@@ -1,6 +1,6 @@
 pipeline {
     options { timeout(time: 10, unit: 'MINUTES') }
-    agent { docker {
+    agent {  {
     image 'node:latest'
     args '-v /.cache/yarn'
  } }
@@ -13,7 +13,7 @@ pipeline {
 		sh 'yarn grunt'
 		sh 'node ./tools/rst2xml.js'
 		sh 'mkdir -p build'
-		sh 'tar --exclude node_modules --exclude build --exclude-vcs -zcv . -f build/docutils-js.tar.gz'
+		sh 'tar --exclude core --exclude node_modules --exclude build --exclude-vcs -zcv . -f build/docutils-js.tar.gz'
             }
         }
     }
