@@ -8,6 +8,7 @@ pipeline {
         stage('build') {
             steps {
 	        sh 'yarn'
+		sh 'rm -rf lib'
 		sh 'yarn jest'
 		sh 'yarn grunt'
 		sh 'node ./tools/rst2xml.js'
