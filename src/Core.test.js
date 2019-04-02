@@ -35,6 +35,7 @@ test.skip('cmdline', () => {
 		       });
     });
 });
+
 test.skip('1',  () => {
     const settings = { ...defaultSettings }
     const args = { ...defaultArgs }
@@ -56,7 +57,7 @@ test.skip('1',  () => {
     });
 })
 
-test.each([['Title', "Title\n=====\nParagraph."],
+test.skip.each([['Title', "Title\n=====\nParagraph."],
 //	   ['Random', '* bullet\n* bullet\n\n '],
 //	   ['Random 2', 'Header 1\n========\nText\n\nHeader 2\n-------'],
 //	   ['Random 2', 'Test.\nTest2\nTest3\n-----'],
