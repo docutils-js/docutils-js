@@ -8,7 +8,7 @@ pipeline {
         stage('build') {
             steps {
 	        sh 'yarn'
-		sh 'yarn jest -u'
+		sh 'yarn jest'
 		sh 'yarn grunt'
 		sh 'node ./tools/rst2xml.js'
 		sh 'mkdir -p build'
