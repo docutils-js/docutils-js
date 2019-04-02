@@ -625,7 +625,7 @@ class Body extends RSTState {
 			  'line': `(${pats.nonalphanum7bit})\\1* *$`,
 			  'text': '' ,
 			}
-	console.log(this.enumerator);
+//	console.log(this.enumerator);
 
 	this.initialTransitions = [ 'bullet', 'enumerator', 'line', 'text']
 /*          'enumerator',
@@ -803,7 +803,7 @@ class Body extends RSTState {
     }
 
     line(match, context, nextState) {
-	console.log(line);
+//	console.log(line);
         if(this.stateMachine.matchTitles) {
             return [[match.input], 'Line', []]
         } else if(match.match.input.trim() == '::') {

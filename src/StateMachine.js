@@ -27,16 +27,19 @@ export class StateMachine {
         Initialize a `StateMachine` object; add state objects.
 
        Parameters:
-
+o
         - `state_classes`: a list of `State` (sub)classes.
         - `initial_state`: a string, the class name of the initial state.
         - `debug`: a boolean; produce verbose output if true (nonzero).
 	*/
 
     constructor({ stateClasses, initialState, debug }) {
+	/* Perform some sanity checking on arguments */
 	if(stateClasses == null || stateClasses.length == 0) {
 	    throw new InvalidArgumentsError("stateClasses");
 	}
+	/* Initialize instance junk that we can't do except through
+	   this method. */
 	this._init();
 	if(!debug) {
 	    debug = false;
@@ -372,10 +375,10 @@ export class StateMachine {
 	for(let name of transitions) {
 	    const [ pattern, method, nextState ] = state.transitions[name];
 	    //	    console.log(method);
-	    console.log(`checkLine: ${name} ${pattern} ${nextState}`);
+//	    console.log(`checkLine: ${name} ${pattern} ${nextState}`);
 	    const result = pattern.exec(this.line);
 	    if(result) {
-		console.log(`pattern match for ${name}`);
+//		console.log(`pattern match for ${name}`);
 		const r = method({ pattern, result, input: this.line }, context, nextState);
 		if(r === undefined) {
 			throw new Error();
