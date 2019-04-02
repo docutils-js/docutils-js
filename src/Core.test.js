@@ -15,7 +15,7 @@ const defaultSettings = {
 //    debug: true,
 };
 
-test('cmdline', () => {
+test.skip('cmdline', () => {
     const description = ('Generates Docutils-native XML from standalone '+
 			     'reStructuredText sources.  ' + defaultDescription)
     
@@ -35,7 +35,7 @@ test('cmdline', () => {
 		       });
     });
 });
-test.skip('1',  () => {
+test('1',  () => {
     const settings = { ...defaultSettings }
     const args = { ...defaultArgs }
 
@@ -56,7 +56,7 @@ test.skip('1',  () => {
     });
 })
 
-test.skip.each([['Title', "Title\n=====\nParagraph."],
+test.each([['Title', "Title\n=====\nParagraph."],
 	   ['Random', '* bullet\n* bullet\n\n '],
 	   ['Emphasis', "*hello*"],
 	   ['Emphasis surrounded by text', "stuff *hello* things"],
