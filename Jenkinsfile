@@ -13,12 +13,12 @@ pipeline {
 		sh 'node ./tools/rst2xml.js'
 		sh 'mkdir -p build'
 		sh 'tar --exclude node_modules --exclude build --exclude-vcs -zcv . -f build/docutils-js.tar.gz'
-		junit 'junit.xml'
             }
         }
     }
        post {
       always {
+		junit 'junit.xml'
       archiveArtifacts artifacts: 'build/*.tar.gz', fingerprint: true
       }
       }
