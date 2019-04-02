@@ -35,7 +35,7 @@ test.skip('cmdline', () => {
 		       });
     });
 });
-test.only('1',  () => {
+test.skip('1',  () => {
     const settings = { ...defaultSettings }
     const args = { ...defaultArgs }
 
