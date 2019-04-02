@@ -20,7 +20,8 @@ pipeline {
        post {
       always {
 		junit 'junit.xml'
-		      archiveArtifacts artifacts: ['build/*.tar.gz', '**/__snapshots__/*'], fingerprint: true
+		      archiveArtifacts artifacts: 'build/*.tar.gz', fingerprint: true
+		      archiveArtifacts artifacts: '**/__snapshots__/*', fingerprint: true
       }
       }
 
