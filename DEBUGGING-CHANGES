@@ -1,0 +1,19 @@
+added debugFn to publisher constructor
+in publisher constructor, if its undefined it sets t to console.log (but I had to set this somewhere else, so it doesnt quite seem to work?
+
+in setReader, a new arg is added to the call to ReaderClass (i.e. standalone) to accept debugFn. is this necessary?
+
+in publisher, because we dont have a command line argument parser, I had to force debug to true at the end of processCommandLine
+
+in the test, I seem confused about where to pass my arguments, since
+I've now diplicasted the debug flag but its not clear to what end this
+has been - why I am documenting the changes here.
+I cant pass settings to publishCmdLine because otherwise it skips essential processing in processCommandLine
+
+Reader altered to accept a third structured argument in order to set 'debug' and ''debugFn' on the reader.
+Reader also passes these into Parser
+
+Statemachine constructor takes an additional 'debugFn' arg (already had debug arg)
+it also sets debugFn to console.log if unset
+in restructuredtext.js is where the statemachine is instantiated, so it supplied 'this.debugFn'. debug is supplied from document.reporter.debugFlag, so it makes sense for reporter to be more involved in debugging
+

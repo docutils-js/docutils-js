@@ -650,7 +650,7 @@ function _upperroman_to_int() {
 }
 
 
-class Body extends RSTState {
+export class Body extends RSTState {
     constructor(args) {
         super(args);
         const pats = { };
@@ -1025,7 +1025,7 @@ export class Text extends RSTState {
             } else {
                 const blocktext = `${context[0]}\n${this.stateMachine.line}`;
                 const msg = this.reporter.warning('Title underline too short.',
-                    [new nodes.literal_block(blocktext, blocktext)], line = lineno);
+						  [new nodes.literal_block(blocktext, blocktext)], { line: lineno});
                 messages.push(msg);
             }
         }

@@ -12,7 +12,7 @@ const defaultArgs = {
 };
 
 const defaultSettings = {
-//    debug: true,
+    debug: true,
 };
 
 test.skip('cmdline', () => {
@@ -40,7 +40,7 @@ test('1',  () => {
     const args = { ...defaultArgs }
 
     const { readerName, parserName, writerName } = args;
-    const source = new StringInput({source: "test *em* **bold**"})
+    const source = new StringInput({source: 'Header 1\n========\nText\n\nHeader 2\n-------'})
     const destination = new StringOutput({})
     const pub = new Publisher({source, destination, settings});
     pub.setComponents(readerName, parserName, writerName);
@@ -57,7 +57,16 @@ test('1',  () => {
 })
 
 test.each([['Title', "Title\n=====\nParagraph."],
-	   ['Random', '* bullet\n* bullet\n\n '],
+//	   ['Random', '* bullet\n* bullet\n\n '],
+//	   ['Random 2', 'Header 1\n========\nText\n\nHeader 2\n-------'],
+//	   ['Random 2', 'Test.\nTest2\nTest3\n-----'],
+/*	   ['Random 4', `Test3
+-----
+
+This is a test.
+
+* BUllet list 1
+* The emacs rst editor is weird.`],*/
 	   ['Emphasis', "*hello*"],
 	   ['Emphasis surrounded by text', "stuff *hello* things"],
 	   ['Emphasis preceded by text', "stuff *hello*"],
@@ -70,7 +79,7 @@ test.each([['Title', "Title\n=====\nParagraph."],
 	      const args = { ...defaultArgs }
 	      
 	      const { readerName, parserName, writerName } = args;
-	      console.log(raw);
+//	      console.log(raw);
 	      const source = new StringInput({source: raw});
 	      const destination = new StringOutput({})
 	      const pub = new Publisher({source, destination, settings});
@@ -83,7 +92,7 @@ test.each([['Title', "Title\n=====\nParagraph."],
 			  return;
 		      }
 		      expect(destination.destination).toMatchSnapshot();
-		      console.log(destination.destination);
+//		      console.log(destination.destination);
 		      resolve();
 		  });
 	      });

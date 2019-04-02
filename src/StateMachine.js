@@ -71,9 +71,7 @@ export class StateMachine {
     }
 
     /* Faithful to python implementation. */
-    run({
- inputLines, inputOffset, context, inputSource, initialState,
-}) {
+    run({ inputLines, inputOffset, context, inputSource, initialState}) {
         /*
         Run the state machine on `input_lines`. Return results (a list).
 
@@ -130,7 +128,7 @@ export class StateMachine {
 	    if(!Array.isArray(context)) {
 		throw new Error('expecting array');
 	    }
-	    console.log(context);
+//	    console.log(context);
             results.push(...result);
             while (true) {
                 try {
@@ -144,7 +142,7 @@ export class StateMachine {
                                 u'offset=%r):\n| %s'
                                 % (source, offset, self.line))
 */
-			console.log(context);
+//			console.log(context);
 			if(!Array.isArray(context)) {
 			    throw new Error("context should be array");
 			}
@@ -381,7 +379,10 @@ src;
 	if(!Array.isArray(context)) {
 	    throw new Error("context should be array");
 	}
-        console.log(`checking line ${this.line}`);
+	if(this.debug) {
+            this.debugFn(`\nStateMachine.check_line: state="${state.constructor.name}", transitions=${transitions}.`);
+	}
+	//console.log(`checking line ${this.line}`);
         if (transitions === undefined) {
             transitions = state.transitionOrder;
         }
@@ -390,7 +391,7 @@ src;
 //          throw new Error("no transitions");
 //      }
 
-        console.log(transitions);
+//        console.log(transitions);
         for (const name of transitions) {
             const [pattern, method, nextState] = state.transitions[name];
             //      console.log(method);
@@ -400,7 +401,7 @@ src;
 		if(this.debug) {
 		    this.debugFn(`\nStateMachine.checkLine: Matched transition '"${name}" in state "${state.constructor.name}`);
 		}
-              console.log(`pattern match for ${name}`);
+//              console.log(`pattern match for ${name}`);
                 const r = method({ pattern, result, input: this.line }, context, nextState);
                 if (r === undefined) {
                         throw new Error();
@@ -462,8 +463,8 @@ src;
 export class State {
     constructor(args) {
         const { stateMachine, debug } = args;
-            this._init();
-            this.transitionOrder = [];
+        this._init();
+        this.transitionOrder = [];
         this.transitions = {};
         // this.patterns = {}
         // this.initialTransitions = args.initialTransitions;
@@ -476,14 +477,17 @@ export class State {
 
         this.stateMachine = stateMachine;
         this.debug = debug;
+	
         if (!this.nestedSm) {
             this.nestedSm = this.stateMachine.constructor;
         }
         if (!this.nestedSmKwargs) {
+	    console.log('I am bogus');
+	    throw new Error();
             this.nestedSmKwargs = {
- stateClasses: [this.constructor],
-                                    initialState: this.constructor.name,
-};
+		stateClasses: [this.constructor],
+		initialState: this.constructor.name,
+	    };
         }
     }
 
@@ -659,11 +663,12 @@ stripIndent,
 
 export class StateWS extends State {
     constructor(args) {
-        super({ ...args });
+        super(args);
         if (!this.indentSm) {
             this.indentSm = this.nestedSm;
         }
         if (!this.indentSmKwargs) {
+	    console.log('setting indentSmKwargs');
             this.indentSmKwargs = this.nestedSmKwargs;
         }
         if (!this.knownIndentSm) {
@@ -702,9 +707,16 @@ export class StateWS extends State {
     }
 
     indent(match, context, nextState) {
-        const [indented, indent, lineOffset, BlankFinish] = this.stateMachine.getIndented();
-        const { indentSm } = this;
-        const sm = new indentSm({ debug: this.debug, ...this.indentSmKwargs });
+        const [indented, indent, lineOffset, blankFinish] = this.stateMachine.getIndented({});
+	const IndentSm = this.indentSm;
+	console.log(`instantiating indentsm`);
+	console.log(this.indentSmKwargs);
+        const sm = new IndentSm({ debug: this.debug, ...this.indentSmKwargs });
+	if(!sm.run) {
+	    console.log(Object.keys(sm));
+	    throw Error(`no sm run ${this} ${IndentSm.constructor.name}`);
+	}
+	
         const results = sm.run({ indented, inputOffset: lineOffset });
         return [context, nextState, results];
     }
@@ -804,9 +816,7 @@ export class StringList extends ViewList {
         return this.slice(start, end);
     }
 
-    getIndented({
- start, untilBlank, stripIndent, blockIndent, firstIndent,
-}) {
+    getIndented({ start, untilBlank, stripIndent, blockIndent, firstIndent }) {
         if (start == null) {
                 start = 0;
         }

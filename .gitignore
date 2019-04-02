@@ -1,6 +1,8 @@
 node_modules
 junit.xml
 out
+.\#*
+\#*#
 lib
 *~
 .idea
