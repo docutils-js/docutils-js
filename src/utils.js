@@ -1,6 +1,6 @@
 import * as nodes from './nodes';
 import { InvalidArgumentsError, SystemMessage, UnimplementedError as Unimp } from './Exceptions'
-export { SystemMessge };
+//export { SystemMessge };
 
 function isIterable(obj) {
   // checks for null and undefined
