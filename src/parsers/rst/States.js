@@ -916,7 +916,22 @@ export class Text extends RSTState {
     }
 
     indent(match, context, nextState) {
-        throw new Unimp();
+        /*"""Definition list item."""*/
+        const definitionlist = new nodes.definition_list()
+        const [ definitionlistitem, blank_finish ] = this.definition_list_item(context)
+        definitionlist.add(definitionlistitem)
+        this.parent.add(definitionlist)
+        const offset = this.stateMachine.lineOffset + 1
+        const [ newlineOffset, blankFinish ]  = this.nestedListParse(
+            this.stateMachine.inputLines.slice(offset),
+            { inputOffset: this.stateMachine.absLineOffset() + 1,
+              node: definitionlist, initialState: 'DefinitionList',
+              blankFinish, blankFinishState: 'Definition' });
+        this.gotoLine(newlineOffset)
+        if(!blankFinish)  {
+            this.parent.add(this.unindent_warning('Definition list'))
+	}
+        return[ [], 'Body', []]
     }
 
     underline(match, context, nextState) {
