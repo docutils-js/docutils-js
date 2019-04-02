@@ -15,7 +15,7 @@ class MockStateMachine {
 }
 
 
-test('construct StateMachine', () => {
+test('run StateMachine', () => {
     try
     {
 	//{ stateClasses, initialState, debug, debugFn }
@@ -24,7 +24,8 @@ test('construct StateMachine', () => {
 		super._init();
 		console.log('settig indentSmKwargs');
 		this.indentSmKwargs = { runResult: [] };
-		this.nestedSmKwargs = { runResult: [] }; // I think this needs stateclasses and oter stuff ???
+		// I think this needs stateclasses and ohter stuff ???
+		this.nestedSmKwargs = { runResult: [] }; 
 		this.indentSm = MockStateMachine;
 		this.nestedSm = MockStateMachine;
 	    }
@@ -32,10 +33,13 @@ test('construct StateMachine', () => {
 	const stateClasses = [StateClass]
 	const initialState = 'StateClass'
 	const sot = new StateMachine({stateClasses, initialState});
-	sot.run({ context: [], inputLines: new StringList(["test"]) });
+
+	const r = sot.run({ context: [], inputLines: new StringList(["test"]) });
+	console.log(r);
     } catch(error) {
 	console.log(error.stack);
 	console.log(error.message);
+	throw error;
     }
     
 });
