@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites name="jest tests" tests="16" failures="0" time="2.965">
+  <testsuite name="undefined" errors="0" failures="0" skipped="1" timestamp="2019-04-02T14:10:55" time="1.425" tests="9">
+    <testcase classname=" cmdline" name=" cmdline" time="0.274">
+    </testcase>
+    <testcase classname=" 1" name=" 1" time="0">
+      <skipped/>
+    </testcase>
+    <testcase classname=" Emphasis" name=" Emphasis" time="0.021">
+    </testcase>
+    <testcase classname=" Emphasis surrounded by text" name=" Emphasis surrounded by text" time="0.014">
+    </testcase>
+    <testcase classname=" Emphasis preceded by text" name=" Emphasis preceded by text" time="0.015">
+    </testcase>
+    <testcase classname=" Emphasis followed by text" name=" Emphasis followed by text" time="0.02">
+    </testcase>
+    <testcase classname=" Strong" name=" Strong" time="0.019">
+    </testcase>
+    <testcase classname=" Emphasis and inline" name=" Emphasis and inline" time="0.015">
+    </testcase>
+    <testcase classname=" Inline followed by emphasis" name=" Inline followed by emphasis" time="0.016">
+    </testcase>
+  </testsuite>
+  <testsuite name="undefined" errors="0" failures="0" skipped="0" timestamp="2019-04-02T14:10:56" time="0.117" tests="2">
+    <testcase classname=" inliner 1" name=" inliner 1" time="0.002">
+    </testcase>
+    <testcase classname=" inliner 2" name=" inliner 2" time="0.003">
+    </testcase>
+  </testsuite>
+  <testsuite name="undefined" errors="0" failures="0" skipped="0" timestamp="2019-04-02T14:10:56" time="0.129" tests="1">
+    <testcase classname=" 1" name=" 1" time="0.053">
+    </testcase>
+  </testsuite>
+  <testsuite name="undefined" errors="0" failures="0" skipped="0" timestamp="2019-04-02T14:10:56" time="0.109" tests="1">
+    <testcase classname=" paragraph with text" name=" paragraph with text" time="0.002">
+    </testcase>
+  </testsuite>
+  <testsuite name="undefined" errors="0" failures="0" skipped="0" timestamp="2019-04-02T14:10:56" time="0.096" tests="1">
+    <testcase classname=" 1" name=" 1" time="0.001">
+    </testcase>
+  </testsuite>
+  <testsuite name="undefined" errors="0" failures="0" skipped="0" timestamp="2019-04-02T14:10:56" time="0.078" tests="1">
+    <testcase classname=" io 1" name=" io 1" time="0">
+    </testcase>
+  </testsuite>
+  <testsuite name="undefined" errors="0" failures="0" skipped="1" timestamp="2019-04-02T14:10:57" time="0.096" tests="1">
+    <testcase classname=" construct StateMachine" name=" construct StateMachine" time="0">
+      <skipped/>
+    </testcase>
+  </testsuite>
+</testsuites>
