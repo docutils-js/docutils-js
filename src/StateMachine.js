@@ -581,11 +581,11 @@ export class State {
     }
 
     noMatch(context, transitions) {
-        throw new Unimp();
+	return [context, null, []]
     }
 
     bof(context) {
-        throw new Unimp();
+	return [context, []]
     }
 
     eof(context) {

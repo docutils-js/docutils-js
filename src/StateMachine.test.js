@@ -15,11 +15,24 @@ class MockStateMachine {
 }
 
 
-test.skip('construct StateMachine', () => {
+test('construct StateMachine', () => {
     try
     {
-	const sot = new StateMachine({stateClasses:[]});
-	sot.run(["test"]);
+	//{ stateClasses, initialState, debug, debugFn }
+	const StateClass = class extends StateWS {
+	    _init() {
+		super._init();
+		console.log('settig indentSmKwargs');
+		this.indentSmKwargs = { runResult: [] };
+		this.nestedSmKwargs = { runResult: [] }; // I think this needs stateclasses and oter stuff ???
+		this.indentSm = MockStateMachine;
+		this.nestedSm = MockStateMachine;
+	    }
+	}
+	const stateClasses = [StateClass]
+	const initialState = 'StateClass'
+	const sot = new StateMachine({stateClasses, initialState});
+	sot.run({ context: [], inputLines: new StringList(["test"]) });
     } catch(error) {
 	console.log(error.stack);
 	console.log(error.message);
@@ -65,3 +78,4 @@ test('StateWS indent', () => {
     expect(resultResults).toBe(indentResult);
     //    resultResults is the return value from the indent state machine
 });
+
