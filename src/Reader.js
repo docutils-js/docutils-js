@@ -62,7 +62,7 @@ export default class Reader extends Component {
     parse() {
 	const document = this.newDocument();
 	this.document = document;
-	if(!this.input) {
+	if(this.input === undefined) {
 	    throw new Error("need input, i have " + this.input);
 	}
 	

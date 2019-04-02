@@ -36,12 +36,13 @@ test.skip('cmdline', () => {
     });
 });
 
-test.skip('1',  () => {
+test('1',  () => {
     const settings = { ...defaultSettings }
     const args = { ...defaultArgs }
 
     const { readerName, parserName, writerName } = args;
-    const source = new StringInput({source: 'Header 1\n========\nText\n\nHeader 2\n-------'})
+    const source = new StringInput({source: '* a\n\nnot in the list.'})
+//    const source = new StringInput({source: 'Text 1\nText 2\n\nHeader\n======\n'})
     const destination = new StringOutput({})
     const pub = new Publisher({source, destination, settings});
     pub.setComponents(readerName, parserName, writerName);

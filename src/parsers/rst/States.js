@@ -1,7 +1,7 @@
 import * as statemachine from '../../StateMachine';
 import * as languages from '../../languages';
 import * as nodes from '../../nodes';
-import { InvalidArgumentsError, UnimplementedError as Unimp } from '../../Exceptions';
+import { EOFError, InvalidArgumentsError, UnimplementedError as Unimp } from '../../Exceptions';
 import { punctuation_chars, column_width } from '../../utils';
 
 const normalize_name = (x) => x;
@@ -315,6 +315,9 @@ export class RSTStateMachine extends StateMachineWS {
     run({
  inputLines, document, inputOffset, matchTitles, inliner,
 }) {
+        if(inputOffset === undefined) {
+            inputOffset = 0;
+        }
         if (!document) {
             throw new Error('need document');
         }
@@ -766,9 +769,10 @@ export class Body extends RSTState {
             const [blockquote_lines,
              attribution_lines,
              attribution_offset,
-             indented,
+             outIndented,
              new_line_offset] = this.split_attribution(indented, lineOffset);
             const blockquote = nodes.block_quote();
+	    indented = outIndented;
             this.nestedParse(blockquote_lines, lineOffset, blockquote);
             elements.push(blockquote);
             if (attribution_lines) { // fixme
@@ -901,8 +905,8 @@ initialState: 'BulletList',
             throw new Error('Need indent');
         }
 
-        let indented; let line_offset; let
-blank_finish;
+        let indented; let line_offset; let blank_finish;
+	let outIndent;
         if (this.stateMachine.line.length > indent) {
 //          console.log(`get known indentd`);
             [indented, line_offset, blank_finish] = this.stateMachine.getKnownIndented({ indent });
@@ -1122,17 +1126,17 @@ export class Line extends SpecializedText {
     }
 
     eof(context) {
-        const marker = context[0].trip();
+        const marker = context[0].trim();
         if (this.memo.sectionBubbleUpKludge) {
             this.memo.sectionBubbleUpKludge = false;
         } else if (marker.length < 4) {
             this.stateCorrection(context);
         }
         if (this.eofcheck) {
-            const lineno = self.stateMachine.absLineNumber() - 1;
-            const transition = nodes.transition(context[0]);
+            const lineno = this.stateMachine.absLineNumber() - 1;
+            const transition = new nodes.transition(context[0]);
             transition.line = lineno;
-            this.parent.add(lineno);
+            this.parent.add(transition);
         }
         this.eofcheck = 1;
         return [];
@@ -1155,7 +1159,9 @@ export class Line extends SpecializedText {
     }
 
     stateCorrection(context, lines = 1) {
-        throw new Unimp();
+        this.stateMachine.previousLine(lines)
+        context.length = 0;
+	throw new statemachine.StateCorrection('Body', 'text')
     }
 }
 

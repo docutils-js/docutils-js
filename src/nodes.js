@@ -218,7 +218,7 @@ export class Element extends Node {
     }
 
     emptytag() {
-        return '<' + [this.tagname, ...Object.items(this.attlist()).map(([n, v]) => `${n}="${v}"`)].join(' ') + '/>';
+        return '<' + [this.tagname, ...Object.entries(this.attlist()).map(([n, v]) => `${n}="${v}"`)].join(' ') + '/>';
     }
 
     _init() {
@@ -550,6 +550,7 @@ export class emphasis extends TextElement {} // Inline
 export class strong extends TextElement {} // Inline
 export class problematic extends TextElement {} // Inline
 export class literal_block extends FixedTextElement {}
+export class transition extends Element {} // Structura
 export class system_message extends Element {
     constructor(message, children, attributes) {
 	super(attributes.rawsource || '', message ? [new paragraph('', message), ...children] : children, attributes);

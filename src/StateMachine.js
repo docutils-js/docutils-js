@@ -3,6 +3,14 @@ import ErrorOutput from './ErrorOutput';
 import { EOFError, InvalidArgumentsError, UnimplementedError as Unimp } from './Exceptions';
 
 export class TransitionCorrection extends Error {
+    constructor(...args) {
+	super(...args);
+	this.args = args;
+	if(Error.captureStackTrace) {
+	    Error.captureStackTrace(this, InvalidArgumentsError);
+	}
+    }
+
 }
 export class UnexpectedIndentationError extends Error {
 }
@@ -106,15 +114,15 @@ export class StateMachine {
             this.inputLines = new StringList(inputLines, inputSource);
 //          console.log(this.inputLines);
         }
+	this.inputOffset = inputOffset;
         this.lineOffset = -1;
         this.currentState = initialState || this.initialState;
         if (!this.currentState) {
             console.log('No current state');
         }
-        /* if self.debug:
-            print >>self._stderr, (
-                u'\nStateMachine.run: input_lines (line_offset=%s):\n| %s'
-                % (self.line_offset, u'\n| '.join(self.input_lines))) */
+        if(this.debug) {
+	    this.debugFn(`\nStateMachine.run: input_lines (line_offset=${this.lineOffset}):\n| ` + this.inputLines.join('\n| '));
+	}
         let transitions;
         const results = [];
         let state = this.getState();
@@ -135,8 +143,16 @@ export class StateMachine {
                     try {
                         this.nextLine();
 			if(this.debug) {
-                            const [ source, offset ] = this.inputLines.info(
+			    if(Number.isNaN(this.lineOffset)) {
+				throw new Error();
+			    }
+			    
+			    const rinfo = this.inputLines.info(
                                 this.lineOffset)
+                            if(!isIterable(rinfo)) {
+                                throw new Error();
+                            }
+                            const [ source, offset ] = rinfo
 			    this.debugFn(`\nStateMachine.run: line (source=${source}, offset=${offset}):\n| ${this.line}`);
 			}
 //			console.log(context);
@@ -647,11 +663,9 @@ blankFinish;
         return [indented, offset, blankFinish];
     }
 
-    getFirstKnownIndented({
- indent, untilBlank, stripIndent, stripTop,
-}) {
-        let indented; let
-blankFinish;
+    getFirstKnownIndented({ indent, untilBlank, stripIndent, stripTop, }) {
+        let indented;
+	let blankFinish;
         if (stripIndent === undefined) {
             stripIndent = true;
         }
@@ -668,7 +682,7 @@ stripIndent,
         this.nextLine(indented.length - 1);
         if (stripTop) {
             while (indented.length && !(indented[0].trim())) {
-                indented.tripStart();
+                indented.trimStart();
                 offset += 1;
             }
         }
@@ -770,6 +784,9 @@ export function string2lines(astring, args) {
     return astring.split('\n').map(x => x);
 }
 
+/* Our original class delegates to its array,
+   whereas I'm not sure an Array can be implemented without extending it
+*/
 export class ViewList extends Array {
     constructor(initlist, source, items, parent, parentOffset) {
         super(...initlist);
@@ -815,6 +832,20 @@ export class ViewList extends Array {
 	}
     }
 
+    trimStart(n=1) {
+        if(n > this.length) {
+            //raise IndexError("Size of trim too large; can't trim %s items "
+              //               "from a list of size %s." % (n, len(self.data)))
+        } else if(n < 0) {
+            throw Error('Trim size must be >= 0.')
+	}
+	for(let i = 0; i < n; i++) {
+	    this.shift();
+	}
+        if(this.parent) {
+            this.parentOffset += n
+	}
+    }
 }
 
 export class StringList extends ViewList {
