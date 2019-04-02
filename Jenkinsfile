@@ -11,7 +11,6 @@ pipeline {
 		sh 'rm -rf lib'
 		sh 'yarn jest'
 		sh 'yarn grunt'
-		sh 'node ./tools/rst2xml.js'
 		sh 'mkdir -p build'
 		sh 'tar --exclude core --exclude node_modules --exclude build --exclude-vcs -zcv . -f build/docutils-js.tar.gz'
             }
