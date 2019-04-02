@@ -7,13 +7,17 @@ import { FileInput, FileOutput } from './io';
 export class Publisher {
     constructor(args) {
 	let { reader, parser, writer, source, sourceClass, destination,
-		destinationClass, settings }  = args;
+	      destinationClass, settings, debugFn }  = args;
 	if(!sourceClass) {
 	    sourceClass = FileInput;
 	}
 	if(!destinationClass) {
 	    destinationClass = FileOutput;
 	}
+	if(!debugFn) {
+	    debugFn = console.log;
+	}
+	this.debugFn = debugFn;
 	this.document = null;
 	this.reader = reader;
 	this.parser = parser;
@@ -35,10 +39,9 @@ export class Publisher {
 	this.settings = settings;
     }
 
-    /* Does having a reader help us at all ? */
     setReader(readerName, parser, parserName) {
-	const readerClass = readers.getReaderClass(readerName)
-	this.reader = new readerClass(parser, parserName)
+	const ReaderClass = readers.getReaderClass(readerName)
+	this.reader = new ReaderClass(parser, parserName, { debugFn: this.debugFn.bind(this) })
 	this.parser = this.reader.parser
     }
 
@@ -90,6 +93,7 @@ export class Publisher {
 	    argv = process.argv.slice(2);
 	}
 	this.settings = optionParser.parseArgs(argv);
+	this.settings.debug = true; // force debug true for now
     }
 
     setIO(sourcePath, destinationPath) {

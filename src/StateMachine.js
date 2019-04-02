@@ -33,7 +33,7 @@ export class StateMachine {
         - `debug`: a boolean; produce verbose output if true (nonzero).
         */
 
-    constructor({ stateClasses, initialState, debug }) {
+    constructor({ stateClasses, initialState, debug, debugFn }) {
         /* Perform some sanity checking on arguments */
         if (stateClasses == null || stateClasses.length === 0) {
             throw new InvalidArgumentsError('stateClasses');
@@ -44,6 +44,10 @@ export class StateMachine {
         if (!debug) {
             debug = false;
         }
+	if(!debugFn) {
+	    debugFn = console.log;
+	}
+	this.debugFn = debugFn;
         this.inputLines = undefined;
         this.inputOffset = 0;
         this.line = undefined;
@@ -393,6 +397,9 @@ src;
 //          console.log(`checkLine: ${name} ${pattern} ${nextState}`);
             const result = pattern.exec(this.line);
             if (result) {
+		if(this.debug) {
+		    this.debugFn(`\nStateMachine.checkLine: Matched transition '"${name}" in state "${state.constructor.name}`);
+		}
               console.log(`pattern match for ${name}`);
                 const r = method({ pattern, result, input: this.line }, context, nextState);
                 if (r === undefined) {

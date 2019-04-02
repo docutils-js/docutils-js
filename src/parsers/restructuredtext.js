@@ -36,6 +36,7 @@ export class Parser extends BaseParser {
 	this.stateMachine = new states.RSTStateMachine({
 	    stateClasses: this.stateClasses,
 	    initialState: this.initialState,
+	    debugFn: this.debugFn,
 	    debug: document.reporter.debugFlag})
 	const inputLines = statemachine.string2lines(
 	    inputstring, { tabWidth: document.settings.tabWidth,

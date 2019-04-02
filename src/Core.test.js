@@ -20,7 +20,12 @@ test('cmdline', () => {
 			     'reStructuredText sources.  ' + defaultDescription)
     
     return new Promise((resolve, reject)=>{
-	publishCmdLine({ argv: ['in.rst'], writerName: 'xml', description },
+	publishCmdLine({ debug: true,
+			 debugFn: (msg) => {
+			     console.log(`here ${msg}`);
+			 },
+			 argv: ['in.rst'], writerName: 'xml', description,
+		       },
 		       (error) => {
 			   if(error) {
 			       reject(error);
@@ -51,7 +56,8 @@ test.skip('1',  () => {
     });
 })
 
-test.each([['Title', "Title\n=====\nParagraph."],
+test.skip.each([['Title', "Title\n=====\nParagraph."],
+	   ['Random', '* bullet\n* bullet\n\n '],
 	   ['Emphasis', "*hello*"],
 	   ['Emphasis surrounded by text', "stuff *hello* things"],
 	   ['Emphasis preceded by text', "stuff *hello*"],

@@ -9,11 +9,13 @@ export default class Reader extends Component {
 		 universal.ExportInternals, universal.StripComments ];
     }
 
-    constructor(parser, parserName) {
+    constructor(parser, parserName, args) {
 	super(parser, parserName);
 	this.componentType = 'reader';
 	this.configSection = 'readers';
 	this.parser = parser;
+	this.debugFn = args.debugFn;
+	this.debug = args.debug;
 	if(parser === undefined && parserName) {
 	    this.setParser(parserName);
 	}
@@ -23,7 +25,8 @@ export default class Reader extends Component {
 
     setParser(parserName) {
 	const ParserClass = parsers.getParserClass(parserName).Parser;
-	this.parser = new ParserClass({});
+	this.parser = new ParserClass({debug: this.debug,
+				       debugFn: this.debugFn });
     }
 
     /**
