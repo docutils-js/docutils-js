@@ -12,6 +12,8 @@ module.exports = {
     ecmaVersion: 2018,
     sourceType: 'module',
   },
-  rules: {
+    rules: {
+	"indent": ["off"],
+	"class-methods-use-this": ["off"],
   },
 };
