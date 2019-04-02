@@ -15,26 +15,51 @@ class MockStateMachine {
 }
 
 
-test('run StateMachine', () => {
+class State1 extends StateWS {
+    _init() {
+	super._init();
+	this.indentSmKwargs = { runResult: [] };
+	// I think this needs stateclasses and ohter stuff ???
+	this.nestedSmKwargs = { runResult: [] }; 
+	this.indentSm = MockStateMachine;
+	this.nestedSm = MockStateMachine;
+    }
+}
+
+class State2 extends StateWS {
+    _init() {
+	super._init();
+	this.indentSmKwargs = { runResult: [] };
+	// I think this needs stateclasses and ohter stuff ???
+	this.nestedSmKwargs = { runResult: [] }; 
+	this.indentSm = MockStateMachine;
+	this.nestedSm = MockStateMachine;
+    }
+}
+
+class State3 extends StateWS {
+    _init() {
+	super._init();
+	this.indentSmKwargs = { runResult: [] };
+	// I think this needs stateclasses and ohter stuff ???
+	this.nestedSmKwargs = { runResult: [] }; 
+	this.indentSm = MockStateMachine;
+	this.nestedSm = MockStateMachine;
+    }
+}
+
+function createStateMachine() {
+    const stateClasses = [State1]
+    const initialState = 'State1'
+    return new StateMachine({stateClasses, initialState});
+}
+
+test.each([['test', 'test']])("%s", (name,raw) => {
     try
     {
-	//{ stateClasses, initialState, debug, debugFn }
-	const StateClass = class extends StateWS {
-	    _init() {
-		super._init();
-		console.log('settig indentSmKwargs');
-		this.indentSmKwargs = { runResult: [] };
-		// I think this needs stateclasses and ohter stuff ???
-		this.nestedSmKwargs = { runResult: [] }; 
-		this.indentSm = MockStateMachine;
-		this.nestedSm = MockStateMachine;
-	    }
-	}
-	const stateClasses = [StateClass]
-	const initialState = 'StateClass'
-	const sot = new StateMachine({stateClasses, initialState});
-
-	const r = sot.run({ context: [], inputLines: new StringList(["test"]) });
+	const sot = createStateMachine();
+	const r = sot.run({ context: [],
+			    inputLines: new StringList(["test"]) });
 	console.log(r);
     } catch(error) {
 	console.log(error.stack);
@@ -43,6 +68,7 @@ test('run StateMachine', () => {
     }
     
 });
+
 
 test('StateWS indent', () => {
     const indented = new StringList([]);

@@ -134,14 +134,11 @@ export class StateMachine {
                 try {
                     try {
                         this.nextLine();
-/*                        if self.debug:
-                            source, offset = self.input_lines.info(
-                                self.line_offset)
-                            print >>self._stderr, (
-                                u'\nStateMachine.run: line (source=%r, '
-                                u'offset=%r):\n| %s'
-                                % (source, offset, self.line))
-*/
+			if(this.debug) {
+                            const [ source, offset ] = this.inputLines.info(
+                                this.lineOffset)
+			    this.debugFn(`\nStateMachine.run: line (source=${source}, offset=${offset}):\n| ${this.line}`);
+			}
 //			console.log(context);
 			if(!Array.isArray(context)) {
 			    throw new Error("context should be array");
@@ -449,13 +446,31 @@ src;
     }
 
     notifyObservers() {
-        for (const observer of this.observers) {
-            let info = [];
-            try {
-                 info = this.inputLines.info(this.lineOffset);
-            } catch (err) {
+        let observer;
+        for (let observer of this.observers) {
+            if(observer === undefined) {
+                throw newError("undefined observer");
             }
-            observer(...info);
+	    try
+	    {
+		let info = [];
+		try {
+                    info = this.inputLines.info(this.lineOffset);
+		} catch (err) {
+		}
+		if(info === undefined) {
+                    //throw new Error("undefined info");
+                    continue;
+                }
+		if(!isIterable(info)) {
+                    throw new Error("isIterable");
+
+                }
+		observer(...info);
+	    }
+	    catch(err) {
+		console.log(err.stack);
+	    }
         }
     }
 }
@@ -668,7 +683,6 @@ export class StateWS extends State {
             this.indentSm = this.nestedSm;
         }
         if (!this.indentSmKwargs) {
-	    console.log('setting indentSmKwargs');
             this.indentSmKwargs = this.nestedSmKwargs;
         }
         if (!this.knownIndentSm) {
@@ -789,6 +803,18 @@ export class ViewList extends Array {
         }
         return new this.constructor(initList);
     }
+
+    info(i) {
+	try {
+	    return this.items[i];
+	}
+	catch(error) {
+            if(i === this.items.length) {
+                return [this.items[i - 1][0], None]
+	    }
+	}
+    }
+
 }
 
 export class StringList extends ViewList {
