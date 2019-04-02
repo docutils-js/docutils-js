@@ -46,7 +46,7 @@ test.skip('1',  () => {
     });
 })
 
-test.skip.each([['Title', "Title\n=====\nParagraph."],
+test.each([['Title', "Title\n=====\nParagraph."],
 	   ['Emphasis', "*hello*"],
 	   ['Emphasis surrounded by text', "stuff *hello* things"],
 	   ['Emphasis preceded by text', "stuff *hello*"],
