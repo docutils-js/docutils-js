@@ -14,9 +14,6 @@ export class Publisher {
 	if(!destinationClass) {
 	    destinationClass = FileOutput;
 	}
-	if(!debugFn) {
-	    debugFn = console.log;
-	}
 	this.debugFn = debugFn;
 	this.document = null;
 	this.reader = reader;
@@ -41,7 +38,7 @@ export class Publisher {
 
     setReader(readerName, parser, parserName) {
 	const ReaderClass = readers.getReaderClass(readerName)
-	this.reader = new ReaderClass(parser, parserName, { debugFn: this.debugFn.bind(this) })
+	this.reader = new ReaderClass(parser, parserName, { debug: this.debug, debugFn: this.debugFn })
 	this.parser = this.reader.parser
     }
 

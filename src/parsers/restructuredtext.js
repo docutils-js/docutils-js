@@ -32,7 +32,7 @@ export class Parser extends BaseParser {
 	if(!this.stateClasses) {
 	    throw new Error("need classes")
 	}
-	
+
 	this.stateMachine = new states.RSTStateMachine({
 	    stateClasses: this.stateClasses,
 	    initialState: this.initialState,

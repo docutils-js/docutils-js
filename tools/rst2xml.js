@@ -1,13 +1,13 @@
 #!/usr/bin/node
 
-require("@babel/polyfill")
+//require("@babel/polyfill");
 
 var path = require('path')
 function _getCallerFile() {
     var originalFunc = Error.prepareStackTrace;
 
-    	let callerfile;
-		let callerlineno;
+    let callerfile;
+    let callerlineno;
     try {
         var err = new Error();
 
@@ -16,15 +16,15 @@ function _getCallerFile() {
 	const x = err.stack.shift();
  	const currentfile = x.getFileName();
 	const currentlineno = x.getLineNumber();
-//	process.stderr.write(`${currentfile} ${currentlineno}\n`);
+	//	process.stderr.write(`${currentfile} ${currentlineno}\n`);
 
         while (err.stack.length) {
-	const x2 = err.stack.shift();
-        callerfile = x2.getFileName();
-	callerlineno = x2.getLineNumber();
+	    const x2 = err.stack.shift();
+            callerfile = x2.getFileName();
+	    callerlineno = x2.getLineNumber();
 
             if(currentfile !== callerfile) break;
-            }
+        }
     } catch (e) {
         console.log(e);
     }
@@ -34,22 +34,24 @@ function _getCallerFile() {
     return [callerfile, callerlineno];
 }
 
-var _Core = require("../lib/Core");
+var _Core = require("../src/Core");
 
 function log(...args) {
-process.stderr.write(path.relative(__dirname,  _getCallerFile().join(':')) + ": " +args.map(x => typeof x == 'string' ? x : JSON.stringify(x)).join(' ') + "\n");
+    process.stderr.write(path.relative(__dirname,  _getCallerFile().join(':')) + ": " +args.map(x => typeof x == 'string' ? x : JSON.stringify(x)).join(' ') + "\n");
 }
 console.log = log;
 
+const argv = process.argv.slice(2);
+console.log(argv);
 const description = 'Generates Docutils-native XML from standalone ' + 'reStructuredText sources.  ' + _Core.defaultDescription;
 (0, _Core.publishCmdLine)({
-debug: true,
-			 debugFn: (msg) => {
-			     console.log(`here ${msg}`);
-			 },
-  argv: ['in.rst'],
-  writerName: 'xml',
-  description
+    debug: true,
+    debugFn: (msg) => {
+	console.log(`here ${msg}`);
+    },
+    argv,
+    writerName: 'xml',
+    description
 }, (...args) => {
 });
 

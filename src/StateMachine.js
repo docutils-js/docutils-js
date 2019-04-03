@@ -52,7 +52,8 @@ export class StateMachine {
         if (!debug) {
             debug = false;
         }
-	if(!debugFn) {
+	if(debug && !debugFn) {
+	    throw new Error("unexpected");
 	    debugFn = console.log;
 	}
 	this.debugFn = debugFn;
@@ -128,10 +129,10 @@ export class StateMachine {
         let state = this.getState();
         let nextState;
         let result;
-        try { /*
-            if self.debug:
-                print >>self._stderr, '\nStateMachine.run: bof transition'
-             */
+        try {
+            if(this.debug) {
+		this.debugFn('\nStateMachine.run: bof transition');
+	    }
             [context, result] = state.bof(context);
 	    if(!Array.isArray(context)) {
 		throw new Error('expecting array');
@@ -174,6 +175,9 @@ export class StateMachine {
                         results.push(...result);
                     } catch (error) {
                         if (error instanceof EOFError) {
+			    if(this.debug) {
+				this.debugFn(`\nStateMachine.run: ${state.constructor.name}.eof transition`);
+			    }
                             result = state.eof(context);
                             results.push(...result);
                             break;
@@ -494,7 +498,7 @@ src;
 export class State {
     constructor(args) {
         const { stateMachine, debug } = args;
-        this._init();
+        this._init(args);
         this.transitionOrder = [];
         this.transitions = {};
         // this.patterns = {}
@@ -507,7 +511,7 @@ export class State {
         }
 
         this.stateMachine = stateMachine;
-        this.debug = debug;
+        this.debug = debug; 
 	
         if (!this.nestedSm) {
             this.nestedSm = this.stateMachine.constructor;
@@ -518,6 +522,8 @@ export class State {
             this.nestedSmKwargs = {
 		stateClasses: [this.constructor],
 		initialState: this.constructor.name,
+		debug: this.debug,
+		debugFn: this.debugFn,
 	    };
         }
     }
@@ -707,8 +713,8 @@ export class StateWS extends State {
         }
     }
 
-    _init() {
-        super._init();
+    _init(args) {
+        super._init(args);
         this.indentSm = null;
         this.indentSmKwargs = null;
         this.knownIndentSm = null;

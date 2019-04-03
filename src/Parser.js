@@ -6,6 +6,8 @@ class Parser extends Component {
 	super(args);
 	this.componentType = 'parser';
 	this.configSection = 'parsers'
+	this.debug = args.debug;
+	this.debugFn = args.debugFn;
     }
     
     parse(inputstring, document) {

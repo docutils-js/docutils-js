@@ -380,15 +380,17 @@ class NestedStateMachine extends StateMachineWS {
 }
 
 class RSTState extends StateWS {
-    _init() {
-        super._init();
+    _init(args) {
+        super._init(args);
         this.nestedSm = NestedStateMachine;
         this.nestedSmCache = [];
         this.stateClasses = stateClasses;
         this.nestedSmKwargs = {
- stateClasses: this.stateClasses,
-                                initialState: 'Body',
-};
+	    stateClasses: this.stateClasses,
+            initialState: 'Body',
+	    debug: args.stateMachine.debug,
+	    debugFn: args.stateMachine.debugFn,
+	};
     }
 
     runtimeInit() {
@@ -667,8 +669,8 @@ export class Body extends RSTState {
         this.pats = pats;
     }
 
-    _init() {
-        super._init();
+    _init(args) {
+        super._init(args);
 //      this.doubleWidthPadChar = tableparser.TableParser.doubleWidthPadChar
 
         const enum_ = { };
@@ -962,8 +964,8 @@ initialState: 'BulletList',
 }
 
 export class Text extends RSTState {
-    _init() {
-        super._init();
+    _init(args) {
+        super._init(args);
         this.patterns = {
  underline: '([!-/:-@[-\`{-~])\\1* *$',
                          text: '',
@@ -1102,8 +1104,8 @@ srcline;
     }
 }
 export class SpecializedText extends Text {
-    _init() {
-        super._init();
+    _init(args) {
+        super._init(args);
         this.blank = this.invalidInput;
         this.indent = this.invalidInput;
         this.underline = this.invalidInput;
@@ -1120,8 +1122,8 @@ export class SpecializedText extends Text {
 }
 
 export class Line extends SpecializedText {
-    _init() {
-        super._init();
+    _init(args) {
+        super._init(args);
         this.eofcheck = 1;
     }
 

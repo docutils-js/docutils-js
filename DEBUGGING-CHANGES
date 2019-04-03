@@ -1,5 +1,7 @@
 added debugFn to publisher constructor
-in publisher constructor, if its undefined it sets t to console.log (but I had to set this somewhere else, so it doesnt quite seem to work?
+
+in publisher constructor, if its undefined it sets t to console.log (but I had to set this somewhere else,
+so it doesnt quite seem to work?
 
 in setReader, a new arg is added to the call to ReaderClass (i.e. standalone) to accept debugFn. is this necessary?
 

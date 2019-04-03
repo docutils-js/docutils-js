@@ -44,7 +44,7 @@ test('1',  () => {
     const source = new StringInput({source: '* a\n\nnot in the list.'})
 //    const source = new StringInput({source: 'Text 1\nText 2\n\nHeader\n======\n'})
     const destination = new StringOutput({})
-    const pub = new Publisher({source, destination, settings});
+    const pub = new Publisher({source, destination, settings, debug: true, debugFn: console.log});
     pub.setComponents(readerName, parserName, writerName);
     return new Promise((resolve,reject) => {
 	pub.publish({}, (error, ...args) => {
