@@ -1,6 +1,7 @@
 import Transformer from './Transformer';
 import { InvalidArgumentsError} from './Exceptions';
 
+
 function setup_backlinkable(o) {
     o.addBackref = (refid) => o.attributes['backrefs'].push(refid);
 }
@@ -166,7 +167,8 @@ export class Node {
     }
 }
 
-function _addNodeClassNames(names, o) {
+/* This is designed to be called later, a-nd not with an object. hmm */
+export function _addNodeClassNames(names, o) {
     names.forEach(_name => {
 	const v = `visit_${_name}`;
 	if(!o[v]) {
@@ -190,6 +192,7 @@ export class GenericNodeVisitor extends NodeVisitor {
 	throw new Error("not implemented");
     }
 }
+GenericNodeVisitor.nodeClassNames = nodeClassNames;
 
 
 export class Titular { }
@@ -537,7 +540,7 @@ export class document extends Element {
     }
 }
 
-class FixedTextElement extends TextElement {
+export class FixedTextElement extends TextElement {
 /*    def __init__(self, rawsource='', text='', *children, **attributes):
         TextElement.__init__(self, rawsource, text, *children, **attributes)
         self.attributes['xml:space'] = 'preserve'
@@ -550,11 +553,46 @@ export class title extends TextElement { } // Titular, Prebib
 export class paragraph extends TextElement  { } // General
 export class bullet_list extends Element { } // Sequential
 export class list_item extends Element { }
+
+/* Inline elements */
 export class emphasis extends TextElement {} // Inline
 export class strong extends TextElement {} // Inline
+export class literal extends TextElement {} // Inline
+
 export class problematic extends TextElement {} // Inline
 export class literal_block extends FixedTextElement {}
 export class transition extends Element {} // Structura
+
+export class block_quote extends Element{ }
+export class attribution extends TextElement{ }
+export class attention extends Element{ }
+export class caution extends Element{ }
+export class danger extends Element{ }
+export class error extends Element{ }
+export class important extends Element{ }
+export class note extends Element{ }
+export class tip extends Element{ }
+export class hint extends Element{ }
+export class warning extends Element{ }
+export class admonition extends Element{ }
+export class comment extends FixedTextElement{ }
+export class substitution_definition extends TextElement{ }
+export class target extends TextElement{ }
+export class footnote extends Element { }
+export class citation extends Element{ }
+export class label extends  TextElement{ }
+export class figure extends Element{ }
+export class caption extends TextElement{ }
+export class legend extends Element{ }
+export class table extends Element{ }
+export class tgroup extends Element{ }
+export class colspec extends Element{ }
+export class thead extends  Element{ }
+export class tbody extends  Element{ }
+export class row extends  Element{ }
+export class entry extends Element{ }
+
+
 export class system_message extends Element {
     constructor(message, children, attributes) {
 	super(attributes.rawsource || '', message ? [new paragraph('', message), ...children] : children, attributes);

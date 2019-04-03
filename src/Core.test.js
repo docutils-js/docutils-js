@@ -41,7 +41,13 @@ test('1',  () => {
     const args = { ...defaultArgs }
 
     const { readerName, parserName, writerName } = args;
-    const source = new StringInput({source: '* a\n\nnot in the list.'})
+    const source = new StringInput({source: "This is a paragraph.  It's quite\n" +
+		    "short.\n" +
+		    "\n" +
+		    "   This paragraph will result in an indented block of\n" +
+		    "   text, typically used for quoting other text.\n" +
+		    "\n" +
+		    "This is another one."})
 //    const source = new StringInput({source: 'Text 1\nText 2\n\nHeader\n======\n'})
     const destination = new StringOutput({})
     const pub = new Publisher({source, destination, settings, debug: true, debugFn: console.log});

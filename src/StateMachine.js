@@ -640,7 +640,7 @@ export class StateMachineWS extends StateMachine {
             stripIndent = true;
         }
         let offset = this.absLineOffset();
-        const [indented, indent, blankFinish] = this.inputLines.getIndented({ lineOffset: this.lineOffset, untilBlank, stripIndent });
+        const [indented, indent, blankFinish] = this.inputLines.getIndented({ start: this.lineOffset, untilBlank, stripIndent });
         if (indented) {
             this.nextLine(indented.length - 1);
         }
@@ -856,8 +856,17 @@ export class ViewList extends Array {
 
 export class StringList extends ViewList {
     trimLeft(length, start, end) {
+        if(end === undefined) {
+            end = this.length;
+        }
+        if(start === false) {
+            throw new Error();
+        }
         for (let i = start; i < end; i++) {
-            this.data[i] = this.data[i].substring(length);
+            if(this[i] === undefined) {
+                throw new Error(`${i} ${this.length}`);
+            }
+            this[i] = this[i].substring(length);
         }
     }
 
@@ -925,7 +934,7 @@ export class StringList extends ViewList {
         }
         if (indent && stripIndent) {
 //          console.log(block.constructor.name);
-            block.trimLeft(indent, firstIndent != null);
+            block.trimLeft(indent, firstIndent || 0);
         }
 
         return [block, indent || 0, blankFinish];

@@ -84,12 +84,12 @@ function buildRegexp(definition, compile = true) {
 export class Inliner {
     constructor() {
         this.dispatch = {
- '*': this.emphasis.bind(this),
-                         '**': this.strong.bind(this),
-};
+	    '*': this.emphasis.bind(this),
+            '**': this.strong.bind(this),
+            '``': this.literal.bind(this),
+            '`': this.interpreted_or_phrase_ref.bind(this),
+	};
         /*
-                    '`': this.interpreted_or_phrase_ref.bind(this)
-                    '``': this.literal.bind(this)
                     '_`': this.inline_internal_target.bind(this)
                     ']_': this.footnote_reference.bind(this)
                     '|': this.substitution_reference.bind(this)
@@ -98,8 +98,8 @@ export class Inliner {
 */
 
         this.implicitDispatch = [];
-        this.non_whitespace_after = '';
-
+        this.nonWhitespaceAfter = '';
+	this.nonWhitespaceBefore = '(?<!\\s)'
         this.nonWhitespaceEscapeBefore = '(?<![\\s\\x00])';
     }
 
@@ -116,10 +116,65 @@ export class Inliner {
         return [before, inlines, remaining, sysmessages];
    }
 
-strong(match, lineno) {
+    strong(match, lineno) {
         const [before, inlines, remaining, sysmessages, endstring] = this.inline_obj(match, lineno, this.patterns.strong, nodes.strong);
         return [before, inlines, remaining, sysmessages];
-   }
+    }
+
+    interpreted_or_phrase_ref(match, lineno) {
+        const end_pattern = this.patterns.interpreted_or_phrase_ref
+        const string = match.match.input
+	console.log(match.groups);
+/*        matchstart = match.start('backquote')
+        matchend = match.end('backquote')
+        rolestart = match.start('role')
+        role = match.group('role')
+        position = ''
+        if role:
+            role = role[1:-1]
+            position = 'prefix'
+        elif self.quoted_start(match):
+            return (string[:matchend], [], string[matchend:], [])
+        endmatch = end_pattern.search(string[matchend:])
+        if endmatch and endmatch.start(1):  # 1 or more chars
+            textend = matchend + endmatch.end()
+            if endmatch.group('role'):
+                if role:
+                    msg = self.reporter.warning(
+                        'Multiple roles in interpreted text (both '
+                        'prefix and suffix present; only one allowed).',
+                        line=lineno)
+                    text = unescape(string[rolestart:textend], True)
+                    prb = self.problematic(text, text, msg)
+                    return string[:rolestart], [prb], string[textend:], [msg]
+                role = endmatch.group('suffix')[1:-1]
+                position = 'suffix'
+            escaped = endmatch.string[:endmatch.start(1)]
+            rawsource = unescape(string[matchstart:textend], True)
+            if rawsource[-1:] == '_':
+                if role:
+                    msg = self.reporter.warning(
+                          'Mismatch: both interpreted text role %s and '
+                          'reference suffix.' % position, line=lineno)
+                    text = unescape(string[rolestart:textend], True)
+                    prb = self.problematic(text, text, msg)
+                    return string[:rolestart], [prb], string[textend:], [msg]
+                return self.phrase_ref(string[:matchstart], string[textend:],
+                                       rawsource, escaped, unescape(escaped))
+            else:
+                rawsource = unescape(string[rolestart:textend], True)
+                nodelist, messages = self.interpreted(rawsource, escaped, role,
+                                                      lineno)
+                return (string[:rolestart], nodelist,
+                        string[textend:], messages)
+*/
+        const msg = this.reporter.warning(
+            'Inline interpreted text or phrase reference start-string '+
+		'without end-string.', [], {line: lineno})
+        const text = string;//unescape(string[matchstart:matchend], True)
+        //prb = self.problematic(text, text, msg)
+        return [string.substring(0, match.match.index), [/*prb*/], ''/*string[matchend:]*/, [msg]]
+    }
 
     quoted_start(match) {
         return false; // fixme
@@ -204,7 +259,7 @@ esn;
                 parts: {
                     start: {
                         prefix: '',
-                        suffix: this.non_whitespace_after,
+                        suffix: this.nonWhitespaceAfter,
                         parts: ['\\*\\*','\\*(?!\\*)','``','_`', '\\|(?!\\|)'],
                     },
                     whole: {
@@ -213,7 +268,7 @@ esn;
                         parts:
 */
         const parts = [1, 'initial_inline', startStringPrefix, '',
-           [0, [1, 'start', '', this.non_whitespace_after, // simple start-strings
+           [0, [1, 'start', '', this.nonWhitespaceAfter, // simple start-strings
              [0, '\\*\\*', // strong
               '\\*(?!\\*)', // emphasis but not strong
               '``', // literal
@@ -233,7 +288,7 @@ esn;
              ],
             [1, 'backquote', // interpreted text or phrase reference
              [2, `((:${this.simplename}:)?)`, 'role', null], // optional role
-             this.non_whitespace_after,
+             this.nonWhitespaceAfter,
              [0, [2, '`(?!`)', null]], // but not literal
              ],
             ],
@@ -245,10 +300,9 @@ esn;
 //      console.log(build[0]);
         this.patterns = {
             initial: buildRegexp(parts), // KM
-            emphasis: new RegExp(`${this.nonWhitespaceEscapeBefore
-                                 }(\\*)${endStringSuffix}`),
-            strong: new RegExp(`${this.nonWhitespaceEscapeBefore
-                               }(\\*\\*)${endStringSuffix}`),
+            emphasis: new RegExp(`${this.nonWhitespaceEscapeBefore}(\\*)${endStringSuffix}`),
+            strong: new RegExp(`${this.nonWhitespaceEscapeBefore}(\\*\\*)${endStringSuffix}`),
+	    literal: new RegExp(this.nonWhitespaceBefore + '(``)' + endStringSuffix),
 //          interpreted_or_phrase_ref: new RegExp(`${non_unescaped_whitespace_escape_before}(((:${simplename}:)?(__?)?))${endStringSuffix}`)
         };
     }
@@ -308,6 +362,12 @@ sysmessages;
         }
         // FIXME
         return [new nodes.Text(text, text)];
+    }
+
+    literal(match, lineno) {
+        const [ before, inlines, remaining, sysmessages, endstring ] = this.inline_obj(
+            match, lineno, this.patterns.literal, nodes.literal, true)
+        return [ before, inlines, remaining, sysmessages ]
     }
 }
 
@@ -375,6 +435,9 @@ class NestedStateMachine extends StateMachineWS {
         this.language = memo.language;
         this.node = node;
         const results = super.run({ inputLines, inputOffset });
+        if(results === undefined) {
+            throw new Error();
+        }
         return results;
     }
 }
@@ -554,10 +617,11 @@ matchTitles,
             memo.sectionLevel = level   // bubble up to parent section
             if(style.length === 2) {
                 memo.sectionBubbleUpKludge = True
+            }
             // back up 2 lines for underline title, 3 for overline title
-		this.stateMachine.previousLine(style.length + 1)
-		throw new EOFError()    // let parent section re-evaluate
-	    }
+            this.stateMachine.previousLine(style.length + 1)
+            throw new EOFError()    // let parent section re-evaluate
+
 	}
 	
 	if(level === mylevel + 1) {        // immediate subsection
@@ -757,6 +821,9 @@ export class Body extends RSTState {
 
     indent(match, context, nextState) {
         const [indented, indent, lineOffset, blankFinish] = this.stateMachine.getIndented({});
+        if(indented === undefined) {
+            throw new Error();
+        }
         const elements = this.block_quote(indented, lineOffset);
         this.parent.add(elements);
         if (!blankFinish) {
@@ -766,16 +833,19 @@ export class Body extends RSTState {
     }
 
     block_quote(indented, lineOffset) {
+        if(!indented) {
+            throw new Error();
+        }
         const elements = [];
-        while (indented.length) {
+        while (indented && indented.length) {
             const [blockquote_lines,
              attribution_lines,
              attribution_offset,
              outIndented,
              new_line_offset] = this.split_attribution(indented, lineOffset);
-            const blockquote = nodes.block_quote();
+            const blockquote = new nodes.block_quote();
 	    indented = outIndented;
-            this.nestedParse(blockquote_lines, lineOffset, blockquote);
+            this.nestedParse(blockquote_lines, { inputOffset: lineOffset, node: blockquote });
             elements.push(blockquote);
             if (attribution_lines) { // fixme
                 const [attribution, messages] = this.parse_attribution(attribution_lines, attribution_offset);
@@ -783,7 +853,7 @@ export class Body extends RSTState {
                 elements.add(messages);
             }
             lineOffset = new_line_offset;
-            while (indented.length && !indented[0]) {
+            while (indented && indented.length && !indented[0]) {
                 indented = indented.slice(1);
                 lineOffset += 1;
             }
@@ -798,16 +868,16 @@ export class Body extends RSTState {
             const line = indented[i].trimRight();
             if (line) {
                 if (nonblank_seen && blank === i - 1) {
-                    match = this.attribution_pattern.exec(line);
+                    const match = this.attribution_pattern.exec(line);
                     if (match) {
                         const [attribution_end, indent] = this.check_attribution(indented, i);
                         if (attribution_end) {
                             const a_lines = indented.slice(i, attribution_end);
                             a_lines.trimLeft(match.index + match[0].length, undefined, 1); // end=1 check fixme
                             a_lines.trimLeft(indent, 1);
-                            return (indented.slice(undefined, i), a_lines,
+                            return [indented.slice(undefined, i), a_lines,
                                     i, indented.slice(attribution_end),
-                                    lineOffset + attribution_end);
+                                    lineOffset + attribution_end]
                         }
                     }
                 }
