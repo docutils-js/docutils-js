@@ -850,7 +850,7 @@ export class Body extends RSTState {
             if (attribution_lines) { // fixme
                 const [attribution, messages] = this.parse_attribution(attribution_lines, attribution_offset);
                 blockquote.add(attribution);
-                elements.add(messages);
+                elements.push(...messages);
             }
             lineOffset = new_line_offset;
             while (indented && indented.length && !indented[0]) {
@@ -862,6 +862,7 @@ export class Body extends RSTState {
     }
 
     split_attribution(indented, lineOffset) {
+	this.attribution_pattern = new RegExp('(---?(?!-)|\u2014) *(?=[^ \\n])');
         let blank;
         let nonblank_seen = false;
         for (let i = 0; i < indented.length; i++) {
@@ -889,6 +890,28 @@ export class Body extends RSTState {
         return [indented, null, null, null, null];
     }
 
+    check_attribution(indented, attribution_start) {
+        let indent = null
+        let i;
+	for( i = attribution_start + 1; i < indented.length; i++) {
+            const line = indented[i].trimRight()
+            if (!line) {
+                break
+
+            }
+            if (indent == null) {
+                indent = line.length - line.trimLeft().length;
+            } else if ((line.length - line.lstrip().length) !== indent) {
+                return [null, null]      // bad shape; not an attribution
+            }
+        }
+	if(i === indented.length) {
+	    i++;
+
+	}
+        return [i, indent || 0]
+    }
+    
     enumerator(match, context, nextState) {
         const [format, sequence, text, ordinal] = this.parseEnumerator(match);
         if (!this.isEnumeratedListItem(ordinal, sequence, format)) {
@@ -935,6 +958,17 @@ initialState: 'EnumeratedList',
             this.parent.add(this.unindent_warning('Enumerated list'));
         }
         return [[], nextState, []];
+    }
+
+    parse_attribution(indented, line_offset) {
+        const text = indented.join('\n').trimRight();
+        const lineno = this.stateMachine.absLineNumber() + line_offset;
+        const [ textnodes, messages ] = this.inline_text(text, lineno)
+        const anode = new nodes.attribution(text, '', textnodes)
+        const [ source, line ] = this.stateMachine.getSourceAndLine(lineno)
+        anode.source = source;
+        anode.line = line;
+        return [ anode, messages ]
     }
 
     bullet(match, context, nextState) {
@@ -1063,7 +1097,7 @@ export class Text extends RSTState {
     indent(match, context, nextState) {
         /*"""Definition list item."""*/
         const definitionlist = new nodes.definition_list()
-        const [ definitionlistitem, blank_finish ] = this.definition_list_item(context)
+        const [ definitionlistitem, blank_finish ] = new this.definition_list_item(context)
         definitionlist.add(definitionlistitem)
         this.parent.add(definitionlist)
         const offset = this.stateMachine.lineOffset + 1

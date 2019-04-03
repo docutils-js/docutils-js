@@ -551,6 +551,22 @@ export class section extends Element { } // Structural
 export class title extends TextElement { } // Titular, Prebib
 
 export class paragraph extends TextElement  { } // General
+/*class compound(General, Element): pass
+class container(General, Element): pass
+class bullet_list(Sequential, Element): pass
+class enumerated_list(Sequential, Element): pass
+class list_item(Part, Element): pass*/
+export class definition_list extends Element {}
+export class definition_list_item extends Element {}
+/*class term(Part, TextElement): pass
+class classifier(Part, TextElement): pass
+class definition(Part, Element): pass
+class field_list(Sequential, Element): pass
+class field(Part, Element): pass
+class field_name(Part, TextElement): pass
+class field_body(Part, Element): pass
+*/
+
 export class bullet_list extends Element { } // Sequential
 export class list_item extends Element { }
 
