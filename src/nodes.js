@@ -344,9 +344,13 @@ export class Text extends Node {
     astext() {
 	return this.data;
     }
-    
+    toString() {
+	return this.astext();
+    }
+    toSource() {
+	return this.toString();
+    }
 }
-
 export class document extends Element {
     constructor(settings, reporter, ...args) {
 	super(...args);

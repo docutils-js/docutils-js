@@ -1167,7 +1167,30 @@ export class Line extends SpecializedText {
     }
 }
 
-export class SpecializedBody extends Body {}
+export class SpecializedBody extends Body {
+    _init(args) {
+	super._init(args);
+	this.indent = this.invalid_input.bind(this);
+	this.bullet = this.invalid_input.bind(this);
+	this.enumerator = this.invalid_input.bind(this);
+	this.field_marker = this.invalid_input.bind(this);
+	this.option_marker = this.invalid_input.bind(this);
+	this.doctest = this.invalid_input.bind(this);
+	this.line_block = this.invalid_input.bind(this);
+	this.grid_table_top = this.invalid_input.bind(this);
+	this.simple_table_top = this.invalid_input.bind(this);
+	this.explicit_markup = this.invalid_input.bind(this);
+	this.anonymous = this.invalid_input.bind(this);
+	this.line = this.invalid_input.bind(this);
+	this.text = this.invalid_input.bind(this);
+    }
+
+    invalid_input(match, context, nextState) {
+	this.stateMachine.previousLine();
+	throw new EOFError();
+    }
+}
+
 export class BulletList extends SpecializedBody {
     bullet(match, context, nextState) {
         if (match.result.input[0] !== this.parent.attributes.bullet) {
