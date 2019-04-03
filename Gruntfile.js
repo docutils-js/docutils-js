@@ -16,11 +16,15 @@ module.exports = function(grunt) {
 		dest: 'lib',
 	    },
 	},
+	eslint: {
+	    target: ['src/*.js'],
+	},
     });
 
     // Load the plugin that provides the "uglify" task.
     grunt.loadNpmTasks('grunt-babel');
-
+    grunt.loadNpmTasks('grunt-babel');
+        grunt.loadNpmTasks('grunt-eslint');
     // Default task(s).
     grunt.registerTask('default', ['babel']);
 

@@ -1,5 +1,5 @@
-import { Parser } from './restructuredtext';
-import { newDocument } from '../utils'
+import { Parser } from 'parsers/restructuredtext';
+import { newDocument } from 'utils'
 
 test('1', () => {
     const p = new Parser({});

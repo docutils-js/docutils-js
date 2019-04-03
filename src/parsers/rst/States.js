@@ -392,10 +392,10 @@ export class RSTStateMachine extends StateMachineWS {
         }
         inliner.initCustomizations(document.settings);
         this.memo = {
- document,
-reporter: document.reporter,
-language: this.language,
-                      titleStyles: [],
+	    document,
+	    reporter: document.reporter,
+	    language: this.language,
+            titleStyles: [],
                       sectionLevel: 0,
                       sectionBubbleUpKludge: false,
                       inliner,
@@ -1097,11 +1097,14 @@ export class Text extends RSTState {
     indent(match, context, nextState) {
         /*"""Definition list item."""*/
         const definitionlist = new nodes.definition_list()
-        const [ definitionlistitem, blank_finish ] = new this.definition_list_item(context)
+        let blankFinish;
+        let definitionlistitem;
+        [ definitionlistitem, blankFinish ] = this.definition_list_item(context)
         definitionlist.add(definitionlistitem)
         this.parent.add(definitionlist)
-        const offset = this.stateMachine.lineOffset + 1
-        const [ newlineOffset, blankFinish ]  = this.nestedListParse(
+        const offset = this.stateMachine.lineOffset + 1;
+        let newlineOffset;
+        [ newlineOffset, blankFinish ]  = this.nestedListParse(
             this.stateMachine.inputLines.slice(offset),
             { inputOffset: this.stateMachine.absLineOffset() + 1,
               node: definitionlist, initialState: 'DefinitionList',
@@ -1199,12 +1202,53 @@ srcline;
         throw new Unimp();
     }
 
-    definition_list_item(match, context, nextState) {
-        throw new Unimp();
+    definition_list_item(termline) {
+        const [ indented, indent, line_offset, blank_finish ] = 
+              this.stateMachine.getIndented({})
+        const itemnode = new nodes.definition_list_item(
+            [...termline, ...indented].join('\b'))
+        const lineno = this.stateMachine.absLineNumber() - 1;
+        [itemnode.source,
+         itemnode.line] = this.stateMachine.getSourceAndLine(lineno)
+        const [ termlist, messages ] = this.term(termline, lineno)
+        itemnode.add(termlist)
+        const definition = new nodes.definition('', messages)
+        itemnode.add(definition);
+        if(termline[0].endsWith('::')) {
+            definition.add(this.reporter.info(
+                'Blank line missing before literal block (after the "::")? '+
+                    'Interpreted as a definition list item.',[],
+                {line: lineno+1}))
+	}
+        this.nestedParse(indented, { inputOffset: line_offset, node: definition })
+        return [ itemnode,blank_finish ]
     }
 
-    term(match, context, nextState) {
-        throw new Unimp();
+    term(lines, lineno) {
+        const [ text_nodes, messages ] = this.inline_text(lines[0], lineno)
+        const term_node = new nodes.term(lines[0])
+   //     [term_node.source,
+    //     term_node.line] = this.stateMachine.getSourceAndLine(lineno)
+        const node_list = [term_node]
+	text_nodes.forEach(node => {
+            if(node instanceof nodes.Text) {
+                const parts = node.astext().split(this.classifier_delimiter); //fixme
+                if(parts.length === 1) {
+                    node_list[node_list.length-1].add(node)
+		} else {
+                    const text = parts[0].trimRight()
+                    const textnode = new nodes.Text(utils.unescape(text, true))
+                    node_list[node_list.length-1].add(textnode)
+                    for(let part of parts.slice(1)) {
+                        node_list.push(
+                            new nodes.classifier(unescape(part, false), part))
+		    }
+		}
+	    } else {
+                node_list[node_list.length-1].add(node)
+	    }
+	});
+	return [node_list, messages]
     }
 }
 export class SpecializedText extends Text {

@@ -558,9 +558,10 @@ class enumerated_list(Sequential, Element): pass
 class list_item(Part, Element): pass*/
 export class definition_list extends Element {}
 export class definition_list_item extends Element {}
-/*class term(Part, TextElement): pass
+export class term extends TextElement {}
+export class definition extends Element {}
+/*
 class classifier(Part, TextElement): pass
-class definition(Part, Element): pass
 class field_list(Sequential, Element): pass
 class field(Part, Element): pass
 class field_name(Part, TextElement): pass

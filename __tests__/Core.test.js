@@ -1,6 +1,6 @@
-import { Publisher, publishCmdLine, defaultDescription } from './Core'
-import { Source } from './Sources';
-import { StringInput, StringOutput } from './io'
+import { Publisher, publishCmdLine, defaultDescription } from 'Core'
+import { Source } from 'Sources';
+import { StringInput, StringOutput } from 'io'
 
 const defaultArgs = {
     readerName: 'standalone',
@@ -41,11 +41,18 @@ test('1',  () => {
     const args = { ...defaultArgs }
 
     const { readerName, parserName, writerName } = args;
-    const source = new StringInput({source: "This is an ordinary paragraph, introducing a block quote.\n" +
+    const source = new StringInput({source: "Definition lists: \n" +
 		    "\n" +
-		    "    \"It is my business to know things.  That is my trade.\"\n" +
+		    "what \n" +
+		    "  Definition lists associate a term with \n" +
+		    "  a definition. \n" +
 		    "\n" +
-		    "    -- Sherlock Holmes\n"})
+		    "how \n" +
+		    "  The term is a one-line phrase, and the \n" +
+		    "  definition is one or more paragraphs or \n" +
+		    "  body elements, indented relative to the \n" +
+		    "  term. Blank lines are not allowed \n" +
+		    "  between term and definition."})
 //    const source = new StringInput({source: 'Text 1\nText 2\n\nHeader\n======\n'})
     const destination = new StringOutput({})
     const pub = new Publisher({source, destination, settings, debug: true, debugFn: console.log});
@@ -53,6 +60,7 @@ test('1',  () => {
     return new Promise((resolve,reject) => {
 	pub.publish({}, (error, ...args) => {
 	    if(error) {
+	    	console.log(error)
 		reject(error);
 		return;
 	    }

@@ -1,3 +1,0 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
-
-exports[`paragraph with text 1`] = `"<paragraph>This is my paragraph text.</paragraph>"`;
