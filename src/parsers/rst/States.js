@@ -332,7 +332,7 @@ export class Inliner {
 endStringSuffix;
         let ssn; let
 esn;
-        if (settings.character_level_inline_markup) {
+        if (settings.characterLevelInlineMarkup) {
             startStringPrefix = '(^|(?<!\\x00))';
             ssn = [null, null];
             endStringSuffix = '';
@@ -401,7 +401,7 @@ esn;
 	//      console.log(build[0]);
 	// note
         this.patterns = {
-            initial: buildRegexp(parts, false), // KM
+            initial: buildRegexp(parts, true), // KM
             emphasis: new RegExp(`${this.nonWhitespaceEscapeBefore}(\\*)${endStringSuffix}`),
             strong: new RegExp(`${this.nonWhitespaceEscapeBefore}(\\*\\*)${endStringSuffix}`),
 	    literal: new RegExp(this.nonWhitespaceBefore + '(``)' + endStringSuffix),
@@ -429,7 +429,6 @@ esn;
 //          console.log(match);
             if (match) {
                 const rr = {};
-
                 this.patterns.initial[1].forEach((x, index) => {
                     rr[x] = match[index];
                 });
