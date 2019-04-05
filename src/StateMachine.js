@@ -1,3 +1,4 @@
+
 import UnknownStateError from './UnknownStateError';
 import ErrorOutput from './ErrorOutput';
 import { EOFError, InvalidArgumentsError, UnimplementedError as Unimp } from './Exceptions';
@@ -22,8 +23,10 @@ function isIterable(obj) {
   if (obj == null) {
     return false;
   }
-  return typeof obj[Symbol.iterator] === 'function';
+
+    return typeof obj[Symbol.iterator] === 'function';
 }
+
 
 function __getClass(object) {
   return Object.prototype.toString.call(object)
@@ -80,7 +83,7 @@ export class StateMachine {
     }
 
     /* Faithful to python implementation. */
-    run({ inputLines, inputOffset, context, inputSource, initialState}) {
+    run({ inputLines, inputOffset, context, inputSource, initialState, callback, doYield }) {
         /*
         Run the state machine on `input_lines`. Return results (a list).
 
@@ -137,92 +140,80 @@ export class StateMachine {
 	    if(!Array.isArray(context)) {
 		throw new Error('expecting array');
 	    }
-//	    console.log(context);
             results.push(...result);
             while (true) {
-                try {
+		try
+		{
                     try {
-                        this.nextLine();
-			if(this.debug) {
-			    if(Number.isNaN(this.lineOffset)) {
-				throw new Error();
-			    }
-			    
-			    const rinfo = this.inputLines.info(
-                                this.lineOffset)
-                            if(!isIterable(rinfo)) {
-                                throw new Error();
-                            }
-                            const [ source, offset ] = rinfo
-			    this.debugFn(`\nStateMachine.run: line (source=${source}, offset=${offset}):\n| ${this.line}`);
-			}
-//			console.log(context);
-			if(!Array.isArray(context)) {
-			    throw new Error("context should be array");
-			}
-
-                        const r = this.checkLine(context, state, transitions);
-                        if (!isIterable(r)) {
-                            throw new Error(`Expect iterable result, got: ${r}`);
-                        }
-                        [context, nextState, result] = r;
-			if(!Array.isArray(context)) {
-			    throw new Error("context should be array");
-			}
-                        if (!isIterable(result)) {
-                            throw new Error(`Expect iterable result, got: ${result}`);
-                        }
-                        results.push(...result);
-                    } catch (error) {
-                        if (error instanceof EOFError) {
+			const [contextOut, nextState, resultOut] =
+			      this.iterate(context, transitions);
+			context = contextOut;
+			results.push(...resultOut);
+		    } catch (error) {
+			if (error instanceof EOFError) {
 			    if(this.debug) {
 				this.debugFn(`\nStateMachine.run: ${state.constructor.name}.eof transition`);
 			    }
-                            result = state.eof(context);
-                            results.push(...result);
-                            break;
-                        } else {
-                            throw error;
-                        }
-                    }
-                } catch (error) {
+			    result = state.eof(context);
+			results.push(...result);
+			} else {
+			    throw error;
+			}
+		    }
+		} catch (error) {
                     if (error instanceof TransitionCorrection) {
-                        this.previousLine();
-                        transitions = [error.args[0]];
-                        /* if self.debug:
-                        print >>self._stderr, (
-                              '\nStateMachine.run: TransitionCorrection to '
-                              'state "%s", transition %s.'
-                              % (state.__class__.__name__, transitions[0])) */
-                        continue;
+			this.previousLine();
+			transitions = [error.args[0]];
+			if(self.debug){
+                            this.debugFn(`\nStateMachine.run: TransitionCorrection to state "${state.constructor.name}", transition ${transitions[0]}`);
+			}
+			continue;
                     } else if (error instanceof StateCorrection) {
-                        this.previousLine();
-                        nextState = error.args[0];
-                        if (error.args.length === 1) {
+                    this.previousLine();
+			nextState = error.args[0];
+			if (error.args.length === 1) {
                             transitions = null;
-                        } else {
+			} else {
                             transitions = [error.args[1]];
-                        }
-                    /*                    if self.debug:
-                        print >>self._stderr, (
-                              '\nStateMachine.run: StateCorrection to state '
-                              '"%s", transition %s.'
-                              % (next_state, transitions[0]))
-                    */
+			}
+			if(self.debug) {
+                            this.debugFn(`\nStateMachine.run: StateCorrection to state "${nextState}", transition ${transitions[0]}.`);
+			}
                     } else {
-                        throw error;
+			throw error;
                     }
-                }
-                // transitions = undefined /* we need this somehow, its part of a try, except, else */
-                state = this.getState(nextState);
+		}
+		// transitions = undefined /* we need this somehow, its part of a try, except, else */
+		state = this.getState(nextState);
             }
-        } catch (error) {
+	} catch (error) {
             throw error;
-        }
-        this.observers = [];
-        return results;
+	}
+	this.observers = [];
+	return results;
     }
-
+    
+    iterate(context, transitions, results) {
+	let state = this.getState();
+        this.nextLine();
+	if(this.debug) {
+	    if(Number.isNaN(this.lineOffset)) {
+		throw new Error();
+	    }
+	    const rinfo = this.inputLines.info(
+                this.lineOffset)
+	    if(!isIterable(rinfo)) {
+                throw new Error();
+	    }
+	    const [ source, offset ] = rinfo
+	    this.debugFn(`\nStateMachine.run: line (source=${source}, offset=${offset}):\n| ${this.line}`);
+	}
+	if(!Array.isArray(context)) {
+	    throw new Error("context should be array");
+	}
+	const [contextOut, nextState, result] = this.checkLine(context, state, transitions);
+	return [ contextOut, nextState, result ];
+    }
     /**
       *         Return current state object; set it first if
       *         `next_state` given.  Parameter `next_state`: a string,
@@ -455,6 +446,7 @@ src;
 
 
     error() {
+	throw new Error();
     }
 
     attachObserver(observer) {
@@ -952,3 +944,4 @@ export class StringList extends ViewList {
         throw new UnimplementedException('replace');
     }
 }
+
