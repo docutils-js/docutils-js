@@ -1,4 +1,4 @@
-import { Body } from './States';
+import { Body } from '../../../src/parsers/rst/States';
 
 test('body constructor',
      () => {

@@ -1,6 +1,6 @@
-import { Publisher, publishCmdLine, defaultDescription } from 'Core'
-import { Source } from 'Sources';
-import { StringInput, StringOutput } from 'io'
+import { Publisher, publishCmdLine, defaultDescription } from '../src/Core'
+import { Source } from '../src/Sources';
+import { StringInput, StringOutput } from '../src/io'
 
 const defaultArgs = {
     readerName: 'standalone',
@@ -36,12 +36,12 @@ test.skip('cmdline', () => {
     });
 });
 
-test.only('1',  () => {
+test('1',  () => {
     const settings = { ...defaultSettings }
     const args = { ...defaultArgs }
 
     const { readerName, parserName, writerName } = args;
-    const source = new StringInput({source: "`derp`:blah: http://heptet.us/ Python_"})
+    const source = new StringInput({source: "input"})
 //    const source = new StringInput({source: 'Text 1\nText 2\n\nHeader\n======\n'})
     const destination = new StringOutput({})
     const pub = new Publisher({source, destination, settings, debug: true, debugFn: console.log});
@@ -59,17 +59,17 @@ test.only('1',  () => {
     });
 })
 
-test.each([['Title', "Title\n=====\nParagraph."],
-	   ['Random', '* bullet\n* bullet\n\n '],
-	   ['Random 2', 'Header 1\n========\nText\n\nHeader 2\n-------'],
-	   ['Random 2', 'Test.\nTest2\nTest3\n-----'],
-	   ['Random 4', `Test3
+test.skip.each([['Title', "Title\n=====\nParagraph."],
+//	   ['Random', '* bullet\n* bullet\n\n '],
+//	   ['Random 2', 'Header 1\n========\nText\n\nHeader 2\n-------'],
+//	   ['Random 2', 'Test.\nTest2\nTest3\n-----'],
+/*	   ['Random 4', `Test3
 -----
 
 This is a test.
 
 * BUllet list 1
-* The emacs rst editor is weird.`],
+* The emacs rst editor is weird.`],*/
 	   ['Emphasis', "*hello*"],
 	   ['Emphasis surrounded by text', "stuff *hello* things"],
 	   ['Emphasis preceded by text', "stuff *hello*"],
@@ -77,7 +77,7 @@ This is a test.
 	   ['Strong', '**hello**'],
 	   ['Emphasis and inline', '*hello* and **goodbye**'],
 	   ['Inline followed by emphasis', '**hello** and *goodbye*'],
-	  ] )("%s: %s", (a,raw) => {
+	  ] )("%s", (a,raw) => {
 	      const settings = { ...defaultSettings }
 	      const args = { ...defaultArgs }
 	      
@@ -85,7 +85,7 @@ This is a test.
 //	      console.log(raw);
 	      const source = new StringInput({source: raw});
 	      const destination = new StringOutput({})
-	      const pub = new Publisher({source, destination, settings, debug: true, debugFn: console.log });
+	      const pub = new Publisher({source, destination, settings});
 	      pub.setComponents(readerName, parserName, writerName);
 	      return new Promise((resolve, reject) => {
 		  /* {argv, usage, description, settingsSpec, settingsOverrides, configSection, enableExitStatus }*/

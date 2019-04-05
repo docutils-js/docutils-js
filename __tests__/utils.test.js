@@ -1,4 +1,4 @@
-import * as utils from './utils';
+import * as utils from '../src/utils';
 
 test('1', () => {
     const r = utils.newReporter({}, { debug: true,

@@ -1,4 +1,4 @@
-import { StateMachine, StateWS, StringList } from './StateMachine';
+import { StateMachine, StateWS, StringList } from '../src/StateMachine';
 
 class MockStateMachine {
     constructor(args)

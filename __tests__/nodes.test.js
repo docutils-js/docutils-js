@@ -1,4 +1,4 @@
-import * as nodes from 'nodes';
+import * as nodes from '../src/nodes';
 
 test('paragraph with text', ()=>{
     /* constructor(rawsource, text, children, attributes) */

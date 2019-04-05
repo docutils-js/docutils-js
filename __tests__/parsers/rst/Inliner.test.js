@@ -1,21 +1,6 @@
-import { Inliner } from 'parsers/rst/States'
-import { newDocument, newReporter } from 'utils';
-import { Element }  from 'nodes';
-
-function setupInliner() {
-    const inliner = new Inliner();
-    inliner.initCustomizations({})
-    const document = newDocument({}, {});
-    const reporter = newReporter({}, {});
-    let language;
-    const memo = { document,
-		   reporter,
-		   language,
-		 };
-
-    return [inliner,memo, document];
-}
-
+import { Inliner } from '../../../src/parsers/rst/States'
+import { newDocument, newReporter } from '../../../src/utils';
+import { Element }  from '../../../src/nodes';
 
 function isIterable(obj) {
   // checks for null and undefined
@@ -37,25 +22,53 @@ function dumpNodes(nodes) {
 }
 
 test('inliner 1', () => {
-    const [inliner, memo, document] = setupInliner();
+    const inliner = new Inliner();
+    inliner.initCustomizations({})
+    const document = newDocument({}, {});
+    const reporter = newReporter({}, {});
+    let language;
+    const memo = { document,
+		   reporter,
+		   language,
+		 };
+		   
     const result = inliner.parse('I like TV.', {  lineno: 1, memo, parent: document });
     const [ nodes] = result;
-    expect(nodes.toString()).toMatchSnapshot();
+    console.log(nodes);
 })
 
 test('inliner 2', () => {
-    const [inliner, memo, document] = setupInliner();
+    const inliner = new Inliner();
+    inliner.initCustomizations({})
+    const document = newDocument({}, {});
+    const reporter = newReporter({}, {});
+    let language;
+    const memo = { document,
+		   reporter,
+		   language,
+		 };
+		   
     const result = inliner.parse('I like *TV*.', {  lineno: 1, memo, parent: document });
     const [ nodes] = result;
-    expect(nodes.toString()).toMatchSnapshot();
+    if(isIterable(nodes)) {
+	console.log('is iterable');
+	nodes.forEach((e, i) => {
+	    if(typeof e === 'object' && e instanceof Element) {
+		console.log(e.tagname);
+	    } else if(Array.isArray(e)) {
+		e.forEach((e2, i2) => {
+		    if(e2 instanceof Element) {
+			console.log(e.tagname);
+		    } else {
+			console.log(`    ${i2}: ${e2}`);
+		    }
+		    
+		})
+	    } else {
+		console.log(`${i}: ${e}`);
+	    }
+	});
+
+    }
+
 })
-
-test('pattern 1', () => {
-    const [inliner, memo, document] = setupInliner();
-    /* do we want to pass parent as document ?? */
-    const [ nodes ] = inliner.parse('*wibble* **wobble***', {  lineno: 1, memo, parent: document });
-    expect(nodes.toString()).toMatchSnapshot();
-})
-
-
-
