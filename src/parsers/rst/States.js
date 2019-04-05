@@ -328,10 +328,10 @@ export class Inliner {
     }
 
     initCustomizations(settings) {
-        let startStringPrefix; let
-endStringSuffix;
-        let ssn; let
-esn;
+        let startStringPrefix;
+	let endStringSuffix;
+        let ssn;
+	let esn;
         if (settings.characterLevelInlineMarkup) {
             startStringPrefix = '(^|(?<!\\x00))';
             ssn = [null, null];
