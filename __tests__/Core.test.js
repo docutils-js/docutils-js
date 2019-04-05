@@ -59,17 +59,17 @@ test('1',  () => {
     });
 })
 
-test.skip.each([['Title', "Title\n=====\nParagraph."],
-//	   ['Random', '* bullet\n* bullet\n\n '],
-//	   ['Random 2', 'Header 1\n========\nText\n\nHeader 2\n-------'],
-//	   ['Random 2', 'Test.\nTest2\nTest3\n-----'],
-/*	   ['Random 4', `Test3
+test.each([['Title', "Title\n=====\nParagraph."],
+	   ['Random', '* bullet\n* bullet\n\n '],
+	   ['Random 2', 'Header 1\n========\nText\n\nHeader 2\n-------'],
+	   ['Random 2', 'Test.\nTest2\nTest3\n-----'],
+	   ['Random 4', `Test3
 -----
 
 This is a test.
 
 * BUllet list 1
-* The emacs rst editor is weird.`],*/
+* The emacs rst editor is weird.`],
 	   ['Emphasis', "*hello*"],
 	   ['Emphasis surrounded by text', "stuff *hello* things"],
 	   ['Emphasis preceded by text', "stuff *hello*"],
@@ -85,7 +85,7 @@ This is a test.
 //	      console.log(raw);
 	      const source = new StringInput({source: raw});
 	      const destination = new StringOutput({})
-	      const pub = new Publisher({source, destination, settings});
+	      const pub = new Publisher({source, destination, settings, debug: true, debugFn: console.log});
 	      pub.setComponents(readerName, parserName, writerName);
 	      return new Promise((resolve, reject) => {
 		  /* {argv, usage, description, settingsSpec, settingsOverrides, configSection, enableExitStatus }*/
