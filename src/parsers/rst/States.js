@@ -103,6 +103,105 @@ export class Inliner {
         this.nonWhitespaceEscapeBefore = '(?<![\\s\\x00])';
     }
 
+    substitution_reference(match, lineno) {
+        const [ before, inlines, remaining, sysmessages, endstring ] = self.inline_obj(
+              match, lineno, self.patterns.substitution_ref,
+              nodes.substitution_reference)
+        if(inlines.length === 1) {
+            const subrefNode = inlines[0]
+            if(subrefNode instanceof nodes.substitution_reference) {
+                subrefText = subrefNode.astext()
+                this.document.note_substitution_ref(subrefNode, subrefText)
+		if(endstring[endstring.length - 1] === '_') {
+                    const referenceNode = new nodes.reference(
+                        '|' + subrefText + endstring, '')
+                    if(endstring.endsWith('__')) {
+                        referenceNode.attributes['anonymous'] = 1
+		    } else {
+                        referenceNode.attributes['refname'] = normalize_name(subrefText)
+                        this.document.note_refname(reference_node)
+		    }
+                    referenceNode.add(subrefNode)
+                    const inlines = [reference_node]
+		}
+	    }
+	}
+        return [before, inlines, remaining, sysmessages]
+    }
+    
+    footnote_reference( match, lineno) {
+	const label = match.group['footnotelabel']
+	const refname = normalize_name(label)
+	const string = match.result.input
+	let before = string.substring(0, match.result.index)
+	let remaining = string.substring(match.result.index + match.result[0].length);
+	let refnode;
+	if(match.group['citationlabel']) {
+            refnode = new nodes.citation_reference('[%s]_' % label, [],
+						   { refname })
+            refnode += nodes.Text(label)
+            self.document.note_citation_ref(refnode)
+	} else {
+            refnode = new nodes.footnote_reference('[%s]_' % label)
+            if(refname[0] === '#') {
+		const refname = refname.substring(1);
+		refnode.attributes['auto'] = 1
+		this.document.note_autofootnote_ref(refnode)
+	    } else if(refname === '*') {
+                refname = ''
+                refnode.attributes['auto'] = '*'
+                this.document.note_symbol_footnote_ref(
+                    refnode)
+	    } else {
+                refnode,add(new nodes.Text(label))
+	    }
+            if(refname) {
+                refnode.attributes['refname'] = refname
+                this.document.note_footnote_ref(refnode)
+	    }
+            if(utils.getTrimFootnoteRefSpace(this.document.settings)) {
+                before = before.trimRight()
+	    }
+	}
+        return [before, [refnode], remaining, []]
+    }
+
+    reference(match, lineno, anonymous=false) {
+        const referencename = match.group['refname']
+        const refname = normalize_name(referencename)
+        const referencenode = new nodes.reference(
+            referencename + match.group['refend'], referencename, [],
+            { name: whitespace_normalize_name(referencename)})
+        referencenode[0].rawsource = referencename
+        if(anonymous) {
+            referencenode.attributes['anonymous'] = 1
+	} else {
+            referencenode.attributes['refname'] = refname
+            this.document.note_refname(referencenode)
+	}
+        string = match.result.input
+        matchstart = match.result.index
+        matchend = match.result.index + match.result[0].length
+        return [string.substring(0, matchstart), [referencenode], string.substring(matchend), []]
+    }
+    
+    anonymous_reference(match, lineno) {
+	return this.reference(match, lineno, true);
+    }
+    
+    inline_internal_target( match, lineno) {
+        const [ before, inlines, remaining, sysmessages, endstring ] = this.inline_obj(
+              match, lineno, this.patterns.target, nodes.target)
+        if(inlines && inlines[0] instanceof nodes.target) {
+            //assert len(inlines) == 1
+            const target = inlines[0]
+            const name = normalize_name(target.astext())
+            target.attributes['names'].append(name)
+            this.document.note_explicit_target(target, this.parent)
+	}
+        return [ before, inlines, remaining, sysmessages ]
+    }
+
     problematic(text, rawsource, message) {
         const msgid = this.document.setId(message, this.parent);
         const problematic = new nodes.problematic(rawsource, text, [], { refid: msgid });
@@ -125,19 +224,21 @@ export class Inliner {
         const end_pattern = this.patterns.interpreted_or_phrase_ref
         const string = match.match.input
 	console.log(match.groups);
-/*        matchstart = match.start('backquote')
-        matchend = match.end('backquote')
-        rolestart = match.start('role')
-        role = match.group('role')
-        position = ''
-        if role:
-            role = role[1:-1]
+	const matchstart = match.match.index
+        const matchend = matchstart + match.match[0].length
+        const rolestart = match.match.input.indexOf(match.groups['role'])
+        let role = match.groups['role']
+        let position = ''
+        if(role) {
+            role = role.substring(1, role.length - 1)
             position = 'prefix'
-        elif self.quoted_start(match):
-            return (string[:matchend], [], string[matchend:], [])
-        endmatch = end_pattern.search(string[matchend:])
-        if endmatch and endmatch.start(1):  # 1 or more chars
-            textend = matchend + endmatch.end()
+	} else if(this.quoted_start(match)) {
+            return [string.substring(0, matchend), [], string.substring(matchend), []]
+	}	    
+        const endmatch = end_pattern.exec(string.substring(matchend));
+        if(endmatch && endmatch[0].length) {
+            const textend = matchend + endmatch.index + endmatch[0].length
+            /*
             if endmatch.group('role'):
                 if role:
                     msg = self.reporter.warning(
@@ -167,7 +268,8 @@ export class Inliner {
                                                       lineno)
                 return (string[:rolestart], nodelist,
                         string[textend:], messages)
-*/
+            */
+	}
         const msg = this.reporter.warning(
             'Inline interpreted text or phrase reference start-string '+
 		'without end-string.', [], {line: lineno})
