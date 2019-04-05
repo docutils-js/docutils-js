@@ -212,11 +212,6 @@ export class Element extends Node {
 	});
     }
 
-/*    asdom(dom) {
-	const parser =
- new DOMParser();
-	parser.parse*/
-
     toString() {
 	if(this.children.length) {
 	    return [this.starttag(), ...this.children.map(c => c.toString()), this.endtag()].join('')
