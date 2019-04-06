@@ -1,4 +1,4 @@
-#!/usr/bin/node
+#!/usr/bin/env babel-node
 
 //require("@babel/polyfill");
 
@@ -45,7 +45,6 @@ const argv = process.argv.slice(2);
 console.log(argv);
 const description = 'Generates Docutils-native XML from standalone ' + 'reStructuredText sources.  ' + _Core.defaultDescription;
 (0, _Core.publishCmdLine)({
-    debug: true,
     debugFn: (msg) => {
 	console.log(`here ${msg}`);
     },

@@ -211,6 +211,17 @@ export class Element extends Node {
 	this.listAttributes.forEach(x => {
 	    this.attributes[x] = [];
 	});
+	if(typeof attributes === 'undefined') {
+		attributes = {};
+	}
+	Object.entries(attributes).forEach(([att, value]) => {
+	    att = att.toLowerCase();
+	    if(att in this.listAttributes) {
+		this.attributes[att] = [...value]
+	    } else {
+		this.attributes[att] = value;
+	    }
+	});
     }
 
     toString() {
@@ -391,22 +402,37 @@ export class document extends Element {
 
     setId(node, msgNode) {
 	let msg;
-	node.attributes.ids.forEach(id => {
-	    if(this.ids[id] !== node) {
+	let id;
+	for(id of node.attributes.ids) {
+	    if(id in this.ids && this.ids[id] !== node) {
 		msg = self.reporter.severe(`Duplicate ID: "${id}".`);
 		if(msgnode) {
 		    msgnode.add(msg);
 		}
 	    }
-	});
-	if(!node.attributes.ids){
-	    node.attributes.names.forEach(name => {
-		let id = this.settings.idPrefix + makeId(name);
-		if(id && !self.attributes.ids[id]){
-		}
-	    });
 	}
-	// fixme bla
+	if(node.attributes.ids.length === 0){
+	    let name;
+	    let myBreak = false;
+	    for(name of node.attributes.names) {
+		id = this.settings.idPrefix + makeId(name);
+		if(id && !(id in self.attributes.ids)){
+		    myBreak = true;
+		    break;
+		}
+	    }
+	    if(!myBreak) {
+		id = ''
+		while (!id || (id in this.attributes.ids)) {
+		    id = (this.settings.idPrefix + this.settings.autoIdPrefix
+			  + this.idStart);
+		    this.idStart += 1;
+		}
+	    }
+	    node.attributes.ids.push(id);
+	}
+	this.ids[id] = node;
+	return id;
     }
 
     setNameIdMap(node, id, msgnode, explicit) {

@@ -90,6 +90,8 @@ export class Publisher {
 	    argv = process.argv.slice(2);
 	}
 	this.settings = optionParser.parseArgs(argv);
+	this.settings.idPrefix = '';
+	this.settings.autoIdPrefix = 'auto'
 	this.settings.debug = true; // force debug true for now
     }
 

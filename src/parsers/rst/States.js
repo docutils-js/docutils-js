@@ -2,7 +2,7 @@ import * as statemachine from '../../StateMachine';
 import * as languages from '../../languages';
 import * as nodes from '../../nodes';
 import { EOFError, InvalidArgumentsError, UnimplementedError as Unimp } from '../../Exceptions';
-import { punctuation_chars, column_width } from '../../utils';
+import { punctuation_chars, column_width, unescape } from '../../utils';
 
 const normalize_name = (x) => x;
 
@@ -101,6 +101,9 @@ export class Inliner {
         this.nonWhitespaceAfter = '';
 	this.nonWhitespaceBefore = '(?<!\\s)'
         this.nonWhitespaceEscapeBefore = '(?<![\\s\\x00])';
+
+	this.nonUnescapedWhitespaceEscapeBefore = '(?<!(?<!\\x00)[\\s\\x00])'
+
     }
 
     substitution_reference(match, lineno) {
@@ -110,7 +113,7 @@ export class Inliner {
         if(inlines.length === 1) {
             const subrefNode = inlines[0]
             if(subrefNode instanceof nodes.substitution_reference) {
-                subrefText = subrefNode.astext()
+                const subrefText = subrefNode.astext()
                 this.document.note_substitution_ref(subrefNode, subrefText)
 		if(endstring[endstring.length - 1] === '_') {
                     const referenceNode = new nodes.reference(
@@ -273,9 +276,9 @@ export class Inliner {
         const msg = this.reporter.warning(
             'Inline interpreted text or phrase reference start-string '+
 		'without end-string.', [], {line: lineno})
-        const text = string;//unescape(string[matchstart:matchend], True)
-        //prb = self.problematic(text, text, msg)
-        return [string.substring(0, match.match.index), [/*prb*/], ''/*string[matchend:]*/, [msg]]
+        const text = unescape(string.substring(matchstart, matchend), true);
+        const prb = this.problematic(text, text, msg)
+        return [string.substring(0, match.match.index), [prb], string.substring(matchend), [msg]]
     }
 
     quoted_start(match) {
@@ -405,7 +408,7 @@ esn;
             emphasis: new RegExp(`${this.nonWhitespaceEscapeBefore}(\\*)${endStringSuffix}`),
             strong: new RegExp(`${this.nonWhitespaceEscapeBefore}(\\*\\*)${endStringSuffix}`),
 	    literal: new RegExp(this.nonWhitespaceBefore + '(``)' + endStringSuffix),
-//          interpreted_or_phrase_ref: new RegExp(`${non_unescaped_whitespace_escape_before}(((:${simplename}:)?(__?)?))${endStringSuffix}`)
+            interpreted_or_phrase_ref: new RegExp(`${this.nonUnescapedWhitespaceEscapeBefore}(\`((:${this.simplename}:)?(__?)?))${endStringSuffix}`)
         };
     }
 
@@ -440,7 +443,7 @@ esn;
 sysmessages;
                 [before, inlines, remaining, sysmessages] = method({ match, groups: rr }, lineno);
                 unprocessed.push(before);
-//                messages.add(sysmessages)
+                messages.push(...sysmessages)
                 if (inlines) {
                     processed.push(...this.implicit_inline(unprocessed.join(''),
                                                        lineno));
@@ -795,7 +798,7 @@ matchTitles,
         const [textnodes, messages] = r;
         const p = new nodes.paragraph(data, '', textnodes);
         [p.source, p.line] = this.stateMachine.getSourceAndLine(lineno);
-        return [[p], literalnext];
+        return [[p, ...messages], literalnext];
     }
 
     inline_text(text, lineno) {
@@ -1181,7 +1184,7 @@ export class Text extends RSTState {
 
     blank(match, context, nextState) {
         const [paragraph, literalnext] = this.paragraph(context, this.stateMachine.absLineNumber() - 1);
-        this.parent.append(...paragraph);
+        this.parent.add(paragraph);
         if (literalnext) {
             this.parent.append(this.literal_Block());
         }
