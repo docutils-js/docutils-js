@@ -1,6 +1,8 @@
 import * as statemachine from '../../StateMachine';
 import * as languages from '../../languages';
 import * as nodes from '../../nodes';
+import { matchChars } from '../../utils/punctuationChars';
+
 import { EOFError, InvalidArgumentsError, UnimplementedError as Unimp } from '../../Exceptions';
 import { punctuation_chars, column_width, unescape } from '../../utils';
 
@@ -282,7 +284,26 @@ export class Inliner {
     }
 
     quoted_start(match) {
-        return false; // fixme
+        /*"""Test if inline markup start-string is 'quoted'.
+
+        'Quoted' in this context means the start-string is enclosed in a pair
+        of matching opening/closing delimiters (not necessarily quotes)
+        or at the end of the match.
+        """*/
+        const string = match.result.input
+        const start = match.result.index
+        if(start === 0) { // start-string at beginning of text
+            return false;
+	}
+        let poststart;
+        const prestart = string[start - 1]
+        try {
+	    poststart = string.substr(match.result.index + match.result[0].length, 1);
+	} catch(error) {
+	    console.log(error.constructor.name);
+	    return true; // not "quoted" but no markup start-string either
+	}
+        return matchChars(prestart, poststart)
     }
 
     inline_obj(match, lineno, end_pattern, nodeclass,
@@ -441,7 +462,7 @@ esn;
                 }
                 let before; let inlines; let
 sysmessages;
-                [before, inlines, remaining, sysmessages] = method({ match, groups: rr }, lineno);
+                [before, inlines, remaining, sysmessages] = method({ result: match, match, groups: rr }, lineno);
                 unprocessed.push(before);
                 messages.push(...sysmessages)
                 if (inlines) {
