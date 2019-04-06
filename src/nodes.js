@@ -416,7 +416,7 @@ export class document extends Element {
 	    let myBreak = false;
 	    for(name of node.attributes.names) {
 		id = this.settings.idPrefix + makeId(name);
-		if(id && !(id in self.attributes.ids)){
+		if(id && !(id in this.attributes.ids)){
 		    myBreak = true;
 		    break;
 		}
