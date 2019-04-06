@@ -107,8 +107,8 @@ export class Inliner {
     }
 
     substitution_reference(match, lineno) {
-        const [ before, inlines, remaining, sysmessages, endstring ] = self.inline_obj(
-              match, lineno, self.patterns.substitution_ref,
+        const [ before, inlines, remaining, sysmessages, endstring ] = this.inline_obj(
+              match, lineno, this.patterns.substitution_ref,
               nodes.substitution_reference)
         if(inlines.length === 1) {
             const subrefNode = inlines[0]
@@ -143,7 +143,7 @@ export class Inliner {
             refnode = new nodes.citation_reference('[%s]_' % label, [],
 						   { refname })
             refnode += nodes.Text(label)
-            self.document.note_citation_ref(refnode)
+            this.document.note_citation_ref(refnode)
 	} else {
             refnode = new nodes.footnote_reference('[%s]_' % label)
             if(refname[0] === '#') {
@@ -1033,7 +1033,7 @@ export class Body extends RSTState {
         enumlist.suffix = this.enum.formatinfo[format].suffix;
         if (ordinal !== 1) {
             enumlist.start = ordinal;
-            const msg = self.reporter.info(
+            const msg = this.reporter.info(
                 `Enumerated list start value not ordinal-1: "${text}" (ordinal ${ordinal})`,
 );
             this.parent.add(msg);
@@ -1146,7 +1146,7 @@ initialState: 'BulletList',
             const msg = this.reporter.info(
                 'Unexpected possible title overline or transition.\n'
                 + "Treating it as ordinary text because it's so short.",
-                { line: self.state_machine.abs_line_number() },
+                { line: this.stateMachine.absLineNumber() },
 );
             this.parent.add(msg);
             throw new statemachine.TransitionCorrection('text');
@@ -1155,9 +1155,9 @@ initialState: 'BulletList',
             const msg = this.reporter.severe(
                   'Unexpected section title or transition.',
                   nodes.literal_block(blocktext, blocktext),
-                { line: self.state_machine.abs_line_number() },
+                { line: this.stateMachine.absLineNumber() },
 );
-            self.parent.add(msg);
+            this.parent.add(msg);
             return [[], next_state, []];
         }
     }
@@ -1251,7 +1251,7 @@ export class Text extends RSTState {
             const blocktext = `${context[0]}\n${this.stateMachine.line}`;
             // We need get_source_and_line() here to report correctly
             const [src, srcline] = this.stateMachine.getSourceAndLine();
-            const msg = self.reporter.severe('Unexpected section title.',
+            const msg = this.reporter.severe('Unexpected section title.',
                                              [nodes.literal_block(blocktext, blocktext)], { source: src, line: srcline });
             this.parent.add(messages);
             this.parent.add(msg);
@@ -1287,7 +1287,7 @@ srcline;
         // fixme this.parent.add(msg)
         if (literalnext) {
             try {
-                self.stateMachine.nextLine();
+                this.stateMachine.nextLine();
             } catch (error) {
                 if (error instanceof EOFError) {
                 } else {
@@ -1434,7 +1434,7 @@ export class Line extends SpecializedText {
 		if(overline.trimEnd().length < 4) {
                     this.short_overline(context, blocktext, lineno, 2)
 		} else {
-                    const msg = self.reporter.severe(
+                    const msg = this.reporter.severe(
 			'Incomplete section title.',
 			[new nodes.literal_block(blocktext, blocktext)],
 			{ line: lineno})
@@ -1453,7 +1453,7 @@ export class Line extends SpecializedText {
             if(overline.trimEnd().length < 4) {
                 this.short_overline(context, blocktext, lineno, 2)
 	    } else {
-                const msg = self.reporter.severe(
+                const msg = this.reporter.severe(
                     'Missing matching underline for section title overline.',
                     [nodes.literal_block(source, source)],
                     { line: lineno })
@@ -1465,7 +1465,7 @@ export class Line extends SpecializedText {
             if(overline.trimEnd().length < 4) {
                 this.short_overline(context, blocktext, lineno, 2)
 	    } else {
-                const msg = self.reporter.severe(
+                const msg = this.reporter.severe(
                     'Title overline & underline mismatch.',
                     [nodes.literal_block(source, source)],
                     { line: lineno });
@@ -1480,7 +1480,7 @@ export class Line extends SpecializedText {
             if(overline.trimEnd().length() < 4) {
                 this.short_overline(context, blocktext, lineno, 2)
 	    } else {
-                const msg = self.reporter.warning(
+                const msg = this.reporter.warning(
                     'Title overline too short.',
                     [nodes.literal_block(source, source)],
                     { line: lineno })
@@ -1490,7 +1490,7 @@ export class Line extends SpecializedText {
         const style = [overline[0], underline[0]]
         this.eofcheck = 0               // @@@ not sure this is correct
         this.section({ title: title.trimStart(), source, style, lineno: lineno + 1, messages});
-        self.eofcheck = 1
+        this.eofcheck = 1
         return [[], 'Body', []]
 
     }
@@ -1502,7 +1502,7 @@ export class Line extends SpecializedText {
         if(overline.trimEnd().length < 4) {
             this.short_overline(context, blocktext, lineno, 1)
 	}
-        msg = self.reporter.error(
+        const msg = this.reporter.error(
 	    'Invalid section title or transition marker.',
 	    [nodes.literal_block(blocktext, blocktext)],
 	    {line: lineno})
@@ -1511,7 +1511,7 @@ export class Line extends SpecializedText {
     }
 
     shortOverline(context, blocktext, lineno, lines = 1) {
-        const msg = self.reporter.info(
+        const msg = this.reporter.info(
             'Possible incomplete section title.\nTreating the overline as '+
             "ordinary text because it's so short.", [],
             { line: lineno})
