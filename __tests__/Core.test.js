@@ -43,12 +43,10 @@ test('1',  () => {
     const args = { ...defaultArgs }
 
     const { readerName, parserName, writerName } = args;
-    const source = new StringInput({source: `Block quotes consist of indented body elements:
-
-    This theory, that is mine, is mine.
-
-    -- Anne Elk (Miss)
-`});
+    const source = new StringInput({source: `>>> print 'Python-specific usage examples; begun with ">>>"'
+Python-specific usage examples; begun with ">>>"
+>>> print '(cut and pasted from interactive Python sessions)'
+(cut and pasted from interactive Python sessions)`});
         const destination = new StringOutput({})
     const pub = new Publisher({source, destination, settings, debug: true, debugFn: console.log});
     pub.setComponents(readerName, parserName, writerName);

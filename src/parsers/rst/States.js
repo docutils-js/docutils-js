@@ -925,13 +925,14 @@ export class Body extends RSTState {
  bullet: '[-+*\u2022\u2023\u2043]( +|$)',
                           enumerator: `(${pats.parens}|${pats.rparen}|${pats.period})( +|$)`,
             'field_marker': ':(?![: ])([^:\\\\]|\\\\.|:(?!([ `]|$)))*(?<! ):( +|$)',                          grid_table_top: this.gridTableTopPat,
+	    'doctest': '>>>( +|$)',
                           simple_table_top: this.simpleTableTopPat,
                           line: `(${pats.nonalphanum7bit})\\1* *$`,
                           text: '',
                         };
 //      console.log(this.enumerator);
 
-        this.initialTransitions = ['bullet', 'enumerator', 'field_marker', 'line', 'text'];
+        this.initialTransitions = ['bullet', 'enumerator', 'field_marker', 'doctest', 'line', 'text'];
 /*          'enumerator',
           'field_marker',
           'option_marker',
@@ -1256,6 +1257,123 @@ initialState: 'BulletList',
 
     parse_field_body(indented, offset, node) {
 	this.nestedParse(indented, { inputOffset: offset, node: node })
+    }
+
+    option_marker( match, context, nextState) {
+        //"""Option list item."""
+        const optionlist = new nodes.option_list()
+        const [ source, line ] = this.stateMachine.getSourceAndLine()
+        try {
+            const [ listitem, blankFinish ] = this.option_list_item(match)
+	}
+	catch(error) {
+	    if(error instanceof MarkupError) {
+		// This shouldn't happen; pattern won't match.
+		const msg = this.reporter.error(`Invalid option list marker: ${error}`);
+		this.parent.add( msg )
+		const [ indented, indent, line_offset, blankFinish2 ]  = 
+                      this.stateMachine.getFirstKnownIndented({ indent: match.result.index + match.result[0].length });
+		blankFinish = blankFinish2;
+		const elements = this.block_quote(indented, line_offset)
+		this.parent.add(elements);
+		if(!blankFinish2) {
+                    this.parent.add(this.unindentWarning('Option list'));
+		}
+		return [[], nextState, []]
+	    }
+	    throw error;
+	}
+        this.parent.add( optionlist)
+        optionlist.add( listitem)
+        const offset = this.stateMachine.lineOffset + 1   // next line
+        const [ newline_offset, blankFinish3 ] = this.nestedListParse(
+            this.stateMachine.inputLines.slice(offset),
+	    {
+		inputOffset: this.stateMachine.absLineOffset() + 1,
+		node: optionlist,
+		initialState: 'OptionList',
+		blankFinish: blankFinish3,
+	    }
+	);
+        this.gotoLine(newlineOffset)
+        if(!blankFinish3) {
+            this.parent.add(self.unindentWarning('Option list'));
+	}
+        return [[], nextState, []]
+    }
+    
+    option_list_item(match) {
+        const offset = this.stateMachine.absLineOffset()
+        const options = thisn.parse_option_marker(match)
+        const [ indented, indent, line_offset, blank_finish ] = 
+              this.stateMachine.getFirstKnownIndented({ indent: match.result.index + match.result[0].length });
+        if(!indented || !indented.length) {//  not an option list item
+            this.gotoLine(offset)
+            throw new statemachine.TransitionCorrection('text')
+	}
+        const option_group = new nodes.option_group('', options)
+        const description = new nodes.description(indented.join('\n'));
+        const option_list_item = new nodes.option_list_item('', option_group,
+                                                  [description])
+        if(indented && indented.length) {
+            this.nestedParse(indented, { inputOffset: line_offset,
+					 node: description });
+	}
+        return [ option_list_item, blank_finish ]
+    }
+
+    parse_option_marker(match) {
+    /*"""
+        Return a list of `node.option` and `node.option_argument` objects,
+        parsed from an option marker match.
+
+        :Exception: `MarkupError` for invalid option markers.
+        """*/
+        const optlist = []
+        const optionstrings = match.result[0].trimEnd().split(', ');
+        for(let optionstring of optionstrings) {
+            const tokens = optionstring.split(/s+/)
+            const delimiter = ' '
+            const firstopt = tokens[0].split('=', 2)
+            if(firstopt.length > 1) {
+		// "--opt=value" form
+		tokens.splice(0, 1, firstopt); // fixme check
+                delimiter = '='
+	    } else if(tokens[0].length > 2
+		      && ((tokens[0].indexOf('-') === 0
+			   && tokens[0].indexOf('--') !== 0)
+			  || tokens[0].indexOf('+') === 0)) {
+		//"-ovalue" form
+		tokens.splice(0, 1, tokens[0].substring(0, 2), tokens[0].substring(2));
+                delimiter = ''
+	    }
+            if(tokens.length > 1 && (tokens[1].startsWith('<')
+                                     && tokens[-1].endsWith('>'))) {
+		// "-o <value1 value2>" form; join all values into one token
+                tokens.splice(1, tokens.length, tokens.slice(1).join(''));
+	    }
+	    if(0 < tokens.length <= 2) {
+                const option = new nodes.option(optionstring)
+                option.add(new nodes.option_string(tokens[0], tokens[0]))
+                if(tokens.length > 1) {
+                    option.add(new nodes.option_argument(tokens[1], tokens[1],
+							 [], { delimiter }));
+		}
+                optlist.push(option)
+	    }else {
+                throw new MarkupError(`wrong number of option tokens (=${tokens.length}), should be 1 or 2: "${optionstring}"`);
+	    }
+	}
+        return optlist
+    }
+
+    doctest(match, context, nextState) {
+	const data = this.stateMachine.getTextBlock().join('\n');
+	// TODO: prepend class value ['pycon'] (Python Console)
+        // parse with `directives.body.CodeBlock` (returns literal-block
+        // with class "code" and syntax highlight markup).
+        this.parent.add(new nodes.doctest_block(data, data))
+        return [[], nextState, []]
     }
     
     line(match, context, nextState) {

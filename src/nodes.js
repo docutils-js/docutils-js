@@ -609,8 +609,21 @@ export class strong extends TextElement {} // Inline
 export class literal extends TextElement {} // Inline
 
 export class problematic extends TextElement {} // Inline
-export class literal_block extends FixedTextElement {}
+
 export class transition extends Element {} // Structura
+
+export class option_group extends Element {
+    //child_text_separator = ', '
+}
+
+export class option_list extends Element { } //Sequential
+export class option_list_item extends Element { } //    child_text_separator = '
+export class option_string extends TextElement { } // (Part
+export class description extends Element { } //(Part
+export class literal_block extends FixedTextElement {}
+export class doctest_block extends FixedTextElement {}
+export class math_block extends FixedTextElement {}
+export class line_block extends Element { }
 
 export class block_quote extends Element{ }
 export class attribution extends TextElement{ }
