@@ -659,7 +659,7 @@ blankFinish;
         }
         let offset = this.absLineOffset();
         [indented, indent, blankFinish] = this.inputLines.getIndented({
- lineOffset: this.lineOffset, untilBlank, stripIndent, blockIndent: indent,
+ start: this.lineOffset, untilBlank, stripIndent, blockIndent: indent,
 });
         this.nextLine(indented.length - 1);
         while (indented.length && !(indented[0].trim())) {
@@ -775,6 +775,13 @@ export class StateWS extends State {
     }
 }
 
+function expandtabs(string) {
+    let tabIndex;
+    while((tabIndex = string.indexOf('\t')) !== -1) {
+        string = string.substring(0, tabIndex) + Array(tabIndex % 8).map(x => ' ').join('') + string.substring(tabIndex + 1);
+    }
+    return string;
+}
 export function string2lines(astring, args) {
     if (!astring) {
         astring = '';
@@ -786,8 +793,12 @@ export function string2lines(astring, args) {
     if (tabWidth === undefined) {
         tabWidth = 8;
     }
-    /* fo a bunch of stuff */
-    return astring.split('\n').map(x => x);
+    const result = astring.split('\n');
+    if(astring[astring.length - 1] === '\n') {
+        result.pop();
+    }
+    return result.map(expandtabs);
+
 }
 
 /* Our original class delegates to its array,

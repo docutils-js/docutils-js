@@ -41,7 +41,11 @@ test('1',  () => {
     const args = { ...defaultArgs }
 
     const { readerName, parserName, writerName } = args;
-    const source = new StringInput({source: "input"})
+    const source = new StringInput({source: `
+* I love docs.
+
+`});
+
 //    const source = new StringInput({source: 'Text 1\nText 2\n\nHeader\n======\n'})
     const destination = new StringOutput({})
     const pub = new Publisher({source, destination, settings, debug: true, debugFn: console.log});
