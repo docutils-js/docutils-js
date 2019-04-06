@@ -3,6 +3,17 @@ import{ GenericNodeVisitor}from '../nodes';
 import * as docutils from '../index';
 import * as nodes from '../nodes';
 
+function escapeXml(unsafe) {
+    return unsafe.replace(/[<>&'"]/g, function (c) {
+        switch (c) {
+            case '<': return '&lt;';
+            case '>': return '&gt;';
+            case '&': return '&amp;';
+            case '\'': return '&apos;';
+            case '"': return '&quot;';
+        }
+    });
+}
 class XMLTranslator extends GenericNodeVisitor {
     constructor(document) {
 	super(document);
@@ -65,7 +76,7 @@ class XMLTranslator extends GenericNodeVisitor {
 	// bla
     }
     visit_Text(node) {
-	const text = node.astext()
+	const text = escapeXml(node.astext())
 	this.output.push(text);
     }
     depart_Text(node) {

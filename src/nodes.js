@@ -1,5 +1,6 @@
 import Transformer from './Transformer';
 import { InvalidArgumentsError} from './Exceptions';
+import * as utils from './utils';
 
 
 function setup_backlinkable(o) {
@@ -345,7 +346,7 @@ export class Text extends Node {
 	this.children = []
     }
     astext() {
-	return this.data;
+	return utils.unescape(this.data);
     }
     toString() {
 	return this.astext();

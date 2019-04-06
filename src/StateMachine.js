@@ -7,7 +7,7 @@ export class TransitionCorrection extends Error {
 	super(...args);
 	this.args = args;
 	if(Error.captureStackTrace) {
-	    Error.captureStackTrace(this, InvalidArgumentsError);
+	    Error.captureStackTrace(this, TransitionCorrection);
 	}
     }
 
@@ -15,6 +15,14 @@ export class TransitionCorrection extends Error {
 export class UnexpectedIndentationError extends Error {
 }
 export class StateCorrection extends Error {
+    constructor(...args) {
+        super(...args);
+        this.args = args;
+        if(Error.captureStackTrace) {
+            Error.captureStackTrace(this, StateCorrection);
+        }
+    }
+
 }
 
 function isIterable(obj) {
