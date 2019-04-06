@@ -43,10 +43,14 @@ test('1',  () => {
     const args = { ...defaultArgs }
 
     const { readerName, parserName, writerName } = args;
-    const source = new StringInput({source: `- This is a bullet list.
+    const source = new StringInput({source: `what
+    Definition lists associate a term with a definition.
 
-- Bullets can be "*", "+", or "-".`})
-    const destination = new StringOutput({})
+how
+    The term is a one-line phrase, and the definition is one
+    or more paragraphs or body elements, indented relative to
+    the term.`});
+        const destination = new StringOutput({})
     const pub = new Publisher({source, destination, settings, debug: true, debugFn: console.log});
     pub.setComponents(readerName, parserName, writerName);
     return new Promise((resolve,reject) => {

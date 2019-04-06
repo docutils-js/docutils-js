@@ -345,13 +345,17 @@ export class TextElement extends Element {
 	if(!children) {
 	    children = [];
 	}
-	super(rawsource, text !== '' ? [new Text(text), ...children] : children, attributes);
+	super(rawsource, (typeof text !== 'undefined' && text !== '') ? [new Text(text), ...children] : children, attributes);
     }
 }
 
 export class Text extends Node {
     constructor(data, rawsource='') {
 	super();
+	if(typeof data === 'undefined') {
+		throw new Error("data should not be undefined");
+	}
+
 	this.rawsource = rawsource;
 	this.data = data;
 	this.children = []

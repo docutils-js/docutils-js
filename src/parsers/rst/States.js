@@ -1404,6 +1404,21 @@ export class SpecializedText extends Text {
     }
 }
 
+export class Definition extends SpecializedText {
+    eof(context) {
+	this.stateMachine.previousLine(2);
+	return []
+    }
+    indent(match,context, nextState) {
+	const [itemNode, blankFinish ] = this.definition_list_item(context);
+	this.parent.add(itemNode);
+	this.blankFinish = blankFinish;
+	return [[], 'DefinitionList', []]
+    }
+}
+
+
+
 export class Line extends SpecializedText {
     _init(args) {
         super._init(args);
@@ -1583,7 +1598,13 @@ export class BulletList extends SpecializedBody {
     }
 }
 
-export const stateClasses = [Body, BulletList, Text, Line];
+export class DefinitionList extends SpecializedBody {
+    text(match, context, nextState) {
+	return [[match.result.input], 'Definition', []]
+    }
+}
+
+export const stateClasses = [Body, BulletList, Text, Line, DefinitionList, Definition];
 
 /*    underline(match, context, nextState) {
         const overline = context[0]
