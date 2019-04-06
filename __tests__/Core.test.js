@@ -43,9 +43,13 @@ test('1',  () => {
     const args = { ...defaultArgs }
 
     const { readerName, parserName, writerName } = args;
-    const source = new StringInput({source: '`'});
+    const source = new StringInput({source: `para1.
 
-//    const source = new StringInput({source: 'Text 1\nText 2\n\nHeader\n======\n'})
+--------
+
+para2.
+`});
+
     const destination = new StringOutput({})
     const pub = new Publisher({source, destination, settings, debug: true, debugFn: console.log});
     pub.setComponents(readerName, parserName, writerName);

@@ -1370,6 +1370,7 @@ export class SpecializedText extends Text {
     }
 
     invalidInput() {
+	console.log('invalid input, throwing eoferror');
         throw new EOFError();
     }
 }
@@ -1398,19 +1399,116 @@ export class Line extends SpecializedText {
     }
 
     blank(match, context, nextState) {
-        throw new Unimp();
+        /*"""Transition marker."""*/
+        const [src, srcline ]  = this.stateMachine.getSourceAndLine()
+        const marker = context[0].trim()
+        if(marker.length < 4) {
+            this.stateCorrection(context)
+	}
+        const transition = new nodes.transition(rawsource=marker)
+        transition.source = src
+        transition.line = srcline - 1
+        this.parent.add(transition)
+        return [[], 'Body', []]
     }
 
     text(match, context, nextState) {
-        throw new Unimp();
+        /*"""Potential over- & underlined title."""*/
+        const lineno = this.stateMachine.absLineNumber() - 1
+        let overline = context[0]
+        let title = match.match.input
+        let underline = ''
+        try {
+            underline = this.stateMachine.nextLine()
+	} catch(error) {
+	    if(error instanceof EOFError) {
+		const blocktext = overline + '\n' + title
+		if(overline.trimEnd().length < 4) {
+                    this.short_overline(context, blocktext, lineno, 2)
+		} else {
+                    const msg = self.reporter.severe(
+			'Incomplete section title.',
+			[new nodes.literal_block(blocktext, blocktext)],
+			{ line: lineno})
+                    this.parent.add(msg)
+                    return [[], 'Body', []]
+		}
+	    } else {
+		throw error;
+	    }
+	}
+	const source = [overline, title, underline].join('\n');
+	overline = overline.trimEnd();
+	underline = underline.trimEnd();
+	if(!this.transitions.underline[0].test(underline)) {
+	    const blocktext = overline + '\n' + title + '\n' + underline;
+            if(overline.trimEnd().length < 4) {
+                this.short_overline(context, blocktext, lineno, 2)
+	    } else {
+                const msg = self.reporter.severe(
+                    'Missing matching underline for section title overline.',
+                    [nodes.literal_block(source, source)],
+                    { line: lineno })
+                this.parent.add(msg);
+                return [[], 'Body', []]
+	    }
+	} else if(overline !== underline) {
+            const blocktext = overline + '\n' + title + '\n' + underline
+            if(overline.trimEnd().length < 4) {
+                this.short_overline(context, blocktext, lineno, 2)
+	    } else {
+                const msg = self.reporter.severe(
+                    'Title overline & underline mismatch.',
+                    [nodes.literal_block(source, source)],
+                    { line: lineno });
+                this.parent.add(msg)
+                return [[], 'Body', []]
+	    }
+	}
+	title = title.rstrip()
+        const messages = []
+        if(column_width(title) > overline.length) {
+            const blocktext = overline + '\n' + title + '\n' + underline
+            if(overline.trimEnd().length() < 4) {
+                this.short_overline(context, blocktext, lineno, 2)
+	    } else {
+                const msg = self.reporter.warning(
+                    'Title overline too short.',
+                    [nodes.literal_block(source, source)],
+                    { line: lineno })
+                messages.push(msg)
+	    }
+	}
+        const style = [overline[0], underline[0]]
+        this.eofcheck = 0               // @@@ not sure this is correct
+        this.section({ title: title.trimStart(), source, style, lineno: lineno + 1, messages});
+        self.eofcheck = 1
+        return [[], 'Body', []]
+
     }
 
     underline(match, context, nextState) {
-        throw new Unimp();
+        const overline = context[0]
+        const blocktext = overline + '\n' + this.stateMachine.line
+        const lineno = this.stateMachine.absLineNumber() - 1
+        if(overline.trimEnd().length < 4) {
+            this.short_overline(context, blocktext, lineno, 1)
+	}
+        msg = self.reporter.error(
+	    'Invalid section title or transition marker.',
+	    [nodes.literal_block(blocktext, blocktext)],
+	    {line: lineno})
+        this.parent.add(msg)
+        return [[], 'Body', []]
     }
 
     shortOverline(context, blocktext, lineno, lines = 1) {
-        throw new Unimp();
+        const msg = self.reporter.info(
+            'Possible incomplete section title.\nTreating the overline as '+
+            "ordinary text because it's so short.", [],
+            { line: lineno})
+        this.parent.add(msg);
+        this.state_correction(context, lines)
     }
 
     stateCorrection(context, lines = 1) {
