@@ -988,7 +988,7 @@ export class Body extends RSTState {
     }
 
     split_attribution(indented, lineOffset) {
-	this.attribution_pattern = new RegExp('(---?(?!-)|\u2014) *(?=[^ \\n])');
+	this.attribution_pattern = new RegExp('(---?(?!-)|\\u2014) *(?=[^ \\n])');
         let blank;
         let nonblank_seen = false;
         for (let i = 0; i < indented.length; i++) {
@@ -1002,7 +1002,7 @@ export class Body extends RSTState {
                             const a_lines = indented.slice(i, attribution_end);
                             a_lines.trimLeft(match.index + match[0].length, undefined, 1); // end=1 check fixme
                             a_lines.trimLeft(indent, 1);
-                            return [indented.slice(undefined, i), a_lines,
+                            return [indented.slice(0, i), a_lines,
                                     i, indented.slice(attribution_end),
                                     lineOffset + attribution_end]
                         }
@@ -1276,7 +1276,7 @@ initialState: 'BulletList',
             const blocktext = this.stateMachine.line;
             const msg = this.reporter.severe(
                   'Unexpected section title or transition.',
-                  nodes.literal_block(blocktext, blocktext),
+                [nodes.literal_block(blocktext, blocktext)],
                 { line: this.stateMachine.absLineNumber() },
 );
             this.parent.add(msg);
@@ -1308,7 +1308,7 @@ export class Text extends RSTState {
         const [paragraph, literalnext] = this.paragraph(context, this.stateMachine.absLineNumber() - 1);
         this.parent.add(paragraph);
         if (literalnext) {
-            this.parent.append(this.literal_Block());
+            this.parent.add(this.literal_block());
         }
 
         return [[], 'Body', []];
@@ -1374,7 +1374,7 @@ export class Text extends RSTState {
             // We need get_source_and_line() here to report correctly
             const [src, srcline] = this.stateMachine.getSourceAndLine();
             const msg = this.reporter.severe('Unexpected section title.',
-                                             [nodes.literal_block(blocktext, blocktext)], { source: src, line: srcline });
+                                             [new nodes.literal_block(blocktext, blocktext)], { source: src, line: srcline });
             this.parent.add(messages);
             this.parent.add(msg);
             return [], next_state, [];
@@ -1416,17 +1416,45 @@ srcline;
                     throw error;
                 }
             }
-            this.parent.append(this.literal_block());
+            this.parent.add(this.literal_block());
         }
         return [[], nextState, []];
     }
 
     literal_block(match, context, nextState) {
-        throw new Unimp();
+        //"""Return a list of nodes."""
+        const [ indented, indent, offset, blank_finish ] = this.stateMachine.getIndented({})
+        while(indented && indented.length && !indented[indented.length - 1].trim()){
+            indented.trimEnd()
+	}
+        if(!indented || !indented.length) {
+            return this.quoted_literal_block()
+	}
+        const data = indented.join('\n')
+        const literal_block = new nodes.literal_block(data, data)
+            const [ source, line ] = this.stateMachine.getSourceAndLine(offset+1)
+        literal_block.source = source;
+         literal_block.line =  line;
+        const nodelist = [literal_block]
+        if(!blank_finish){
+            nodelist.push(this.unindentWarning('Literal block'))
+	}
+        return nodelist
     }
 
     quoted_literal_block(match, context, nextState) {
-        throw new Unimp();
+        const absLineOffset = this.stateMachine.absLineOffset()
+        const offset = this.stateMachine.lineOffset
+	const parentNode = new nodes.Element()
+        const newAbsOffset = this.nestedParse(
+            this.stateMachine.inputLines.slice(offset),
+            { inputOffset: absLineOffset,
+	      node: parentNode,
+	      matchTitles: false,
+              stateMachineKwargs: {stateClasses: [QuotedLiteralBlock],
+                                   initialState: 'QuotedLiteralBlock'}});
+        this.gotoLine(newAbsOffset)
+        return parentNode.children
     }
 
     definition_list_item(termline) {

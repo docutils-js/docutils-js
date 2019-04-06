@@ -652,8 +652,8 @@ export class StateMachineWS extends StateMachine {
         if (indented) {
             this.nextLine(indented.length - 1);
         }
-        while (indented.length && !(indented[0].trim())) {
-            indented.ltrim();
+        while (indented && indented.length && !(indented[0].trim())) {
+            indented.trimStart();
             offset += 1;
         }
         return [indented, indent, offset, blankFinish];
@@ -840,7 +840,8 @@ export class ViewList extends Array {
         if (end == null) {
             end = this.length;
         }
-        for (let i = start; i < end; i++) {
+
+        for (let i = start; i < Math.min(end, this.length); i++) {
             initList.push(this[i]);
         }
         return new this.constructor(initList);
@@ -871,18 +872,29 @@ export class ViewList extends Array {
             this.parentOffset += n
 	}
     }
+
+    trimEnd(n = 1) {
+	/* Remove items from the end of the list, without touching the parent. */
+/*        if n > len(self.data):
+            raise IndexError("Size of trim too large; can't trim %s items "
+                             "from a list of size %s." % (n, len(self.data)))
+        elif n < 0:
+            raise IndexError('Trim size must be >= 0.')
+*/
+	for(let i = 0; i < n; i++) {
+	    this.pop();
+	    this.items.pop();
+	}
+    }
 }
 
 export class StringList extends ViewList {
-    trimLeft(length, start, end) {
+    trimLeft(length, start=0, end) {
         if(end === undefined) {
             end = this.length;
         }
-        if(start === false) {
-            throw new Error();
-        }
-        for (let i = start; i < end; i++) {
-            if(this[i] === undefined) {
+        for (let i = start; i < Math.min(end, this.length); i++) {
+            if(typeof this[i] === 'undefined') {
                 throw new Error(`${i} ${this.length}`);
             }
             this[i] = this[i].substring(length);
@@ -969,5 +981,19 @@ export class StringList extends ViewList {
 
     replace() {
         throw new UnimplementedException('replace');
+    }
+    trimTop(n=1) {
+        /* Remove items from the start of the list, without touching the parent. */
+        if(n > this.length) {
+            throw new Error(`Size of trim too large; can't trim ${n} items `+
+                            `from a list of size ${self.length}`);
+	} else if (n < 0) {
+            throw new Error('Trim size must be >= 0.')
+	}
+	this.splice(0, n);
+	this.items.splice(0, n);
+	if(this.parent) {
+	    this.parentOffset += n;
+	}
     }
 }
