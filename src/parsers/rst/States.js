@@ -1359,10 +1359,18 @@ srcline;
 export class SpecializedText extends Text {
     _init(args) {
         super._init(args);
-        this.blank = this.invalidInput;
-        this.indent = this.invalidInput;
-        this.underline = this.invalidInput;
-        this.text = this.invalidInput;
+	if(!this.blank) {
+            this.blank = this.invalidInput;
+	}
+	if(!this.indent) {
+            this.indent = this.invalidInput;
+	}
+	if(!this.underline) {
+            this.underline = this.invalidInput;
+	}
+	if(!this.text) {
+            this.text = this.invalidInput;
+	}
     }
 
     eof() {
@@ -1405,7 +1413,7 @@ export class Line extends SpecializedText {
         if(marker.length < 4) {
             this.stateCorrection(context)
 	}
-        const transition = new nodes.transition(rawsource=marker)
+        const transition = new nodes.transition(marker)
         transition.source = src
         transition.line = srcline - 1
         this.parent.add(transition)
