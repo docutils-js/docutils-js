@@ -688,7 +688,7 @@ blankFinish;
         }
         let offset = this.absLineOffset();
         [indented, indent, blankFinish] = this.inputLines.getIndented({
-            lineOffset: this.lineOffset,
+            start: this.lineOffset,
 untilBlank,
 stripIndent,
             firstIndent: indent,
@@ -953,7 +953,7 @@ export class StringList extends ViewList {
         }
         if (indent && stripIndent) {
 //          console.log(block.constructor.name);
-            block.trimLeft(indent, firstIndent || 0);
+            block.trimLeft(indent, firstIndent != null ? 1 : 0);
         }
 
         return [block, indent || 0, blankFinish];

@@ -924,14 +924,14 @@ export class Body extends RSTState {
         this.patterns = {
  bullet: '[-+*\u2022\u2023\u2043]( +|$)',
                           enumerator: `(${pats.parens}|${pats.rparen}|${pats.period})( +|$)`,
-                          grid_table_top: this.gridTableTopPat,
+            'field_marker': ':(?![: ])([^:\\\\]|\\\\.|:(?!([ `]|$)))*(?<! ):( +|$)',                          grid_table_top: this.gridTableTopPat,
                           simple_table_top: this.simpleTableTopPat,
                           line: `(${pats.nonalphanum7bit})\\1* *$`,
                           text: '',
                         };
 //      console.log(this.enumerator);
 
-        this.initialTransitions = ['bullet', 'enumerator', 'line', 'text'];
+        this.initialTransitions = ['bullet', 'enumerator', 'field_marker', 'line', 'text'];
 /*          'enumerator',
           'field_marker',
           'option_marker',
@@ -1157,6 +1157,107 @@ initialState: 'BulletList',
         return [listitem, blank_finish];
     }
 
+    enumerator(match, context, nextState) {
+        /*"""Enumerated List Item"""*/
+        const [ format, sequence, text, ordinal ] = this.parse_enumerator(match)
+        if(!this.is_enumerated_list_item(ordinal, sequence, format)) {
+            throw statemachine.TransitionCorrection('text')
+	}
+        const enumlist = new nodes.enumerated_list()
+        this.parent.add(enumlist);
+        if(sequence === '#') {
+            enumlist.attributes['enumtype'] = 'arabic'
+	} else {
+            enumlist.attributes['enumtype'] = sequence
+	}
+        enumlist.attributes['prefix'] = this.enum.formatinfo[format].prefix // fixme check
+        enumlist.attributes['suffix'] = this.enum.formatinfo[format].suffix
+        if(ordinal !== 1) {
+            enumlist.attributes['start'] = ordinal
+            const msg = self.reporter.info(
+                `Enumerated list start value not ordinal-1: "${text}" (ordinal ${ordinal})`, [], {});
+            this.parent.add(msg);
+	}
+        let listitem;
+        let blankFinish;
+        [ listitem, blankFinish ] = this.list_item(match.result.index + match.result[0].length)
+        enumlist.add(listitem)
+        const offset = this.stateMachine.lineOffset + 1   // next line
+            let newlineOffset;
+         [ newlineOffset, blankFinish ] = this.nestedListParse(
+            this.stateMachine.inputLines.slice(offset), {
+		inputOffset: this.stateMachine.absLineOffset() + 1,
+		node: enumlist, initialState: 'EnumeratedList',
+		blankFinish,
+		extraSettings: {'lastordinal': ordinal,
+                               'format': format,
+                               'auto': sequence === '#'}});
+        this.gotoLine(newlineOffset)
+        if(!blankFinish) {
+            this.parent.add(this.unindent_warning('Enumerated list'));
+	}
+        return [[], nextState, []]
+    }
+
+    parse_enumerator(match, expected_sequence) {
+	throw new Unimp();
+    }
+
+    field_marker(match,context,nextState) {
+	const fieldList = new nodes.field_list();
+	this.parent.add(fieldList);
+	let field;
+	let blankFinish;
+	[field,blankFinish] = this.field(match);
+	fieldList.add(field);
+	const offset = this.stateMachine.lineOffset + 1
+	let newlineOffset;
+	[newlineOffset, blankFinish] = this.nestedListParse(
+	    this.stateMachine.inputLines.slice(offset),
+	    {
+		inputOffset: this.stateMachine.absLineOffset() + 1,
+		node:fieldList,
+		initialState:'FieldList',
+		blankFinish,
+	    });
+	this.gotoLine(newlineOffset);
+	if(!blankFinish) {
+	    this.parent.add(this.unindentWarning('Field list'));
+	}
+	return [[], nextState, []]
+    }
+
+    field(match) {
+        const name = this.parse_field_marker(match)
+        const [ src, srcline ] = this.stateMachine.getSourceAndLine()
+        const lineno = this.stateMachine.absLineNumber()
+        const [ indented, indent, lineOffset, blankFinish ] = 
+              this.stateMachine.getFirstKnownIndented({ indent: match.result.index + match.result[0].length});
+        const field_node = new nodes.field()
+        field_node.source = src
+        field_node.line = srcline
+        const [ name_nodes, name_messages ] = this.inline_text(name, lineno)
+        field_node.add(new nodes.field_name(name, '', name_nodes, {}));
+        const field_body = new nodes.field_body(indented.join('\n'), name_messages, {})
+        field_node.add(field_body)
+        if(indented && indented.length) {
+            this.parse_field_body(indented, lineOffset, field_body)
+	}
+        return [field_node, blankFinish]
+    }
+    
+    parse_field_marker(match) {
+        /*"""Extract & return field name from a field marker match."""*/
+	console.log(match);
+	let field = match.result[0].substring(1);
+        field = field.substring(0, field.lastIndexOf(':'));
+	return field;
+    }
+
+    parse_field_body(indented, offset, node) {
+	this.nestedParse(indented, { inputOffset: offset, node: node })
+    }
+    
     line(match, context, nextState) {
 //      console.log(line);
         if (this.stateMachine.matchTitles) {
@@ -1604,7 +1705,45 @@ export class DefinitionList extends SpecializedBody {
     }
 }
 
-export const stateClasses = [Body, BulletList, Text, Line, DefinitionList, Definition];
+class EnumeratedList extends SpecializedBody {
+    /*"""Second and subsequent enumerated_list list_items."""*/
+    enumerator(match, context, nextState) {
+        /*"""Enumerated list item."""*/
+        const [ format, sequence, text, ordinal ] = this.parse_enumerator(
+            match, self.parent.attributes['enumtype'])
+        if (( format !== self.format
+              || (sequence !== '#' && (sequence !== self.parent.attributes['enumtype']
+                                       || self.auto// fxme
+                                       || ordinal !== (this.lastordinal + 1)))
+              || !this.is_enumerated_list_item(ordinal, sequence, format))) {
+	    //# different enumeration: new list
+            this.invalid_input()
+	}
+        if(sequence === '#') {
+	    this.auto = 1
+	}
+        const [listitem, blank_finish ] = new self.list_item(match.result.index + match.result[0].length)
+        this.parent.add(listitem)
+        this.blankFinish = blank_finish
+        this.lastordinal = ordinal
+        return [[], next_state, []]
+    }
+}
+
+class FieldList extends SpecializedBody {
+/*    """Second and subsequent field_list fields."""*/
+
+    field_marker(match, context, next_state) {
+        /*"""Field list field."""*/
+        const [ field, blank_finish ] = this.field(match)
+        this.parent.add(field);
+        this.blankFinish = blank_finish
+        return [[], next_state, []]
+    }
+}
+
+
+export const stateClasses = [Body, BulletList, Text, Line, DefinitionList, Definition, FieldList];
 
 /*    underline(match, context, nextState) {
         const overline = context[0]

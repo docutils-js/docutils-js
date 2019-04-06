@@ -43,13 +43,15 @@ test('1',  () => {
     const args = { ...defaultArgs }
 
     const { readerName, parserName, writerName } = args;
-    const source = new StringInput({source: `what
-    Definition lists associate a term with a definition.
+    const source = new StringInput({source: `:what: Field lists map field names to field bodies, like
+       database records.  They are often part of an extension
+       syntax.
 
-how
-    The term is a one-line phrase, and the definition is one
-    or more paragraphs or body elements, indented relative to
-    the term.`});
+:how: The field marker is a colon, the field name, and a
+      colon.
+
+      The field body may contain one or more body elements,
+      indented relative to the field marker.`});
         const destination = new StringOutput({})
     const pub = new Publisher({source, destination, settings, debug: true, debugFn: console.log});
     pub.setComponents(readerName, parserName, writerName);

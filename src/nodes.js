@@ -593,11 +593,12 @@ export class term extends TextElement {}
 export class definition extends Element {}
 /*
 class classifier(Part, TextElement): pass
-class field_list(Sequential, Element): pass
-class field(Part, Element): pass
-class field_name(Part, TextElement): pass
-class field_body(Part, Element): pass
 */
+export class field_list extends Element { } // (Sequential, Element
+export class field extends Element {} // (Part
+export class field_name extends TextElement {} // (Part
+export class field_body extends Element { } // (Part
+
 
 export class bullet_list extends Element { } // Sequential
 export class list_item extends Element { }
