@@ -30,6 +30,8 @@ export class InvalidArgumentsError extends Error {
 }
     
 export const InvalidArgumentError = InvalidArgumentsError
+
+
 export class SystemMessage extends Error {
     constructor(msg, level, ...params) {
 	super(...params);
@@ -42,3 +44,11 @@ export class SystemMessage extends Error {
     }
 }
     
+export class DataError extends Error {
+    constructor(...params) {
+	super(...params);
+	if(Error.captureStackTrace) {
+	    Error.captureStackTrace(this, DataError);
+	}
+    }
+}

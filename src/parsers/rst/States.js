@@ -3,8 +3,10 @@ import * as languages from '../../languages';
 import * as nodes from '../../nodes';
 import { matchChars } from '../../utils/punctuationChars';
 
-import { EOFError, InvalidArgumentsError, UnimplementedError as Unimp } from '../../Exceptions';
+import { DataError, EOFError, InvalidArgumentsError, UnimplementedError as Unimp } from '../../Exceptions';
 import { punctuation_chars, column_width, unescape } from '../../utils';
+
+class MarkupError extends DataError { }
 
 const normalize_name = (x) => x;
 
@@ -907,12 +909,12 @@ export class Body extends RSTState {
         pats.alpha = '[a-zA-Z]';
         pats.alphanum = '[a-zA-Z0-9]';
         pats.alphanumplus = '[a-zA-Z0-9_-]';
-        pats.enum = '';// ('(%(arabic)s|%(loweralpha)s|%(upperalpha)s|%(lowerroman)s' +'|%(upperroman)s|#)' % enum.sequencepats)
-        pats.optname = '';// '%(alphanum)s%(alphanumplus)s*' % pats
-        pats.optarg = '';// '(%(alpha)s%(alphanumplus)s*|<[^<>]+>)' % pats
-        pats.shortopt = '';// r'(-|\+)%(alphanum)s( ?%(optarg)s)?' % pats
-        pats.longopt = '';// r'(--|/)%(optname)s([ =]%(optarg)s)?' % pats
-        pats.option = '';// r'(%(shortopt)s|%(longopt)s)' % pats
+        pats.enum = '';//('(%(arabic)s|%(loweralpha)s|%(upperalpha)s|%(lowerroman)s' +'|%(upperroman)s|#)' % enum.sequencepats)
+        pats.optname = `${pats.alphanum}${pats.alphanumplus}*`;
+        pats.optarg = `(${pats.alpha}${pats.alphanumplus}*|<[^<>]+>)`;
+        pats.shortopt = `(-|\\+)${pats.alphanum}( ?${pats.optarg})?`;
+        pats.longopt = `(--|/)${pats.optname}([ =]${pats.optargs})?`;
+        pats.option = `(${pats.shortopt}|${pats.longopt})`;
 
         for (const format of enum_.formats) {
             pats[format] = `(${
@@ -925,6 +927,7 @@ export class Body extends RSTState {
  bullet: '[-+*\u2022\u2023\u2043]( +|$)',
                           enumerator: `(${pats.parens}|${pats.rparen}|${pats.period})( +|$)`,
             'field_marker': ':(?![: ])([^:\\\\]|\\\\.|:(?!([ `]|$)))*(?<! ):( +|$)',                          grid_table_top: this.gridTableTopPat,
+	    'option_marker': `${pats.option}(, ${pats.option})*(  +| ?$)`,
 	    'doctest': '>>>( +|$)',
                           simple_table_top: this.simpleTableTopPat,
                           line: `(${pats.nonalphanum7bit})\\1* *$`,
@@ -932,7 +935,7 @@ export class Body extends RSTState {
                         };
 //      console.log(this.enumerator);
 
-        this.initialTransitions = ['bullet', 'enumerator', 'field_marker', 'doctest', 'line', 'text'];
+        this.initialTransitions = ['bullet', 'enumerator', 'field_marker', 'option_marker', 'doctest', 'line', 'text'];
 /*          'enumerator',
           'field_marker',
           'option_marker',
@@ -1262,21 +1265,22 @@ initialState: 'BulletList',
     option_marker( match, context, nextState) {
         //"""Option list item."""
         const optionlist = new nodes.option_list()
-        const [ source, line ] = this.stateMachine.getSourceAndLine()
+        const [ source, line ] = this.stateMachine.getSourceAndLine();
+        let listitem;
+        let blankFinish;
         try {
-            const [ listitem, blankFinish ] = this.option_list_item(match)
+             [ listitem, blankFinish ] = this.option_list_item(match)
 	}
 	catch(error) {
 	    if(error instanceof MarkupError) {
 		// This shouldn't happen; pattern won't match.
 		const msg = this.reporter.error(`Invalid option list marker: ${error}`);
 		this.parent.add( msg )
-		const [ indented, indent, line_offset, blankFinish2 ]  = 
+		const [ indented, indent, line_offset, blankFinish ]  = 
                       this.stateMachine.getFirstKnownIndented({ indent: match.result.index + match.result[0].length });
-		blankFinish = blankFinish2;
 		const elements = this.block_quote(indented, line_offset)
 		this.parent.add(elements);
-		if(!blankFinish2) {
+		if(!blankFinish) {
                     this.parent.add(this.unindentWarning('Option list'));
 		}
 		return [[], nextState, []]
@@ -1286,25 +1290,25 @@ initialState: 'BulletList',
         this.parent.add( optionlist)
         optionlist.add( listitem)
         const offset = this.stateMachine.lineOffset + 1   // next line
-        const [ newline_offset, blankFinish3 ] = this.nestedListParse(
+        const [ newline_offset, blankFinish2 ] = this.nestedListParse(
             this.stateMachine.inputLines.slice(offset),
 	    {
 		inputOffset: this.stateMachine.absLineOffset() + 1,
 		node: optionlist,
 		initialState: 'OptionList',
-		blankFinish: blankFinish3,
+		blankFinish,
 	    }
 	);
-        this.gotoLine(newlineOffset)
-        if(!blankFinish3) {
-            this.parent.add(self.unindentWarning('Option list'));
+        this.gotoLine(newline_offset)
+        if(!blankFinish2) {
+            this.parent.add(this.unindentWarning('Option list'));
 	}
         return [[], nextState, []]
     }
     
     option_list_item(match) {
         const offset = this.stateMachine.absLineOffset()
-        const options = thisn.parse_option_marker(match)
+        const options = this.parse_option_marker(match)
         const [ indented, indent, line_offset, blank_finish ] = 
               this.stateMachine.getFirstKnownIndented({ indent: match.result.index + match.result[0].length });
         if(!indented || !indented.length) {//  not an option list item
@@ -1313,8 +1317,8 @@ initialState: 'BulletList',
 	}
         const option_group = new nodes.option_group('', options)
         const description = new nodes.description(indented.join('\n'));
-        const option_list_item = new nodes.option_list_item('', option_group,
-                                                  [description])
+        const option_list_item = new nodes.option_list_item('', [option_group,
+								 description])
         if(indented && indented.length) {
             this.nestedParse(indented, { inputOffset: line_offset,
 					 node: description });
@@ -1333,7 +1337,7 @@ initialState: 'BulletList',
         const optionstrings = match.result[0].trimEnd().split(', ');
         for(let optionstring of optionstrings) {
             const tokens = optionstring.split(/s+/)
-            const delimiter = ' '
+            let delimiter = ' '
             const firstopt = tokens[0].split('=', 2)
             if(firstopt.length > 1) {
 		// "--opt=value" form
@@ -1456,7 +1460,7 @@ export class Text extends RSTState {
               blankFinish, blankFinishState: 'Definition' });
         this.gotoLine(newlineOffset)
         if(!blankFinish)  {
-            this.parent.add(this.unindent_warning('Definition list'))
+            this.parent.add(this.unindentWarning('Definition list'))
 	}
         return[ [], 'Body', []]
     }
@@ -1812,19 +1816,48 @@ export class Line extends SpecializedText {
 export class SpecializedBody extends Body {
     _init(args) {
 	super._init(args);
-	this.indent = this.invalid_input.bind(this);
-	this.bullet = this.invalid_input.bind(this);
-	this.enumerator = this.invalid_input.bind(this);
-	this.field_marker = this.invalid_input.bind(this);
-	this.option_marker = this.invalid_input.bind(this);
-	this.doctest = this.invalid_input.bind(this);
-	this.line_block = this.invalid_input.bind(this);
-	this.grid_table_top = this.invalid_input.bind(this);
-	this.simple_table_top = this.invalid_input.bind(this);
-	this.explicit_markup = this.invalid_input.bind(this);
-	this.anonymous = this.invalid_input.bind(this);
-	this.line = this.invalid_input.bind(this);
-	this.text = this.invalid_input.bind(this);
+    }
+
+    indent() {
+	this.invalid_input();
+    }
+
+    bullet() {
+	this.invalid_input();
+    }
+
+    enumerator() {
+	this.invalid_input();
+    }
+    field_marker() {
+	this.invalid_input();
+    }
+    option_marker() {
+	this.invalid_input();
+    }
+    doctest() {
+	this.invalid_input();
+    }
+    line_block() {
+	this.invalid_input();
+    }
+    grid_table_top() {
+	this.invalid_input();
+    }
+    simple_table_top() {
+	this.invalid_input();
+    }
+    explicit_markup() {
+	this.invalid_input();
+    }
+    anonymous() {
+	this.invalid_input();
+    }
+    line() {
+	this.invalid_input();
+    }
+    text() {
+	this.invalid_input();
     }
 
     invalid_input(match, context, nextState) {
@@ -1888,8 +1921,29 @@ class FieldList extends SpecializedBody {
     }
 }
 
+export class OptionList extends SpecializedBody {
+/*
+    """Second and subsequent option_list option_list_items."""
+*/
+    option_marker( match, context, nextState) {
+        //"""Option list item."""
+	let option_list_item;
+	let blank_finish;
+        try {
+            [ option_list_item, blank_finish ] = this.option_list_item(match)
+	} catch(error) {
+	    if(error instanceof MarkupError) {
+		this.invalid_input();
+	    }
+	    throw error;
+	}
+        this.parent.add(option_list_item)
+        this.blankFinish = blank_finish
+        return [[], nextState, []]
+    }
+}
 
-export const stateClasses = [Body, BulletList, Text, Line, DefinitionList, Definition, FieldList];
+export const stateClasses = [Body, BulletList, Text, Line, DefinitionList, Definition, FieldList, OptionList];
 
 /*    underline(match, context, nextState) {
         const overline = context[0]

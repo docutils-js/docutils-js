@@ -217,6 +217,9 @@ export class Element extends Node {
 	Object.entries(attributes).forEach(([att, value]) => {
 	    att = att.toLowerCase();
 	    if(att in this.listAttributes) {
+	    	if(!isIterable(value)) {
+	    		throw new Error();
+		}
 		this.attributes[att] = [...value]
 	    } else {
 		this.attributes[att] = value;
@@ -611,6 +614,17 @@ export class literal extends TextElement {} // Inline
 export class problematic extends TextElement {} // Inline
 
 export class transition extends Element {} // Structura
+
+
+export class option extends Element {
+    //fixme//child_text_separator = ''
+}
+
+export class option_argument extends TextElement {
+    //fixme
+    //def astext(self):
+    //return self.get('delimiter', ' ') + TextElement.astext(self)
+}
 
 export class option_group extends Element {
     //child_text_separator = ', '

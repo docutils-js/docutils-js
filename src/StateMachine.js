@@ -591,7 +591,12 @@ export class State {
 
         let pattern = this.patterns[name];
         if (!(pattern instanceof RegExp)) {
-            pattern = new RegExp(`^${pattern}`);
+            try {
+
+                pattern = new RegExp(`^${pattern}`);
+            } catch(error) {
+                throw error;
+            }
         }
         if (typeof (this[name]) !== 'function') {
             throw new Error(`cant find method ${name} on ${this.constructor.name}`);
