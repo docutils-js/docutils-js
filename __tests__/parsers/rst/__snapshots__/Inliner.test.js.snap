@@ -1,0 +1,11 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`_\`hello\` 1`] = `"<target ids=\\"undefinedhello\\" names=\\"hello\\">hello</target>"`;
+
+exports[`\`\`literal\`\` 1`] = `"<literal>literal</literal>"`;
+
+exports[`Eat **lots** of *food*. 1`] = `"Eat <strong>lots</strong> of <emphasis>food</emphasis>."`;
+
+exports[`I like *TV* 1`] = `"I like <emphasis>TV</emphasis>"`;
+
+exports[`inliner 1 1`] = `"<target ids=\\"undefinedhello\\" names=\\"hello\\">hello</target>"`;

@@ -8,7 +8,7 @@ import { punctuation_chars, column_width, unescape } from '../../utils';
 
 class MarkupError extends DataError { }
 
-const normalize_name = (x) => x;
+const normalize_name = nodes.fullyNormalizeName;
 
 const { StateMachineWS } = statemachine;
 const { StateWS } = statemachine;
@@ -92,9 +92,9 @@ export class Inliner {
             '**': this.strong.bind(this),
             '``': this.literal.bind(this),
             '`': this.interpreted_or_phrase_ref.bind(this),
+            '_`': this.inline_internal_target.bind(this),
 	};
         /*
-                    '_`': this.inline_internal_target.bind(this)
                     ']_': this.footnote_reference.bind(this)
                     '|': this.substitution_reference.bind(this)
                     '_': this.reference.bind(this)
@@ -108,6 +108,18 @@ export class Inliner {
 
 	this.nonUnescapedWhitespaceEscapeBefore = '(?<!(?<!\\x00)[\\s\\x00])'
 
+    }
+
+    inline_internal_target(match, lineno) {
+        const [ before, inlines, remaining, sysmessages, endstring ] = this.inline_obj( match, lineno, this.patterns.target, nodes.target );
+        if(inlines && inlines.length && inlines[0] instanceof nodes.target) {
+            //assert len(inlines) == 1
+            const target = inlines[0]
+            const name = normalize_name(target.astext())
+            target.attributes['names'].push(name)
+            this.document.noteExplicitTarget(target, this.parent)
+	}
+        return [ before, inlines, remaining, sysmessages ]
     }
 
     substitution_reference(match, lineno) {
@@ -186,9 +198,9 @@ export class Inliner {
             referencenode.attributes['refname'] = refname
             this.document.note_refname(referencenode)
 	}
-        string = match.result.input
-        matchstart = match.result.index
-        matchend = match.result.index + match.result[0].length
+        const string = match.result.input
+        const matchstart = match.result.index
+        const matchend = match.result.index + match.result[0].length
         return [string.substring(0, matchstart), [referencenode], string.substring(matchend), []]
     }
     
@@ -196,7 +208,7 @@ export class Inliner {
 	return this.reference(match, lineno, true);
     }
     
-    inline_internal_target( match, lineno) {
+    zinline_internal_target( match, lineno) {
         const [ before, inlines, remaining, sysmessages, endstring ] = this.inline_obj(
               match, lineno, this.patterns.target, nodes.target)
         if(inlines && inlines[0] instanceof nodes.target) {
@@ -204,7 +216,7 @@ export class Inliner {
             const target = inlines[0]
             const name = normalize_name(target.astext())
             target.attributes['names'].append(name)
-            this.document.note_explicit_target(target, this.parent)
+            this.document.noteExplicitTarget(target, this.parent)
 	}
         return [ before, inlines, remaining, sysmessages ]
     }
@@ -427,12 +439,14 @@ esn;
 //      const build = buildRegexp(parts, true);
 //      console.log(build[0]);
         this.patterns = {
-            initial: buildRegexp(parts), // KM
+            initial: buildRegexp(parts, true), // KM
             emphasis: new RegExp(`${this.nonWhitespaceEscapeBefore}(\\*)${endStringSuffix}`),
             strong: new RegExp(`${this.nonWhitespaceEscapeBefore}(\\*\\*)${endStringSuffix}`),
 	    literal: new RegExp(this.nonWhitespaceBefore + '(``)' + endStringSuffix),
+	    target: new RegExp(this.nonWhitespaceEscapeBefore + '(`)' + endStringSuffix),
             interpreted_or_phrase_ref: new RegExp(`${this.nonUnescapedWhitespaceEscapeBefore}(\`((:${this.simplename}:)?(__?)?))${endStringSuffix}`)
         };
+        //console.log(this.patterns.initial);
     }
 
     parse(text, { lineno, memo, parent }) {
@@ -458,7 +472,8 @@ esn;
                 this.patterns.initial[1].forEach((x, index) => {
                     rr[x] = match[index];
                 });
-                const method = this.dispatch[rr.start];
+		const mname = rr.start || rr.backquote || rr.refend || groups.fnend;
+                const method = this.dispatch[mname];
                 if (typeof method !== 'function') {
                     throw new Error(`Invalid dispatch ${rr.start}`);
                 }
@@ -1178,7 +1193,7 @@ initialState: 'BulletList',
         enumlist.attributes['suffix'] = this.enum.formatinfo[format].suffix
         if(ordinal !== 1) {
             enumlist.attributes['start'] = ordinal
-            const msg = self.reporter.info(
+            const msg = this.reporter.info(
                 `Enumerated list start value not ordinal-1: "${text}" (ordinal ${ordinal})`, [], {});
             this.parent.add(msg);
 	}
@@ -1889,10 +1904,10 @@ class EnumeratedList extends SpecializedBody {
     enumerator(match, context, nextState) {
         /*"""Enumerated list item."""*/
         const [ format, sequence, text, ordinal ] = this.parse_enumerator(
-            match, self.parent.attributes['enumtype'])
-        if (( format !== self.format
-              || (sequence !== '#' && (sequence !== self.parent.attributes['enumtype']
-                                       || self.auto// fxme
+            match, this.parent.attributes['enumtype'])
+        if (( format !== this.format
+              || (sequence !== '#' && (sequence !== this.parent.attributes['enumtype']
+                                       || this.auto// fxme
                                        || ordinal !== (this.lastordinal + 1)))
               || !this.is_enumerated_list_item(ordinal, sequence, format))) {
 	    //# different enumeration: new list
@@ -1901,7 +1916,7 @@ class EnumeratedList extends SpecializedBody {
         if(sequence === '#') {
 	    this.auto = 1
 	}
-        const [listitem, blank_finish ] = new self.list_item(match.result.index + match.result[0].length)
+        const [listitem, blank_finish ] = this.list_item(match.result.index + match.result[0].length)
         this.parent.add(listitem)
         this.blankFinish = blank_finish
         this.lastordinal = ordinal

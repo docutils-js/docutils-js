@@ -24,7 +24,9 @@ function dumpNodes(nodes) {
 test('inliner 1', () => {
     const inliner = new Inliner();
     inliner.initCustomizations({})
-    const document = newDocument({}, {});
+    const document = newDocument({}, { autoIdPrefix: 'auto',
+        idPrefix: '' });
+            
     const reporter = newReporter({}, {});
     let language;
     const memo = { document,
@@ -32,12 +34,18 @@ test('inliner 1', () => {
 		   language,
 		 };
 		   
-    const result = inliner.parse('I like TV.', {  lineno: 1, memo, parent: document });
+    const result = inliner.parse('_`hello`', {  lineno: 1, memo, parent: document });
     const [ nodes] = result;
-    console.log(nodes);
+    const stringRep = nodes.map(n => n.toString()).join('');
+    expect(stringRep).toMatchSnapshot();
+
 })
 
-test('inliner 2', () => {
+test.each([['I like *TV*'],
+	   ['Eat **lots** of *food*.'],
+	   ['``literal``'],
+	   ['_`hello`'],
+	  ])("%s", (a) => {
     const inliner = new Inliner();
     inliner.initCustomizations({})
     const document = newDocument({}, {});
@@ -47,9 +55,14 @@ test('inliner 2', () => {
 		   reporter,
 		   language,
 		 };
-		   
-    const result = inliner.parse('I like *TV*.', {  lineno: 1, memo, parent: document });
+    
+    const result = inliner.parse(a, {  lineno: 1, memo, parent: document });
     const [ nodes] = result;
+    const stringRep = nodes.map(n => n.toString()).join('');
+    expect(stringRep).toMatchSnapshot();
+});
+			     
+/*
     if(isIterable(nodes)) {
 	console.log('is iterable');
 	nodes.forEach((e, i) => {
@@ -70,5 +83,5 @@ test('inliner 2', () => {
 	});
 
     }
+*/
 
-})

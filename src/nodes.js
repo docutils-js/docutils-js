@@ -2,6 +2,9 @@ import Transformer from './Transformer';
 import { InvalidArgumentsError} from './Exceptions';
 import * as utils from './utils';
 
+export function fullyNormalizeName(name) {
+    return name.toLowerCase().replace(/\s+/, ' ');
+}
 
 function setup_backlinkable(o) {
     o.addBackref = (refid) => o.attributes['backrefs'].push(refid);
@@ -412,7 +415,7 @@ export class document extends Element {
 	let id;
 	for(id of node.attributes.ids) {
 	    if(id in this.ids && this.ids[id] !== node) {
-		msg = self.reporter.severe(`Duplicate ID: "${id}".`);
+		msg = this.reporter.severe(`Duplicate ID: "${id}".`);
 		if(msgnode) {
 		    msgnode.add(msg);
 		}
@@ -443,18 +446,83 @@ export class document extends Element {
     }
 
     setNameIdMap(node, id, msgnode, explicit) {
+        for(let name of node.attributes['names']) {
+            if(name in this.nameIds) {
+                this.set_duplicate_name_id(node, id, name, msgnode, explicit)
+	    } else {
+                this.nameIds[name] = id
+                this.nameTypes[name] = explicit
+	    }
+	}
     }
 
     setDuplicateNameId(node, id, name, msgnode, explicit) {
+        const old_id = this.nameIds[name]
+        const old_explicit = this.nameTypes[name]
+        this.nameTypes[name] = old_explicit || explicit
+	let old_node;
+        if(explicit) {
+            if(old_explicit) {
+                let level = 2;
+                if(old_id != null) {
+                    old_node = this.ids[old_id]
+                    if('refuri' in node.attributes) {
+                        const refuri = node.attributes['refuri']
+                        if(old_node.attributes['names'].length
+                           && 'refuri' in old_node.attributes
+                           && old_node.attributes['refuri'] === refuri) {
+                            level = 1   // just inform if refuri's identical
+			}
+		    }
+                    if(level > 1) {
+                        dupname(old_node, name)
+                        this.nameIds[name] = null;
+		    }
+		}
+                const msg = this.reporter.systemMessage(
+                    level, `Duplicate explicit target name: "${name}".`,
+		    [], { backrefs: [id], base_node: node })
+                if(msgnode != null) {
+                    msgnode.add(msg)
+		}
+                dupname(node, name)
+	    } else {
+                this.nameIds[name] = id
+                if(old_id != null) {
+                    old_node = this.ids[old_id]
+                    dupname(old_node, name)
+		}
+	    }
+	}else {
+            if(old_id != null && !old_explicit) {
+                this.nameIds[name] = null
+                old_node = this.ids[old_id]
+                dupname(old_node, name)
+	    }
+            dupname(node, name)
+	}
+        if(!explicit || (!old_explicit && old_id != null)){
+            const msg = this.reporter.info(
+                `Duplicate implicit target name: "${name}".`, [],
+                { backrefs: [id], base_node: node})
+            if(msgnode != null) {
+                msgnode.add(msg)
+	    }
+	}
     }
 
     hasName(name) {
-	return Object.keys(self.nameIds).includes(name);
+	return Object.keys(this.nameIds).includes(name);
     }
-    
+
     noteImplicitTarget(target, msgnode) {
 	const id = this.setId(target, msgnode);
 	this.setNameIdMap(target, id, msgnode);
+    }
+
+    noteExplicitTarget(target, msgnode) {
+	const id = this.setId(target, msgnode);
+	this.setNameIdMap(target, id, msgnode, true);
     }
 
     noteRefName(node) {
@@ -653,7 +721,7 @@ export class warning extends Element{ }
 export class admonition extends Element{ }
 export class comment extends FixedTextElement{ }
 export class substitution_definition extends TextElement{ }
-export class target extends TextElement{ }
+export class target extends TextElement { }
 export class footnote extends Element { }
 export class citation extends Element{ }
 export class label extends  TextElement{ }
