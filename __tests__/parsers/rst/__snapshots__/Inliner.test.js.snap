@@ -8,4 +8,4 @@ exports[`Eat **lots** of *food*. 1`] = `"Eat <strong>lots</strong> of <emphasis>
 
 exports[`I like *TV* 1`] = `"I like <emphasis>TV</emphasis>"`;
 
-exports[`inliner 1 1`] = `"<target ids=\\"undefinedhello\\" names=\\"hello\\">hello</target>"`;
+exports[`inliner 1 1`] = `"<target ids=\\"hello\\" names=\\"hello\\">hello</target>"`;
