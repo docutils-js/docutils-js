@@ -913,7 +913,7 @@ export class Body extends RSTState {
         pats.optname = `${pats.alphanum}${pats.alphanumplus}*`;
         pats.optarg = `(${pats.alpha}${pats.alphanumplus}*|<[^<>]+>)`;
         pats.shortopt = `(-|\\+)${pats.alphanum}( ?${pats.optarg})?`;
-        pats.longopt = `(--|/)${pats.optname}([ =]${pats.optargs})?`;
+        pats.longopt = `(--|/)${pats.optname}([ =]${pats.optarg})?`;
         pats.option = `(${pats.shortopt}|${pats.longopt})`;
 
         for (const format of enum_.formats) {
@@ -1341,7 +1341,7 @@ initialState: 'BulletList',
             const firstopt = tokens[0].split('=', 2)
             if(firstopt.length > 1) {
 		// "--opt=value" form
-		tokens.splice(0, 1, firstopt); // fixme check
+		tokens.splice(0, 1, ...firstopt); // fixme check
                 delimiter = '='
 	    } else if(tokens[0].length > 2
 		      && ((tokens[0].indexOf('-') === 0
@@ -1631,20 +1631,20 @@ srcline;
 export class SpecializedText extends Text {
     _init(args) {
         super._init(args);
-	if(!this.blank) {
-            this.blank = this.invalidInput;
-	}
-	if(!this.indent) {
-            this.indent = this.invalidInput;
-	}
-	if(!this.underline) {
-            this.underline = this.invalidInput;
-	}
-	if(!this.text) {
-            this.text = this.invalidInput;
-	}
     }
 
+    blank() {
+        this.invalidInput()
+    }
+    underline() {
+        this.invalidInput()
+    }
+    indent() {
+        this.invalidInput()
+    }
+    text() {
+    this.invalidInput();
+    }
     eof() {
         return [];
     }
