@@ -2,6 +2,15 @@ import { Publisher, publishCmdLine, defaultDescription } from '../src/Core';
 import { Source } from '../src/Sources';
 import { StringInput, StringOutput } from '../src/io';
 
+const currentLogLines = [];
+
+afterEach(() => {
+    if(currentLogLines.length) {
+	console.log(currentLogLines.join('\n') + '\n');
+	currentLogLines.length = 0;
+    }
+});
+
 const defaultArgs = {
     readerName: 'standalone',
     parserName: 'restructuredtext',
@@ -44,7 +53,7 @@ test('1', () => {
 
     const debugLog = [];
     const debugFn = (msg) => {
-	debugLog.push(msg);
+	currentLogLines.push(msg);
     };
 
     const { readerName, parserName, writerName } = args;
@@ -57,12 +66,11 @@ test('1', () => {
     return new Promise((resolve, reject) => {
 	pub.publish({}, (error, ...args) => {
 	    if (error) {
-		debugLog.map(msg=> console.log(msg));
-	    	console.log(error);
 		reject(error);
 		return;
 	    }
 	    expect(destination.destination).toMatchSnapshot();
+	    currentLogLines.length = 0;
 	    resolve();
 	});
     });
@@ -91,7 +99,7 @@ This is a test.
 	      const args = { ...defaultArgs };
 	      const debugLog = [];
 	      const debugFn = (msg) => {
-		  debugLog.push(msg);
+		  currentLogLines.push(msg);
 	      };
 
 	      const { readerName, parserName, writerName } = args;
@@ -110,7 +118,7 @@ This is a test.
 			  return;
 		      }
 		      expect(destination.destination).toMatchSnapshot();
-//		      console.log(destination.destination);
+		      currentLogLines.length = 0;
 		      resolve();
 		  });
 	      });
