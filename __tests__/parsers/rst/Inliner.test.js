@@ -44,9 +44,10 @@ test('inliner 1', () => {
     };
 
     const result = inliner.parse('`test`:foo:', { lineno: 1, memo, parent: document });
-    const [nodes] = result;
+    const [nodes, messages] = result;
     const stringRep = nodes.map(n => n.toString()).join('');
     expect(stringRep).toMatchSnapshot();
+    expect(messages.map(n => n.toString()).join('')).toMatchSnapshot();
 });
 
 test.each([['I like *TV*'],
@@ -68,9 +69,10 @@ test.each([['I like *TV*'],
 		 };
 
     const result = inliner.parse(a, { lineno: 1, memo, parent: document });
-    const [nodes] = result;
+    const [nodes, messages] = result;
     const stringRep = nodes.map(n => n.toString()).join('');
-    expect(stringRep).toMatchSnapshot();
+	      expect(stringRep).toMatchSnapshot();
+    expect(messages.map(n => n.toString()).join('')).toMatchSnapshot();
 });
 
 /*
