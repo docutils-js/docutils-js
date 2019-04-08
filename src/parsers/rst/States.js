@@ -2,9 +2,9 @@ import * as statemachine from '../../StateMachine';
 import * as languages from '../../languages';
 import * as nodes from '../../nodes';
 import { matchChars } from '../../utils/punctuationChars';
-import * as roles from './Roles';
+//import * as roles from './Roles';
 
-import { DataError, EOFError, InvalidArgumentsError, UnimplementedError as Unimp } from '../../Exceptions';
+import { ApplicationError, DataError, EOFError, InvalidArgumentsError, UnimplementedError as Unimp } from '../../Exceptions';
 import { punctuation_chars, column_width, unescape } from '../../utils';
 
 class MarkupError extends DataError { }
@@ -245,7 +245,7 @@ export class Inliner {
     interpreted_or_phrase_ref(match, lineno) {
         const end_pattern = this.patterns.interpreted_or_phrase_ref
         const string = match.match.input
-	console.log(match.groups);
+	//console.log(match.groups);
 	const matchstart = match.match.index
         const matchend = matchstart + match.match[0].length
         const rolestart = matchstart
@@ -304,11 +304,12 @@ export class Inliner {
 	const match = self.patterns.embedded_link.exec(escaped)
 	let aliastype;
 	let aliastext;
-	let aliastype;
 	let rawaliastext;
 	let rawtext;
-	let text;
 	let alias;
+	let target;
+	let alias_parts;
+	
         if(match) {// # embedded <URI> or <alias_>
             text = unescape(escaped.substring(0, match.index));
             rawtext = unescape(escaped.substring(0, match.index), true);
@@ -318,61 +319,70 @@ export class Inliner {
             if(aliastext.endsWith('_') && ! (underscore_escaped
                                              || self.patterns.uri.exec('^' + aliastext))) {
                 aliastype = 'name'
-                alias = normalize_name(aliastext[:-1])
-                target = nodes.target(match.group(1), refname=alias)
-                target.indirect_reference_name = aliastext[:-1]
-            else:
+                alias = normalize_name(aliastext.substring(0, aliastext.length - 1));
+                target = new nodes.target(match[1], [], {refname: alias});
+                target.indirectReferenceName = aliastext.substring(0, aliastext.length - 1);
+	    } else {
                 aliastype = 'uri'
-                alias_parts = split_escaped_whitespace(match.group(2))
-                alias = ' '.join(''.join(unescape(part).split())
-                                 for part in alias_parts)
-                alias = self.adjust_uri(alias)
-                if alias.endswith(r'\_'):
-                    alias = alias[:-2] + '_'
-                target = nodes.target(match.group(1), refuri=alias)
-                target.referenced = 1
-            if not aliastext:
-                raise ApplicationError('problem with embedded link: %r'
-                                       % aliastext)
-            if not text:
+                alias_parts = split_escaped_whitespace(match[2]);
+		/* this behaves differently from python's split with no args */
+		alias = alias_parts.map(part => unescape(part).split(/\s+/).join('')).join(' ');
+		console.log(`alias is ${alias}`);
+                alias = this.adjust_uri(alias)
+                if(alias.endsWith('\\_')) {
+                    alias = alias.substring(0, alias.length - 2) +'_';
+		}
+                target = new nodes.target(match[1], [], { refuri: alias });
+                target.referenced = 1 //  1 or truE???
+	    }
+	    if(!aliastext) {
+                throw new ApplicationError(`problem with embedded link: ${aliastext}`);
+	    }
+            if(!text) {
                 text = alias
                 rawtext = rawaliastext
-        else:
-            target = None
-            rawtext = unescape(escaped, True)
+	    }
+	} else {
+            target = null
+            rawtext = unescape(escaped, true)
+	}
 
         refname = normalize_name(text)
-        reference = nodes.reference(rawsource, text,
-                                    name=whitespace_normalize_name(text))
+        reference = new nodes.reference(rawsource, [text],
+					{ name: whitespace_normalize_name(text) });
         reference[0].rawsource = rawtext
+        const node_list = [reference]
 
-        node_list = [reference]
-
-        if rawsource[-2:] == '__':
-            if  target and (aliastype == 'name'):
-                reference['refname'] = alias
-                self.document.note_refname(reference)
-                # self.document.note_indirect_target(target) # required?
-            elif target and (aliastype == 'uri'):
-                reference['refuri'] = alias
-            else:
-                reference['anonymous'] = 1
-        else:
-            if target:
-                target['names'].append(refname)
-                if aliastype == 'name':
-                    reference['refname'] = alias
-                    self.document.note_indirect_target(target)
-                    self.document.note_refname(reference)
-                else:
-                    reference['refuri'] = alias
-                    self.document.note_explicit_target(target, self.parent)
-                # target.note_referenced_by(name=refname)
-                node_list.append(target)
-            else:
-                reference['refname'] = refname
-                self.document.note_refname(reference)
-        */
+        if(rawsource.endWith('__')) {
+            if(target && (aliastype === 'name')) {
+                reference.attributes['refname'] = alias;
+                this.document.noteRefname(reference)
+		// commented out in docutils.
+		//# self.document.note_indirect_target(target) # required?
+	    } else if(target && (aliastype === 'uri')) {
+		reference.attributes['refuri'] = alias;
+	    }else {
+                reference.attributes['anonymous'] = 1;
+	    }
+	} else{
+            if(target) {
+                target.attributes['names'].push(refname);
+                if(aliastype === 'name') {
+                    reference.attributes['refname'] = alias;
+                    this.document.noteIndirectTarget(target)
+                    this.document.noteRefname(reference);
+		} else {
+                    reference.attributes['refuri'] = alias;
+                    this.document.noteExplicitTarget(target, this.parent)
+		    //original source commented out
+		    //# target.note_referenced_by(name=refname)
+		}
+                node_list.push(target)
+	    } else {
+                reference.attributes['refname'] = refname;
+                this.document.noteRefname(reference);
+	    }
+	}
         return [before, node_list, after, []]
     }
 
@@ -663,8 +673,7 @@ sysmessages;
     }
 
     interpreted(rawsource, text, role, lineno) {
-        const [ role_fn, messages ] = roles.role(role, self.language, lineno,
-                                       self.reporter)
+        const [ role_fn, messages ] = [ undefined, [] ];//roles.role(role, self.language, lineno, self.reporter) // fixme
         if(role_fn) {
             [ nodes, messages2 ] = role_fn(role, rawsource, text, lineno, this)
 	    try{
@@ -994,7 +1003,7 @@ matchTitles,
     }
 
     paragraph(lines, lineno) {
-        const data = [lines].flatMap(x => x).join('\n').replace(/\s*$/, '');
+	const data =  lines.join('\n').trimEnd();
         let text;
         let literalnext;
         if (/(?<!\\)(\\\\)*::$/.test(data)) {
@@ -1084,7 +1093,8 @@ export class Body extends RSTState {
         enum_.converters = {
  arabic: parseInt,
                        loweralpha: _loweralpha_to_int,
-                       upperalpha: _upperalpha_to_int,
+
+            upperalpha: _upperalpha_to_int,
                        lowerroman: _lowerroman_to_int,
                             upperroman: _upperroman_to_int,
 };

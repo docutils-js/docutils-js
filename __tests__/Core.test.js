@@ -24,9 +24,6 @@ test.skip('cmdline', () => {
     return new Promise((resolve, reject) => {
 	publishCmdLine({
  debug: true,
-			 debugFn: (msg) => {
-			     console.log(`here ${msg}`);
-			 },
 			 argv: ['in.rst'],
 writerName: 'xml',
 description,
@@ -45,16 +42,22 @@ test('1', () => {
     const settings = { ...defaultSettings };
     const args = { ...defaultArgs };
 
+    const debugLog = [];
+    const debugFn = (msg) => {
+	debugLog.push(msg);
+    };
+
     const { readerName, parserName, writerName } = args;
     const source = new StringInput({ source: '`text`:role:' });
         const destination = new StringOutput({});
     const pub = new Publisher({
- source, destination, settings, debug: true, debugFn: console.log,
+ source, destination, settings, debug: true, debugFn
 });
     pub.setComponents(readerName, parserName, writerName);
     return new Promise((resolve, reject) => {
 	pub.publish({}, (error, ...args) => {
 	    if (error) {
+		debugLog.map(msg=> console.log(msg));
 	    	console.log(error);
 		reject(error);
 		return;
@@ -86,13 +89,17 @@ This is a test.
 	  ])('%s', (a, raw) => {
 	      const settings = { ...defaultSettings };
 	      const args = { ...defaultArgs };
+	      const debugLog = [];
+	      const debugFn = (msg) => {
+		  debugLog.push(msg);
+	      };
 
 	      const { readerName, parserName, writerName } = args;
 //	      console.log(raw);
 	      const source = new StringInput({ source: raw });
 	      const destination = new StringOutput({});
 	      const pub = new Publisher({
- source, destination, settings, debug: true, debugFn: console.log,
+		  source, destination, settings, debug: true, debugFn
 });
 	      pub.setComponents(readerName, parserName, writerName);
 	      return new Promise((resolve, reject) => {

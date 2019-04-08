@@ -44,7 +44,16 @@ export class SystemMessage extends Error {
     }
 }
     
-export class DataError extends Error {
+export class ApplicationError extends Error {
+    constructor(...params) {
+	super(...params);
+	if(Error.captureStackTrace) {
+	    Error.captureStackTrace(this, Error);
+	}
+    }
+}
+
+export class DataError extends ApplicationError {
     constructor(...params) {
 	super(...params);
 	if(Error.captureStackTrace) {

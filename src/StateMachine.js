@@ -241,7 +241,7 @@ export class StateMachine {
     getState(nextState) {
         if (nextState) {
             if (this.debug && nextState !== this.currentState) {
-                console.log(`StateMachine.getState: changing state from "${this.currentState}" to "${nextState}" (input line ${this.absLineNumber()})`);
+                this.debugFn(`StateMachine.getState: changing state from "${this.currentState}" to "${nextState}" (input line ${this.absLineNumber()})`);
             }
             this.currentState = nextState;
         }
