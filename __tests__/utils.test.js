@@ -1,23 +1,22 @@
 import * as utils from '../src/utils';
 
 test('1', () => {
-    const r = utils.newReporter({}, { debug: true,
+    const r = utils.newReporter({}, {
+ debug: true,
 				      reportLevel: 0,
 				      warningStream: {
-					  write: process.stdout.write.bind(process.stdout)
-				      }
-				    })
+					  write: process.stdout.write.bind(process.stdout),
+				      },
+				    });
 
 //    r.attachObserver(node => {
 //	console.log(node.children[0].children[0].astext());
 //    })
-    r.debug('hello')
-})
+    r.debug('hello');
+});
 
 test.only('2', () => {
-    console.log(unescape("derp"));
-    console.log(unescape("d\x00erp"));
-    expect(utils.unescape("d\x00 e\x00\nrp")).toBe('derp')
-
-})
-     
+    console.log(unescape('derp'));
+    console.log(unescape('d\x00erp'));
+    expect(utils.unescape('d\x00 e\x00\nrp')).toBe('derp');
+});

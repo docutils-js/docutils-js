@@ -1,6 +1,6 @@
-import { Inliner } from '../../../src/parsers/rst/States'
+import { Inliner } from '../../../src/parsers/rst/States';
 import { newDocument, newReporter } from '../../../src/utils';
-import { Element }  from '../../../src/nodes';
+import { Element } from '../../../src/nodes';
 import baseSettings from '../../../src/baseSettings';
 
 function isIterable(obj) {
@@ -12,8 +12,8 @@ function isIterable(obj) {
 }
 
 function dumpNodes(nodes) {
-    for(let node in nodes) {
-	if(Array.isArray(node)) {
+    for (const node in nodes) {
+	if (Array.isArray(node)) {
 	    dumpNodes(node);
 	    continue;
 	}
@@ -24,43 +24,46 @@ function dumpNodes(nodes) {
 
 test('inliner 1', () => {
     const inliner = new Inliner();
-    inliner.initCustomizations({})
+    inliner.initCustomizations({});
     const document = newDocument({}, baseSettings);
     const reporter = newReporter({}, {});
     let language;
-    const memo = { document,
+    const memo = {
+ document,
 		   reporter,
 		   language,
 		 };
-		   
-    const result = inliner.parse('_`hello`', {  lineno: 1, memo, parent: document });
-    const [ nodes] = result;
+
+    const result = inliner.parse('_`hello`', { lineno: 1, memo, parent: document });
+    const [nodes] = result;
     const stringRep = nodes.map(n => n.toString()).join('');
     expect(stringRep).toMatchSnapshot();
-
-})
+});
 
 test.each([['I like *TV*'],
 	   ['Eat **lots** of *food*.'],
 	   ['``literal``'],
 	   ['_`hello`'],
-	  ])("%s", (a) => {
+	   ['`test`:foo:'],
+	   ['`test`'],
+	  ])('%s', (a) => {
     const inliner = new Inliner();
-    inliner.initCustomizations({})
+    inliner.initCustomizations({});
     const document = newDocument({}, {});
     const reporter = newReporter({}, {});
     let language;
-    const memo = { document,
+    const memo = {
+ document,
 		   reporter,
 		   language,
 		 };
-    
-    const result = inliner.parse(a, {  lineno: 1, memo, parent: document });
-    const [ nodes] = result;
+
+    const result = inliner.parse(a, { lineno: 1, memo, parent: document });
+    const [nodes] = result;
     const stringRep = nodes.map(n => n.toString()).join('');
     expect(stringRep).toMatchSnapshot();
 });
-			     
+
 /*
     if(isIterable(nodes)) {
 	console.log('is iterable');
@@ -74,7 +77,7 @@ test.each([['I like *TV*'],
 		    } else {
 			console.log(`    ${i2}: ${e2}`);
 		    }
-		    
+
 		})
 	    } else {
 		console.log(`${i}: ${e}`);
@@ -83,4 +86,3 @@ test.each([['I like *TV*'],
 
     }
 */
-

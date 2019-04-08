@@ -2,6 +2,7 @@ import * as statemachine from '../../StateMachine';
 import * as languages from '../../languages';
 import * as nodes from '../../nodes';
 import { matchChars } from '../../utils/punctuationChars';
+import * as roles from './Roles';
 
 import { DataError, EOFError, InvalidArgumentsError, UnimplementedError as Unimp } from '../../Exceptions';
 import { punctuation_chars, column_width, unescape } from '../../utils';
@@ -60,30 +61,32 @@ function buildRegexp(definition, compile = true) {
         const fakeTuple3 = Array.isArray(part) ? part[0] : undefined;
         if (fakeTuple3 === 1) {
             const [regexp, subGroupNames] = buildRegexp(part, null);
-            groupNames.push(...subGroupNames);
+            groupNames.push(null, ...subGroupNames);
             partStrings.push(regexp);
         } else if (fakeTuple3 === 2) {
             part.shift();
             const regexp = part.shift();
             partStrings.push(regexp);
-                groupNames.push(...part);
+            groupNames.push(null, ...part);
             } else {
                 partStrings.push(part);
+		groupNames.push(null);
             }
     }
     const orGroup = partStrings.map(x => `(${x})`).join('|');
     const regexp = `${prefix}(${orGroup})${suffix}`;
 //    console.log(new RegExp(regexp))
     groupNames.splice(0, 0, ...prefixNames, name);
+
     groupNames.push(...suffixNames);
 //    console.log('groupnames')
 //    console.log(groupNames);
 //    console.log(`regexp is ${regexp}`);
     if (compile) {
-        return [new RegExp(regexp), groupNames];
+        return [new RegExp(regexp), groupNames, regexp];
     }
 
-        return [regexp, groupNames];
+    return [regexp, groupNames];
 }
 export class Inliner {
     constructor() {
@@ -147,7 +150,7 @@ export class Inliner {
 	}
         return [before, inlines, remaining, sysmessages]
     }
-    
+
     footnote_reference( match, lineno) {
 	const label = match.group['footnotelabel']
 	const refname = normalize_name(label)
@@ -203,11 +206,11 @@ export class Inliner {
         const matchend = match.result.index + match.result[0].length
         return [string.substring(0, matchstart), [referencenode], string.substring(matchend), []]
     }
-    
+
     anonymous_reference(match, lineno) {
 	return this.reference(match, lineno, true);
     }
-    
+
     zinline_internal_target( match, lineno) {
         const [ before, inlines, remaining, sysmessages, endstring ] = this.inline_obj(
               match, lineno, this.patterns.target, nodes.target)
@@ -245,7 +248,7 @@ export class Inliner {
 	console.log(match.groups);
 	const matchstart = match.match.index
         const matchend = matchstart + match.match[0].length
-        const rolestart = match.match.input.indexOf(match.groups['role'])
+        const rolestart = matchstart
         let role = match.groups['role']
         let position = ''
         if(role) {
@@ -253,41 +256,41 @@ export class Inliner {
             position = 'prefix'
 	} else if(this.quoted_start(match)) {
             return [string.substring(0, matchend), [], string.substring(matchend), []]
-	}	    
+	}
         const endmatch = end_pattern.exec(string.substring(matchend));
         if(endmatch && endmatch[0].length) {
             const textend = matchend + endmatch.index + endmatch[0].length
-            /*
-            if endmatch.group('role'):
-                if role:
-                    msg = self.reporter.warning(
-                        'Multiple roles in interpreted text (both '
+	    if(endmatch[2]) {
+                if(role) {
+                    const msg = self.reporter.warning(
+                        'Multiple roles in interpreted text (both '+
                         'prefix and suffix present; only one allowed).',
-                        line=lineno)
-                    text = unescape(string[rolestart:textend], True)
-                    prb = self.problematic(text, text, msg)
-                    return string[:rolestart], [prb], string[textend:], [msg]
-                role = endmatch.group('suffix')[1:-1]
+                        [], { line: lineno })
+                    const text = unescape(string.substring(rolestart, textend), true)
+                    const prb = this.problematic(text, text, msg)
+                    return [string.substring(0, rolestart), [prb], string.substring(textend), [msg]];
+		}
+                role = endmatch[3];
                 position = 'suffix'
-            escaped = endmatch.string[:endmatch.start(1)]
-            rawsource = unescape(string[matchstart:textend], True)
-            if rawsource[-1:] == '_':
-                if role:
-                    msg = self.reporter.warning(
-                          'Mismatch: both interpreted text role %s and '
-                          'reference suffix.' % position, line=lineno)
-                    text = unescape(string[rolestart:textend], True)
-                    prb = self.problematic(text, text, msg)
-                    return string[:rolestart], [prb], string[textend:], [msg]
-                return self.phrase_ref(string[:matchstart], string[textend:],
-                                       rawsource, escaped, unescape(escaped))
-            else:
-                rawsource = unescape(string[rolestart:textend], True)
-                nodelist, messages = self.interpreted(rawsource, escaped, role,
-                                                      lineno)
-                return (string[:rolestart], nodelist,
-                        string[textend:], messages)
-            */
+	    }
+            const escaped = endmatch.input.substring(0, endmatch.index + 1);
+            const rawsource = unescape(string.substring(matchstart, textend), true)
+            if(rawsource[rawsource.length - 1] === '_') {
+                if(role) {
+                    const msg = this.reporter.warning(
+                        `Mismatch: both interpreted text role ${position} and `+
+                            `reference suffix.`, [], { line: lineno })
+                    const text = unescape(string.substring(rolestart, textend), true);
+                    const prb = this.problematic(text, text, msg)
+                    return [string.substring(0, rolestart), [prb], string.substring(textend), [msg]]
+		}
+                return this.phrase_ref(string.substring(0, matchstart), string.substring(textend), rawsource, escaped, unescape(escaped))
+	    } else {
+                const rawsource = unescape(string.substring(rolestart, textend), true);
+                const [ nodelist, messages ] = this.interpreted(rawsource, escaped, role, lineno)
+                return [string.substring(0, rolestart), nodelist,
+                        string.substring(textend), messages]
+	    }
 	}
         const msg = this.reporter.warning(
             'Inline interpreted text or phrase reference start-string '+
@@ -295,6 +298,82 @@ export class Inliner {
         const text = unescape(string.substring(matchstart, matchend), true);
         const prb = this.problematic(text, text, msg)
         return [string.substring(0, match.match.index), [prb], string.substring(matchend), [msg]]
+    }
+
+    phrase_ref(before, after, rawsource, escaped, text) {
+	const match = self.patterns.embedded_link.exec(escaped)
+	let aliastype;
+	let aliastext;
+	let aliastype;
+	let rawaliastext;
+	let rawtext;
+	let text;
+	let alias;
+        if(match) {// # embedded <URI> or <alias_>
+            text = unescape(escaped.substring(0, match.index));
+            rawtext = unescape(escaped.substring(0, match.index), true);
+	    aliastext = unescape(match[2])
+            rawaliastext = unescape(match[2], true)
+            const underscore_escaped = rawaliastext.endsWith('\\_')
+            if(aliastext.endsWith('_') && ! (underscore_escaped
+                                             || self.patterns.uri.exec('^' + aliastext))) {
+                aliastype = 'name'
+                alias = normalize_name(aliastext[:-1])
+                target = nodes.target(match.group(1), refname=alias)
+                target.indirect_reference_name = aliastext[:-1]
+            else:
+                aliastype = 'uri'
+                alias_parts = split_escaped_whitespace(match.group(2))
+                alias = ' '.join(''.join(unescape(part).split())
+                                 for part in alias_parts)
+                alias = self.adjust_uri(alias)
+                if alias.endswith(r'\_'):
+                    alias = alias[:-2] + '_'
+                target = nodes.target(match.group(1), refuri=alias)
+                target.referenced = 1
+            if not aliastext:
+                raise ApplicationError('problem with embedded link: %r'
+                                       % aliastext)
+            if not text:
+                text = alias
+                rawtext = rawaliastext
+        else:
+            target = None
+            rawtext = unescape(escaped, True)
+
+        refname = normalize_name(text)
+        reference = nodes.reference(rawsource, text,
+                                    name=whitespace_normalize_name(text))
+        reference[0].rawsource = rawtext
+
+        node_list = [reference]
+
+        if rawsource[-2:] == '__':
+            if  target and (aliastype == 'name'):
+                reference['refname'] = alias
+                self.document.note_refname(reference)
+                # self.document.note_indirect_target(target) # required?
+            elif target and (aliastype == 'uri'):
+                reference['refuri'] = alias
+            else:
+                reference['anonymous'] = 1
+        else:
+            if target:
+                target['names'].append(refname)
+                if aliastype == 'name':
+                    reference['refname'] = alias
+                    self.document.note_indirect_target(target)
+                    self.document.note_refname(reference)
+                else:
+                    reference['refuri'] = alias
+                    self.document.note_explicit_target(target, self.parent)
+                # target.note_referenced_by(name=refname)
+                node_list.append(target)
+            else:
+                reference['refname'] = refname
+                self.document.note_refname(reference)
+        */
+        return [before, node_list, after, []]
     }
 
     quoted_start(match) {
@@ -442,9 +521,62 @@ esn;
             initial: buildRegexp(parts, true), // KM
             emphasis: new RegExp(`${this.nonWhitespaceEscapeBefore}(\\*)${endStringSuffix}`),
             strong: new RegExp(`${this.nonWhitespaceEscapeBefore}(\\*\\*)${endStringSuffix}`),
+            interpreted_or_phrase_ref: new RegExp(`${this.nonUnescapedWhitespaceEscapeBefore}(\`((:${this.simplename}:)?(__?)?))${endStringSuffix}`),
+	    embedded_link: new RegExp('((?:[ \\n]+|^)<' + this.nonWhitespaceAfter + '(([^<>]|\\x00[<>])+)' + this.nonWhitespaceEscapeBefore + '>)$'),
 	    literal: new RegExp(this.nonWhitespaceBefore + '(``)' + endStringSuffix),
 	    target: new RegExp(this.nonWhitespaceEscapeBefore + '(`)' + endStringSuffix),
-            interpreted_or_phrase_ref: new RegExp(`${this.nonUnescapedWhitespaceEscapeBefore}(\`((:${this.simplename}:)?(__?)?))${endStringSuffix}`)
+            substitution_ref: new RegExp(this.nonWhitespaceEscapeBefore
+					 + '(\\|_{0,2})'
+					 + endStringSuffix),
+            //email: new RegExp(this.email_pattern // fixme % args + '$',
+            //re.VERBOSE | re.UNICODE),
+	    //            uri: new RegExp(${startStringPrefix} + '((([a-zA-Z][a-zA-Z0-9.+-]*):(((//?)?
+	    /*
+                (?P<whole>
+                  (?P<absolute>           # absolute URI
+                    (?P<scheme>             # scheme (http, ftp, mailto)
+                      [a-zA-Z][a-zA-Z0-9.+-]*
+                    )
+                    :
+                    (
+                      (                       # either:
+                        (//?)?                  # hierarchical URI
+                        %(uric)s*               # URI characters
+                        %(uri_end)s             # final URI char
+                      )
+                      (                       # optional query
+                        \?%(uric)s*
+                        %(uri_end)s
+                      )?
+                      (                       # optional fragment
+                        \#%(uric)s*
+                        %(uri_end)s
+                      )?
+                    )
+                  )
+                |                       # *OR*
+                  (?P<email>              # email address
+                    """ + self.email_pattern + r"""
+                  )
+                )
+                %(end_string_suffix)s
+                """) % args, re.VERBOSE | re.UNICODE),
+                   */
+/*          pep=re.compile(
+                r"""
+                %(start_string_prefix)s
+                (
+                  (pep-(?P<pepnum1>\d+)(.txt)?) # reference to source file
+                |
+                  (PEP\s+(?P<pepnum2>\d+))      # reference by name
+                )
+                %(end_string_suffix)s""" % args, re.VERBOSE | re.UNICODE),
+          rfc=re.compile(
+                r"""
+                %(start_string_prefix)s
+                (RFC(-|\s+)?(?P<rfcnum>\d+))
+                %(end_string_suffix)s""" % args, re.VERBOSE | re.UNICODE))*/
+
         };
         //console.log(this.patterns.initial);
     }
@@ -470,7 +602,9 @@ esn;
                 const rr = {};
 
                 this.patterns.initial[1].forEach((x, index) => {
-                    rr[x] = match[index];
+                    if(x != null) {
+                        rr[x] = match[index];
+                    }
                 });
 		const mname = rr.start || rr.backquote || rr.refend || groups.fnend;
                 const method = this.dispatch[mname];
@@ -481,6 +615,9 @@ esn;
 sysmessages;
                 [before, inlines, remaining, sysmessages] = method({ result: match, match, groups: rr }, lineno);
                 unprocessed.push(before);
+                if(!isIterable(sysmessages)) {
+                    throw new Error("Expecting iterable");
+                }
                 messages.push(...sysmessages)
                 if (inlines) {
                     processed.push(...this.implicit_inline(unprocessed.join(''),
@@ -500,11 +637,53 @@ sysmessages;
     }
 
     implicit_inline(text, lineno) {
-        if (!text) {
-            return [];
-        }
-        // FIXME
-        return [new nodes.Text(text, text)];
+	/*
+        Check each of the patterns in `self.implicit_dispatch` for a match,
+        and dispatch to the stored method for the pattern.  Recursively check
+        the text before and after the match.  Return a list of `nodes.Text`
+        and inline element nodes.
+	*/
+        if(!text) {
+            return []
+	}
+
+/*        for pattern, method in self.implicit_dispatch:
+            match = pattern.search(text)
+            if match:
+                try:
+                    # Must recurse on strings before *and* after the match;
+                    # there may be multiple patterns.
+                    return (self.implicit_inline(text[:match.start()], lineno)
+                            + method(match, lineno) +
+                            self.implicit_inline(text[match.end():], lineno))
+                except MarkupMismatch:
+                    pass
+*/
+	return [new nodes.Text(unescape(text), unescape(text, true))];
+    }
+
+    interpreted(rawsource, text, role, lineno) {
+        const [ role_fn, messages ] = roles.role(role, self.language, lineno,
+                                       self.reporter)
+        if(role_fn) {
+            [ nodes, messages2 ] = role_fn(role, rawsource, text, lineno, this)
+	    try{
+                nodes[0][0].rawsource = unescape(text, true)
+	    }
+	    catch(error)
+	    {
+		//except IndexError:
+                //pass
+		throw error;
+	    }
+            return [ nodes, messages.extend(messages2) ]
+	}else {
+            const msg = this.reporter.error(
+                `Unknown interpreted text role "${role}".`, [],
+                { line: lineno } )
+            return [[this.problematic(rawsource, rawsource, msg)],
+                    messages.push([msg])];
+	}
     }
 
     literal(match, lineno) {
@@ -766,7 +945,7 @@ matchTitles,
             throw new EOFError()    // let parent section re-evaluate
 
 	}
-	
+
 	if(level === mylevel + 1) {        // immediate subsection
             return 1
 	} else {
@@ -805,7 +984,7 @@ matchTitles,
         if(memo.sectionLevel <= mylevel) {
             throw new EOFError()
 	}
-	
+
             memo.sectionLevel = mylevel
     }
 
@@ -1056,7 +1235,7 @@ export class Body extends RSTState {
 	}
         return [i, indent || 0]
     }
-    
+
     enumerator(match, context, nextState) {
         const [format, sequence, text, ordinal] = this.parseEnumerator(match);
         if (!this.isEnumeratedListItem(ordinal, sequence, format)) {
@@ -1250,7 +1429,7 @@ initialState: 'BulletList',
         const name = this.parse_field_marker(match)
         const [ src, srcline ] = this.stateMachine.getSourceAndLine()
         const lineno = this.stateMachine.absLineNumber()
-        const [ indented, indent, lineOffset, blankFinish ] = 
+        const [ indented, indent, lineOffset, blankFinish ] =
               this.stateMachine.getFirstKnownIndented({ indent: match.result.index + match.result[0].length});
         const field_node = new nodes.field()
         field_node.source = src
@@ -1264,7 +1443,7 @@ initialState: 'BulletList',
 	}
         return [field_node, blankFinish]
     }
-    
+
     parse_field_marker(match) {
         /*"""Extract & return field name from a field marker match."""*/
 	console.log(match);
@@ -1291,7 +1470,7 @@ initialState: 'BulletList',
 		// This shouldn't happen; pattern won't match.
 		const msg = this.reporter.error(`Invalid option list marker: ${error}`);
 		this.parent.add( msg )
-		const [ indented, indent, line_offset, blankFinish ]  = 
+		const [ indented, indent, line_offset, blankFinish ]  =
                       this.stateMachine.getFirstKnownIndented({ indent: match.result.index + match.result[0].length });
 		const elements = this.block_quote(indented, line_offset)
 		this.parent.add(elements);
@@ -1320,11 +1499,11 @@ initialState: 'BulletList',
 	}
         return [[], nextState, []]
     }
-    
+
     option_list_item(match) {
         const offset = this.stateMachine.absLineOffset()
         const options = this.parse_option_marker(match)
-        const [ indented, indent, line_offset, blank_finish ] = 
+        const [ indented, indent, line_offset, blank_finish ] =
               this.stateMachine.getFirstKnownIndented({ indent: match.result.index + match.result[0].length });
         if(!indented || !indented.length) {//  not an option list item
             this.gotoLine(offset)
@@ -1394,7 +1573,7 @@ initialState: 'BulletList',
         this.parent.add(new nodes.doctest_block(data, data))
         return [[], nextState, []]
     }
-    
+
     line(match, context, nextState) {
 //      console.log(line);
         if (this.stateMachine.matchTitles) {
@@ -1595,7 +1774,7 @@ srcline;
     }
 
     definition_list_item(termline) {
-        const [ indented, indent, line_offset, blank_finish ] = 
+        const [ indented, indent, line_offset, blank_finish ] =
               this.stateMachine.getIndented({})
         const itemnode = new nodes.definition_list_item(
             [...termline, ...indented].join('\b'))

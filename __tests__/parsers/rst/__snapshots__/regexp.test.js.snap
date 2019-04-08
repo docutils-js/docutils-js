@@ -1,0 +1,46 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`emphasis surrounded by text 1`] = `
+Object {
+  "backquote": undefined,
+  "citationlabel": undefined,
+  "fnend": undefined,
+  "footnotelabel": undefined,
+  "initial_inline": "*",
+  "refend": undefined,
+  "refname": undefined,
+  "role": undefined,
+  "start": "*",
+  "whole": undefined,
+}
+`;
+
+exports[`interpreted with role prefix 1`] = `
+Object {
+  "backquote": "\`",
+  "citationlabel": undefined,
+  "fnend": undefined,
+  "footnotelabel": undefined,
+  "initial_inline": ":hello:\`",
+  "refend": undefined,
+  "refname": undefined,
+  "role": ":hello:",
+  "start": undefined,
+  "whole": undefined,
+}
+`;
+
+exports[`interpreted with role suffix 1`] = `
+Object {
+  "backquote": "\`",
+  "citationlabel": undefined,
+  "fnend": undefined,
+  "footnotelabel": undefined,
+  "initial_inline": "\`",
+  "refend": undefined,
+  "refname": undefined,
+  "role": "",
+  "start": undefined,
+  "whole": undefined,
+}
+`;

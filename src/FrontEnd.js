@@ -205,6 +205,11 @@ export class OptionParser extends OptionParserBase {
            'validator': validate_colon_separated_string_list}],
          [SUPPRESS_HELP, ['--strict-visitor'], {'action': 'store_true'}],
 		      ]];
+
+	this.settingsDefaults = {'_disable_config': null,
+				 '_source': null,
+				 '_destination': null,
+				 '_config_files': null}
 	
     }
 

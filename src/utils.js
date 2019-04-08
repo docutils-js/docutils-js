@@ -5,8 +5,9 @@ import { InvalidArgumentsError, SystemMessage, UnimplementedError as Unimp } fro
 export function column_width(text) {
     return text.length;
 }
-function isIterable(obj) {
-  // checks for null and undefined
+export function isIterable(obj) {
+    // checks for null and undefined
+    /* instanbul ignore if */
   if (obj == null) {
     return false;
   }
@@ -40,7 +41,7 @@ export class Reporter {
     constructor(source, reportLevel, haltLevel, stream, debug, encoding,
 		errorHandler='backslashreplace') {
 	if(haltLevel === undefined) {
-	    haltLevel = 3;
+	    haltLevel = 4;
 	}
 	this.DEBUG_LEVEL = 0
 	this.INFO_LEVEL = 1
