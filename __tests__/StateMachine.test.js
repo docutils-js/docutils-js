@@ -56,7 +56,7 @@ function createStateMachine() {
     return new StateMachine({ stateClasses, initialState });
 }
 
-test.each([['test', 'test']])('%s', (name, raw) => {
+test.skip.each([['test', 'test']])('%s', (name, raw) => {
     try {
 	const sot = createStateMachine();
 	const r = sot.run({
@@ -72,7 +72,7 @@ test.each([['test', 'test']])('%s', (name, raw) => {
 });
 
 
-test('StateWS indent', () => {
+test.skip('StateWS indent', () => {
     const indented = new StringList([]);
     const indent = 2;
     const offset = 0;
