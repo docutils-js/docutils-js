@@ -16,7 +16,5 @@ test('1', () => {
 });
 
 test.only('2', () => {
-    console.log(unescape('derp'));
-    console.log(unescape('d\x00erp'));
     expect(utils.unescape('d\x00 e\x00\nrp')).toBe('derp');
 });
