@@ -204,19 +204,6 @@ export class Inliner {
 	return this.reference(match, lineno, true);
     }
 
-    zinline_internal_target( match, lineno) {
-        const [ before, inlines, remaining, sysmessages, endstring ] = this.inline_obj(
-              match, lineno, this.patterns.target, nodes.target)
-        if(inlines && inlines[0] instanceof nodes.target) {
-            //assert len(inlines) == 1
-            const target = inlines[0]
-            const name = normalize_name(target.astext())
-            target.attributes['names'].append(name)
-            this.document.noteExplicitTarget(target, this.parent)
-	}
-        return [ before, inlines, remaining, sysmessages ]
-    }
-
     problematic(text, rawsource, message) {
         const msgid = this.document.setId(message, this.parent);
         const problematic = new nodes.problematic(rawsource, text, [], { refid: msgid });
