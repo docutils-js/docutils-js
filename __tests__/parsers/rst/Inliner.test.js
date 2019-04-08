@@ -3,6 +3,15 @@ import { newDocument, newReporter } from '../../../src/utils';
 import { Element } from '../../../src/nodes';
 import baseSettings from '../../../src/baseSettings';
 
+const currentLogLines = [];
+
+afterEach(() => {
+    if(currentLogLines.length) {
+	currentLogLines.map(line => console.log(line));
+	currentLogLines.length = 0;
+    }
+});
+
 function isIterable(obj) {
   // checks for null and undefined
   if (obj == null) {
@@ -29,12 +38,12 @@ test('inliner 1', () => {
     const reporter = newReporter({}, {});
     let language;
     const memo = {
- document,
-		   reporter,
-		   language,
-		 };
+	document,
+	reporter,
+	language,
+    };
 
-    const result = inliner.parse('_`hello`', { lineno: 1, memo, parent: document });
+    const result = inliner.parse('`test`:foo:', { lineno: 1, memo, parent: document });
     const [nodes] = result;
     const stringRep = nodes.map(n => n.toString()).join('');
     expect(stringRep).toMatchSnapshot();
@@ -44,8 +53,8 @@ test.each([['I like *TV*'],
 	   ['Eat **lots** of *food*.'],
 	   ['``literal``'],
 	   ['_`hello`'],
-	   ['`test`:foo:'],
-	   ['`test`'],
+	   //['`test`:foo:'],
+	   //['`test`'],
 	  ])('%s', (a) => {
     const inliner = new Inliner();
     inliner.initCustomizations({});
