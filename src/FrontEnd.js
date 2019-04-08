@@ -174,8 +174,7 @@ export class OptionParser extends OptionParserBase {
           {'metavar': '<name[:handler]>', 'default': default_error_encoding,
            'validator': validate_encoding_and_error_handler}],
          ['Specify the error handler for unencodable characters in ' +
-          'error output.  Default: %s.'
-          % default_error_encoding_error_handler,
+          'error output.  Default: ' + default_error_encoding_error_handler + '.',
           ['--error-encoding-error-handler'],
           {'default': default_error_encoding_error_handler,
            'validator': validate_encoding_error_handler}],
@@ -206,6 +205,7 @@ export class OptionParser extends OptionParserBase {
            'validator': validate_colon_separated_string_list}],
          [SUPPRESS_HELP, ['--strict-visitor'], {'action': 'store_true'}],
 		      ]];
+	
     }
 
     checkArgs(args) {

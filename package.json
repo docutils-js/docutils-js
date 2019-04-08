@@ -26,7 +26,8 @@
     "grunt-contrib-watch": "^1.1.0",
     "grunt-eslint": "^21.0.0",
     "jest": "^24.1.0",
-    "jest-junit": "^6.3.0"
+    "jest-junit": "^6.3.0",
+    "nyc": "^13.3.0"
   },
   "jest": {
     "reporters": [

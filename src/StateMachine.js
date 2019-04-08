@@ -26,7 +26,8 @@ export class StateCorrection extends Error {
 }
 
 function isIterable(obj) {
-  // checks for null and undefined
+    // checks for null and undefined
+    /* istanbul ignore if */
   if (obj == null) {
     return false;
   }

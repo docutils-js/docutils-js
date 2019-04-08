@@ -1,6 +1,7 @@
 import { Inliner } from '../../../src/parsers/rst/States'
 import { newDocument, newReporter } from '../../../src/utils';
 import { Element }  from '../../../src/nodes';
+import baseSettings from '../../../src/baseSettings';
 
 function isIterable(obj) {
   // checks for null and undefined
@@ -24,9 +25,7 @@ function dumpNodes(nodes) {
 test('inliner 1', () => {
     const inliner = new Inliner();
     inliner.initCustomizations({})
-    const document = newDocument({}, { autoIdPrefix: 'auto',
-        idPrefix: '' });
-            
+    const document = newDocument({}, baseSettings);
     const reporter = newReporter({}, {});
     let language;
     const memo = { document,
