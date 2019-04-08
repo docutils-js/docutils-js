@@ -34,9 +34,6 @@
       "default",
       "jest-junit"
     ],
-    "modulePaths": [
-      "<rootDir>/src"
-    ]
   },
   "dependencies": {
     "@babel/polyfill": "^7.4.0"
