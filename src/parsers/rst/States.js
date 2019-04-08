@@ -5,7 +5,7 @@ import { matchChars } from '../../utils/punctuationChars';
 //import * as roles from './Roles';
 
 import { ApplicationError, DataError, EOFError, InvalidArgumentsError, UnimplementedError as Unimp } from '../../Exceptions';
-import { punctuation_chars, column_width, unescape } from '../../utils';
+import { punctuation_chars, column_width, unescape, isIterable } from '../../utils';
 
 class MarkupError extends DataError { }
 
@@ -13,13 +13,6 @@ const normalize_name = nodes.fullyNormalizeName;
 
 const { StateMachineWS } = statemachine;
 const { StateWS } = statemachine;
-function isIterable(obj) {
-  // checks for null and undefined
-  if (obj == null) {
-    return false;
-  }
-  return typeof obj[Symbol.iterator] === 'function';
-}
 
 function escapeRegExp(string) {
   return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
