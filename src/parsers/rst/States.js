@@ -255,6 +255,7 @@ export class Inliner {
                     return [string.substring(0, rolestart), [prb], string.substring(textend), [msg]];
 		}
                 role = endmatch[3];
+		role = role.substring(1, role.length - 1)
                 position = 'suffix'
 	    }
             const escaped = endmatch.input.substring(0, endmatch.index + 1);

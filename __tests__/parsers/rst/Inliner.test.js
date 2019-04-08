@@ -50,7 +50,7 @@ test('inliner 1', () => {
     expect(messages.map(n => n.toString()).join('')).toMatchSnapshot();
 });
 
-test.only.each([['`test`:foo:'],
+test.each([['`test`:foo:'],
 		['I like *TV*'],
 		['Eat **lots** of *food*.'],
 		['``literal``'],
