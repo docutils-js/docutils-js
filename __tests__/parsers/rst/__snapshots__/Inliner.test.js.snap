@@ -1,12 +1,20 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`_\`hello\` 1`] = `"<target ids=\\"undefinedhello\\" names=\\"hello\\">hello</target>"`;
+exports[`_\`hello\` 1`] = `"<target ids=\\"hello\\" names=\\"hello\\">hello</target>"`;
 
 exports[`_\`hello\` 2`] = `""`;
 
 exports[`\`\`literal\`\` 1`] = `"<literal>literal</literal>"`;
 
 exports[`\`\`literal\`\` 2`] = `""`;
+
+exports[`\`test\` 1`] = `"<problematic ids=\\"id2\\" refid=\\"id1\\">\`test\`</problematic>"`;
+
+exports[`\`test\` 2`] = `"<system_message ids=\\"id1\\" backrefs=\\"id2\\" line=\\"1\\"><paragraph>Unknown interpreted text role \\"\\".</paragraph></system_message>"`;
+
+exports[`\`test\`:foo: 1`] = `"<problematic ids=\\"id2\\" refid=\\"id1\\">\`test\`:foo:</problematic>"`;
+
+exports[`\`test\`:foo: 2`] = `"<system_message ids=\\"id1\\" backrefs=\\"id2\\" line=\\"1\\"><paragraph>Unknown interpreted text role \\":foo:\\".</paragraph></system_message>"`;
 
 exports[`Eat **lots** of *food*. 1`] = `"Eat <strong>lots</strong> of <emphasis>food</emphasis>."`;
 

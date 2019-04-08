@@ -20,6 +20,9 @@ function escapeRegExp(string) {
 function buildRegexp(definition, compile = true) {
     const di = (isIterable(definition));
     let [fakeTuple, name, prefix, suffix, parts] = definition;
+    prefix = prefix.slice();
+    suffix = suffix.slice();
+    parts = parts.slice();
     let prefixNames = [];
     if (Array.isArray(prefix)) {
         prefix.shift();
@@ -57,14 +60,15 @@ function buildRegexp(definition, compile = true) {
             groupNames.push(null, ...subGroupNames);
             partStrings.push(regexp);
         } else if (fakeTuple3 === 2) {
-            part.shift();
-            const regexp = part.shift();
+	    const myPart = part.slice();
+            myPart.shift();
+            const regexp = myPart.shift();
             partStrings.push(regexp);
-            groupNames.push(null, ...part);
-            } else {
-                partStrings.push(part);
-		groupNames.push(null);
-            }
+            groupNames.push(null, ...myPart);
+        } else {
+            partStrings.push(part);
+	    groupNames.push(null);
+        }
     }
     const orGroup = partStrings.map(x => `(${x})`).join('|');
     const regexp = `${prefix}(${orGroup})${suffix}`;
