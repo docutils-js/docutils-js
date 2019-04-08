@@ -309,7 +309,7 @@ export class Inliner {
 	let alias;
 	let target;
 	let alias_parts;
-	
+
         if(match) {// # embedded <URI> or <alias_>
             text = unescape(escaped.substring(0, match.index));
             rawtext = unescape(escaped.substring(0, match.index), true);
@@ -626,7 +626,7 @@ sysmessages;
                 [before, inlines, remaining, sysmessages] = method({ result: match, match, groups: rr }, lineno);
                 unprocessed.push(before);
                 if(!isIterable(sysmessages)) {
-                    throw new Error("Expecting iterable");
+                    throw new Error(`Expecting iterable, got ${sysmessages}`);
                 }
                 messages.push(...sysmessages)
                 if (inlines) {
@@ -691,7 +691,7 @@ sysmessages;
                 `Unknown interpreted text role "${role}".`, [],
                 { line: lineno } )
             return [[this.problematic(rawsource, rawsource, msg)],
-                    messages.push([msg])];
+                    [...messages, msg]];
 	}
     }
 
