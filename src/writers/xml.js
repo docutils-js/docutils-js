@@ -50,8 +50,9 @@ class XMLTranslator extends GenericNodeVisitor {
 	}
 	this.output.push(node.starttag());
 	this.level += 1;
+	// fixme should probably pick this code up
 	if (false) {//node instanceof nodes.FixedTextElement || node instanceof nodes.literal) {
-	    this.fixed_text += 1
+	    this.fixedText += 1
 	} else {
 	    for (let nt of this.simple_nodes) {
 		if (node instanceof nt) {
