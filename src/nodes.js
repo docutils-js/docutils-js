@@ -98,7 +98,7 @@ export class NodeVisitor {
 	    throw new Error(`departing unknown node type: ${node.tagname}`);
 	}
     }
-    
+
 }
 
 export class Node {
@@ -113,7 +113,7 @@ export class Node {
 
     _init() {
     }
-    
+
     asdom() {
     }
 
@@ -144,7 +144,7 @@ export class Node {
 		    throw error;
 		}
 	    }
-		
+
 	    const children = this.children;
 	    try {
 		for(let child of [...children]) {
@@ -254,7 +254,7 @@ export class Element extends Node {
 	this.localAttributes = ['backrefs',]
 	this.listAttributes = [...this.basicAttributes, ...this.localAttributes];
     }
-    
+
 
     astext() {
 	return this.children.map(x => x.astext()).join(this.childTextSeparator);
@@ -279,13 +279,13 @@ export class Element extends Node {
 	    this.append(item);
 	}
     }
-    
+
 
     setupChild(child) {
 	if(!(child instanceof Node)) {
 	    throw new InvalidArgumentsError(`Expecting node instance ${child}`)
 	}
-	
+
 	if(!child) {
 	    throw new InvalidArgumentsError();
 	}
@@ -303,7 +303,7 @@ export class Element extends Node {
 	    }
 	}
     }
-    
+
     starttag(quoteattr) {
 	if(quoteattr === undefined) {
 	    quoteattr = pseudoQuoteattr;
@@ -550,7 +550,7 @@ export class document extends Element {
 	}
     }
 
-    noteAnonymousTarget(tartget) {
+    noteAnonymousTarget(target) {
 	this.setId(target);
     }
 

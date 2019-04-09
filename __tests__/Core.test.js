@@ -58,21 +58,12 @@ test('1', () => {
     };
 
     const { readerName, parserName, writerName } = args;
-    const source = new StringInput({ source: `==========================================
- Docutils_ Project Documentation Overview
-==========================================
+    const source = new StringInput({ source: `Docutils-general:
 
-:Author: David Goodger
-:Contact: docutils-develop@lists.sourceforge.net
-:Date: $Date: 2016-01-13 13:09:13 -0800 (Wed, 13 Jan 2016) $
-:Revision: $Revision: 7933 $
-:Copyright: This document has been placed in the public domain.
-
-The latest working documents may be accessed individually below, or
-from the \`\`docs\`\` directory of the \`Docutils distribution\`_.
-
-.. _Docutils: http://docutils.sourceforge.net/
-.. _Docutils distribution: http://docutils.sourceforge.net/#download
+* \`Docutils Front-End Tools <user/tools.html>\`__
+* \`Docutils Configuration <user/config.html>\`__
+* \`Docutils Mailing Lists <user/mailing-lists.html>\`__
+* \`Docutils Link List <user/links.html>\`__
 ` });
         const destination = new StringOutput({});
     const pub = new Publisher({

@@ -1,6 +1,8 @@
 import * as nodes from '../src/nodes';
 import { newDocument } from '../src/utils';
 
+import baseSettings from '../src/baseSettings'
+
 test('paragraph with text', () => {
     /* constructor(rawsource, text, children, attributes) */
     const paraText = 'This is my paragraph text.';
@@ -13,7 +15,7 @@ test.only('problematic', () => {
     expect(p.attributes.refid).toBe('auto1');
 });
 test('setId', () => {
-    const d = newDocument({}, { idPrefix: '', autoIdPrefix: 'auto' });
+    const d = newDocument({}, baseSettings);
     const p = new nodes.paragraph('test', 'test', [], {});
     const id = d.setId(p);
     console.log(id);

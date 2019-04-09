@@ -77,7 +77,7 @@ export class Reporter {
 	if(kwargs === undefined) {
 	    kwargs = {}
 	}
-	
+
 	if(message instanceof Error) {
 	    message = message.message;
 	}
@@ -168,7 +168,7 @@ function _getCallerFile() {
         console.log(e);
     }
 
-    Error.prepareStackTrace = originalFunc; 
+    Error.prepareStackTrace = originalFunc;
 
     return [callerfile, callerlineno];
 }
@@ -179,6 +179,22 @@ export function newReporter({sourcePath}, settings) {
 			settings.warningStream, settings.debug,
 			settings.error_encoding,
 			settings.error_encoding_error_handler)
+}
+
+export function escape2null(text) {
+    //"""Return a string with escape-backslashes converted to nulls."""
+    const parts = []
+    let start = 0;
+    while(true) {
+        const found = text.indexOf('\\', start);
+        if(found === -1) {
+            parts.push(text.substring(start));
+            return parts.join('');
+	}
+        parts.push(text.substring(start, found));
+        parts.push('\x00' + text.substring(found+1, found+2));
+        start = found + 2               // skip character after escape
+    }
 }
 
 export function unescape(text, restoreBackslashes=false, respectWhitespace=false) {
@@ -205,6 +221,21 @@ export function newDocument({sourcePath}, settings) {
     document.noteSource(sourcePath, -1);
     return document;
 }
+
+export function splitEscapedWhitespace(text) {
+    /*    """
+    Split `text` on escaped whitespace (null+space or null+newline).
+    Return a list of strings.
+    """*/
+    const strings = text.split('\x00 ')
+    const s = []
+    for (const string of strings) {
+	s.push(...string.split('\x00\n'));
+    }
+    return s;
+}
+
 export default {
     newDocument,
 }
+

@@ -3,9 +3,16 @@ import * as languages from '../../languages';
 import * as nodes from '../../nodes';
 import * as tableparser from './tableparser.js';
 import { matchChars } from '../../utils/punctuationChars';
+import { escape2null, splitEscapedWhitespace } from '../../utils';
 import RSTStateMachine from './RSTStateMachine';
 import Inliner from './Inliner';
 
+const nonWhitespaceBefore = '(?<!\\s)'
+const nonWhitespaceEscapeBefore = '(?<![\\s\\x00])'
+const nonUnescapedWhitespaceEscapeBefore = '(?<!(?<!\\x00)[\\s\\x00])'
+const nonWhitespaceAfter = '(?!\\s)'
+
+const StringList = statemachine.StringList;
 //import * as roles from './Roles';
 
 import { ApplicationError, DataError, EOFError, InvalidArgumentsError, UnimplementedError as Unimp } from '../../Exceptions';
@@ -429,6 +436,12 @@ export class Body extends RSTState {
         this.initialTransitions = ['bullet', 'enumerator', 'field_marker', 'option_marker', 'doctest', 'line_block', 'grid_table_top', 'simple_table_top', 'explicit_markup', 'anonymous', 'line', 'text']
 
         this.explicit = {};
+	this.explicit.patterns = {
+	    target: new RegExp(`(_|(?!_)(\`?)(?![ \`])(.+?)${nonWhitespaceEscapeBefore})(?<!(?<!\\x00):)${nonWhitespaceEscapeBefore}[ ]?:([ ]+|$)`),
+            reference: new RegExp('zzzz'),//((?P<simple>%(simplename)s)_|`(?![ ])(?P<phrase>.+?)%(non_whitespace_escape_before)s`_)$'),
+            substitution: new RegExp('zzzz')//((?![ ])(?P<name>.+?)%(non_whitespace_escape_before)s\\|)([ ]+|$)'),
+	};
+
         this.explicit.constructs = [
             [ this.footnote.bind(this), new RegExp(`\\.\\.[ ]+\\[([0-9]+|\\#|\\#${simplename}|\\*)\\]([ ]+|$)`) ],
             [this.citation.bind(this),
@@ -481,6 +494,80 @@ export class Body extends RSTState {
 
     hyperlink_target(match) {
 	throw new Unimp("hyperlink_target");
+    }
+
+    make_target(block, block_text, lineno, target_name) {
+        const [ target_type, data ] = this.parse_target(block, block_text, lineno)
+        if(target_type === 'refname') {
+            const target = new nodes.target(block_text, '', [], { refname: normalize_name(data) });
+            target.indirectReferenceName = data
+            this.add_target(target_name, '', target, lineno)
+            this.document.noteIndirectTarget(target)
+            return target
+	} else if(target_type === 'refuri') {
+            const target = new nodes.target(block_text, '')
+            this.add_target(target_name, data, target, lineno)
+            return target
+	} else {
+            return data;
+	}
+    }
+
+    parse_target(block, block_text, lineno) {
+        /*"""
+        Determine the type of reference of a target.
+
+        :Return: A 2-tuple, one of:
+
+            - 'refname' and the indirect reference name
+            - 'refuri' and the URI
+            - 'malformed' and a system_message node
+            """*/
+        if(block.length && block[block.length - 1].trim().endsWith('_')) {
+	    const lines = [];
+	    block.forEach(line => lines.push(line.trim()));
+            const reference = lines.join(' ');
+            const refname = this.is_reference(reference)
+            if(refname) {
+                return [ 'refname', refname ]
+	    }
+	}
+        const ref_parts = splitEscapedWhitespace(block.join(' '));
+        const reference = ref_parts.map(part => unescape(part).split(/\s+/).join('')).join(' ');
+        return ['refuri', reference]
+    }
+    is_reference(reference) {
+        const match = this.explicit.patterns.reference.exec(
+            '^' + whitespaceNormalizeName(reference))
+        if(!match) {
+	    return null;
+	}
+	throw new Unimp();
+       // return unescape(match.group('simple') or match.group('phrase'))
+    }
+
+    add_target(targetname, refuri, target, lineno) {
+        target.line = lineno
+        if(targetname) {
+            const name = normalize_name(unescape(targetname))
+            target.attributes['names'].append(name)
+            if(refuri) {
+                const uri = this.inliner.adjust_uri(refuri)
+                if(uri) {
+                    target.attributes['refuri'] = uri
+                } else {
+                    throw new ApplicationError(`problem with URI: ${refuri}`);
+		}
+	    }
+            this.document.noteExplicitTarget(target, this.parent)
+	} else {
+	    //# anonymous target
+            if(refuri) {
+                target.attributes['refuri'] = refuri
+	    }
+            target.attributes['anonymous'] = 1
+            this.document.noteAnonymousTarget(target)
+	}
     }
 
     substitution_def(match) {
@@ -645,7 +732,10 @@ export class Body extends RSTState {
               = this.stateMachine.getFirstKnownIndented({ indent: match.result.index + match.result[0].length,
                                                           untilBlank: true});
         const blocktext = match.result.input.substring(0, match.result.index + match.result[0].length) + block.join('\n');
-        const block2 = block.map(escape2null);
+        const blockLines = [];
+        block.forEach(line => blockLines.push(escape2null(line)));
+        const block2 = new StringList(blockLines);
+
         const target = this.make_target(block2, blocktext, lineno, '')
         return [[target], blank_finish]
     }
