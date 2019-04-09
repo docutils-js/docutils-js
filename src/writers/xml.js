@@ -99,3 +99,21 @@ export default class Writer extends BaseWriter {
 //	console.log(this.output);
     }
 }
+
+Writer.settingsSpec = [
+        '"Docutils XML" Writer Options',
+    null,
+        [['Generate XML with newlines before and after tags.',
+          ['--newlines'],
+          {'action': 'store_true', 'validator': 'frontend.validate_boolean'}],
+         ['Generate XML with indents and newlines.',
+          ['--indents'], //#@ TODO use integer value for number of spaces?
+          {'action': 'store_true', 'validator': 'frontend.validate_boolean'}],
+         ['Omit the XML declaration.  Use with caution.',
+          ['--no-xml-declaration'],
+          {'dest': 'xml_declaration', 'default': 1, 'action': 'store_false',
+           'validator': 'frontend.validate_boolean'}],
+         ['Omit the DOCTYPE declaration.',
+          ['--no-doctype'],
+          {'dest': 'doctype_declaration', 'default': 1,
+           'action': 'store_false', 'validator': 'frontend.validate_boolean'}]]]
