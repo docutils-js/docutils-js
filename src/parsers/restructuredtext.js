@@ -1,6 +1,7 @@
 import BaseParser from '../Parser';
 import * as states from './rst/States';
 import * as statemachine from '../StateMachine';
+import RSTStateMachine from './rst/RSTStateMachine';
 
 export class Parser extends BaseParser {
     constructor(args) {
@@ -33,7 +34,7 @@ export class Parser extends BaseParser {
 	    throw new Error("need classes")
 	}
 
-	this.stateMachine = new states.RSTStateMachine({
+	this.stateMachine = new RSTStateMachine({
 	    stateClasses: this.stateClasses,
 	    initialState: this.initialState,
 	    debugFn: this.debugFn,

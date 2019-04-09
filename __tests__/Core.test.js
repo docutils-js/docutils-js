@@ -53,11 +53,15 @@ test('1', () => {
 
     const debugLog = [];
     const debugFn = (msg) => {
-	currentLogLines.push(msg);
+	console.log(msg);
+//	currentLogLines.push(msg);
     };
 
     const { readerName, parserName, writerName } = args;
-    const source = new StringInput({ source: '`text`:role:' });
+    const source = new StringInput({ source: `==========================================
+ Docutils_ Project Documentation Overview
+==========================================
+` });
         const destination = new StringOutput({});
     const pub = new Publisher({
  source, destination, settings, debug: true, debugFn

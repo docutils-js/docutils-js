@@ -33,7 +33,8 @@
     "reporters": [
       "default",
       "jest-junit"
-    ]
+    ],
+      "testEnvironment": "node"
   },
   "dependencies": {
     "@babel/polyfill": "^7.4.0"

@@ -1,4 +1,4 @@
-import { Inliner } from '../../../src/parsers/rst/States';
+import Inliner from '../../../src/parsers/rst/Inliner';
 import { newDocument, newReporter } from '../../../src/utils';
 import { Element } from '../../../src/nodes';
 import baseSettings from '../../../src/baseSettings';
