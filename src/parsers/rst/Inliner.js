@@ -233,9 +233,9 @@ class Inliner {
             return [string.substring(0, matchend), [], string.substring(matchend), []]
 	}
         const endmatch = end_pattern.exec(string.substring(matchend));
-        if(endmatch && endmatch[0].length) {
+        if(endmatch && endmatch[1].length) {
             const textend = matchend + endmatch.index + endmatch[0].length
-	    if(endmatch[2]) {
+	    if(endmatch[3]) {
                 if(role) {
                     const msg = self.reporter.warning(
                         'Multiple roles in interpreted text (both '+
@@ -277,7 +277,7 @@ class Inliner {
     }
 
     phrase_ref(before, after, rawsource, escaped, text) {
-	const match = self.patterns.embedded_link.exec(escaped)
+	const match = this.patterns.embedded_link.exec(escaped)
 	let aliastype;
 	let aliastext;
 	let rawaliastext;
@@ -285,7 +285,9 @@ class Inliner {
 	let alias;
 	let target;
 	let alias_parts;
-
+if(!rawsource) {
+    rawsource = '';
+}
         if(match) {// # embedded <URI> or <alias_>
             text = unescape(escaped.substring(0, match.index));
             rawtext = unescape(escaped.substring(0, match.index), true);
@@ -323,13 +325,13 @@ class Inliner {
             rawtext = unescape(escaped, true)
 	}
 
-        refname = normalize_name(text)
-        reference = new nodes.reference(rawsource, [text],
+        const refname = normalize_name(text)
+        const reference = new nodes.reference(rawsource, text,  [],
 					{ name: nodes.whitespaceNormalizeName(text) });
-        reference[0].rawsource = rawtext
+        reference.children[0].rawsource = rawtext
         const node_list = [reference]
 
-        if(rawsource.endWith('__')) {
+        if(rawsource.endsWith('__')) {
             if(target && (aliastype === 'name')) {
                 reference.attributes['refname'] = alias;
                 this.document.noteRefname(reference)

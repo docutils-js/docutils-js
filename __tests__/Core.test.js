@@ -61,6 +61,18 @@ test('1', () => {
     const source = new StringInput({ source: `==========================================
  Docutils_ Project Documentation Overview
 ==========================================
+
+:Author: David Goodger
+:Contact: docutils-develop@lists.sourceforge.net
+:Date: $Date: 2016-01-13 13:09:13 -0800 (Wed, 13 Jan 2016) $
+:Revision: $Revision: 7933 $
+:Copyright: This document has been placed in the public domain.
+
+The latest working documents may be accessed individually below, or
+from the \`\`docs\`\` directory of the \`Docutils distribution\`_.
+
+.. _Docutils: http://docutils.sourceforge.net/
+.. _Docutils distribution: http://docutils.sourceforge.net/#download
 ` });
         const destination = new StringOutput({});
     const pub = new Publisher({
@@ -98,6 +110,7 @@ This is a test.
 	   ['Strong', '**hello**'],
 	   ['Emphasis and inline', '*hello* and **goodbye**'],
 	   ['Inline followed by emphasis', '**hello** and *goodbye*'],
+	   ['docutils title', '==========================================\n Docutils_ Project Documentation Overview\n==========================================\n'],
 	  ])('%s', (a, raw) => {
 	      const settings = { ...defaultSettings };
 	      const args = { ...defaultArgs };
