@@ -1,6 +1,16 @@
 import Transformer from './Transformer';
 import { InvalidArgumentsError} from './Exceptions';
 import * as utils from './utils';
+import xmlescape from 'xml-escape';
+
+function serial_escape(value) {
+    //"""Escape string values that are elements of a list, for serialization."""
+    return value.replace('\\', '\\\\').replace(' ', '\\ ')
+}
+
+function pseudo_quoteattr(value) {
+    return `"${xmlescape(value)}"`;
+}
 
 export function whitespaceNormalizeName(name) {
 //"""Return a whitespace-normalized name."""
@@ -38,10 +48,6 @@ function isIterable(obj) {
     return false;
   }
   return typeof obj[Symbol.iterator] === 'function';
-}
-
-function pseudoQuoteattr(value) {
-    return `"${value}"`;
 }
 
 function _callDefaultVisit(node) {
@@ -306,19 +312,23 @@ export class Element extends Node {
 
     starttag(quoteattr) {
 	if(quoteattr === undefined) {
-	    quoteattr = pseudoQuoteattr;
+	    quoteattr = pseudo_quoteattr;
 	}
 	const parts = [this.tagname];
 	const attlist = this.attlist();
 	for(let name of Object.keys(attlist)) {
-	    const value = attlist[name];
+	    let value = attlist[name];
 	    if(value === undefined) {
 		parts.push(`${name}="True"`);
 		continue;
+	    } else if(Array.isArray(value)) {
+		const values = value.map(v => serial_escape(v.toString()));
+		value = values.join(' ');
+	    } else {
+		value = value.toString();
 	    }
-	    // list
-	    // string
-	    parts.push(`${name}="${value}"`);
+	    value = quoteattr(value);
+	    parts.push(`${name}=${value}`);
 	}
 	return `<${parts.join(' ')}>`;
     }

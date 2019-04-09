@@ -10,7 +10,7 @@ test('paragraph with text', () => {
     expect(p.toString()).toMatchSnapshot();
 });
 
-test.only('problematic', () => {
+test('problematic', () => {
     const p = new nodes.problematic('lala', 'lala', [], { refid: 'auto1' });
     expect(p.attributes.refid).toBe('auto1');
 });
@@ -20,3 +20,10 @@ test('setId', () => {
     const id = d.setId(p);
     console.log(id);
 });
+test('paragraph text escaped', () =>
+{
+    const d = newDocument({}, baseSettings);
+    const text = 'escape <me>';
+    const p = new nodes.paragraph(text, text, [], {});
+    expect(p.toString()).toEqual(expect.not.stringContaining('<'));
+})
