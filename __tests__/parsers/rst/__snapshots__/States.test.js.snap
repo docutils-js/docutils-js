@@ -4,7 +4,7 @@ exports[`Body patterns 1`] = `
 Object {
   "anonymous": "__( +|)",
   "blank": " *$",
-  "bullet": "[-+*•‣⁃]( +|$)",
+  "bullet": "[-+*\\\\u2022\\\\u2023\\\\u2043]( +|$)",
   "doctest": ">>>( +|$)",
   "enumerator": "((\\\\(\\\\))|(\\\\))|(\\\\.))( +|$)",
   "explicit_markup": "\\\\.\\\\.( +|$)",

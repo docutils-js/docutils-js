@@ -1,6 +1,7 @@
 import * as statemachine from '../../StateMachine';
 import * as languages from '../../languages';
 import * as nodes from '../../nodes';
+import * as tableparser from './tableparser.js';
 import { matchChars } from '../../utils/punctuationChars';
 import RSTStateMachine from './RSTStateMachine';
 import Inliner from './Inliner';
@@ -9,6 +10,8 @@ import Inliner from './Inliner';
 
 import { ApplicationError, DataError, EOFError, InvalidArgumentsError, UnimplementedError as Unimp } from '../../Exceptions';
 import { punctuation_chars, column_width, unescape, isIterable } from '../../utils';
+
+const nonalphanum7bit = '[!-/:-@[-\`{-~]';
 
 class MarkupError extends DataError { }
 
@@ -19,74 +22,6 @@ const { StateWS } = statemachine;
 
 function escapeRegExp(string) {
   return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
-}
-function buildRegexp(definition, compile = true) {
-    const di = (isIterable(definition));
-    let [fakeTuple, name, prefix, suffix, parts] = definition;
-    prefix = prefix.slice();
-    suffix = suffix.slice();
-    parts = parts.slice();
-    let prefixNames = [];
-    if (Array.isArray(prefix)) {
-        prefix.shift();
-        const pr = prefix.shift();
-        prefixNames = [...prefix];
-        prefix = pr;
-    }
-    if (suffix === undefined) {
-        throw new Error();
-    }
-    let suffixNames = [];
-    if (Array.isArray(suffix)) {
-        suffix.shift();
-        const sr = suffix.shift();
-        suffixNames = [...suffix];
-        suffix = sr;
-    }
-
-    if (!fakeTuple) {
-        throw new Error();
-    }
-    const pi = isIterable(parts);
-//    console.log(`buildRegexp(${name} - ${pi})`);
-    const partStrings = [];
-//    console.log(parts);
-    if (parts === undefined) {
-        throw new Error();
-    }
-    const fakeTuple2 = parts.shift();
-    const groupNames = [];
-    for (const part of parts) {
-        const fakeTuple3 = Array.isArray(part) ? part[0] : undefined;
-        if (fakeTuple3 === 1) {
-            const [regexp, subGroupNames] = buildRegexp(part, null);
-            groupNames.push(null, ...subGroupNames);
-            partStrings.push(regexp);
-        } else if (fakeTuple3 === 2) {
-	    const myPart = part.slice();
-            myPart.shift();
-            const regexp = myPart.shift();
-            partStrings.push(regexp);
-            groupNames.push(null, ...myPart);
-        } else {
-            partStrings.push(part);
-	    groupNames.push(null);
-        }
-    }
-    const orGroup = partStrings.map(x => `(${x})`).join('|');
-    const regexp = `${prefix}(${orGroup})${suffix}`;
-//    console.log(new RegExp(regexp))
-    groupNames.splice(0, 0, ...prefixNames, name);
-
-    groupNames.push(...suffixNames);
-//    console.log('groupnames')
-//    console.log(groupNames);
-//    console.log(`regexp is ${regexp}`);
-    if (compile) {
-        return [new RegExp(regexp), groupNames, regexp];
-    }
-
-    return [regexp, groupNames];
 }
 
 class NestedStateMachine extends StateMachineWS {
@@ -474,7 +409,7 @@ export class Body extends RSTState {
         }
 
         this.patterns = {
-	    bullet: '[-+*\u2022\u2023\u2043]( +|$)',
+	    bullet: '[-+*\\u2022\\u2023\\u2043]( +|$)',
             enumerator: `(${pats.parens}|${pats.rparen}|${pats.period})( +|$)`,
             'field_marker': ':(?![: ])([^:\\\\]|\\\\.|:(?!([ `]|$)))*(?<! ):( +|$)',
 	    grid_table_top: this.gridTableTopPat,
@@ -490,18 +425,34 @@ export class Body extends RSTState {
         };
 //      console.log(this.enumerator);
 
-        this.initialTransitions = ['bullet', 'enumerator', 'field_marker', 'option_marker', 'doctest', 'line', 'text'];
-/*          'enumerator',
-          'field_marker',
-          'option_marker',
-          'doctest',
-          'line_block',
-          'grid_table_top',
-          'simple_table_top',
-          'explicit_markup',
-          'anonymous',
-          'line',
-            'text' */
+        this.initialTransitions = ['bullet', 'enumerator', 'field_marker', 'option_marker', 'doctest', 'line_block', 'grid_table_top', 'simple_table_top', 'explicit_markup', 'anonymous', 'line', 'text']
+    }
+
+    explicit_markup(match, context, next_state) {
+        /*"""Footnotes, hyperlink targets, directives, comments."""*/
+        const [ nodelist, blank_finish ] = this.explicit_construct(match)
+        this.parent.add(nodelist);
+        this.explicit_list(blank_finish)
+        return [[], next_state, []];
+    }
+
+    anonymous( match, context, next_state) {
+        /*"""Anonymous hyperlink targets."""*/
+        const [ nodelist, blank_finish ] = this.anonymous_target(match)
+        this.parent.add(nodelist)
+        this.explicit_list(blank_finish)
+        return [[], next_state, []]
+    }
+
+    anonymous_target(match) {
+        const lineno = this.stateMachine.absLineNumber()
+        const [ block, indent, offset, blank_finish ]
+              = this.stateMachine.getFirstKnownIndented({ indent: match.result.index + match.result[0].length,
+                                                          untilBlank: true});
+        const blocktext = match.result.input.substring(0, match.result.index + match.result[0].length) + block.join('\n');
+        const block2 = block.map(escape2null);
+        const target = this.make_target(block2, blocktext, lineno, '')
+        return [[target], blank_finish]
     }
 
     indent(match, context, nextState) {
@@ -935,8 +886,264 @@ initialState: 'BulletList',
         return [[], nextState, []]
     }
 
+    line_block(match, context, next_state) {
+        //"""First line of a line block."""
+        const block = new nodes.line_block()
+        this.parent.add(block)
+        const lineno = this.stateMachine.absLineNumber();
+	let line;
+	let messages;
+        [ line, messages, blank_finish ]  = this.line_block_line(match, lineno)
+        block.add(line)
+        this.parent.add(messages)
+        if(!blank_finish) {
+            const offset = this.stateMachine.line_offset + 1   // next line
+	    let new_line_offset;
+            [ new_line_offset, blank_finish ] = self.nested_list_parse(
+                this.stateMachine.inputLines.slice(offset), 
+                { inputOffset: this.stateMachine.abs_line_offset() + 1,
+                  node: block, initialState: 'LineBlock',
+                  blankFinish: 0 });
+            this.gotoLine(new_line_offset)
+	}
+	if(!blank_finish) {
+            this.parent.add(this.reporter.warning(
+                'Line block ends without a blank line.', [],
+                { line: lineno+1}))
+	}
+	if(block.children.length) {
+            if(block[0].indent == null) {
+                block[0].indent = 0
+	    }
+            this.nest_line_block_lines(block)
+	}
+        return [[], next_state, []]
+    }
+    
+    line_block_line(match, lineno) {
+        //"""Return one line element of a line_block."""
+        const [ indented, indent, line_offset, blank_finish ] = 
+              this.stateMachine.get_first_known_indented({ indent: match.result.index + match.result[0].length, untilBlank: true});
+        const text = indented.join('\n');
+        const [ text_nodes, messages ] = this.inline_text(text, lineno)
+        const line = new nodes.line(text, '', text_nodes)
+        if(match.result.input.trimEnd() !== '|') {
+            line.indent = match.result[1].length - 1;
+	}
+	
+        return [line, messages, blank_finish];
+    }
+
+    nest_line_block_lines(self, block) {
+	/*
+        for index in range(1, len(block)):
+            if getattr(block[index], 'indent', None) is None:
+                block[index].indent = block[index - 1].indent
+        self.nest_line_block_segment(block)
+	*/
+    }
+/*
+    def nest_line_block_segment(self, block):
+        indents = [item.indent for item in block]
+        least = min(indents)
+        new_items = []
+        new_block = nodes.line_block()
+        for item in block:
+            if item.indent > least:
+                new_block.append(item)
+            else:
+                if len(new_block):
+                    self.nest_line_block_segment(new_block)
+                    new_items.append(new_block)
+                    new_block = nodes.line_block()
+                new_items.append(item)
+        if len(new_block):
+            self.nest_line_block_segment(new_block)
+            new_items.append(new_block)
+        block[:] = new_items
+*/
+    grid_table_top(match, context, next_state) {
+        //"""Top border of a full table."""
+        return this.table_top(match, context, next_state,
+                              this.isolate_grid_table,
+                              tableparser.GridTableParser)
+    }
+    
+    simple_table_top(match, context, next_state) {
+        /*"""Top border of a simple table."""*/
+        return this.table_top(match, context, next_state,
+                              this.isolate_simple_table,
+                              tableparser.SimpleTableParser)
+    }
+/*
+    def table_top(self, match, context, next_state,
+                  isolate_function, parser_class):
+        """Top border of a generic table."""
+        nodelist, blank_finish = self.table(isolate_function, parser_class)
+        self.parent += nodelist
+        if not blank_finish:
+            msg = self.reporter.warning(
+                'Blank line required after table.',
+                line=this.stateMachine.absLineNumber()+1)
+            self.parent += msg
+        return [], next_state, []
+
+    def table(self, isolate_function, parser_class):
+        """Parse a table."""
+        block, messages, blank_finish = isolate_function()
+        if block:
+            try:
+                parser = parser_class()
+                tabledata = parser.parse(block)
+                tableline = (this.stateMachine.absLineNumber() - len(block)
+                             + 1)
+                table = self.build_table(tabledata, tableline)
+                nodelist = [table] + messages
+            except tableparser.TableMarkupError, err:
+                nodelist = self.malformed_table(block, ' '.join(err.args),
+                                                offset=err.offset) + messages
+        else:
+            nodelist = messages
+        return nodelist, blank_finish
+
+    def isolate_grid_table(self):
+        messages = []
+        blank_finish = 1
+        try:
+            block = this.stateMachine.get_text_block(flush_left=True)
+        except statemachine.UnexpectedIndentationError, err:
+            block, src, srcline = err.args
+            messages.append(self.reporter.error('Unexpected indentation.',
+                                                source=src, line=srcline))
+            blank_finish = 0
+        block.disconnect()
+        # for East Asian chars:
+        block.pad_double_width(self.double_width_pad_char)
+        width = len(block[0].strip())
+        for i in range(len(block)):
+            block[i] = block[i].strip()
+            if block[i][0] not in '+|': # check left edge
+                blank_finish = 0
+                this.stateMachine.previous_line(len(block) - i)
+                del block[i:]
+                break
+        if not self.grid_table_top_pat.match(block[-1]): # find bottom
+            blank_finish = 0
+            # from second-last to third line of table:
+            for i in range(len(block) - 2, 1, -1):
+                if self.grid_table_top_pat.match(block[i]):
+                    this.stateMachine.previous_line(len(block) - i + 1)
+                    del block[i+1:]
+                    break
+            else:
+                messages.extend(self.malformed_table(block))
+                return [], messages, blank_finish
+        for i in range(len(block)):     # check right edge
+            if len(block[i]) != width or block[i][-1] not in '+|':
+                messages.extend(self.malformed_table(block))
+                return [], messages, blank_finish
+        return block, messages, blank_finish
+
+    def isolate_simple_table(self):
+        start = this.stateMachine.line_offset
+        lines = this.stateMachine.input_lines
+        limit = len(lines) - 1
+        toplen = len(lines[start].strip())
+        pattern_match = self.simple_table_border_pat.match
+        found = 0
+        found_at = None
+        i = start + 1
+        while i <= limit:
+            line = lines[i]
+            match = pattern_match(line)
+            if match:
+                if len(line.strip()) != toplen:
+                    this.stateMachine.next_line(i - start)
+                    messages = self.malformed_table(
+                        lines[start:i+1], 'Bottom/header table border does '
+                        'not match top border.')
+                    return [], messages, i == limit or not lines[i+1].strip()
+                found += 1
+                found_at = i
+                if found == 2 or i == limit or not lines[i+1].strip():
+                    end = i
+                    break
+            i += 1
+        else:                           # reached end of input_lines
+            if found:
+                extra = ' or no blank line after table bottom'
+                this.stateMachine.next_line(found_at - start)
+                block = lines[start:found_at+1]
+            else:
+                extra = ''
+                this.stateMachine.next_line(i - start - 1)
+                block = lines[start:]
+            messages = self.malformed_table(
+                block, 'No bottom table border found%s.' % extra)
+            return [], messages, not extra
+        this.stateMachine.next_line(end - start)
+        block = lines[start:end+1]
+        # for East Asian chars:
+        block.pad_double_width(self.double_width_pad_char)
+        return block, [], end == limit or not lines[end+1].strip()
+
+    def malformed_table(self, block, detail='', offset=0):
+        block.replace(self.double_width_pad_char, '')
+        data = '\n'.join(block)
+        message = 'Malformed table.'
+        startline = this.stateMachine.absLineNumber() - len(block) + 1
+        if detail:
+            message += '\n' + detail
+        error = self.reporter.error(message, nodes.literal_block(data, data),
+                                    line=startline+offset)
+        return [error]
+
+    def build_table(self, tabledata, tableline, stub_columns=0, widths=None):
+        colwidths, headrows, bodyrows = tabledata
+        table = nodes.table()
+        if widths == 'auto':
+            table['classes'] += ['colwidths-auto']
+        elif widths: # "grid" or list of integers
+            table['classes'] += ['colwidths-given']
+        tgroup = nodes.tgroup(cols=len(colwidths))
+        table += tgroup
+        for colwidth in colwidths:
+            colspec = nodes.colspec(colwidth=colwidth)
+            if stub_columns:
+                colspec.attributes['stub'] = 1
+                stub_columns -= 1
+            tgroup += colspec
+        if headrows:
+            thead = nodes.thead()
+            tgroup += thead
+            for row in headrows:
+                thead += self.build_table_row(row, tableline)
+        tbody = nodes.tbody()
+        tgroup += tbody
+        for row in bodyrows:
+            tbody += self.build_table_row(row, tableline)
+        return table
+
+    def build_table_row(self, rowdata, tableline):
+        row = nodes.row()
+        for cell in rowdata:
+            if cell is None:
+                continue
+            morerows, morecols, offset, cellblock = cell
+            attributes = {}
+            if morerows:
+                attributes['morerows'] = morerows
+            if morecols:
+                attributes['morecols'] = morecols
+            entry = nodes.entry(**attributes)
+            row += entry
+            if ''.join(cellblock):
+                self.nested_parse(cellblock, input_offset=tableline+offset,
+                                  node=entry)
+        return row
+
+*/
     line(match, context, nextState) {
-//      console.log(line);
         if (this.stateMachine.matchTitles) {
             return [[match.input], 'Line', []];
         } if (match.match.input.trim() == '::') {
@@ -1476,6 +1683,184 @@ class FieldList extends SpecializedBody {
     }
 }
 
+class ExtensionOptions extends FieldList {
+    /* Parse field_list fields for extension options. */
+    /* No nested parsing is done (including inline markup parsing). */
+
+    parse_field_body(indented, offset, node) {
+        //"""Override `Body.parse_field_body` for simpler parsing."""
+        const lines = []
+	for(const line of [...indented, '']) {
+            if(line.trim()) {
+		lines.push(line)
+	    } else if(lines.length) {
+                const text = lines.join('\n')
+                node.add(new nodes.paragraph(text, text));
+                lines.length = 0;
+	    }
+	}
+    }
+}
+
+class LineBlock extends SpecializedBody {
+    /*"""Second and subsequent lines of a line_block."""*/
+
+    blank() {
+	this.invalid_input();
+    }
+
+    line_block(match, context, next_state) {
+        //"""New line of line block."""
+        const lineno = this.stateMachine.absLineNumber()
+        const [ line, messages, blank_finish ] = this.line_block_line(match, lineno)
+        this.parent.add(line)
+        this.parent.parent.add(messages)
+        this.blankFinish = blank_finish
+        return [[], next_state, []]
+    }
+}
+
+class Explicit extends SpecializedBody {
+    /*
+    """Second and subsequent explicit markup construct."""
+    */
+    explicit_markup(match, context, next_state) {
+        //"""Footnotes, hyperlink targets, directives, comments."""
+        const [ nodelist, blank_finish ] = this.explicit_construct(match)
+        this.parent.add(nodelist);
+        this.blankFinish = blank_finish
+        return [[], next_state, []]
+    }
+
+    anonymous( match, context, next_state) {
+        //"""Anonymous hyperlink targets."""
+        const [ nodelist, blank_finish ] = this.anonymous_target(match)
+        this.parent.add(nodelist);
+        this.blankFinish = blank_finish
+        return [ [], next_state, [] ];
+    }
+
+    blank() {
+	this.invalid_input();
+    }
+}
+
+class SubstitutionDef extends Body {
+    /*"""
+    Parser for the contents of a substitution_definition element.
+    """*/
+    _init() {
+	super._init();
+	this.patterns = {
+            'embedded_directive': new RegExp('(' + simplename + ')::( +|$)'),
+            'text': ''}
+	this.initialTransitions = ['embedded_directive', 'text']
+    }
+    
+    embedded_directive(match, context, next_state) {
+        const [ nodelist, blank_finish ]  = this.directive(match,
+							   { alt: this.parent.attributes['names'][0]});
+        this.parent.add(nodelist)
+        if(!this.stateMachine.atEof()) {
+            this.blankFinish = blank_finish
+	}
+        throw new EOFError();
+    }
+    text(match, context, next_state) {
+        if(!this.stateMachine.atEof()) {
+            this.blankFinish = this.stateMachine.isNextLineBlank();
+	}
+        throw new EOFError();
+    }
+}
+
+class QuotedLiteralBlock extends RSTState {
+/*
+    """
+    Nested parse handler for quoted (unindented) literal blocks.
+
+    Special-purpose.  Not for inclusion in `state_classes`.
+    """
+*/
+    _init() {
+	super._init();
+	this.patterns = {'initial_quoted': '(' + nonalphanum7bit + ')',
+                'text': ''}
+	this.initialTransitions = ['initial_quoted', 'text']
+	this.messages = []
+	this.initial_lineno = null;
+    }
+
+    blank( match, context, next_state) {
+        if(context.length) {
+            throw new EOFError();
+	} else {
+            return [context, next_state, []]
+	}
+    }
+
+    eof( context) {
+	if(context.length) {
+            const [ src, srcline ] = this.stateMachine.getSourceAndLine(
+                this.initial_lineno)
+            const text = context.join('\n');
+            const literal_block = new nodes.literal_block(text, text)
+            literal_block.source = src
+            literal_block.line = srcline
+            this.parent.add(literal_block);
+	} else {
+            this.parent.add(this.reporter.warning(
+                'Literal block expected; none found.', [],
+                { line: this.stateMachine.absLineNumber() }));
+	    //# src not available, because statemachine.input_lines is empty
+            this.stateMachine.previousLine()
+	}
+        this.parent.add(this.messages)
+        return []
+    }
+
+    indent(match, context, next_state) {
+//        assert context, ('QuotedLiteralBlock.indent: context should not '
+//                         'be empty!')
+        this.messages.push(
+            this.reporter.error('Unexpected indentation.', [],
+                                { line: this.stateMachine.absLineNumber() }));
+        this.stateMachine.previousLine()
+        throw new EOFError();
+    }
+
+    initial_quoted(match, context, next_state) {
+        //"""Match arbitrary quote character on the first line only."""
+        this.removeTransition('initial_quoted')
+        const quote = match.result.input[0]
+        const pattern = new RegExp(escapeRegExp(quote));
+	//# New transition matches consistent quotes only:
+        this.addTransition('quoted',
+                           [pattern, this.quoted.bind(this),
+			    this.constructor.name]);
+        this.initial_lineno = this.stateMachine.absLineNumber()
+        return [[match.result.input], next_state, []]
+    }
+
+    quoted(match, context, next_state) {
+        //"""Match consistent quotes on subsequent lines."""
+        context.push(match.result.input)
+        return [context, next_state, []]
+    }
+
+    text(match, context, next_state) {
+        if(context.length) {
+            this.messages.push(
+		this.reporter.error('Inconsistent literal block quoting.',
+                                    [], { line: this.stateMachine.absLineNumber() }));
+            this.stateMachine.previousLine()
+	}
+	throw new EOFError();
+    }
+}
+
+
+
 export class OptionList extends SpecializedBody {
 /*
     """Second and subsequent option_list option_list_items."""
@@ -1498,7 +1883,8 @@ export class OptionList extends SpecializedBody {
     }
 }
 
-export const stateClasses = [Body, BulletList, Text, Line, DefinitionList, Definition, FieldList, OptionList];
+export const stateClasses = [Body, BulletList, DefinitionList, EnumeratedList, FieldList, OptionList, LineBlock, ExtensionOptions, Explicit, Text, Definition, Line];
+//SubstitutionDef];
 
 /*    underline(match, context, nextState) {
         const overline = context[0]

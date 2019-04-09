@@ -781,7 +781,7 @@ export class StateWS extends State {
     }
 
     firstKnownIndent(match, context, nextState) {
-        const [indented, lineOffset, blankFinish] = this.stateMachine.getFirstKnownIndented(match.end());
+        const [indented, lineOffset, blankFinish] = this.stateMachine.getFirstKnownIndented({ indent: match.result.index + match.result[0].length});
         const KnownIndentSm = this.knownIndentSm;
         const sm = new KnownIndentSm({ debug: this.debug, ...this.knownIndentSmKwargs });
         const results = sm.run({ indented, inputOffset: lineOffset });
