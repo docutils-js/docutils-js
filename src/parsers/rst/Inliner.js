@@ -83,11 +83,11 @@ class Inliner {
             '``': this.literal.bind(this),
             '`': this.interpreted_or_phrase_ref.bind(this),
             '_`': this.inline_internal_target.bind(this),
+            '_': this.reference.bind(this),
 	};
         /*
                     ']_': this.footnote_reference.bind(this)
                     '|': this.substitution_reference.bind(this)
-                    '_': this.reference.bind(this)
                     '__': this.anonymous_reference.bind(this)}
 */
 
@@ -176,17 +176,18 @@ class Inliner {
     }
 
     reference(match, lineno, anonymous=false) {
-        const referencename = match.group['refname']
+        const referencename = match.groups['refname']
         const refname = normalize_name(referencename)
         const referencenode = new nodes.reference(
-            referencename + match.group['refend'], referencename, [],
-            { name: whitespace_normalize_name(referencename)})
-        referencenode[0].rawsource = referencename
+            referencename + match.groups['refend'], referencename,
+            [],
+            { name: nodes.whitespaceNormalizeName(referencename)})
+        referencenode.children[0].rawsource = referencename
         if(anonymous) {
             referencenode.attributes['anonymous'] = 1
 	} else {
             referencenode.attributes['refname'] = refname
-            this.document.note_refname(referencenode)
+            this.document.noteRefname(referencenode)
 	}
         const string = match.result.input
         const matchstart = match.result.index
@@ -324,7 +325,7 @@ class Inliner {
 
         refname = normalize_name(text)
         reference = new nodes.reference(rawsource, [text],
-					{ name: whitespace_normalize_name(text) });
+					{ name: nodes.whitespaceNormalizeName(text) });
         reference[0].rawsource = rawtext
         const node_list = [reference]
 
@@ -594,7 +595,7 @@ esn;
 		const mname = rr.start || rr.backquote || rr.refend || rr.fnend;
                 const method = this.dispatch[mname];
                 if (typeof method !== 'function') {
-                    throw new Error(`Invalid dispatch ${rr.start}`);
+                    throw new Error(`Invalid dispatch ${mname}`);
                 }
                 let before; let inlines; let
 sysmessages;

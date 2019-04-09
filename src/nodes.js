@@ -2,6 +2,11 @@ import Transformer from './Transformer';
 import { InvalidArgumentsError} from './Exceptions';
 import * as utils from './utils';
 
+export function whitespaceNormalizeName(name) {
+//"""Return a whitespace-normalized name."""
+    return name.replace(/\s+/, ' ');
+}
+
 export function fullyNormalizeName(name) {
     return name.toLowerCase().replace(/\s+/, ' ');
 }
@@ -525,8 +530,13 @@ export class document extends Element {
 	this.setNameIdMap(target, id, msgnode, true);
     }
 
-    noteRefName(node) {
-	this.refNames.setDefault(node.refname, []).push(node);
+    noteRefname(node) {
+	const a = [node];
+	if(this.refNames[node.refname]) {
+	    this.refNames[node.refname].push(node);
+	} else {
+	    this.refNames[node.refName] = a;
+	}
     }
 
     noteRefId(node) {
@@ -572,7 +582,7 @@ export class document extends Element {
     noteFootnoteRef(ref) {
 	this.setId(ref);
 	this.footnoteRefs.setDefault(ref.refname, []).append(ref);
-	this.noteRefName(ref);
+	this.noteRefname(ref);
     }
 
     noteCitation(citation) {
@@ -678,6 +688,7 @@ export class list_item extends Element { }
 export class emphasis extends TextElement {} // Inline
 export class strong extends TextElement {} // Inline
 export class literal extends TextElement {} // Inline
+export class reference extends TextElement {} // General, Inline, Referential
 
 export class problematic extends TextElement {} // Inline
 

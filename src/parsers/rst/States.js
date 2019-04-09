@@ -900,7 +900,7 @@ initialState: 'BulletList',
             const offset = this.stateMachine.line_offset + 1   // next line
 	    let new_line_offset;
             [ new_line_offset, blank_finish ] = self.nested_list_parse(
-                this.stateMachine.inputLines.slice(offset), 
+                this.stateMachine.inputLines.slice(offset),
                 { inputOffset: this.stateMachine.abs_line_offset() + 1,
                   node: block, initialState: 'LineBlock',
                   blankFinish: 0 });
@@ -919,10 +919,10 @@ initialState: 'BulletList',
 	}
         return [[], next_state, []]
     }
-    
+
     line_block_line(match, lineno) {
         //"""Return one line element of a line_block."""
-        const [ indented, indent, line_offset, blank_finish ] = 
+        const [ indented, indent, line_offset, blank_finish ] =
               this.stateMachine.get_first_known_indented({ indent: match.result.index + match.result[0].length, untilBlank: true});
         const text = indented.join('\n');
         const [ text_nodes, messages ] = this.inline_text(text, lineno)
@@ -930,7 +930,7 @@ initialState: 'BulletList',
         if(match.result.input.trimEnd() !== '|') {
             line.indent = match.result[1].length - 1;
 	}
-	
+
         return [line, messages, blank_finish];
     }
 
@@ -968,7 +968,7 @@ initialState: 'BulletList',
                               this.isolate_grid_table,
                               tableparser.GridTableParser)
     }
-    
+
     simple_table_top(match, context, next_state) {
         /*"""Top border of a simple table."""*/
         return this.table_top(match, context, next_state,
@@ -1431,11 +1431,14 @@ export class Definition extends SpecializedText {
 }
 
 
-
 export class Line extends SpecializedText {
     _init(args) {
         super._init(args);
         this.eofcheck = 1;
+    }
+
+    indent(...args) {
+        return this.text(...args);
     }
 
     eof(context) {
@@ -1473,7 +1476,7 @@ export class Line extends SpecializedText {
         /*"""Potential over- & underlined title."""*/
         const lineno = this.stateMachine.absLineNumber() - 1
         let overline = context[0]
-        let title = match.match.input
+        let title = match.result.input
         let underline = ''
         try {
             underline = this.stateMachine.nextLine()
@@ -1522,7 +1525,7 @@ export class Line extends SpecializedText {
                 return [[], 'Body', []]
 	    }
 	}
-	title = title.rstrip()
+	title = title.trimEnd()
         const messages = []
         if(column_width(title) > overline.length) {
             const blocktext = overline + '\n' + title + '\n' + underline
@@ -1537,10 +1540,10 @@ export class Line extends SpecializedText {
 	    }
 	}
         const style = [overline[0], underline[0]]
-        this.eofcheck = 0               // @@@ not sure this is correct
+        this.eofcheck = 0;              // @@@ not sure this is correct
         this.section({ title: title.trimStart(), source, style, lineno: lineno + 1, messages});
         this.eofcheck = 1
-        return [[], 'Body', []]
+        return [[], 'Body', []];
 
     }
 
@@ -1756,7 +1759,7 @@ class SubstitutionDef extends Body {
             'text': ''}
 	this.initialTransitions = ['embedded_directive', 'text']
     }
-    
+
     embedded_directive(match, context, next_state) {
         const [ nodelist, blank_finish ]  = this.directive(match,
 							   { alt: this.parent.attributes['names'][0]});
