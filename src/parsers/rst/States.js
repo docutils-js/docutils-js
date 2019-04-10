@@ -75,7 +75,7 @@ class RSTState extends StateWS {
         super._init(args);
         this.nestedSm = NestedStateMachine;
         this.nestedSmCache = [];
-        this.stateClasses = args.stateClasses;
+        this.stateClasses = stateClasses;
         this.nestedSmKwargs = {
             stateClasses: this.stateClasses,
             initialState: 'Body',
