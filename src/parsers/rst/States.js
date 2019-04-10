@@ -791,7 +791,7 @@ initialState: 'Explicit',
             elements.push(blockquote);
             if (attribution_lines) { // fixme
                 const [attribution, messages] = this.parse_attribution(attribution_lines,
-					     attribution_offset);
+                                             attribution_offset);
                 blockquote.add(attribution);
                 elements.push(...messages);
             }
@@ -875,7 +875,7 @@ initialState: 'Explicit',
             this.parent.add(msg);
         }
         const [listitem, blankFinish1] = this.list_item(match.match.index + match.match[0].length);
-	let blankFinish = blankFinish1;
+        let blankFinish = blankFinish1;
         enumlist.add(listitem);
         const offset = this.stateMachine.lineOffset + 1; // next line
         const [newlineOffset, blankFinish2] = this.nestedListParse(
@@ -891,8 +891,8 @@ initialState: 'EnumeratedList',
                            auto: sequence === '#',
 },
 },
-	);
-	blankFinish = blankFinish2;
+        );
+        blankFinish = blankFinish2;
         this.gotoLine(newlineOffset);
         if (!blankFinish) {
             this.parent.add(this.unindent_warning('Enumerated list'));
@@ -926,9 +926,9 @@ initialState: 'EnumeratedList',
         bulletlist.attributes.bullet = match.result[0].substring(0, 1);
 
         const [i, blankFinish1] = this.list_item(
-	    match.pattern.lastIndex + match.result[0].length,
+            match.pattern.lastIndex + match.result[0].length,
 ); /* -1 ? */
-	let blankFinish = blankFinish1;
+        let blankFinish = blankFinish1;
         /* istanbul ignore if */
         if (!i) {
             throw new Error('no node');
@@ -936,13 +936,15 @@ initialState: 'EnumeratedList',
 
         bulletlist.append(i);
         const offset = this.stateMachine.lineOffset + 1;
-        const [newLineOffset, blankFinish2] = this.nestedListParse(this.stateMachine.inputLines.slice(offset), {
- inputOffset: this.stateMachine.absLineOffset() + 1,
-                                                                                                           node: bulletlist,
-initialState: 'BulletList',
-                                                                                                           blankFinish,
-	});
-	blankFinish = blankFnish2;
+        const [newLineOffset, blankFinish2] = this.nestedListParse(
+	    this.stateMachine.inputLines.slice(offset), {
+		inputOffset: this.stateMachine.absLineOffset() + 1,
+		node: bulletlist,
+		initialState: 'BulletList',
+		blankFinish,
+        },
+);
+        blankFinish = blankFinish2;
         this.gotoLine(newLineOffset);
         if (!blankFinish) {
             this.parent.add(this.unindentWarning('Bullet list'));
@@ -1500,6 +1502,97 @@ initialState: 'LineBlock',
     }
 }
 
+class QuotedLiteralBlock extends RSTState {
+/*
+    """
+    Nested parse handler for quoted (unindented) literal blocks.
+
+    Special-purpose.  Not for inclusion in `state_classes`.
+    """
+*/
+    _init() {
+        super._init();
+        this.patterns = {
+ initial_quoted: `(${nonalphanum7bit})`,
+                text: '',
+};
+        this.initialTransitions = ['initial_quoted', 'text'];
+        this.messages = [];
+        this.initial_lineno = null;
+    }
+
+    blank(match, context, next_state) {
+        if (context.length) {
+            throw new EOFError();
+        } else {
+            return [context, next_state, []];
+        }
+    }
+
+    eof(context) {
+        if (context.length) {
+            const [src, srcline] = this.stateMachine.getSourceAndLine(
+                this.initial_lineno,
+);
+            const text = context.join('\n');
+            const literal_block = new nodes.literal_block(text, text);
+            literal_block.source = src;
+            literal_block.line = srcline;
+            this.parent.add(literal_block);
+        } else {
+            this.parent.add(this.reporter.warning(
+                'Literal block expected; none found.', [],
+                { line: this.stateMachine.absLineNumber() },
+));
+            // # src not available, because statemachine.input_lines is empty
+            this.stateMachine.previousLine();
+        }
+        this.parent.add(this.messages);
+        return [];
+    }
+
+    indent(match, context, next_state) {
+//        assert context, ('QuotedLiteralBlock.indent: context should not '
+//                         'be empty!')
+        this.messages.push(
+            this.reporter.error('Unexpected indentation.', [],
+                                { line: this.stateMachine.absLineNumber() }),
+);
+        this.stateMachine.previousLine();
+        throw new EOFError();
+    }
+
+    initial_quoted(match, context, next_state) {
+        // """Match arbitrary quote character on the first line only."""
+        this.removeTransition('initial_quoted');
+        const quote = match.result.input[0];
+        const pattern = new RegExp(escapeRegExp(quote));
+        // # New transition matches consistent quotes only:
+        this.addTransition('quoted',
+                           [pattern, this.quoted.bind(this),
+                            this.constructor.name]);
+        this.initial_lineno = this.stateMachine.absLineNumber();
+        return [[match.result.input], next_state, []];
+    }
+
+    quoted(match, context, next_state) {
+        // """Match consistent quotes on subsequent lines."""
+        context.push(match.result.input);
+        return [context, next_state, []];
+    }
+
+    text(match, context, next_state) {
+        if (context.length) {
+            this.messages.push(
+                this.reporter.error('Inconsistent literal block quoting.',
+                                    [], { line: this.stateMachine.absLineNumber() }),
+);
+            this.stateMachine.previousLine();
+        }
+        throw new EOFError();
+    }
+}
+
 export class Text extends RSTState {
     _init(args) {
         super._init(args);
@@ -1589,7 +1682,7 @@ blankFinishState: 'Definition',
                                              [new nodes.literal_block(blocktext, blocktext)], { source: src, line: srcline });
             this.parent.add(messages);
             this.parent.add(msg);
-            return [], next_state, [];
+            return [[], nextState, []];
         }
         const style = underline[0];
         context.length = 0;
@@ -1626,6 +1719,7 @@ srcline;
                 this.stateMachine.nextLine();
             } catch (error) {
                 if (error instanceof EOFError) {
+		    /* do nothing */
                 } else {
                     throw error;
                 }
@@ -1712,7 +1806,7 @@ srcline;
                     node_list[node_list.length - 1].add(node);
                 } else {
                     const text = parts[0].trimRight();
-                    const textnode = new nodes.Text(utils.unescape(text, true));
+                    const textnode = new nodes.Text(unescape(text, true));
                     node_list[node_list.length - 1].add(textnode);
                     for (const part of parts.slice(1)) {
                         node_list.push(
@@ -2026,11 +2120,13 @@ class EnumeratedList extends SpecializedBody {
         if (sequence === '#') {
             this.auto = 1;
         }
-        const [listitem, blank_finish] = this.list_item(match.result.index + match.result[0].length);
+        const [listitem, blank_finish] = this.list_item(
+	    match.result.index + match.result[0].length,
+);
         this.parent.add(listitem);
         this.blankFinish = blank_finish;
         this.lastordinal = ordinal;
-        return [[], next_state, []];
+        return [[], nextState, []];
     }
 }
 
@@ -2122,8 +2218,10 @@ class SubstitutionDef extends Body {
     }
 
     embedded_directive(match, context, next_state) {
-        const [nodelist, blank_finish] = this.directive(match,
-                                                           { alt: this.parent.attributes.names[0] });
+        const [nodelist, blank_finish] = this.directive(
+	    match,
+            { alt: this.parent.attributes.names[0] },
+);
         this.parent.add(nodelist);
         if (!this.stateMachine.atEof()) {
             this.blankFinish = blank_finish;
@@ -2134,97 +2232,6 @@ class SubstitutionDef extends Body {
     text(match, context, next_state) {
         if (!this.stateMachine.atEof()) {
             this.blankFinish = this.stateMachine.isNextLineBlank();
-        }
-        throw new EOFError();
-    }
-}
-
-class QuotedLiteralBlock extends RSTState {
-/*
-    """
-    Nested parse handler for quoted (unindented) literal blocks.
-
-    Special-purpose.  Not for inclusion in `state_classes`.
-    """
-*/
-    _init() {
-        super._init();
-        this.patterns = {
- initial_quoted: `(${nonalphanum7bit})`,
-                text: '',
-};
-        this.initialTransitions = ['initial_quoted', 'text'];
-        this.messages = [];
-        this.initial_lineno = null;
-    }
-
-    blank(match, context, next_state) {
-        if (context.length) {
-            throw new EOFError();
-        } else {
-            return [context, next_state, []];
-        }
-    }
-
-    eof(context) {
-        if (context.length) {
-            const [src, srcline] = this.stateMachine.getSourceAndLine(
-                this.initial_lineno,
-);
-            const text = context.join('\n');
-            const literal_block = new nodes.literal_block(text, text);
-            literal_block.source = src;
-            literal_block.line = srcline;
-            this.parent.add(literal_block);
-        } else {
-            this.parent.add(this.reporter.warning(
-                'Literal block expected; none found.', [],
-                { line: this.stateMachine.absLineNumber() },
-));
-            // # src not available, because statemachine.input_lines is empty
-            this.stateMachine.previousLine();
-        }
-        this.parent.add(this.messages);
-        return [];
-    }
-
-    indent(match, context, next_state) {
-//        assert context, ('QuotedLiteralBlock.indent: context should not '
-//                         'be empty!')
-        this.messages.push(
-            this.reporter.error('Unexpected indentation.', [],
-                                { line: this.stateMachine.absLineNumber() }),
-);
-        this.stateMachine.previousLine();
-        throw new EOFError();
-    }
-
-    initial_quoted(match, context, next_state) {
-        // """Match arbitrary quote character on the first line only."""
-        this.removeTransition('initial_quoted');
-        const quote = match.result.input[0];
-        const pattern = new RegExp(escapeRegExp(quote));
-        // # New transition matches consistent quotes only:
-        this.addTransition('quoted',
-                           [pattern, this.quoted.bind(this),
-                            this.constructor.name]);
-        this.initial_lineno = this.stateMachine.absLineNumber();
-        return [[match.result.input], next_state, []];
-    }
-
-    quoted(match, context, next_state) {
-        // """Match consistent quotes on subsequent lines."""
-        context.push(match.result.input);
-        return [context, next_state, []];
-    }
-
-    text(match, context, next_state) {
-        if (context.length) {
-            this.messages.push(
-                this.reporter.error('Inconsistent literal block quoting.',
-                                    [], { line: this.stateMachine.absLineNumber() }),
-);
-            this.stateMachine.previousLine();
         }
         throw new EOFError();
     }
@@ -2253,7 +2260,10 @@ export class OptionList extends SpecializedBody {
     }
 }
 
-export const stateClasses = [Body, BulletList, DefinitionList, EnumeratedList, FieldList, OptionList, LineBlock, ExtensionOptions, Explicit, Text, Definition, Line];
+export const stateClasses = [Body, BulletList, DefinitionList,
+			     EnumeratedList, FieldList, OptionList,
+			     LineBlock, ExtensionOptions, Explicit,
+			     Text, Definition, Line];
 // SubstitutionDef];
 
 /*    underline(match, context, nextState) {
