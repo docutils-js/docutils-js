@@ -42,7 +42,7 @@ export class StringList extends ViewList {
         if (end === undefined) {
             end = this.length;
         }
-        for (let i = start; i < Math.min(end, this.length); i++) {
+        for (let i = start; i < Math.min(end, this.length); i += 1) {
             if (typeof this[i] === 'undefined') {
                 throw new Error(`${i} ${this.length}`);
             }
@@ -139,14 +139,14 @@ export class StringList extends ViewList {
         if (n > this.length) {
             throw new Error(`Size of trim too large; can't trim ${n} items `
                             + `from a list of size ${self.length}`);
-	} else if (n < 0) {
+        } else if (n < 0) {
             throw new Error('Trim size must be >= 0.');
-	}
-	this.splice(0, n);
-	this.items.splice(0, n);
-	if (this.parent) {
-	    this.parentOffset += n;
-	}
+        }
+        this.splice(0, n);
+        this.items.splice(0, n);
+        if (this.parent) {
+            this.parentOffset += n;
+        }
     }
 }
 
@@ -174,11 +174,11 @@ export class StateMachine {
         if (!debug) {
             debug = false;
         }
-	if (debug && !debugFn) {
-	    // throw new Error("unexpected lack of debug function");
-	    debugFn = console.log;
-	}
-	this.debugFn = debugFn;
+        if (debug && !debugFn) {
+            // throw new Error("unexpected lack of debug function");
+            debugFn = console.log;
+        }
+        this.debugFn = debugFn;
         this.inputLines = undefined;
         this.inputOffset = 0;
         this.line = undefined;
@@ -239,15 +239,15 @@ export class StateMachine {
             this.inputLines = new StringList(inputLines, inputSource);
 //          console.log(this.inputLines);
         }
-	this.inputOffset = inputOffset;
+        this.inputOffset = inputOffset;
         this.lineOffset = -1;
         this.currentState = initialState || this.initialState;
         if (!this.currentState) {
             console.log('No current state');
         }
         if (this.debug) {
-	    this.debugFn(`\nStateMachine.run: input_lines (line_offset=${this.lineOffset}):\n| ${this.inputLines.join('\n| ')}`);
-	}
+            this.debugFn(`\nStateMachine.run: input_lines (line_offset=${this.lineOffset}):\n| ${this.inputLines.join('\n| ')}`);
+        }
         let transitions;
         const results = [];
         let state = this.getState();
@@ -255,54 +255,54 @@ export class StateMachine {
         let result;
         try {
             if (this.debug) {
-		this.debugFn('\nStateMachine.run: bof transition');
-	    }
+                this.debugFn('\nStateMachine.run: bof transition');
+            }
             [context, result] = state.bof(context);
-	    if (!Array.isArray(context)) {
-		throw new Error('expecting array');
-	    }
-//	    console.log(context);
+            if (!Array.isArray(context)) {
+                throw new Error('expecting array');
+            }
+//          console.log(context);
             results.push(...result);
             while (true) {
                 try {
                     try {
                         this.nextLine();
-			if (this.debug) {
-			    if (Number.isNaN(this.lineOffset)) {
-				throw new Error();
-			    }
+                        if (this.debug) {
+                            if (Number.isNaN(this.lineOffset)) {
+                                throw new Error();
+                            }
 
-			    const rinfo = this.inputLines.info(
+                            const rinfo = this.inputLines.info(
                                 this.lineOffset,
 );
                             if (!isIterable(rinfo)) {
                                 throw new Error();
                             }
                             const [source, offset] = rinfo;
-			    this.debugFn(`\nStateMachine.run: line (source=${source}, offset=${offset}):\n| ${this.line}`);
-			}
-//			console.log(context);
-			if (!Array.isArray(context)) {
-			    throw new Error('context should be array');
-			}
+                            this.debugFn(`\nStateMachine.run: line (source=${source}, offset=${offset}):\n| ${this.line}`);
+                        }
+//                      console.log(context);
+                        if (!Array.isArray(context)) {
+                            throw new Error('context should be array');
+                        }
 
                         const r = this.checkLine(context, state, transitions);
                         if (!isIterable(r)) {
                             throw new Error(`Expect iterable result, got: ${r}`);
                         }
                         [context, nextState, result] = r;
-			if (!Array.isArray(context)) {
-			    throw new Error('context should be array');
-			}
+                        if (!Array.isArray(context)) {
+                            throw new Error('context should be array');
+                        }
                         if (!isIterable(result)) {
                             throw new Error(`Expect iterable result, got: ${result}`);
                         }
                         results.push(...result);
                     } catch (error) {
                         if (error instanceof EOFError) {
-			    if (this.debug) {
-				this.debugFn(`\nStateMachine.run: ${state.constructor.name}.eof transition`);
-			    }
+                            if (this.debug) {
+                                this.debugFn(`\nStateMachine.run: ${state.constructor.name}.eof transition`);
+                            }
                             result = state.eof(context);
                             results.push(...result);
                             break;
@@ -518,13 +518,13 @@ src;
     }
 
     checkLine(context, state, transitions) {
-	if (!Array.isArray(context)) {
-	    throw new Error('context should be array');
-	}
-	if (this.debug) {
+        if (!Array.isArray(context)) {
+            throw new Error('context should be array');
+        }
+        if (this.debug) {
             this.debugFn(`\nStateMachine.check_line: state="${state.constructor.name}", transitions=${transitions}.`);
-	}
-	// console.log(`checking line ${this.line}`);
+        }
+        // console.log(`checking line ${this.line}`);
         if (transitions === undefined) {
             transitions = state.transitionOrder;
         }
@@ -540,9 +540,9 @@ src;
 //          console.log(`checkLine: ${name} ${pattern} ${nextState}`);
             const result = pattern.exec(this.line);
             if (result) {
-		if (this.debug) {
-		    this.debugFn(`\nStateMachine.checkLine: Matched transition '"${name}" in state "${state.constructor.name}`);
-		}
+                if (this.debug) {
+                    this.debugFn(`\nStateMachine.checkLine: Matched transition '"${name}" in state "${state.constructor.name}`);
+                }
 //              console.log(`pattern match for ${name}`);
                 const r = method.bind(state)({ pattern, result, input: this.line }, context, nextState);
                 if (r === undefined) {
@@ -596,23 +596,23 @@ src;
             if (observer === undefined) {
                 throw newError('undefined observer');
             }
-	    try {
-		let info = [];
-		try {
+            try {
+                let info = [];
+                try {
                     info = this.inputLines.info(this.lineOffset);
-		} catch (err) {
-		}
-		if (info === undefined) {
+                } catch (err) {
+                }
+                if (info === undefined) {
                     // throw new Error("undefined info");
                     continue;
                 }
-		if (!isIterable(info)) {
+                if (!isIterable(info)) {
                     throw new Error('isIterable');
                 }
-		observer(...info);
-	    } catch (err) {
-		console.log(err.stack);
-	    }
+                observer(...info);
+            } catch (err) {
+                console.log(err.stack);
+            }
         }
     }
 }
@@ -639,14 +639,14 @@ export class State {
             this.nestedSm = this.stateMachine.constructor;
         }
         if (!this.nestedSmKwargs) {
-	    console.log('I am bogus');
-	    throw new Error();
+            console.log('I am bogus');
+            throw new Error();
             this.nestedSmKwargs = {
-		stateClasses: [this.constructor],
-		initialState: this.constructor.name,
-		debug: this.debug,
-		debugFn: this.debugFn,
-	    };
+                stateClasses: [this.constructor],
+                initialState: this.constructor.name,
+                debug: this.debug,
+                debugFn: this.debugFn,
+            };
         }
     }
 
@@ -744,11 +744,11 @@ export class State {
     }
 
     noMatch(context, transitions) {
-	return [context, null, []];
+        return [context, null, []];
     }
 
     bof(context) {
-	return [context, []];
+        return [context, []];
     }
 
     eof(context) {
@@ -799,7 +799,7 @@ blankFinish;
  indent, untilBlank, stripIndent, stripTop,
 }) {
         let indented;
-	let blankFinish;
+        let blankFinish;
         if (stripIndent === undefined) {
             stripIndent = true;
         }
@@ -870,14 +870,14 @@ export class StateWS extends State {
 
     indent(match, context, nextState) {
         const [indented, indent, lineOffset, blankFinish] = this.stateMachine.getIndented({});
-	const IndentSm = this.indentSm;
-	console.log('instantiating indentsm');
-	console.log(this.indentSmKwargs);
+        const IndentSm = this.indentSm;
+        console.log('instantiating indentsm');
+        console.log(this.indentSmKwargs);
         const sm = new IndentSm({ debug: this.debug, ...this.indentSmKwargs });
-	if (!sm.run) {
-	    console.log(Object.keys(sm));
-	    throw Error(`no sm run ${this} ${IndentSm.constructor.name}`);
-	}
+        if (!sm.run) {
+            console.log(Object.keys(sm));
+            throw Error(`no sm run ${this} ${IndentSm.constructor.name}`);
+        }
 
         const results = sm.run({ indented, inputOffset: lineOffset });
         return [context, nextState, results];
@@ -947,7 +947,7 @@ export class ViewList extends Array {
                 this.items = items;
             } else {
                 this.items = [];
-                for (let i = 0; i < initlist.length; i++) {
+                for (let i = 0; i < initlist.length; i += 1) {
                     this.items.push([source, i]);
                 }
             }
@@ -960,20 +960,20 @@ export class ViewList extends Array {
             end = this.length;
         }
 
-        for (let i = start; i < Math.min(end, this.length); i++) {
+        for (let i = start; i < Math.min(end, this.length); i += 1) {
             initList.push(this[i]);
         }
         return new this.constructor(initList);
     }
 
     info(i) {
-	try {
-	    return this.items[i];
-	} catch (error) {
-            if (i === this.items.length) {
-                return [this.items[i - 1][0], None];
-	    }
+        if (i === this.items.length && this.items.length > 0) {
+            return [this.items[i - 1][0], null];
+        }
+	if(i < 0 || i >= this.items.length) {
+	    throw new ApplicationError("Out of range");
 	}
+        return this.items[i];
     }
 
     trimStart(n = 1) {
@@ -982,27 +982,26 @@ export class ViewList extends Array {
               //               "from a list of size %s." % (n, len(self.data)))
         } else if (n < 0) {
             throw Error('Trim size must be >= 0.');
-	}
-	for (let i = 0; i < n; i++) {
-	    this.shift();
-	}
+        }
+        for (let i = 0; i < n; i += 1) {
+            this.shift();
+        }
         if (this.parent) {
             this.parentOffset += n;
-	}
+        }
     }
 
     trimEnd(n = 1) {
-	/* Remove items from the end of the list, without touching the parent. */
+        /* Remove items from the end of the list, without touching the parent. */
 /*        if n > len(self.data):
             raise IndexError("Size of trim too large; can't trim %s items "
                              "from a list of size %s." % (n, len(self.data)))
         elif n < 0:
             raise IndexError('Trim size must be >= 0.')
 */
-	for (let i = 0; i < n; i++) {
-	    this.pop();
-	    this.items.pop();
-	}
+        for (let i = 0; i < n; i += 1) {
+            this.pop();
+            this.items.pop();
+        }
     }
 }
-
