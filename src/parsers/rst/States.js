@@ -1,29 +1,31 @@
 import * as statemachine from '../../StateMachine';
-import * as languages from '../../languages';
 import * as nodes from '../../nodes';
-import * as tableparser from './tableparser.js';
-import { matchChars } from '../../utils/punctuationChars';
-import { escape2null, splitEscapedWhitespace } from '../../utils';
-import RSTStateMachine from './RSTStateMachine';
-import Inliner from './Inliner';
+import * as tableparser from './tableparser';
+import {
+  columnWidth, unescape, isIterable, escape2null, splitEscapedWhitespace,
+} from '../../utils';
 
-const nonWhitespaceBefore = '(?<!\\s)'
-const nonWhitespaceEscapeBefore = '(?<![\\s\\x00])'
-const nonUnescapedWhitespaceEscapeBefore = '(?<!(?<!\\x00)[\\s\\x00])'
-const nonWhitespaceAfter = '(?!\\s)'
+/* import RSTStateMachine from './RSTStateMachine';
+import Inliner from './Inliner'; */
+// import * as roles from './Roles';
 
-const StringList = statemachine.StringList;
-//import * as roles from './Roles';
+import {
+ ApplicationError, DataError, EOFError, InvalidArgumentsError, UnimplementedError as Unimp,
+} from '../../Exceptions';
 
-import { ApplicationError, DataError, EOFError, InvalidArgumentsError, UnimplementedError as Unimp } from '../../Exceptions';
-import { punctuation_chars, column_width, unescape, isIterable } from '../../utils';
+const nonWhitespaceBefore = '(?<!\\s)';
+const nonWhitespaceEscapeBefore = '(?<![\\s\\x00])';
+const nonUnescapedWhitespaceEscapeBefore = '(?<!(?<!\\x00)[\\s\\x00])';
+const nonWhitespaceAfter = '(?!\\s)';
 
-const nonalphanum7bit = '[!-/:-@[-\`{-~]';
-const simplename = '\w+';
+const { StringList } = statemachine;
+
+const nonalphanum7bit = '[!-/:-@[-`{-~]';
+const simplename = '\\w+';
 
 class MarkupError extends DataError { }
 
-const normalize_name = nodes.fullyNormalizeName;
+const normalizeName = nodes.fullyNormalizeName;
 
 const { StateMachineWS } = statemachine;
 const { StateWS } = statemachine;
@@ -36,19 +38,20 @@ class NestedStateMachine extends StateMachineWS {
     run({
  inputLines, inputOffset, memo, node, matchTitles,
     }) {
-	/* istanbul ignore if */
+        /* istanbul ignore if */
         if (!inputLines) {
             throw new Error('need inputlines');
         }
 
-	/* istanbul ignore if */
+        /* istanbul ignore if */
         if (matchTitles === undefined) {
-            matchTitles = true;
+            this.matchTitles = true;
+        } else {
+            this.matchTitles = matchTitles;
         }
-        this.matchTitles = matchTitles;
         this.memo = memo;
         this.document = memo.document;
-	/* istanbul ignore if */
+        /* istanbul ignore if */
         if (!this.document) {
             throw new Error('need document');
         }
@@ -58,8 +61,8 @@ class NestedStateMachine extends StateMachineWS {
         this.language = memo.language;
         this.node = node;
         const results = super.run({ inputLines, inputOffset });
-	/* istanbul ignore if */
-        if(results === undefined) {
+        /* istanbul ignore if */
+        if (results === undefined) {
             throw new Error();
         }
         return results;
@@ -71,7 +74,7 @@ class RSTState extends StateWS {
         super._init(args);
         this.nestedSm = NestedStateMachine;
         this.nestedSmCache = [];
-        this.stateClasses = stateClasses;
+        this.stateClasses = args.stateClasses;
         this.nestedSmKwargs = {
             stateClasses: this.stateClasses,
             initialState: 'Body',
@@ -107,18 +110,18 @@ class RSTState extends StateWS {
         return [context, null, []];
     }
 
-    bof(context) {
+    bof() {
         return [[], []];
     }
 
     nestedParse(block, {
  inputOffset, node, matchTitles, stateMachineClass, stateMachineKwargs,
 }) {
-	/* istanbul ignore if */
+        /* istanbul ignore if */
         if (!this.memo || !this.memo.document) {
             throw new Error('need memo');
         }
-	/* istanbul ignore if */
+        /* istanbul ignore if */
         if (!block) {
             throw new Error('need block');
         }
@@ -135,15 +138,12 @@ class RSTState extends StateWS {
         const blockLength = block.length;
 
         let stateMachine;
-        if (useDefault === 2) {
-            try {
-                stateMachine = this.nestedSmCache.pop();
-            } catch (err) {
-            }
+        if (useDefault === 2 && this.nestedSmCache.length > 0) {
+            stateMachine = this.nestedSmCache.pop();
         }
 
         if (!stateMachine) {
-	/* istanbul ignore if */
+        /* istanbul ignore if */
             if (!stateMachineKwargs.stateClasses) {
                 throw new InvalidArgumentsError('stateClasses');
             }
@@ -168,7 +168,7 @@ matchTitles,
             stateMachine.unlink();
         }
         const newOffset = stateMachine.absLineOffset();
-        if (block.parent && (len(block) - block_length) !== 0) {
+        if (block.parent && (block.length - blockLength) !== 0) {
             this.stateMachine.nextLine(block.length - blockLength);
         }
         return newOffset;
@@ -198,7 +198,7 @@ matchTitles,
         if (!blankFinishState) {
             blankFinishState = initialState;
         }
-	/* istanbul ignore if */
+        /* istanbul ignore if */
         if (!(blankFinishState in stateMachine.states)) {
             throw new InvalidArgumentsError(`invalid state ${blankFinishState}`);
         }
@@ -227,72 +227,74 @@ matchTitles,
         }
     }
 
-    checkSubsection({source, style, lineno}) {
-        const memo = this.memo
-        const title_styles = memo.titleStyles
-        const mylevel = memo.sectionLevel
+    checkSubsection({ source, style, lineno }) {
+        const { memo } = this;
+        const title_styles = memo.titleStyles;
+        const mylevel = memo.sectionLevel;
         let level = 0;
-        level = title_styles.indexOf(style) + 1
-        if(level == 0) {
-            if(title_styles.length == memo.sectionLevel) { // new subsection
-                title_styles.push(style)
-                return 1
-            } else {
-                this.parent.add(this.title_inconsistent(source, lineno))
-                return None
+        level = title_styles.indexOf(style) + 1;
+        if (level === 0) {
+            if (title_styles.length === memo.sectionLevel) { // new subsection
+                title_styles.push(style);
+                return 1;
             }
+                this.parent.add(this.title_inconsistent(source, lineno));
+                return null;
         }
-        if(level <= mylevel) {//            // sibling or supersection
-            memo.sectionLevel = level   // bubble up to parent section
-            if(style.length === 2) {
-                memo.sectionBubbleUpKludge = True
+        if (level <= mylevel) { //            // sibling or supersection
+            memo.sectionLevel = level; // bubble up to parent section
+            if (style.length === 2) {
+                memo.sectionBubbleUpKludge = true;
             }
             // back up 2 lines for underline title, 3 for overline title
-            this.stateMachine.previousLine(style.length + 1)
-            throw new EOFError()    // let parent section re-evaluate
-
+            this.stateMachine.previousLine(style.length + 1);
+            throw new EOFError(); // let parent section re-evaluate
         }
 
-        if(level === mylevel + 1) {        // immediate subsection
-            return 1
-        } else {
-            this.parent.add(this.title_inconsistent(source, lineno))
+        if (level === mylevel + 1) { // immediate subsection
+            return 1;
+        }
+            this.parent.add(this.title_inconsistent(source, lineno));
             return undefined;
-        }
     }
 
-    title_inconsistent( sourcetext, lineno)  {
+    title_inconsistent(sourcetext, lineno) {
         const error = this.reporter.severe(
-            'Title level inconsistent:', [new nodes.literal_block('', sourcetext)], { line: lineno });
-        return error
+            'Title level inconsistent:', [new nodes.literal_block('', sourcetext)], { line: lineno },
+);
+        return error;
     }
 
 
-    newSubsection({title, lineno, messages}) {
-        const memo = this.memo
-        const mylevel = memo.sectionLevel
-        memo.sectionLevel += 1
-        const section_node = new nodes.section()
-        this.parent.add(section_node)
-        const [ textnodes, title_messages ] = this.inline_text(title, lineno)
-        const titlenode = new nodes.title(title, '', textnodes)
-        const name = normalize_name(titlenode.astext())
-        section_node.attributes['names'].push(name)
-        section_node.add(titlenode)
-        section_node.add(messages)
-        section_node.add(title_messages)
-        this.document.noteImplicitTarget(section_node, section_node)
-        const offset = this.stateMachine.lineOffset + 1
-        const absoffset = this.stateMachine.absLineOffset() + 1
+    newSubsection({ title, lineno, messages }) {
+        const { memo } = this;
+        const mylevel = memo.sectionLevel;
+        memo.sectionLevel += 1;
+        const section_node = new nodes.section();
+        this.parent.add(section_node);
+        const [textnodes, title_messages] = this.inline_text(title, lineno);
+        const titlenode = new nodes.title(title, '', textnodes);
+        const name = normalizeName(titlenode.astext());
+        section_node.attributes.names.push(name);
+        section_node.add(titlenode);
+        section_node.add(messages);
+        section_node.add(title_messages);
+        this.document.noteImplicitTarget(section_node, section_node);
+        const offset = this.stateMachine.lineOffset + 1;
+        const absoffset = this.stateMachine.absLineOffset() + 1;
         const newabsoffset = this.nestedParse(
-            this.stateMachine.inputLines.slice(offset), {inputOffset: absoffset,
-                                                         node: section_node, matchTitles: true})
-        this.gotoLine(newabsoffset)
-        if(memo.sectionLevel <= mylevel) {
-            throw new EOFError()
+            this.stateMachine.inputLines.slice(offset), {
+ inputOffset: absoffset,
+                                                         node: section_node,
+matchTitles: true,
+},
+);
+        this.gotoLine(newabsoffset);
+        if (memo.sectionLevel <= mylevel) {
+            throw new EOFError();
         }
 
-            memo.sectionLevel = mylevel
+            memo.sectionLevel = mylevel;
     }
 
     unindentWarning(nodeName) {
@@ -301,14 +303,14 @@ matchTitles,
     }
 
     paragraph(lines, lineno) {
-        const data =  lines.join('\n').trimEnd();
+        const data = lines.join('\n').trimEnd();
         let text;
         let literalnext;
         if (/(?<!\\)(\\\\)*::$/.test(data)) {
             if (data.length === 2) {
                 return [[], 1];
             }
-            if (' \n'.indexOf(data[length.data - 3]) !== -1) {
+            if (' \n'.indexOf(data[data.length - 3]) !== -1) {
                 text = data.substring(0, data.length - 3).replace(/\s*$/, '');
             } else {
                 text = data.substring(0, data.length - 1);
@@ -354,7 +356,7 @@ export class Body extends RSTState {
         const pats = { };
         const _enum = { };
 
-        pats.nonalphanum7bit = '[!-/:-@[-\`{-~]';
+        pats.nonalphanum7bit = '[!-/:-@[-`{-~]';
         pats.alpha = '[a-zA-Z]';
         pats.alphanum = '[a-zA-Z0-9]';
         pats.alphanumplus = '[a-zA-Z0-9_-]';
@@ -398,9 +400,9 @@ export class Body extends RSTState {
 };
 
         enum_.sequenceregexps = {};
-        for (const sequence of enum_.sequences) {
+	enum_.sequences.forEach(sequence => {
             enum_.sequenceregexps[sequence] = new RegExp(`${enum_.sequencepats[sequence]}$`);
-        }
+	});
         this.enum = enum_;
 
         this.gridTableTopPat = new RegExp('\\+-[-+]+-\\+ *$');
@@ -411,7 +413,7 @@ export class Body extends RSTState {
         pats.alpha = '[a-zA-Z]';
         pats.alphanum = '[a-zA-Z0-9]';
         pats.alphanumplus = '[a-zA-Z0-9_-]';
-        pats.enum = '';//('(%(arabic)s|%(loweralpha)s|%(upperalpha)s|%(lowerroman)s' +'|%(upperroman)s|#)' % enum.sequencepats)
+        pats.enum = '';// ('(%(arabic)s|%(loweralpha)s|%(upperalpha)s|%(lowerroman)s' +'|%(upperroman)s|#)' % enum.sequencepats)
         pats.optname = `${pats.alphanum}${pats.alphanumplus}*`;
         pats.optarg = `(${pats.alpha}${pats.alphanumplus}*|<[^<>]+>)`;
         pats.shortopt = `(-|\\+)${pats.alphanum}( ?${pats.optarg})?`;
@@ -428,11 +430,11 @@ export class Body extends RSTState {
         this.patterns = {
             bullet: '[-+*\\u2022\\u2023\\u2043]( +|$)',
             enumerator: `(${pats.parens}|${pats.rparen}|${pats.period})( +|$)`,
-            'field_marker': ':(?![: ])([^:\\\\]|\\\\.|:(?!([ `]|$)))*(?<! ):( +|$)',
+            field_marker: ':(?![: ])([^:\\\\]|\\\\.|:(?!([ `]|$)))*(?<! ):( +|$)',
             grid_table_top: this.gridTableTopPat,
-            'option_marker': `${pats.option}(, ${pats.option})*(  +| ?$)`,
-            'doctest': '>>>( +|$)',
-            'line_block': '\\|( +|$)',
+            option_marker: `${pats.option}(, ${pats.option})*(  +| ?$)`,
+            doctest: '>>>( +|$)',
+            line_block: '\\|( +|$)',
             grid_table_Top: this.gridTableTopPat,
                 simple_table_top: this.simpleTableTopPat,
             explicit_markup: '\\.\\.( +|$)',
@@ -442,17 +444,17 @@ export class Body extends RSTState {
         };
 //      console.log(this.enumerator);
 
-        this.initialTransitions = ['bullet', 'enumerator', 'field_marker', 'option_marker', 'doctest', 'line_block', 'grid_table_top', 'simple_table_top', 'explicit_markup', 'anonymous', 'line', 'text']
+        this.initialTransitions = ['bullet', 'enumerator', 'field_marker', 'option_marker', 'doctest', 'line_block', 'grid_table_top', 'simple_table_top', 'explicit_markup', 'anonymous', 'line', 'text'];
 
         this.explicit = {};
-	this.explicit.patterns = {
-	    target: new RegExp(`(_|(?!_)(\`?)(?![ \`])(.+?)${nonWhitespaceEscapeBefore})(?<!(?<!\\x00):)${nonWhitespaceEscapeBefore}[ ]?:([ ]+|$)`),
-            reference: new RegExp('zzzz'),//((?P<simple>%(simplename)s)_|`(?![ ])(?P<phrase>.+?)%(non_whitespace_escape_before)s`_)$'),
-            substitution: new RegExp('zzzz')//((?![ ])(?P<name>.+?)%(non_whitespace_escape_before)s\\|)([ ]+|$)'),
-	};
+        this.explicit.patterns = {
+            target: new RegExp(`(_|(?!_)(\`?)(?![ \`])(.+?)${nonWhitespaceEscapeBefore})(?<!(?<!\\x00):)${nonWhitespaceEscapeBefore}[ ]?:([ ]+|$)`),
+            reference: new RegExp('zzzz'), // ((?P<simple>%(simplename)s)_|`(?![ ])(?P<phrase>.+?)%(non_whitespace_escape_before)s`_)$'),
+            substitution: new RegExp('zzzz'), // ((?![ ])(?P<name>.+?)%(non_whitespace_escape_before)s\\|)([ ]+|$)'),
+        };
 
         this.explicit.constructs = [
-            [ this.footnote.bind(this), new RegExp(`\\.\\.[ ]+\\[([0-9]+|\\#|\\#${simplename}|\\*)\\]([ ]+|$)`) ],
+            [this.footnote.bind(this), new RegExp(`\\.\\.[ ]+\\[([0-9]+|\\#|\\#${simplename}|\\*)\\]([ ]+|$)`)],
             [this.citation.bind(this),
            new RegExp(`\\.\\.[ ]+\\[(${simplename})\\]([ ]+|$)`)],
             [this.hyperlink_target.bind(this),
@@ -465,11 +467,11 @@ export class Body extends RSTState {
     }
 
     footnote(match) {
-        /*src, srcline = self.state_machine.get_source_and_line()
+        /* src, srcline = self.state_machine.get_source_and_line()
           indented, indent, offset, blank_finish = \
           self.state_machine.get_first_known_indented(match.end())
           label = match.group(1)
-          name = normalize_name(label)
+          name = normalizeName(label)
           footnote = nodes.footnote('\n'.join(indented))
           footnote.source = src
           footnote.line = srcline
@@ -494,36 +496,35 @@ export class Body extends RSTState {
           if indented:
           self.nested_parse(indented, input_offset=offset, node=footnote)
           return [footnote], blank_finish
-	*/
+        */
     }
 
     citation(match) {
-	throw new Unimp("citation");
+        throw new Unimp('citation');
     }
 
     hyperlink_target(match) {
-	throw new Unimp("hyperlink_target");
+        throw new Unimp('hyperlink_target');
     }
 
     make_target(block, block_text, lineno, target_name) {
-        const [ target_type, data ] = this.parse_target(block, block_text, lineno)
-        if(target_type === 'refname') {
-            const target = new nodes.target(block_text, '', [], { refname: normalize_name(data) });
-            target.indirectReferenceName = data
-            this.add_target(target_name, '', target, lineno)
-            this.document.noteIndirectTarget(target)
-            return target
-	} else if(target_type === 'refuri') {
-            const target = new nodes.target(block_text, '')
-            this.add_target(target_name, data, target, lineno)
-            return target
-	} else {
+        const [target_type, data] = this.parse_target(block, block_text, lineno);
+        if (target_type === 'refname') {
+            const target = new nodes.target(block_text, '', [], { refname: normalizeName(data) });
+            target.indirectReferenceName = data;
+            this.add_target(target_name, '', target, lineno);
+            this.document.noteIndirectTarget(target);
+            return target;
+        } if (target_type === 'refuri') {
+            const target = new nodes.target(block_text, '');
+            this.add_target(target_name, data, target, lineno);
+            return target;
+        }
             return data;
-	}
     }
 
     parse_target(block, block_text, lineno) {
-        /*"""
+        /* """
         Determine the type of reference of a target.
 
         :Return: A 2-tuple, one of:
@@ -531,71 +532,74 @@ export class Body extends RSTState {
             - 'refname' and the indirect reference name
             - 'refuri' and the URI
             - 'malformed' and a system_message node
-            """*/
-        if(block.length && block[block.length - 1].trim().endsWith('_')) {
-	    const lines = [];
-	    block.forEach(line => lines.push(line.trim()));
+            """ */
+        if (block.length && block[block.length - 1].trim().endsWith('_')) {
+            const lines = [];
+            block.forEach(line => lines.push(line.trim()));
             const reference = lines.join(' ');
-            const refname = this.is_reference(reference)
-            if(refname) {
-                return [ 'refname', refname ]
-	    }
-	}
+            const refname = this.is_reference(reference);
+            if (refname) {
+                return ['refname', refname];
+            }
+        }
         const ref_parts = splitEscapedWhitespace(block.join(' '));
         const reference = ref_parts.map(part => unescape(part).split(/\s+/).join('')).join(' ');
-        return ['refuri', reference]
+        return ['refuri', reference];
     }
+
     is_reference(reference) {
         const match = this.explicit.patterns.reference.exec(
-            '^' + whitespaceNormalizeName(reference))
-        if(!match) {
-	    return null;
-	}
-	throw new Unimp();
+            `^${whitespaceNormalizeName(reference)}`,
+);
+        if (!match) {
+            return null;
+        }
+        throw new Unimp();
        // return unescape(match.group('simple') or match.group('phrase'))
     }
 
     add_target(targetname, refuri, target, lineno) {
-        target.line = lineno
-        if(targetname) {
-            const name = normalize_name(unescape(targetname))
-            target.attributes['names'].append(name)
-            if(refuri) {
-                const uri = this.inliner.adjust_uri(refuri)
-		/* istanbul ignore else */
-                if(uri) {
-                    target.attributes['refuri'] = uri
+        target.line = lineno;
+        if (targetname) {
+            const name = normalizeName(unescape(targetname));
+            target.attributes.names.append(name);
+            if (refuri) {
+                const uri = this.inliner.adjust_uri(refuri);
+                /* istanbul ignore else */
+                if (uri) {
+                    target.attributes.refuri = uri;
                 } else {
                     throw new ApplicationError(`problem with URI: ${refuri}`);
-		}
-	    }
-            this.document.noteExplicitTarget(target, this.parent)
-	} else {
-	    //# anonymous target
-            if(refuri) {
-                target.attributes['refuri'] = refuri
-	    }
-            target.attributes['anonymous'] = 1
-            this.document.noteAnonymousTarget(target)
-	}
+                }
+            }
+            this.document.noteExplicitTarget(target, this.parent);
+        } else {
+            // # anonymous target
+            if (refuri) {
+                target.attributes.refuri = refuri;
+            }
+            target.attributes.anonymous = 1;
+            this.document.noteAnonymousTarget(target);
+        }
     }
 
     substitution_def(match) {
-	throw new Unimp("substitution_def");
+        throw new Unimp('substitution_def');
     }
 
     directive(match, option_presets) {
-        //"""Returns a 2-tuple: list of nodes, and a "blank finish" boolean."""
-        const type_name = match.result[1]
-        const [ directive_class, messages ] = new directives.directive(
-            type_name, this.memo.language, this.document)
-        this.parent.add(messages)
-        if(directive_class) {
+        // """Returns a 2-tuple: list of nodes, and a "blank finish" boolean."""
+        const type_name = match.result[1];
+        const [directive_class, messages] = new directives.directive(
+            type_name, this.memo.language, this.document,
+);
+        this.parent.add(messages);
+        if (directive_class) {
             return this.run_directive(
-                directive_class, match, type_name, option_presets)
-        } else {
-            return this.unknown_directive(type_name)
-	}
+                directive_class, match, type_name, option_presets,
+);
+        }
+            return this.unknown_directive(type_name);
     }
 
     run_directive(directive, match, type_name, option_presets) {
@@ -618,9 +622,9 @@ export class Body extends RSTState {
           be used by an embedded image directive.
 
         Returns a 2-tuple: list of nodes, and a "blank finish" boolean.
-        """*/
+        """ */
 
-	/*
+        /*
         if isinstance(directive, (FunctionType, MethodType)):
             from docutils.parsers.rst import convert_directive_function
             directive = convert_directive_function(directive)
@@ -659,12 +663,12 @@ export class Body extends RSTState {
                     % (type_name, i, result[i]))
         return (result,
                 blank_finish or self.state_machine.is_next_line_blank())
-	*/
-	throw new Unimp("run_Directive");
+        */
+        throw new Unimp('run_Directive');
     }
 
     comment(match) {
-        /*if not match.string[match.end():].strip() \
+        /* if not match.string[match.end():].strip() \
               and self.state_machine.is_next_line_blank(): # an empty comment?
             return [nodes.comment()], 1 # "A tiny but practical wart."
         indented, indent, offset, blank_finish = \
@@ -672,31 +676,31 @@ export class Body extends RSTState {
         while indented and not indented[-1].strip():
             indented.trim_end()
         text = '\n'.join(indented)
-        return [nodes.comment(text, text)], blank_finish*/
-	return [[], true];
+        return [nodes.comment(text, text)], blank_finish */
+        return [[], true];
     }
 
     explicit_markup(match, context, next_state) {
-        /*"""Footnotes, hyperlink targets, directives, comments."""*/
-        const [ nodelist, blank_finish ] = this.explicit_construct(match)
+        /* """Footnotes, hyperlink targets, directives, comments.""" */
+        const [nodelist, blank_finish] = this.explicit_construct(match);
         this.parent.add(nodelist);
-        this.explicit_list(blank_finish)
+        this.explicit_list(blank_finish);
         return [[], next_state, []];
     }
 
-    explicit_construct( match) {
-        //"""Determine which explicit construct this is, parse & return it."""
+    explicit_construct(match) {
+        // """Determine which explicit construct this is, parse & return it."""
 //        throw new Unimp("explciit_construct");
-        const errors = []
-        for(const [ method, pattern ] of this.explicit.constructs) {
+        const errors = [];
+        for (const [method, pattern] of this.explicit.constructs) {
 //      this.explicit.constructs.forEach(([ method, pattern ]) =>{
-            const expmatch = pattern.exec('^' + match.result.input)
-            if(expmatch) {
+            const expmatch = pattern.exec(`^${match.result.input}`);
+            if (expmatch) {
                 try {
                     return method(expmatch); /* can also use bind */
-                } catch(error) {
-                    if(error instanceof MarkupError) {
-                        const lineno = this.stateMachine.absLineNumber()
+                } catch (error) {
+                    if (error instanceof MarkupError) {
+                        const lineno = this.stateMachine.absLineNumber();
                         const message = error.args.join(' ');
                         errors.push(this.reporter.warning(message, [], { line: lineno }));
                         break;
@@ -705,55 +709,60 @@ export class Body extends RSTState {
             }
         }
 
-        const [ nodelist, blank_finish ]  = this.comment(match)
-        return [[...nodelist], [...errors], blank_finish ]
+        const [nodelist, blank_finish] = this.comment(match);
+        return [[...nodelist], [...errors], blank_finish];
     }
 
     explicit_list(blank_finish) {
-        /*"""
+        /* """
         Create a nested state machine for a series of explicit markup
         constructs (including anonymous hyperlink targets).
-        """*/
-        const offset = this.stateMachine.lineOffset + 1   // next line
+        """ */
+        const offset = this.stateMachine.lineOffset + 1; // next line
             let newline_offset;
-        [ newline_offset, blank_finish ] = this.nestedListParse(
+        [newline_offset, blank_finish] = this.nestedListParse(
             this.stateMachine.inputLines.slice(offset),
-            { inputOffset: this.stateMachine.absLineOffset() + 1,
-              node: this.parent, initialState: 'Explicit',
+            {
+ inputOffset: this.stateMachine.absLineOffset() + 1,
+              node: this.parent,
+initialState: 'Explicit',
               blankFinish: blank_finish,
-              matchTitles: this.stateMachine.matchTitles });
-        this.gotoLine(newline_offset)
-        if(!blank_finish) {
+              matchTitles: this.stateMachine.matchTitles,
+},
+);
+        this.gotoLine(newline_offset);
+        if (!blank_finish) {
             this.parent.add(self.unindent_warning('Explicit markup'));
-	}
+        }
     }
 
-    anonymous( match, context, next_state) {
-        /*"""Anonymous hyperlink targets."""*/
-        const [ nodelist, blank_finish ] = this.anonymous_target(match)
-        this.parent.add(nodelist)
-        this.explicit_list(blank_finish)
-        return [[], next_state, []]
+    anonymous(match, context, next_state) {
+        /* """Anonymous hyperlink targets.""" */
+        const [nodelist, blank_finish] = this.anonymous_target(match);
+        this.parent.add(nodelist);
+        this.explicit_list(blank_finish);
+        return [[], next_state, []];
     }
 
     anonymous_target(match) {
-        const lineno = this.stateMachine.absLineNumber()
-        const [ block, indent, offset, blank_finish ]
-              = this.stateMachine.getFirstKnownIndented({ indent: match.result.index + match.result[0].length,
-                                                          untilBlank: true});
+        const lineno = this.stateMachine.absLineNumber();
+        const [block, indent, offset, blank_finish] = this.stateMachine.getFirstKnownIndented({
+ indent: match.result.index + match.result[0].length,
+                                                          untilBlank: true,
+});
         const blocktext = match.result.input.substring(0, match.result.index + match.result[0].length) + block.join('\n');
         const blockLines = [];
         block.forEach(line => blockLines.push(escape2null(line)));
         const block2 = new StringList(blockLines);
 
-        const target = this.make_target(block2, blocktext, lineno, '')
-        return [[target], blank_finish]
+        const target = this.make_target(block2, blocktext, lineno, '');
+        return [[target], blank_finish];
     }
 
     indent(match, context, nextState) {
         const [indented, indent, lineOffset, blankFinish] = this.stateMachine.getIndented({});
-	/* istanbul ignore if */
-        if(indented === undefined) {
+        /* istanbul ignore if */
+        if (indented === undefined) {
             throw new Error();
         }
         const elements = this.block_quote(indented, lineOffset);
@@ -765,7 +774,7 @@ export class Body extends RSTState {
     }
 
     block_quote(indented, lineOffset) {
-        if(!indented) {
+        if (!indented) {
             throw new Error();
         }
         const elements = [];
@@ -810,7 +819,7 @@ export class Body extends RSTState {
                             a_lines.trimLeft(indent, 1);
                             return [indented.slice(0, i), a_lines,
                                     i, indented.slice(attribution_end),
-                                    lineOffset + attribution_end]
+                                    lineOffset + attribution_end];
                         }
                     }
                 }
@@ -823,25 +832,23 @@ export class Body extends RSTState {
     }
 
     check_attribution(indented, attribution_start) {
-        let indent = null
+        let indent = null;
         let i;
-        for( i = attribution_start + 1; i < indented.length; i++) {
-            const line = indented[i].trimRight()
+        for (i = attribution_start + 1; i < indented.length; i++) {
+            const line = indented[i].trimRight();
             if (!line) {
-                break
-
+                break;
             }
             if (indent == null) {
                 indent = line.length - line.trimLeft().length;
             } else if ((line.length - line.lstrip().length) !== indent) {
-                return [null, null]      // bad shape; not an attribution
+                return [null, null]; // bad shape; not an attribution
             }
         }
-        if(i === indented.length) {
+        if (i === indented.length) {
             i++;
-
         }
-        return [i, indent || 0]
+        return [i, indent || 0];
     }
 
     enumerator(match, context, nextState) {
@@ -895,12 +902,12 @@ initialState: 'EnumeratedList',
     parse_attribution(indented, line_offset) {
         const text = indented.join('\n').trimRight();
         const lineno = this.stateMachine.absLineNumber() + line_offset;
-        const [ textnodes, messages ] = this.inline_text(text, lineno)
-        const anode = new nodes.attribution(text, '', textnodes)
-        const [ source, line ] = this.stateMachine.getSourceAndLine(lineno)
+        const [textnodes, messages] = this.inline_text(text, lineno);
+        const anode = new nodes.attribution(text, '', textnodes);
+        const [source, line] = this.stateMachine.getSourceAndLine(lineno);
         anode.source = source;
         anode.line = line;
-        return [ anode, messages ]
+        return [anode, messages];
     }
 
     bullet(match, context, nextState) {
@@ -909,7 +916,7 @@ initialState: 'EnumeratedList',
         [bulletlist.source,
          bulletlist.line] = this.stateMachine.getSourceAndLine();
 //      console.log(`${bulletlist.source} ${bulletlist.line}`);
-	/* istanbul ignore if */
+        /* istanbul ignore if */
         if (!this.parent) {
             throw new Error('no parent');
         }
@@ -918,7 +925,7 @@ initialState: 'EnumeratedList',
         bulletlist.attributes.bullet = match.result[0].substring(0, 1);
 
         let [i, blankFinish] = this.list_item(match.pattern.lastIndex + match.result[0].length); /* -1 ? */
-	/* istanbul ignore if */
+        /* istanbul ignore if */
         if (!i) {
             throw new Error('no node');
         }
@@ -941,7 +948,7 @@ initialState: 'BulletList',
 
     list_item(indent) {
 //      console.log(`in list_item (indent=${indent})`);
-	/* istanbul ignore if */
+        /* istanbul ignore if */
         if (indent == null) {
             throw new Error('Need indent');
         }
@@ -967,96 +974,102 @@ initialState: 'BulletList',
     }
 
     enumerator(match, context, nextState) {
-        /*"""Enumerated List Item"""*/
-        const [ format, sequence, text, ordinal ] = this.parse_enumerator(match)
-        if(!this.is_enumerated_list_item(ordinal, sequence, format)) {
-            throw statemachine.TransitionCorrection('text')
+        /* """Enumerated List Item""" */
+        const [format, sequence, text, ordinal] = this.parse_enumerator(match);
+        if (!this.is_enumerated_list_item(ordinal, sequence, format)) {
+            throw statemachine.TransitionCorrection('text');
         }
-        const enumlist = new nodes.enumerated_list()
+        const enumlist = new nodes.enumerated_list();
         this.parent.add(enumlist);
-        if(sequence === '#') {
-            enumlist.attributes['enumtype'] = 'arabic'
+        if (sequence === '#') {
+            enumlist.attributes.enumtype = 'arabic';
         } else {
-            enumlist.attributes['enumtype'] = sequence
+            enumlist.attributes.enumtype = sequence;
         }
-        enumlist.attributes['prefix'] = this.enum.formatinfo[format].prefix // fixme check
-        enumlist.attributes['suffix'] = this.enum.formatinfo[format].suffix
-        if(ordinal !== 1) {
-            enumlist.attributes['start'] = ordinal
+        enumlist.attributes.prefix = this.enum.formatinfo[format].prefix; // fixme check
+        enumlist.attributes.suffix = this.enum.formatinfo[format].suffix;
+        if (ordinal !== 1) {
+            enumlist.attributes.start = ordinal;
             const msg = this.reporter.info(
-                `Enumerated list start value not ordinal-1: "${text}" (ordinal ${ordinal})`, [], {});
+                `Enumerated list start value not ordinal-1: "${text}" (ordinal ${ordinal})`, [], {},
+);
             this.parent.add(msg);
         }
         let listitem;
         let blankFinish;
-        [ listitem, blankFinish ] = this.list_item(match.result.index + match.result[0].length)
-        enumlist.add(listitem)
-        const offset = this.stateMachine.lineOffset + 1   // next line
+        [listitem, blankFinish] = this.list_item(match.result.index + match.result[0].length);
+        enumlist.add(listitem);
+        const offset = this.stateMachine.lineOffset + 1; // next line
             let newlineOffset;
-         [ newlineOffset, blankFinish ] = this.nestedListParse(
+         [newlineOffset, blankFinish] = this.nestedListParse(
             this.stateMachine.inputLines.slice(offset), {
                 inputOffset: this.stateMachine.absLineOffset() + 1,
-                node: enumlist, initialState: 'EnumeratedList',
+                node: enumlist,
+initialState: 'EnumeratedList',
                 blankFinish,
-                extraSettings: {'lastordinal': ordinal,
-                               'format': format,
-                               'auto': sequence === '#'}});
-        this.gotoLine(newlineOffset)
-        if(!blankFinish) {
+                extraSettings: {
+ lastordinal: ordinal,
+                               format,
+                               auto: sequence === '#',
+},
+},
+);
+        this.gotoLine(newlineOffset);
+        if (!blankFinish) {
             this.parent.add(this.unindent_warning('Enumerated list'));
         }
-        return [[], nextState, []]
+        return [[], nextState, []];
     }
 
     parse_enumerator(match, expected_sequence) {
-        throw new Unimp("parse_enumerator");
+        throw new Unimp('parse_enumerator');
     }
 
-    field_marker(match,context,nextState) {
+    field_marker(match, context, nextState) {
         const fieldList = new nodes.field_list();
         this.parent.add(fieldList);
         let field;
         let blankFinish;
-        [field,blankFinish] = this.field(match);
+        [field, blankFinish] = this.field(match);
         fieldList.add(field);
-        const offset = this.stateMachine.lineOffset + 1
+        const offset = this.stateMachine.lineOffset + 1;
         let newlineOffset;
         [newlineOffset, blankFinish] = this.nestedListParse(
             this.stateMachine.inputLines.slice(offset),
             {
                 inputOffset: this.stateMachine.absLineOffset() + 1,
-                node:fieldList,
-                initialState:'FieldList',
+                node: fieldList,
+                initialState: 'FieldList',
                 blankFinish,
-            });
+            },
+);
         this.gotoLine(newlineOffset);
-        if(!blankFinish) {
+        if (!blankFinish) {
             this.parent.add(this.unindentWarning('Field list'));
         }
-        return [[], nextState, []]
+        return [[], nextState, []];
     }
 
     field(match) {
-        const name = this.parse_field_marker(match)
-        const [ src, srcline ] = this.stateMachine.getSourceAndLine()
-        const lineno = this.stateMachine.absLineNumber()
-        const [ indented, indent, lineOffset, blankFinish ] =
-              this.stateMachine.getFirstKnownIndented({ indent: match.result.index + match.result[0].length});
-        const field_node = new nodes.field()
-        field_node.source = src
-        field_node.line = srcline
-        const [ name_nodes, name_messages ] = this.inline_text(name, lineno)
+        const name = this.parse_field_marker(match);
+        const [src, srcline] = this.stateMachine.getSourceAndLine();
+        const lineno = this.stateMachine.absLineNumber();
+        const [indented, indent, lineOffset, blankFinish] = this.stateMachine.getFirstKnownIndented({ indent: match.result.index + match.result[0].length });
+        const field_node = new nodes.field();
+        field_node.source = src;
+        field_node.line = srcline;
+        const [name_nodes, name_messages] = this.inline_text(name, lineno);
         field_node.add(new nodes.field_name(name, '', name_nodes, {}));
-        const field_body = new nodes.field_body(indented.join('\n'), name_messages, {})
-        field_node.add(field_body)
-        if(indented && indented.length) {
-            this.parse_field_body(indented, lineOffset, field_body)
+        const field_body = new nodes.field_body(indented.join('\n'), name_messages, {});
+        field_node.add(field_body);
+        if (indented && indented.length) {
+            this.parse_field_body(indented, lineOffset, field_body);
         }
-        return [field_node, blankFinish]
+        return [field_node, blankFinish];
     }
 
     parse_field_marker(match) {
-        /*"""Extract & return field name from a field marker match."""*/
+        /* """Extract & return field name from a field marker match.""" */
         console.log(match);
         let field = match.result[0].substring(1);
         field = field.substring(0, field.lastIndexOf(':'));
@@ -1064,116 +1077,115 @@ initialState: 'BulletList',
     }
 
     parse_field_body(indented, offset, node) {
-        this.nestedParse(indented, { inputOffset: offset, node: node })
+        this.nestedParse(indented, { inputOffset: offset, node });
     }
 
-    option_marker( match, context, nextState) {
-        //"""Option list item."""
-        const optionlist = new nodes.option_list()
-        const [ source, line ] = this.stateMachine.getSourceAndLine();
+    option_marker(match, context, nextState) {
+        // """Option list item."""
+        const optionlist = new nodes.option_list();
+        const [source, line] = this.stateMachine.getSourceAndLine();
         let listitem;
         let blankFinish;
         try {
-             [ listitem, blankFinish ] = this.option_list_item(match)
-        }
-        catch(error) {
-            if(error instanceof MarkupError) {
+             [listitem, blankFinish] = this.option_list_item(match);
+        } catch (error) {
+            if (error instanceof MarkupError) {
                 // This shouldn't happen; pattern won't match.
                 const msg = this.reporter.error(`Invalid option list marker: ${error}`);
-                this.parent.add( msg )
-                const [ indented, indent, line_offset, blankFinish ]  =
-                      this.stateMachine.getFirstKnownIndented({ indent: match.result.index + match.result[0].length });
-                const elements = this.block_quote(indented, line_offset)
+                this.parent.add(msg);
+                const [indented, indent, line_offset, blankFinish] = this.stateMachine.getFirstKnownIndented({ indent: match.result.index + match.result[0].length });
+                const elements = this.block_quote(indented, line_offset);
                 this.parent.add(elements);
-                if(!blankFinish) {
+                if (!blankFinish) {
                     this.parent.add(this.unindentWarning('Option list'));
                 }
-                return [[], nextState, []]
+                return [[], nextState, []];
             }
             throw error;
         }
-        this.parent.add( optionlist)
-        optionlist.add( listitem)
-        const offset = this.stateMachine.lineOffset + 1   // next line
-        const [ newline_offset, blankFinish2 ] = this.nestedListParse(
+        this.parent.add(optionlist);
+        optionlist.add(listitem);
+        const offset = this.stateMachine.lineOffset + 1; // next line
+        const [newline_offset, blankFinish2] = this.nestedListParse(
             this.stateMachine.inputLines.slice(offset),
             {
                 inputOffset: this.stateMachine.absLineOffset() + 1,
                 node: optionlist,
                 initialState: 'OptionList',
                 blankFinish,
-            }
+            },
         );
-        this.gotoLine(newline_offset)
-        if(!blankFinish2) {
+        this.gotoLine(newline_offset);
+        if (!blankFinish2) {
             this.parent.add(this.unindentWarning('Option list'));
         }
-        return [[], nextState, []]
+        return [[], nextState, []];
     }
 
     option_list_item(match) {
-        const offset = this.stateMachine.absLineOffset()
-        const options = this.parse_option_marker(match)
-        const [ indented, indent, line_offset, blank_finish ] =
-              this.stateMachine.getFirstKnownIndented({ indent: match.result.index + match.result[0].length });
-        if(!indented || !indented.length) {//  not an option list item
-            this.gotoLine(offset)
-            throw new statemachine.TransitionCorrection('text')
+        const offset = this.stateMachine.absLineOffset();
+        const options = this.parse_option_marker(match);
+        const [indented, indent, line_offset, blank_finish] = this.stateMachine.getFirstKnownIndented({ indent: match.result.index + match.result[0].length });
+        if (!indented || !indented.length) { //  not an option list item
+            this.gotoLine(offset);
+            throw new statemachine.TransitionCorrection('text');
         }
-        const option_group = new nodes.option_group('', options)
+        const option_group = new nodes.option_group('', options);
         const description = new nodes.description(indented.join('\n'));
         const option_list_item = new nodes.option_list_item('', [option_group,
-                                                                 description])
-        if(indented && indented.length) {
-            this.nestedParse(indented, { inputOffset: line_offset,
-                                         node: description });
+                                                                 description]);
+        if (indented && indented.length) {
+            this.nestedParse(indented, {
+ inputOffset: line_offset,
+                                         node: description,
+});
         }
-        return [ option_list_item, blank_finish ]
+        return [option_list_item, blank_finish];
     }
 
     parse_option_marker(match) {
-    /*"""
+    /* """
         Return a list of `node.option` and `node.option_argument` objects,
         parsed from an option marker match.
 
         :Exception: `MarkupError` for invalid option markers.
-        """*/
-        const optlist = []
+        """ */
+        const optlist = [];
         const optionstrings = match.result[0].trimEnd().split(', ');
-        for(let optionstring of optionstrings) {
-            const tokens = optionstring.split(/s+/)
-            let delimiter = ' '
-            const firstopt = tokens[0].split('=', 2)
-            if(firstopt.length > 1) {
+        for (const optionstring of optionstrings) {
+            const tokens = optionstring.split(/s+/);
+            let delimiter = ' ';
+            const firstopt = tokens[0].split('=', 2);
+            if (firstopt.length > 1) {
                 // "--opt=value" form
                 tokens.splice(0, 1, ...firstopt); // fixme check
-                delimiter = '='
-            } else if(tokens[0].length > 2
+                delimiter = '=';
+            } else if (tokens[0].length > 2
                       && ((tokens[0].indexOf('-') === 0
                            && tokens[0].indexOf('--') !== 0)
                           || tokens[0].indexOf('+') === 0)) {
-                //"-ovalue" form
+                // "-ovalue" form
                 tokens.splice(0, 1, tokens[0].substring(0, 2), tokens[0].substring(2));
-                delimiter = ''
+                delimiter = '';
             }
-            if(tokens.length > 1 && (tokens[1].startsWith('<')
+            if (tokens.length > 1 && (tokens[1].startsWith('<')
                                      && tokens[-1].endsWith('>'))) {
                 // "-o <value1 value2>" form; join all values into one token
                 tokens.splice(1, tokens.length, tokens.slice(1).join(''));
             }
-            if(0 < tokens.length <= 2) {
-                const option = new nodes.option(optionstring)
-                option.add(new nodes.option_string(tokens[0], tokens[0]))
-                if(tokens.length > 1) {
+            if (tokens.length > 0 <= 2) {
+                const option = new nodes.option(optionstring);
+                option.add(new nodes.option_string(tokens[0], tokens[0]));
+                if (tokens.length > 1) {
                     option.add(new nodes.option_argument(tokens[1], tokens[1],
                                                          [], { delimiter }));
                 }
-                optlist.push(option)
-            }else {
+                optlist.push(option);
+            } else {
                 throw new MarkupError(`wrong number of option tokens (=${tokens.length}), should be 1 or 2: "${optionstring}"`);
             }
         }
-        return optlist
+        return optlist;
     }
 
     doctest(match, context, nextState) {
@@ -1181,52 +1193,56 @@ initialState: 'BulletList',
         // TODO: prepend class value ['pycon'] (Python Console)
         // parse with `directives.body.CodeBlock` (returns literal-block
         // with class "code" and syntax highlight markup).
-        this.parent.add(new nodes.doctest_block(data, data))
-        return [[], nextState, []]
+        this.parent.add(new nodes.doctest_block(data, data));
+        return [[], nextState, []];
     }
 
     line_block(match, context, next_state) {
-        //"""First line of a line block."""
-        const block = new nodes.line_block()
-        this.parent.add(block)
+        // """First line of a line block."""
+        const block = new nodes.line_block();
+        this.parent.add(block);
         const lineno = this.stateMachine.absLineNumber();
         let line;
         let messages;
-        [ line, messages, blank_finish ]  = this.line_block_line(match, lineno)
-        block.add(line)
-        this.parent.add(messages)
-        if(!blank_finish) {
-            const offset = this.stateMachine.line_offset + 1   // next line
+        [line, messages, blank_finish] = this.line_block_line(match, lineno);
+        block.add(line);
+        this.parent.add(messages);
+        if (!blank_finish) {
+            const offset = this.stateMachine.line_offset + 1; // next line
             let new_line_offset;
-            [ new_line_offset, blank_finish ] = self.nested_list_parse(
+            [new_line_offset, blank_finish] = self.nested_list_parse(
                 this.stateMachine.inputLines.slice(offset),
-                { inputOffset: this.stateMachine.abs_line_offset() + 1,
-                  node: block, initialState: 'LineBlock',
-                  blankFinish: 0 });
-            this.gotoLine(new_line_offset)
+                {
+ inputOffset: this.stateMachine.abs_line_offset() + 1,
+                  node: block,
+initialState: 'LineBlock',
+                  blankFinish: 0,
+},
+);
+            this.gotoLine(new_line_offset);
         }
-        if(!blank_finish) {
+        if (!blank_finish) {
             this.parent.add(this.reporter.warning(
                 'Line block ends without a blank line.', [],
-                { line: lineno+1}))
+                { line: lineno + 1 },
+));
         }
-        if(block.children.length) {
-            if(block[0].indent == null) {
-                block[0].indent = 0
+        if (block.children.length) {
+            if (block[0].indent == null) {
+                block[0].indent = 0;
             }
-            this.nest_line_block_lines(block)
+            this.nest_line_block_lines(block);
         }
-        return [[], next_state, []]
+        return [[], next_state, []];
     }
 
     line_block_line(match, lineno) {
-        //"""Return one line element of a line_block."""
-        const [ indented, indent, line_offset, blank_finish ] =
-              this.stateMachine.get_first_known_indented({ indent: match.result.index + match.result[0].length, untilBlank: true});
+        // """Return one line element of a line_block."""
+        const [indented, indent, line_offset, blank_finish] = this.stateMachine.get_first_known_indented({ indent: match.result.index + match.result[0].length, untilBlank: true });
         const text = indented.join('\n');
-        const [ text_nodes, messages ] = this.inline_text(text, lineno)
-        const line = new nodes.line(text, '', text_nodes)
-        if(match.result.input.trimEnd() !== '|') {
+        const [text_nodes, messages] = this.inline_text(text, lineno);
+        const line = new nodes.line(text, '', text_nodes);
+        if (match.result.input.trimEnd() !== '|') {
             line.indent = match.result[1].length - 1;
         }
 
@@ -1241,6 +1257,7 @@ initialState: 'BulletList',
         self.nest_line_block_segment(block)
         */
     }
+
 /*
     def nest_line_block_segment(self, block):
         indents = [item.indent for item in block]
@@ -1262,18 +1279,19 @@ initialState: 'BulletList',
         block[:] = new_items
 */
     grid_table_top(match, context, next_state) {
-        //"""Top border of a full table."""
+        // """Top border of a full table."""
         return this.table_top(match, context, next_state,
                               this.isolate_grid_table,
-                              tableparser.GridTableParser)
+                              tableparser.GridTableParser);
     }
 
     simple_table_top(match, context, next_state) {
-        /*"""Top border of a simple table."""*/
+        /* """Top border of a simple table.""" */
         return this.table_top(match, context, next_state,
                               this.isolate_simple_table,
-                              tableparser.SimpleTableParser)
+                              tableparser.SimpleTableParser);
     }
+
 /*
     def table_top(self, match, context, next_state,
                   isolate_function, parser_class):
@@ -1469,7 +1487,7 @@ initialState: 'BulletList',
 
 
     text(match, context, nextState) {
-	/* istanbul ignore if */
+        /* istanbul ignore if */
         if (match.input === undefined) {
             throw new Error('');
         }
@@ -1506,38 +1524,43 @@ export class Text extends RSTState {
     }
 
     indent(match, context, nextState) {
-        /*"""Definition list item."""*/
-        const definitionlist = new nodes.definition_list()
+        /* """Definition list item.""" */
+        const definitionlist = new nodes.definition_list();
         let blankFinish;
         let definitionlistitem;
-        [ definitionlistitem, blankFinish ] = this.definition_list_item(context)
-        definitionlist.add(definitionlistitem)
-        this.parent.add(definitionlist)
+        [definitionlistitem, blankFinish] = this.definition_list_item(context);
+        definitionlist.add(definitionlistitem);
+        this.parent.add(definitionlist);
         const offset = this.stateMachine.lineOffset + 1;
         let newlineOffset;
-        [ newlineOffset, blankFinish ]  = this.nestedListParse(
+        [newlineOffset, blankFinish] = this.nestedListParse(
             this.stateMachine.inputLines.slice(offset),
-            { inputOffset: this.stateMachine.absLineOffset() + 1,
-              node: definitionlist, initialState: 'DefinitionList',
-              blankFinish, blankFinishState: 'Definition' });
-        this.gotoLine(newlineOffset)
-        if(!blankFinish)  {
-            this.parent.add(this.unindentWarning('Definition list'))
+            {
+ inputOffset: this.stateMachine.absLineOffset() + 1,
+              node: definitionlist,
+initialState: 'DefinitionList',
+              blankFinish,
+blankFinishState: 'Definition',
+},
+);
+        this.gotoLine(newlineOffset);
+        if (!blankFinish) {
+            this.parent.add(this.unindentWarning('Definition list'));
         }
-        return[ [], 'Body', []]
+        return [[], 'Body', []];
     }
 
     underline(match, context, nextState) {
-	/* istanbul ignore if */
-        if(!Array.isArray(context)) {
-            throw new Error("Context should be array");
+        /* istanbul ignore if */
+        if (!Array.isArray(context)) {
+            throw new Error('Context should be array');
         }
         const lineno = this.stateMachine.absLineNumber();
         const title = context[0].trimRight();
         const underline = match.result.input.trimRight();
         const source = `${title}\n${underline}`;
         const messages = [];
-        if (column_width(title) > underline.length) {
+        if (columnWidth(title) > underline.length) {
             if (underline.length < 4) {
                 if (this.stateMachine.matchTitles) {
                     const msg = this.reporter.info(
@@ -1550,7 +1573,7 @@ export class Text extends RSTState {
             } else {
                 const blocktext = `${context[0]}\n${this.stateMachine.line}`;
                 const msg = this.reporter.warning('Title underline too short.',
-                                                  [new nodes.literal_block(blocktext, blocktext)], { line: lineno});
+                                                  [new nodes.literal_block(blocktext, blocktext)], { line: lineno });
                 messages.push(msg);
             }
         }
@@ -1566,7 +1589,9 @@ export class Text extends RSTState {
         }
         const style = underline[0];
         context.length = 0;
-        this.section({title, source, style, lineno: lineno - 1, messages});
+        this.section({
+ title, source, style, lineno: lineno - 1, messages,
+});
 
         return [[], nextState, []];
     }
@@ -1607,88 +1632,95 @@ srcline;
     }
 
     literal_block(match, context, nextState) {
-        //"""Return a list of nodes."""
-        const [ indented, indent, offset, blank_finish ] = this.stateMachine.getIndented({})
-        while(indented && indented.length && !indented[indented.length - 1].trim()){
-            indented.trimEnd()
+        // """Return a list of nodes."""
+        const [indented, indent, offset, blank_finish] = this.stateMachine.getIndented({});
+        while (indented && indented.length && !indented[indented.length - 1].trim()) {
+            indented.trimEnd();
         }
-        if(!indented || !indented.length) {
-            return this.quoted_literal_block()
+        if (!indented || !indented.length) {
+            return this.quoted_literal_block();
         }
-        const data = indented.join('\n')
-        const literal_block = new nodes.literal_block(data, data)
-            const [ source, line ] = this.stateMachine.getSourceAndLine(offset+1)
+        const data = indented.join('\n');
+        const literal_block = new nodes.literal_block(data, data);
+            const [source, line] = this.stateMachine.getSourceAndLine(offset + 1);
         literal_block.source = source;
-         literal_block.line =  line;
-        const nodelist = [literal_block]
-        if(!blank_finish){
-            nodelist.push(this.unindentWarning('Literal block'))
+         literal_block.line = line;
+        const nodelist = [literal_block];
+        if (!blank_finish) {
+            nodelist.push(this.unindentWarning('Literal block'));
         }
-        return nodelist
+        return nodelist;
     }
 
     quoted_literal_block(match, context, nextState) {
-        const absLineOffset = this.stateMachine.absLineOffset()
-        const offset = this.stateMachine.lineOffset
-        const parentNode = new nodes.Element()
+        const absLineOffset = this.stateMachine.absLineOffset();
+        const offset = this.stateMachine.lineOffset;
+        const parentNode = new nodes.Element();
         const newAbsOffset = this.nestedParse(
             this.stateMachine.inputLines.slice(offset),
-            { inputOffset: absLineOffset,
+            {
+ inputOffset: absLineOffset,
               node: parentNode,
               matchTitles: false,
-              stateMachineKwargs: {stateClasses: [QuotedLiteralBlock],
-                                   initialState: 'QuotedLiteralBlock'}});
-        this.gotoLine(newAbsOffset)
-        return parentNode.children
+              stateMachineKwargs: {
+ stateClasses: [QuotedLiteralBlock],
+                                   initialState: 'QuotedLiteralBlock',
+},
+},
+);
+        this.gotoLine(newAbsOffset);
+        return parentNode.children;
     }
 
     definition_list_item(termline) {
-        const [ indented, indent, line_offset, blank_finish ] =
-              this.stateMachine.getIndented({})
+        const [indented, indent, line_offset, blank_finish] = this.stateMachine.getIndented({});
         const itemnode = new nodes.definition_list_item(
-            [...termline, ...indented].join('\b'))
+            [...termline, ...indented].join('\b'),
+);
         const lineno = this.stateMachine.absLineNumber() - 1;
         [itemnode.source,
-         itemnode.line] = this.stateMachine.getSourceAndLine(lineno)
-        const [ termlist, messages ] = this.term(termline, lineno)
-        itemnode.add(termlist)
-        const definition = new nodes.definition('', messages)
+         itemnode.line] = this.stateMachine.getSourceAndLine(lineno);
+        const [termlist, messages] = this.term(termline, lineno);
+        itemnode.add(termlist);
+        const definition = new nodes.definition('', messages);
         itemnode.add(definition);
-        if(termline[0].endsWith('::')) {
+        if (termline[0].endsWith('::')) {
             definition.add(this.reporter.info(
-                'Blank line missing before literal block (after the "::")? '+
-                    'Interpreted as a definition list item.',[],
-                {line: lineno+1}))
+                'Blank line missing before literal block (after the "::")? '
+                    + 'Interpreted as a definition list item.', [],
+                { line: lineno + 1 },
+));
         }
-        this.nestedParse(indented, { inputOffset: line_offset, node: definition })
-        return [ itemnode,blank_finish ]
+        this.nestedParse(indented, { inputOffset: line_offset, node: definition });
+        return [itemnode, blank_finish];
     }
 
     term(lines, lineno) {
-        const [ text_nodes, messages ] = this.inline_text(lines[0], lineno)
-        const term_node = new nodes.term(lines[0])
+        const [text_nodes, messages] = this.inline_text(lines[0], lineno);
+        const term_node = new nodes.term(lines[0]);
    //     [term_node.source,
     //     term_node.line] = this.stateMachine.getSourceAndLine(lineno)
-        const node_list = [term_node]
-        text_nodes.forEach(node => {
-            if(node instanceof nodes.Text) {
-                const parts = node.astext().split(this.classifier_delimiter); //fixme
-                if(parts.length === 1) {
-                    node_list[node_list.length-1].add(node)
+        const node_list = [term_node];
+        text_nodes.forEach((node) => {
+            if (node instanceof nodes.Text) {
+                const parts = node.astext().split(this.classifier_delimiter); // fixme
+                if (parts.length === 1) {
+                    node_list[node_list.length - 1].add(node);
                 } else {
-                    const text = parts[0].trimRight()
-                    const textnode = new nodes.Text(utils.unescape(text, true))
-                    node_list[node_list.length-1].add(textnode)
-                    for(let part of parts.slice(1)) {
+                    const text = parts[0].trimRight();
+                    const textnode = new nodes.Text(utils.unescape(text, true));
+                    node_list[node_list.length - 1].add(textnode);
+                    for (const part of parts.slice(1)) {
                         node_list.push(
-                            new nodes.classifier(unescape(part, false), part))
+                            new nodes.classifier(unescape(part, false), part),
+);
                     }
                 }
             } else {
-                node_list[node_list.length-1].add(node)
+                node_list[node_list.length - 1].add(node);
             }
         });
-        return [node_list, messages]
+        return [node_list, messages];
     }
 }
 export class SpecializedText extends Text {
@@ -1697,17 +1729,21 @@ export class SpecializedText extends Text {
     }
 
     blank() {
-        this.invalidInput()
+        this.invalidInput();
     }
+
     underline() {
-        this.invalidInput()
+        this.invalidInput();
     }
+
     indent() {
-        this.invalidInput()
+        this.invalidInput();
     }
+
     text() {
     this.invalidInput();
     }
+
     eof() {
         return [];
     }
@@ -1721,13 +1757,14 @@ export class SpecializedText extends Text {
 export class Definition extends SpecializedText {
     eof(context) {
         this.stateMachine.previousLine(2);
-        return []
+        return [];
     }
-    indent(match,context, nextState) {
-        const [itemNode, blankFinish ] = this.definition_list_item(context);
+
+    indent(match, context, nextState) {
+        const [itemNode, blankFinish] = this.definition_list_item(context);
         this.parent.add(itemNode);
         this.blankFinish = blankFinish;
-        return [[], 'DefinitionList', []]
+        return [[], 'DefinitionList', []];
     }
 }
 
@@ -1760,39 +1797,40 @@ export class Line extends SpecializedText {
     }
 
     blank(match, context, nextState) {
-        /*"""Transition marker."""*/
-        const [src, srcline ]  = this.stateMachine.getSourceAndLine()
-        const marker = context[0].trim()
-        if(marker.length < 4) {
-            this.stateCorrection(context)
+        /* """Transition marker.""" */
+        const [src, srcline] = this.stateMachine.getSourceAndLine();
+        const marker = context[0].trim();
+        if (marker.length < 4) {
+            this.stateCorrection(context);
         }
-        const transition = new nodes.transition(marker)
-        transition.source = src
-        transition.line = srcline - 1
-        this.parent.add(transition)
-        return [[], 'Body', []]
+        const transition = new nodes.transition(marker);
+        transition.source = src;
+        transition.line = srcline - 1;
+        this.parent.add(transition);
+        return [[], 'Body', []];
     }
 
     text(match, context, nextState) {
-        /*"""Potential over- & underlined title."""*/
-        const lineno = this.stateMachine.absLineNumber() - 1
-        let overline = context[0]
-        let title = match.result.input
-        let underline = ''
+        /* """Potential over- & underlined title.""" */
+        const lineno = this.stateMachine.absLineNumber() - 1;
+        let overline = context[0];
+        let title = match.result.input;
+        let underline = '';
         try {
-            underline = this.stateMachine.nextLine()
-        } catch(error) {
-            if(error instanceof EOFError) {
-                const blocktext = overline + '\n' + title
-                if(overline.trimEnd().length < 4) {
-                    this.short_overline(context, blocktext, lineno, 2)
+            underline = this.stateMachine.nextLine();
+        } catch (error) {
+            if (error instanceof EOFError) {
+                const blocktext = `${overline}\n${title}`;
+                if (overline.trimEnd().length < 4) {
+                    this.short_overline(context, blocktext, lineno, 2);
                 } else {
                     const msg = this.reporter.severe(
                         'Incomplete section title.',
                         [new nodes.literal_block(blocktext, blocktext)],
-                        { line: lineno})
-                    this.parent.add(msg)
-                    return [[], 'Body', []]
+                        { line: lineno },
+);
+                    this.parent.add(msg);
+                    return [[], 'Body', []];
                 }
             } else {
                 throw error;
@@ -1801,81 +1839,87 @@ export class Line extends SpecializedText {
         const source = [overline, title, underline].join('\n');
         overline = overline.trimEnd();
         underline = underline.trimEnd();
-        if(!this.transitions.underline[0].test(underline)) {
-            const blocktext = overline + '\n' + title + '\n' + underline;
-            if(overline.trimEnd().length < 4) {
-                this.short_overline(context, blocktext, lineno, 2)
+        if (!this.transitions.underline[0].test(underline)) {
+            const blocktext = `${overline}\n${title}\n${underline}`;
+            if (overline.trimEnd().length < 4) {
+                this.short_overline(context, blocktext, lineno, 2);
             } else {
                 const msg = this.reporter.severe(
                     'Missing matching underline for section title overline.',
                     [nodes.literal_block(source, source)],
-                    { line: lineno })
+                    { line: lineno },
+);
                 this.parent.add(msg);
-                return [[], 'Body', []]
+                return [[], 'Body', []];
             }
-        } else if(overline !== underline) {
-            const blocktext = overline + '\n' + title + '\n' + underline
-            if(overline.trimEnd().length < 4) {
-                this.short_overline(context, blocktext, lineno, 2)
+        } else if (overline !== underline) {
+            const blocktext = `${overline}\n${title}\n${underline}`;
+            if (overline.trimEnd().length < 4) {
+                this.short_overline(context, blocktext, lineno, 2);
             } else {
                 const msg = this.reporter.severe(
                     'Title overline & underline mismatch.',
                     [nodes.literal_block(source, source)],
-                    { line: lineno });
-                this.parent.add(msg)
-                return [[], 'Body', []]
+                    { line: lineno },
+);
+                this.parent.add(msg);
+                return [[], 'Body', []];
             }
         }
-        title = title.trimEnd()
-        const messages = []
-        if(column_width(title) > overline.length) {
-            const blocktext = overline + '\n' + title + '\n' + underline
-            if(overline.trimEnd().length() < 4) {
-                this.short_overline(context, blocktext, lineno, 2)
+        title = title.trimEnd();
+        const messages = [];
+        if (columnWidth(title) > overline.length) {
+            const blocktext = `${overline}\n${title}\n${underline}`;
+            if (overline.trimEnd().length() < 4) {
+                this.short_overline(context, blocktext, lineno, 2);
             } else {
                 const msg = this.reporter.warning(
                     'Title overline too short.',
                     [nodes.literal_block(source, source)],
-                    { line: lineno })
-                messages.push(msg)
+                    { line: lineno },
+);
+                messages.push(msg);
             }
         }
-        const style = [overline[0], underline[0]]
-        this.eofcheck = 0;              // @@@ not sure this is correct
-        this.section({ title: title.trimStart(), source, style, lineno: lineno + 1, messages});
-        this.eofcheck = 1
+        const style = [overline[0], underline[0]];
+        this.eofcheck = 0; // @@@ not sure this is correct
+        this.section({
+ title: title.trimStart(), source, style, lineno: lineno + 1, messages,
+});
+        this.eofcheck = 1;
         return [[], 'Body', []];
-
     }
 
     underline(match, context, nextState) {
-        const overline = context[0]
-        const blocktext = overline + '\n' + this.stateMachine.line
-        const lineno = this.stateMachine.absLineNumber() - 1
-        if(overline.trimEnd().length < 4) {
-            this.short_overline(context, blocktext, lineno, 1)
+        const overline = context[0];
+        const blocktext = `${overline}\n${this.stateMachine.line}`;
+        const lineno = this.stateMachine.absLineNumber() - 1;
+        if (overline.trimEnd().length < 4) {
+            this.short_overline(context, blocktext, lineno, 1);
         }
         const msg = this.reporter.error(
             'Invalid section title or transition marker.',
             [nodes.literal_block(blocktext, blocktext)],
-            {line: lineno})
-        this.parent.add(msg)
-        return [[], 'Body', []]
+            { line: lineno },
+);
+        this.parent.add(msg);
+        return [[], 'Body', []];
     }
 
     shortOverline(context, blocktext, lineno, lines = 1) {
         const msg = this.reporter.info(
-            'Possible incomplete section title.\nTreating the overline as '+
-            "ordinary text because it's so short.", [],
-            { line: lineno})
+            'Possible incomplete section title.\nTreating the overline as '
+            + "ordinary text because it's so short.", [],
+            { line: lineno },
+);
         this.parent.add(msg);
-        this.state_correction(context, lines)
+        this.state_correction(context, lines);
     }
 
     stateCorrection(context, lines = 1) {
-        this.stateMachine.previousLine(lines)
+        this.stateMachine.previousLine(lines);
         context.length = 0;
-        throw new statemachine.StateCorrection('Body', 'text')
+        throw new statemachine.StateCorrection('Body', 'text');
     }
 }
 
@@ -1895,33 +1939,43 @@ export class SpecializedBody extends Body {
     enumerator() {
         this.invalid_input();
     }
+
     field_marker() {
         this.invalid_input();
     }
+
     option_marker() {
         this.invalid_input();
     }
+
     doctest() {
         this.invalid_input();
     }
+
     line_block() {
         this.invalid_input();
     }
+
     grid_table_top() {
         this.invalid_input();
     }
+
     simple_table_top() {
         this.invalid_input();
     }
+
     explicit_markup() {
         this.invalid_input();
     }
+
     anonymous() {
         this.invalid_input();
     }
+
     line() {
         this.invalid_input();
     }
+
     text() {
         this.invalid_input();
     }
@@ -1946,44 +2000,45 @@ export class BulletList extends SpecializedBody {
 
 export class DefinitionList extends SpecializedBody {
     text(match, context, nextState) {
-        return [[match.result.input], 'Definition', []]
+        return [[match.result.input], 'Definition', []];
     }
 }
 
 class EnumeratedList extends SpecializedBody {
-    /*"""Second and subsequent enumerated_list list_items."""*/
+    /* """Second and subsequent enumerated_list list_items.""" */
     enumerator(match, context, nextState) {
-        /*"""Enumerated list item."""*/
-        const [ format, sequence, text, ordinal ] = this.parse_enumerator(
-            match, this.parent.attributes['enumtype'])
-        if (( format !== this.format
-              || (sequence !== '#' && (sequence !== this.parent.attributes['enumtype']
+        /* """Enumerated list item.""" */
+        const [format, sequence, text, ordinal] = this.parse_enumerator(
+            match, this.parent.attributes.enumtype,
+);
+        if ((format !== this.format
+              || (sequence !== '#' && (sequence !== this.parent.attributes.enumtype
                                        || this.auto// fxme
                                        || ordinal !== (this.lastordinal + 1)))
               || !this.is_enumerated_list_item(ordinal, sequence, format))) {
-            //# different enumeration: new list
-            this.invalid_input()
+            // # different enumeration: new list
+            this.invalid_input();
         }
-        if(sequence === '#') {
-            this.auto = 1
+        if (sequence === '#') {
+            this.auto = 1;
         }
-        const [listitem, blank_finish ] = this.list_item(match.result.index + match.result[0].length)
-        this.parent.add(listitem)
-        this.blankFinish = blank_finish
-        this.lastordinal = ordinal
-        return [[], next_state, []]
+        const [listitem, blank_finish] = this.list_item(match.result.index + match.result[0].length);
+        this.parent.add(listitem);
+        this.blankFinish = blank_finish;
+        this.lastordinal = ordinal;
+        return [[], next_state, []];
     }
 }
 
 class FieldList extends SpecializedBody {
-/*    """Second and subsequent field_list fields."""*/
+/*    """Second and subsequent field_list fields.""" */
 
     field_marker(match, context, next_state) {
-        /*"""Field list field."""*/
-        const [ field, blank_finish ] = this.field(match)
+        /* """Field list field.""" */
+        const [field, blank_finish] = this.field(match);
         this.parent.add(field);
-        this.blankFinish = blank_finish
-        return [[], next_state, []]
+        this.blankFinish = blank_finish;
+        return [[], next_state, []];
     }
 }
 
@@ -1992,13 +2047,13 @@ class ExtensionOptions extends FieldList {
     /* No nested parsing is done (including inline markup parsing). */
 
     parse_field_body(indented, offset, node) {
-        //"""Override `Body.parse_field_body` for simpler parsing."""
-        const lines = []
-        for(const line of [...indented, '']) {
-            if(line.trim()) {
-                lines.push(line)
-            } else if(lines.length) {
-                const text = lines.join('\n')
+        // """Override `Body.parse_field_body` for simpler parsing."""
+        const lines = [];
+        for (const line of [...indented, '']) {
+            if (line.trim()) {
+                lines.push(line);
+            } else if (lines.length) {
+                const text = lines.join('\n');
                 node.add(new nodes.paragraph(text, text));
                 lines.length = 0;
             }
@@ -2007,20 +2062,20 @@ class ExtensionOptions extends FieldList {
 }
 
 class LineBlock extends SpecializedBody {
-    /*"""Second and subsequent lines of a line_block."""*/
+    /* """Second and subsequent lines of a line_block.""" */
 
     blank() {
         this.invalid_input();
     }
 
     line_block(match, context, next_state) {
-        //"""New line of line block."""
-        const lineno = this.stateMachine.absLineNumber()
-        const [ line, messages, blank_finish ] = this.line_block_line(match, lineno)
-        this.parent.add(line)
-        this.parent.parent.add(messages)
-        this.blankFinish = blank_finish
-        return [[], next_state, []]
+        // """New line of line block."""
+        const lineno = this.stateMachine.absLineNumber();
+        const [line, messages, blank_finish] = this.line_block_line(match, lineno);
+        this.parent.add(line);
+        this.parent.parent.add(messages);
+        this.blankFinish = blank_finish;
+        return [[], next_state, []];
     }
 }
 
@@ -2029,19 +2084,19 @@ class Explicit extends SpecializedBody {
     """Second and subsequent explicit markup construct."""
     */
     explicit_markup(match, context, next_state) {
-        //"""Footnotes, hyperlink targets, directives, comments."""
-        const [ nodelist, blank_finish ] = this.explicit_construct(match)
+        // """Footnotes, hyperlink targets, directives, comments."""
+        const [nodelist, blank_finish] = this.explicit_construct(match);
         this.parent.add(nodelist);
-        this.blankFinish = blank_finish
-        return [[], next_state, []]
+        this.blankFinish = blank_finish;
+        return [[], next_state, []];
     }
 
-    anonymous( match, context, next_state) {
-        //"""Anonymous hyperlink targets."""
-        const [ nodelist, blank_finish ] = this.anonymous_target(match)
+    anonymous(match, context, next_state) {
+        // """Anonymous hyperlink targets."""
+        const [nodelist, blank_finish] = this.anonymous_target(match);
         this.parent.add(nodelist);
-        this.blankFinish = blank_finish
-        return [ [], next_state, [] ];
+        this.blankFinish = blank_finish;
+        return [[], next_state, []];
     }
 
     blank() {
@@ -2050,28 +2105,30 @@ class Explicit extends SpecializedBody {
 }
 
 class SubstitutionDef extends Body {
-    /*"""
+    /* """
     Parser for the contents of a substitution_definition element.
-    """*/
+    """ */
     _init() {
         super._init();
         this.patterns = {
-            'embedded_directive': new RegExp('(' + simplename + ')::( +|$)'),
-            'text': ''}
-        this.initialTransitions = ['embedded_directive', 'text']
+            embedded_directive: new RegExp(`(${simplename})::( +|$)`),
+            text: '',
+};
+        this.initialTransitions = ['embedded_directive', 'text'];
     }
 
     embedded_directive(match, context, next_state) {
-        const [ nodelist, blank_finish ]  = this.directive(match,
-                                                           { alt: this.parent.attributes['names'][0]});
-        this.parent.add(nodelist)
-        if(!this.stateMachine.atEof()) {
-            this.blankFinish = blank_finish
+        const [nodelist, blank_finish] = this.directive(match,
+                                                           { alt: this.parent.attributes.names[0] });
+        this.parent.add(nodelist);
+        if (!this.stateMachine.atEof()) {
+            this.blankFinish = blank_finish;
         }
         throw new EOFError();
     }
+
     text(match, context, next_state) {
-        if(!this.stateMachine.atEof()) {
+        if (!this.stateMachine.atEof()) {
             this.blankFinish = this.stateMachine.isNextLineBlank();
         }
         throw new EOFError();
@@ -2088,39 +2145,43 @@ class QuotedLiteralBlock extends RSTState {
 */
     _init() {
         super._init();
-        this.patterns = {'initial_quoted': '(' + nonalphanum7bit + ')',
-                'text': ''}
-        this.initialTransitions = ['initial_quoted', 'text']
-        this.messages = []
+        this.patterns = {
+ initial_quoted: `(${nonalphanum7bit})`,
+                text: '',
+};
+        this.initialTransitions = ['initial_quoted', 'text'];
+        this.messages = [];
         this.initial_lineno = null;
     }
 
-    blank( match, context, next_state) {
-        if(context.length) {
+    blank(match, context, next_state) {
+        if (context.length) {
             throw new EOFError();
         } else {
-            return [context, next_state, []]
+            return [context, next_state, []];
         }
     }
 
-    eof( context) {
-        if(context.length) {
-            const [ src, srcline ] = this.stateMachine.getSourceAndLine(
-                this.initial_lineno)
+    eof(context) {
+        if (context.length) {
+            const [src, srcline] = this.stateMachine.getSourceAndLine(
+                this.initial_lineno,
+);
             const text = context.join('\n');
-            const literal_block = new nodes.literal_block(text, text)
-            literal_block.source = src
-            literal_block.line = srcline
+            const literal_block = new nodes.literal_block(text, text);
+            literal_block.source = src;
+            literal_block.line = srcline;
             this.parent.add(literal_block);
         } else {
             this.parent.add(this.reporter.warning(
                 'Literal block expected; none found.', [],
-                { line: this.stateMachine.absLineNumber() }));
-            //# src not available, because statemachine.input_lines is empty
-            this.stateMachine.previousLine()
+                { line: this.stateMachine.absLineNumber() },
+));
+            // # src not available, because statemachine.input_lines is empty
+            this.stateMachine.previousLine();
         }
-        this.parent.add(this.messages)
-        return []
+        this.parent.add(this.messages);
+        return [];
     }
 
     indent(match, context, next_state) {
@@ -2128,67 +2189,68 @@ class QuotedLiteralBlock extends RSTState {
 //                         'be empty!')
         this.messages.push(
             this.reporter.error('Unexpected indentation.', [],
-                                { line: this.stateMachine.absLineNumber() }));
-        this.stateMachine.previousLine()
+                                { line: this.stateMachine.absLineNumber() }),
+);
+        this.stateMachine.previousLine();
         throw new EOFError();
     }
 
     initial_quoted(match, context, next_state) {
-        //"""Match arbitrary quote character on the first line only."""
-        this.removeTransition('initial_quoted')
-        const quote = match.result.input[0]
+        // """Match arbitrary quote character on the first line only."""
+        this.removeTransition('initial_quoted');
+        const quote = match.result.input[0];
         const pattern = new RegExp(escapeRegExp(quote));
-        //# New transition matches consistent quotes only:
+        // # New transition matches consistent quotes only:
         this.addTransition('quoted',
                            [pattern, this.quoted.bind(this),
                             this.constructor.name]);
-        this.initial_lineno = this.stateMachine.absLineNumber()
-        return [[match.result.input], next_state, []]
+        this.initial_lineno = this.stateMachine.absLineNumber();
+        return [[match.result.input], next_state, []];
     }
 
     quoted(match, context, next_state) {
-        //"""Match consistent quotes on subsequent lines."""
-        context.push(match.result.input)
-        return [context, next_state, []]
+        // """Match consistent quotes on subsequent lines."""
+        context.push(match.result.input);
+        return [context, next_state, []];
     }
 
     text(match, context, next_state) {
-        if(context.length) {
+        if (context.length) {
             this.messages.push(
                 this.reporter.error('Inconsistent literal block quoting.',
-                                    [], { line: this.stateMachine.absLineNumber() }));
-            this.stateMachine.previousLine()
+                                    [], { line: this.stateMachine.absLineNumber() }),
+);
+            this.stateMachine.previousLine();
         }
         throw new EOFError();
     }
 }
-
 
 
 export class OptionList extends SpecializedBody {
 /*
     """Second and subsequent option_list option_list_items."""
 */
-    option_marker( match, context, nextState) {
-        //"""Option list item."""
+    option_marker(match, context, nextState) {
+        // """Option list item."""
         let option_list_item;
         let blank_finish;
         try {
-            [ option_list_item, blank_finish ] = this.option_list_item(match)
-        } catch(error) {
-            if(error instanceof MarkupError) {
+            [option_list_item, blank_finish] = this.option_list_item(match);
+        } catch (error) {
+            if (error instanceof MarkupError) {
                 this.invalid_input();
             }
             throw error;
         }
-        this.parent.add(option_list_item)
-        this.blankFinish = blank_finish
-        return [[], nextState, []]
+        this.parent.add(option_list_item);
+        this.blankFinish = blank_finish;
+        return [[], nextState, []];
     }
 }
 
 export const stateClasses = [Body, BulletList, DefinitionList, EnumeratedList, FieldList, OptionList, LineBlock, ExtensionOptions, Explicit, Text, Definition, Line];
-//SubstitutionDef];
+// SubstitutionDef];
 
 /*    underline(match, context, nextState) {
         const overline = context[0]
