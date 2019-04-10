@@ -9,7 +9,7 @@ pipeline {
             steps {
 	        sh 'yarn'
 		sh 'rm -rf lib'
-		sh 'yarn jest'
+		sh 'yarn jest --coverage'
 		sh 'yarn grunt'
 		sh 'mkdir -p build'
 		sh 'tar --exclude core --exclude node_modules --exclude build --exclude-vcs -zcv . -f build/docutils-js.tar.gz'
