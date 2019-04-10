@@ -3,6 +3,7 @@ import { createReadStream } from 'fs';
 import ErrorOutput from './ErrorOutput';
 import Input from './io/Input';
 import Output from './io/Output';
+import { ApplicationError } from'./Exceptions';
 
 export class StringInput extends Input {
     read(cb) {
@@ -30,8 +31,8 @@ export class FileInput extends Input {
 	super(args);
 	let { source, sourcePath, encoding, errorHandler, autoClose,
 	      mode } = args;
-	if(source === undefined && sourcePath === undefined) {
-	    throw new Error("fail")
+	if(typeof source === 'undefined' && typeof sourcePath === 'undefined') {
+	    throw new ApplicationError("FileInput: Undefined source and sourcePath");
 	}
 	
 	if(autoClose === undefined) {

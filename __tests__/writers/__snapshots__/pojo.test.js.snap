@@ -1,0 +1,76 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`rst2pojo pipeline 1`] = `
+Output {
+  "encode": [MockFunction],
+  "getTransforms": [MockFunction] {
+    "calls": Array [
+      Array [],
+    ],
+    "results": Array [
+      Object {
+        "type": "return",
+        "value": undefined,
+      },
+    ],
+  },
+  "toString": [MockFunction] {
+    "calls": Array [
+      Array [],
+    ],
+    "results": Array [
+      Object {
+        "type": "return",
+        "value": undefined,
+      },
+    ],
+  },
+  "write": [MockFunction] {
+    "calls": Array [
+      Array [
+        Array [
+          "document",
+          Object {
+            "source": undefined,
+          },
+          Array [
+            Array [
+              "section",
+              Object {
+                "ids": Array [
+                  "random test",
+                ],
+                "names": Array [
+                  "random test",
+                ],
+              },
+              Array [
+                Array [
+                  "title",
+                  Object {},
+                  Array [
+                    "Random test",
+                  ],
+                ],
+                Array [
+                  "paragraph",
+                  Object {},
+                  Array [
+                    "I like food.",
+                  ],
+                ],
+              ],
+            ],
+          ],
+        ],
+      ],
+    ],
+    "results": Array [
+      Object {
+        "type": "return",
+        "value": undefined,
+      },
+    ],
+  },
+}
+`;

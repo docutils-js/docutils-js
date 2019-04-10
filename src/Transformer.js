@@ -20,9 +20,13 @@ export default class Transformer {
 	this.sorted = 0
 	const urr = []
 	for( let i of components ) {
-	    console.log(`collecting unknownReferenceResolver from component ${i}`);
-	    if(i.unknownReferenceResolvers) {
-		urr.push(i.unknownReferenceResolvers);
+	    if(typeof i !== 'undefined'){
+		console.log(`collecting unknownReferenceResolver from component ${i}`);
+		if(i.unknownReferenceResolvers) {
+		    urr.push(i.unknownReferenceResolvers);
+		}
+	    } else {
+		console.log('component is undefined. fixme');
 	    }
 	}
 //	console.log('urr is ')

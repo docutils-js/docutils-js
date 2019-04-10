@@ -32,6 +32,7 @@ export default class Reader extends Component {
     /**
       * Magic read method. Returns document. Clearly this is meant to read
       * the stream in its entirety?
+      * why do we have both read and parse??
       * we may have to change api semantics!
       */
     read(source, parser, settings, cb) {

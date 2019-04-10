@@ -13,7 +13,6 @@ class Output extends TransformSpec {
     }
 
     write(data) {
-	process.stdout.write(data);
     }
 
     encode(data) {
@@ -24,5 +23,7 @@ class Output extends TransformSpec {
     }
 
 }
+Output.componentType = 'Output';
+Output.defaultDestinationPath = null;
 
 export default Output;
