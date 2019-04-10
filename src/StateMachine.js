@@ -1,14 +1,16 @@
 import UnknownStateError from './UnknownStateError';
 import ErrorOutput from './ErrorOutput';
-import { ApplicationError, EOFError, InvalidArgumentsError, UnimplementedError as Unimp } from './Exceptions';
+import {
+ ApplicationError, EOFError, InvalidArgumentsError, UnimplementedError as Unimp,
+} from './Exceptions';
 
 export class TransitionCorrection extends Error {
     constructor(...args) {
-	super(...args);
-	this.args = args;
-	if (Error.captureStackTrace) {
-	    Error.captureStackTrace(this, TransitionCorrection);
-	}
+        super(...args);
+        this.args = args;
+        if (Error.captureStackTrace) {
+            Error.captureStackTrace(this, TransitionCorrection);
+        }
     }
 }
 export class UnexpectedIndentationError extends Error {
@@ -202,15 +204,15 @@ export class StringList extends ViewList {
     }
 
     get2dBlock(top, left, bottom, right, stripIndent) {
-        throw new UnimplementedException('get2dblock');
+        throw new Unimp('get2dblock');
     }
 
     padDoubleWidth() {
-        throw new UnimplementedException('padDoublewidth');
+        throw new Unimp('padDoublewidth');
     }
 
     replace() {
-        throw new UnimplementedException('replace');
+        throw new Unimp('replace');
     }
 
     trimTop(n = 1) {
@@ -343,7 +345,7 @@ export class StateMachine {
 //          console.log(context);
             results.push(...result);
             while (true) {
-		const doContinue = false;
+                const doContinue = false;
                 try {
                     try {
                         this.nextLine();
@@ -399,7 +401,7 @@ export class StateMachine {
                               '\nStateMachine.run: TransitionCorrection to '
                               'state "%s", transition %s.'
                               % (state.__class__.__name__, transitions[0])) */
-			/* Cant continue, makes no sense? ??  */
+                        /* Cant continue, makes no sense? ??  */
                         continue;
                     } else if (error instanceof StateCorrection) {
                         this.previousLine();
@@ -419,7 +421,7 @@ export class StateMachine {
                         throw error;
                     }
                 }
-		/* we need this somehow, its part of a try, except, else */
+                /* we need this somehow, its part of a try, except, else */
                 // transitions = undefined
                 state = this.getState(nextState);
             }
@@ -443,7 +445,7 @@ export class StateMachine {
             }
             this.currentState = nextState;
         }
-        if (!Object.hasOwnProperty(this.states, this.currentState)) {
+        if (typeof this.states[this.currentState] === 'undefined') {
             throw new UnknownStateError(this.currentState);
         }
         return this.states[this.currentState];
@@ -615,7 +617,7 @@ src;
 //          throw new Error("no transitions");
 //      }
 
-//        console.log(transitions);
+	//        console.log(transitions);
         for (const name of transitions) {
             const [pattern, method, nextState] = state.transitions[name];
             //      console.log(method);
@@ -675,14 +677,16 @@ src;
     notifyObservers() {
         let observer;
         for (const observer of this.observers) {
+	    /* istanbul ignore if */
             if (observer === undefined) {
-                throw newError('undefined observer');
+                throw new ApplicationError('undefined observer');
             }
             try {
                 let info = [];
                 try {
                     info = this.inputLines.info(this.lineOffset);
                 } catch (err) {
+		    /* Empty */
                 }
                 if (info === undefined) {
                     // throw new Error("undefined info");
@@ -810,7 +814,7 @@ export class State {
             throw new Error('not array');
         }
 
-        for (const namestate of nameList) {
+	nameList.forEach((namestate) => {
             if (namestate == null) {
                 throw new InvalidArgumentsError('nameList contains null');
             }
@@ -821,7 +825,8 @@ export class State {
                 transitions[namestate[0]] = this.makeTransition(...namestate);
                 names.push(namestate[0]);
             }
-        }
+        });
+
         return [names, transitions];
     }
 
@@ -849,7 +854,10 @@ export class StateMachineWS extends StateMachine {
         }
         let offset = this.absLineOffset();
         const [indented, indent, blankFinish] = this.inputLines.getIndented({
-	    start: this.lineOffset, untilBlank, stripIndent });
+	    start: this.lineOffset,
+	    untilBlank,
+	    stripIndent,
+});
         if (indented) {
             this.nextLine(indented.length - 1);
         }
@@ -968,7 +976,8 @@ export class StateWS extends State {
 
     knownIndent(match, context, nextState) {
         const [indetned, ineOffset, blankFinish] = this.stateMachine.getKnownIndented(
-	    match.end());
+            match.end(),
+);
         const knownIndentSm = this.knownIdentSm;
         const sm = new knownIndentSm({
  debug: this.debug,
@@ -990,7 +999,7 @@ export class StateWS extends State {
 function expandtabs(string) {
     let tabIndex;
     while ((tabIndex = string.indexOf('\t')) !== -1) {
-        string = string.substring(0, tabIndex) + Array(tabIndex % 8).map(x => ' ').join('') + string.substring(tabIndex + 1);
+        string = string.substring(0, tabIndex) + Array(8 - (tabIndex % 8)).fill(' ').join('') + string.substring(tabIndex + 1);
     }
     return string;
 }
@@ -1001,6 +1010,7 @@ export function string2lines(astring, args) {
 
     let { tabWidth, convertWhitespace, whitespace } = args;
     if (whitespace === undefined) {
+        /* empty */
     }
     if (tabWidth === undefined) {
         tabWidth = 8;

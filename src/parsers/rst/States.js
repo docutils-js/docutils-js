@@ -452,7 +452,7 @@ export class Body extends RSTState {
         this.explicit = {};
         this.explicit.patterns = {
             target: new RegExp(`(_|(?!_)(\`?)(?![ \`])(.+?)${nonWhitespaceEscapeBefore})(?<!(?<!\\x00):)${nonWhitespaceEscapeBefore}[ ]?:([ ]+|$)`),
-            reference: new RegExp('zzzz'), // ((?P<simple>%(simplename)s)_|`(?![ ])(?P<phrase>.+?)%(non_whitespace_escape_before)s`_)$'),
+            reference: new RegExp(`((${simplename})_|\`(?![ ])(.+?)${nonWhitespaceEscapeBefore}\`_)$`), // ((?P<simple>%(simplename)s)_|`(?![ ])(?P<phrase>.+?)%(non_whitespace_escape_before)s`_)$'),
             substitution: new RegExp('zzzz'), // ((?![ ])(?P<name>.+?)%(non_whitespace_escape_before)s\\|)([ ]+|$)'),
         };
 
@@ -557,8 +557,7 @@ export class Body extends RSTState {
         if (!match) {
             return null;
         }
-        throw new Unimp();
-       // return unescape(match.group('simple') or match.group('phrase'))
+	return unescape(match[2] || match[3]);
     }
 
     add_target(targetname, refuri, target, lineno) {

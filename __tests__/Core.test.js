@@ -60,6 +60,14 @@ Want to learn about \`my favorite programming language\`_?
 });
 
 test.each([['Title', 'Title\n=====\nParagraph.'],
+	   ['Random indent', '  \n   \n \n     \n\n  \n'],
+	   ['Anonymous reference', '__ http://www.python.org\n'],
+	   ['Links', `.. _A ReStructuredText Primer: ../../user/rst/quickstart.html
+.. _Quick reStructuredText: ../../user/rst/quickref.html
+`],
+	  	   ['Anonymous via ..', '.. __: http://www.python.org\n'],
+	   ['Anonymous via .. no blankFinish', '.. __: http://www.python.org'],
+	   ['Nested sections', 'Title\n=====\n\nSection-------\n\nThird@@@@@\n\nSecond\n======\n\nOoops\n@@@@@\n'],
 	   ['Short overline', '===\nTitle\n===\n'],
 	   ['Short overline 2', '===\nTitle\n'],
 	   ['Incomplete title', '=====\nTitle\n'],
@@ -154,6 +162,50 @@ This is a test.
 	   ['Inline followed by emphasis', '**hello** and *goodbye*'],
 	   ['docutils title', '==========================================\n Docutils_ Project Documentation Overview\n==========================================\n'],
 	   ['Paragraph ending in ::', 'This is my paragraph ending in::\n'],
+	   ['grid table', `         +------------------------+------------+----------+
+         | Header row, column 1   | Header 2   | Header 3 |
+         +========================+============+==========+
+         | body row 1, column 1   | column 2   | column 3 |
+         +------------------------+------------+----------+
+         | body row 2             | Cells may span        |
+         +------------------------+-----------------------+
+`],
+	   ['simple table', `         ====================  ==========  ==========
+         Header row, column 1  Header 2    Header 3
+         ====================  ==========  ==========
+         body row 1, column 1  column 2    column 3
+         body row 2            Cells may span columns
+         ====================  ======================
+`],
+	   ['multilevel blockquote', `This is a top-level paragraph.
+
+    This paragraph belongs to a first-level block quote.
+
+        This paragraph belongs to a second-level block quote.
+
+Another top-level paragraph.
+
+        This paragraph belongs to a second-level block quote.
+
+    This paragraph belongs to a first-level block quote.  The
+    second-level block quote above is inside this first-level
+    block quote.`],
+	   [`complex`, `- This is the first line of a bullet list
+  item's paragraph.  All lines must align
+  relative to the first line.  [1]_
+
+      This indented paragraph is interpreted
+      as a block quote.
+
+Because it is not sufficiently indented,
+this paragraph does not belong to the list
+item.
+
+.. [1] Here's a footnote.  The second line is aligned
+   with the beginning of the footnote label.  The ".."
+   marker is what determines the indentation.
+`],
+	   ['tabs', 'hello\ttabs\n'],
 	  ])('%s', (a, raw) => {
 	      const settings = { ...defaultSettings };
 	      const args = { ...defaultArgs };
