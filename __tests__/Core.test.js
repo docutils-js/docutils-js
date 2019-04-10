@@ -26,7 +26,7 @@ const defaultSettings = {
     idPrefix: '',
 };
 
-test.only('full rst2xml pipeline with specific input', () => {
+test('full rst2xml pipeline with specific input', () => {
     const settings = { ...defaultSettings };
     const args = { ...defaultArgs };
 
@@ -63,6 +63,51 @@ test.each([['Title', 'Title\n=====\nParagraph.'],
 	   ['bullet from spec', `- This is a bullet list.
 
 - Bullets can be "*", "+", or "-".`],
+	   ['Bullet no unindent', '* bullet'],
+	   ['Field list', `:Author: David Goodger
+:Contact: docutils-develop@lists.sourceforge.net
+:Revision: $Revision: 8205 $
+:Date: $Date: 2017-11-27 03:07:28 -0800 (Mon, 27 Nov 2017) $
+:Copyright: This document has been placed in the public domain.
+`],
+	   ['option list', `         -a            command-line option "a"
+         -b file       options can have arguments
+                       and long descriptions
+         --long        options can be long also
+         --input=file  long options can also have
+                       arguments
+         /V            DOS/VMS-style options too
+`],
+	   ['literal block', `      Literal blocks are either indented or line-prefix-quoted blocks,
+      and indicated with a double-colon ("::") at the end of the
+      preceding paragraph (right here -->)::
+
+          if literal_block:
+              text = 'is left as-is'
+              spaces_and_linebreaks = 'are preserved'
+              markup_processing = None
+`],
+	   ['block quote', `      Block quotes consist of indented body elements:
+
+          This theory, that is mine, is mine.
+
+          -- Anne Elk (Miss)
+`],
+	   ['doctest block', `      >>> print 'Python-specific usage examples; begun with ">>>"'
+      Python-specific usage examples; begun with ">>>"
+      >>> print '(cut and pasted from interactive Python sessions)'
+      (cut and pasted from interactive Python sessions)
+`],
+	   ['substitution definition', `.. |symbol here| image:: symbol.png\n`],
+	   ['definition list', `what
+    Definition lists associate a term with a definition.
+
+how
+    The term is a one-line phrase, and the definition is one
+    or more paragraphs or body elements, indented relative to
+    the term.
+`],
+
 	   ['Random', '* bullet\n* bullet\n\n '],
 	   ['Random 2', 'Header 1\n========\nText\n\nHeader 2\n-------'],
 	   ['Random 2', 'Test.\nTest2\nTest3\n-----'],
@@ -81,6 +126,7 @@ This is a test.
 	   ['Emphasis and inline', '*hello* and **goodbye**'],
 	   ['Inline followed by emphasis', '**hello** and *goodbye*'],
 	   ['docutils title', '==========================================\n Docutils_ Project Documentation Overview\n==========================================\n'],
+	   ['Paragraph ending in ::', 'This is my paragraph ending in::\n'],
 	  ])('%s', (a, raw) => {
 	      const settings = { ...defaultSettings };
 	      const args = { ...defaultArgs };
