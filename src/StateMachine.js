@@ -37,6 +37,119 @@ function __getClass(object) {
     .match(/^\[object\s(.*)\]$/)[1];
 }
 
+export class StringList extends ViewList {
+    trimLeft(length, start = 0, end) {
+        if (end === undefined) {
+            end = this.length;
+        }
+        for (let i = start; i < Math.min(end, this.length); i++) {
+            if (typeof this[i] === 'undefined') {
+                throw new Error(`${i} ${this.length}`);
+            }
+            this[i] = this[i].substring(length);
+        }
+    }
+
+    getTextBlock(start, flushLeft) {
+        let end = start;
+        const last = this.length;
+        while (end < last) {
+            const line = this[end];
+            if (!line.trim()) {
+                break;
+            }
+            if (flushLeft && (line.substring(0, 1) === ' ')) {
+                const [source, offset] = this.info(end);
+                throw new UnexpectedIndentationError(this.slice(start, end),
+                                                     source, offset + 1);
+            }
+            end += 1;
+        }
+        return this.slice(start, end);
+    }
+
+    getIndented({
+ start, untilBlank, stripIndent, blockIndent, firstIndent,
+}) {
+        if (start == null) {
+                start = 0;
+        }
+        let indent = blockIndent;
+        let end = start;
+        if (blockIndent != null && firstIndent == null) {
+            firstIndent = blockIndent;
+        }
+        if (firstIndent != null) {
+            end += 1;
+        }
+        const last = this.length;
+        let blankFinish;
+        while (end < last) {
+            const line = this[end];
+            if (line && (line[0] !== ' ' || (blockIndent != null && line.substring(0, blockIndent).trim()))) {
+                blankFinish = ((end > start) && !this[end - 1].trim());
+                break;
+            }
+            const stripped = line.replace(/^\s*/, '');
+            if (!stripped) {
+                if (untilBlank) {
+                    blankFinish = 1;
+                    break;
+                }
+            } else if (blockIndent == null) {
+                const lineIndent = line.length - stripped.length;
+                if (indent == null) {
+                    indent = lineIndent;
+                } else {
+                    indent = Math.min(indent, lineIndent);
+                }
+            }
+            end += 1;
+        }
+        if (end === last) {
+            blankFinish = 1;
+        }
+
+        const block = this.slice(start, end);
+        if (firstIndent != null && block) {
+            block[0] = block[0].substring(firstIndent);
+        }
+        if (indent && stripIndent) {
+//          console.log(block.constructor.name);
+            block.trimLeft(indent, firstIndent != null ? 1 : 0);
+        }
+
+        return [block, indent || 0, blankFinish];
+    }
+
+    get2dBlock(top, left, bottom, right, stripIndent) {
+        throw new UnimplementedException('get2dblock');
+    }
+
+    padDoubleWidth() {
+        throw new UnimplementedException('padDoublewidth');
+    }
+
+    replace() {
+        throw new UnimplementedException('replace');
+    }
+
+    trimTop(n = 1) {
+        /* Remove items from the start of the list, without touching the parent. */
+        if (n > this.length) {
+            throw new Error(`Size of trim too large; can't trim ${n} items `
+                            + `from a list of size ${self.length}`);
+	} else if (n < 0) {
+            throw new Error('Trim size must be >= 0.');
+	}
+	this.splice(0, n);
+	this.items.splice(0, n);
+	if (this.parent) {
+	    this.parentOffset += n;
+	}
+    }
+}
+
 export class StateMachine {
     /*
         Initialize a `StateMachine` object; add state objects.
@@ -893,115 +1006,3 @@ export class ViewList extends Array {
     }
 }
 
-export class StringList extends ViewList {
-    trimLeft(length, start = 0, end) {
-        if (end === undefined) {
-            end = this.length;
-        }
-        for (let i = start; i < Math.min(end, this.length); i++) {
-            if (typeof this[i] === 'undefined') {
-                throw new Error(`${i} ${this.length}`);
-            }
-            this[i] = this[i].substring(length);
-        }
-    }
-
-    getTextBlock(start, flushLeft) {
-        let end = start;
-        const last = this.length;
-        while (end < last) {
-            const line = this[end];
-            if (!line.trim()) {
-                break;
-            }
-            if (flushLeft && (line.substring(0, 1) === ' ')) {
-                const [source, offset] = this.info(end);
-                throw new UnexpectedIndentationError(this.slice(start, end),
-                                                     source, offset + 1);
-            }
-            end += 1;
-        }
-        return this.slice(start, end);
-    }
-
-    getIndented({
- start, untilBlank, stripIndent, blockIndent, firstIndent,
-}) {
-        if (start == null) {
-                start = 0;
-        }
-        let indent = blockIndent;
-        let end = start;
-        if (blockIndent != null && firstIndent == null) {
-            firstIndent = blockIndent;
-        }
-        if (firstIndent != null) {
-            end += 1;
-        }
-        const last = this.length;
-        let blankFinish;
-        while (end < last) {
-            const line = this[end];
-            if (line && (line[0] !== ' ' || (blockIndent != null && line.substring(0, blockIndent).trim()))) {
-                blankFinish = ((end > start) && !this[end - 1].trim());
-                break;
-            }
-            const stripped = line.replace(/^\s*/, '');
-            if (!stripped) {
-                if (untilBlank) {
-                    blankFinish = 1;
-                    break;
-                }
-            } else if (blockIndent == null) {
-                const lineIndent = line.length - stripped.length;
-                if (indent == null) {
-                    indent = lineIndent;
-                } else {
-                    indent = Math.min(indent, lineIndent);
-                }
-            }
-            end += 1;
-        }
-        if (end === last) {
-            blankFinish = 1;
-        }
-
-        const block = this.slice(start, end);
-        if (firstIndent != null && block) {
-            block[0] = block[0].substring(firstIndent);
-        }
-        if (indent && stripIndent) {
-//          console.log(block.constructor.name);
-            block.trimLeft(indent, firstIndent != null ? 1 : 0);
-        }
-
-        return [block, indent || 0, blankFinish];
-    }
-
-    get2dBlock(top, left, bottom, right, stripIndent) {
-        throw new UnimplementedException('get2dblock');
-    }
-
-    padDoubleWidth() {
-        throw new UnimplementedException('padDoublewidth');
-    }
-
-    replace() {
-        throw new UnimplementedException('replace');
-    }
-
-    trimTop(n = 1) {
-        /* Remove items from the start of the list, without touching the parent. */
-        if (n > this.length) {
-            throw new Error(`Size of trim too large; can't trim ${n} items `
-                            + `from a list of size ${self.length}`);
-	} else if (n < 0) {
-            throw new Error('Trim size must be >= 0.');
-	}
-	this.splice(0, n);
-	this.items.splice(0, n);
-	if (this.parent) {
-	    this.parentOffset += n;
-	}
-    }
-}
