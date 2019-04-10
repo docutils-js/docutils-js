@@ -35,17 +35,20 @@ function escapeRegExp(string) {
 class NestedStateMachine extends StateMachineWS {
     run({
  inputLines, inputOffset, memo, node, matchTitles,
-}) {
+    }) {
+	/* istanbul ignore if */
         if (!inputLines) {
             throw new Error('need inputlines');
         }
 
+	/* istanbul ignore if */
         if (matchTitles === undefined) {
             matchTitles = true;
         }
         this.matchTitles = matchTitles;
         this.memo = memo;
         this.document = memo.document;
+	/* istanbul ignore if */
         if (!this.document) {
             throw new Error('need document');
         }
@@ -55,6 +58,7 @@ class NestedStateMachine extends StateMachineWS {
         this.language = memo.language;
         this.node = node;
         const results = super.run({ inputLines, inputOffset });
+	/* istanbul ignore if */
         if(results === undefined) {
             throw new Error();
         }
@@ -97,6 +101,7 @@ class RSTState extends StateWS {
         }
     }
 
+    /* istanbul ignore next */
     noMatch(context, transitions) {
         this.reporter.severe(`Internal error: no transition pattern match.  State: "${this.constructor.name}"; transitions: ${transitions}; context: ${context}; current line: ${this.stateMachine.line}.`);
         return [context, null, []];
@@ -109,9 +114,11 @@ class RSTState extends StateWS {
     nestedParse(block, {
  inputOffset, node, matchTitles, stateMachineClass, stateMachineKwargs,
 }) {
+	/* istanbul ignore if */
         if (!this.memo || !this.memo.document) {
             throw new Error('need memo');
         }
+	/* istanbul ignore if */
         if (!block) {
             throw new Error('need block');
         }
@@ -136,6 +143,7 @@ class RSTState extends StateWS {
         }
 
         if (!stateMachine) {
+	/* istanbul ignore if */
             if (!stateMachineKwargs.stateClasses) {
                 throw new InvalidArgumentsError('stateClasses');
             }
@@ -190,6 +198,7 @@ matchTitles,
         if (!blankFinishState) {
             blankFinishState = initialState;
         }
+	/* istanbul ignore if */
         if (!(blankFinishState in stateMachine.states)) {
             throw new InvalidArgumentsError(`invalid state ${blankFinishState}`);
         }
@@ -296,7 +305,7 @@ matchTitles,
         let text;
         let literalnext;
         if (/(?<!\\)(\\\\)*::$/.test(data)) {
-            if (data.length == 2) {
+            if (data.length === 2) {
                 return [[], 1];
             }
             if (' \n'.indexOf(data[length.data - 3]) !== -1) {
@@ -553,6 +562,7 @@ export class Body extends RSTState {
             target.attributes['names'].append(name)
             if(refuri) {
                 const uri = this.inliner.adjust_uri(refuri)
+		/* istanbul ignore else */
                 if(uri) {
                     target.attributes['refuri'] = uri
                 } else {
@@ -742,6 +752,7 @@ export class Body extends RSTState {
 
     indent(match, context, nextState) {
         const [indented, indent, lineOffset, blankFinish] = this.stateMachine.getIndented({});
+	/* istanbul ignore if */
         if(indented === undefined) {
             throw new Error();
         }
@@ -898,6 +909,7 @@ initialState: 'EnumeratedList',
         [bulletlist.source,
          bulletlist.line] = this.stateMachine.getSourceAndLine();
 //      console.log(`${bulletlist.source} ${bulletlist.line}`);
+	/* istanbul ignore if */
         if (!this.parent) {
             throw new Error('no parent');
         }
@@ -906,6 +918,7 @@ initialState: 'EnumeratedList',
         bulletlist.attributes.bullet = match.result[0].substring(0, 1);
 
         let [i, blankFinish] = this.list_item(match.pattern.lastIndex + match.result[0].length); /* -1 ? */
+	/* istanbul ignore if */
         if (!i) {
             throw new Error('no node');
         }
@@ -928,6 +941,7 @@ initialState: 'BulletList',
 
     list_item(indent) {
 //      console.log(`in list_item (indent=${indent})`);
+	/* istanbul ignore if */
         if (indent == null) {
             throw new Error('Need indent');
         }
@@ -1455,6 +1469,7 @@ initialState: 'BulletList',
 
 
     text(match, context, nextState) {
+	/* istanbul ignore if */
         if (match.input === undefined) {
             throw new Error('');
         }
@@ -1513,6 +1528,7 @@ export class Text extends RSTState {
     }
 
     underline(match, context, nextState) {
+	/* istanbul ignore if */
         if(!Array.isArray(context)) {
             throw new Error("Context should be array");
         }
