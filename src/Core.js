@@ -5,6 +5,8 @@ import { Source } from './Sources';
 import { FileInput, FileOutput } from './io';
 import Publisher from './Publisher';
 
+export { Publisher };
+
 export const defaultUsage = '%prog [options] [<source> [<destination>]]'
 export const defaultDescription = ('Reads from <source> (default is stdin) and writes to <destination> (default is stdout).  See <http://docutils.sf.net/docs/user/config.html> for the full reference.')
 

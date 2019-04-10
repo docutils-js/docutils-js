@@ -1,6 +1,7 @@
 import { FileInput, FileOutput } from './io';
 import { ApplicationError } from'./Exceptions';
-
+import readers from './Readers'
+import writers from './Writers'
 
 class Publisher {
     constructor(args) {

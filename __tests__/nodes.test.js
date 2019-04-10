@@ -20,10 +20,10 @@ test('setId', () => {
     const id = d.setId(p);
     console.log(id);
 });
-test('paragraph text escaped', () =>
+test('paragraph text unescaped', () =>
 {
     const d = newDocument({}, baseSettings);
     const text = 'escape <me>';
     const p = new nodes.paragraph(text, text, [], {});
-    expect(p.toString()).toEqual(expect.not.stringContaining('<'));
+    expect(p.toString()).toEqual(expect.stringContaining('<'));
 })
