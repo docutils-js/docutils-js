@@ -1,5 +1,6 @@
 import * as statemachine from '../../StateMachine';
 import * as nodes from '../../nodes';
+import * as directives from './directives';
 import * as tableparser from './tableparser';
 import {
   columnWidth, unescape, isIterable, escape2null, splitEscapedWhitespace,
@@ -400,9 +401,9 @@ export class Body extends RSTState {
 };
 
         enum_.sequenceregexps = {};
-	enum_.sequences.forEach(sequence => {
+        enum_.sequences.forEach((sequence) => {
             enum_.sequenceregexps[sequence] = new RegExp(`${enum_.sequencepats[sequence]}$`);
-	});
+        });
         this.enum = enum_;
 
         this.gridTableTopPat = new RegExp('\\+-[-+]+-\\+ *$');
@@ -420,12 +421,12 @@ export class Body extends RSTState {
         pats.longopt = `(--|/)${pats.optname}([ =]${pats.optarg})?`;
         pats.option = `(${pats.shortopt}|${pats.longopt})`;
 
-        for (const format of enum_.formats) {
+        enum_.formats.forEach((format) => {
             pats[format] = `(${
                 [enum_.formatinfo[format].prefix,
                  pats.enum,
                  enum_.formatinfo[format].suffix].join('')})`;
-        }
+        });
 
         this.patterns = {
             bullet: '[-+*\\u2022\\u2023\\u2043]( +|$)',
@@ -549,7 +550,7 @@ export class Body extends RSTState {
 
     is_reference(reference) {
         const match = this.explicit.patterns.reference.exec(
-            `^${whitespaceNormalizeName(reference)}`,
+            `^${nodes.whitespaceNormalizeName(reference)}`,
 );
         if (!match) {
             return null;
@@ -732,7 +733,7 @@ initialState: 'Explicit',
 );
         this.gotoLine(newline_offset);
         if (!blank_finish) {
-            this.parent.add(self.unindent_warning('Explicit markup'));
+            this.parent.add(this.unindentWarning('Explicit markup'));
         }
     }
 
@@ -789,7 +790,8 @@ initialState: 'Explicit',
             this.nestedParse(blockquote_lines, { inputOffset: lineOffset, node: blockquote });
             elements.push(blockquote);
             if (attribution_lines) { // fixme
-                const [attribution, messages] = this.parse_attribution(attribution_lines, attribution_offset);
+                const [attribution, messages] = this.parse_attribution(attribution_lines,
+					     attribution_offset);
                 blockquote.add(attribution);
                 elements.push(...messages);
             }
@@ -806,7 +808,7 @@ initialState: 'Explicit',
         this.attribution_pattern = new RegExp('(---?(?!-)|\\u2014) *(?=[^ \\n])');
         let blank;
         let nonblank_seen = false;
-        for (let i = 0; i < indented.length; i++) {
+        for (let i = 0; i < indented.length; i += 1) {
             const line = indented[i].trimRight();
             if (line) {
                 if (nonblank_seen && blank === i - 1) {
@@ -815,7 +817,7 @@ initialState: 'Explicit',
                         const [attribution_end, indent] = this.check_attribution(indented, i);
                         if (attribution_end) {
                             const a_lines = indented.slice(i, attribution_end);
-                            a_lines.trimLeft(match.index + match[0].length, undefined, 1); // end=1 check fixme
+                            a_lines.trimLeft(match.index + match[0].length, undefined, 1);
                             a_lines.trimLeft(indent, 1);
                             return [indented.slice(0, i), a_lines,
                                     i, indented.slice(attribution_end),
@@ -834,7 +836,7 @@ initialState: 'Explicit',
     check_attribution(indented, attribution_start) {
         let indent = null;
         let i;
-        for (i = attribution_start + 1; i < indented.length; i++) {
+        for (i = attribution_start + 1; i < indented.length; i += 1) {
             const line = indented[i].trimRight();
             if (!line) {
                 break;
@@ -846,7 +848,7 @@ initialState: 'Explicit',
             }
         }
         if (i === indented.length) {
-            i++;
+            i += 1;
         }
         return [i, indent || 0];
     }
@@ -872,13 +874,11 @@ initialState: 'Explicit',
 );
             this.parent.add(msg);
         }
-        let listitem; let
-blankFinish;
-        [listitem, blankFinish] = this.list_item(match.match.index + match.match[0].length);
+        const [listitem, blankFinish1] = this.list_item(match.match.index + match.match[0].length);
+	let blankFinish = blankFinish1;
         enumlist.add(listitem);
         const offset = this.stateMachine.lineOffset + 1; // next line
-                let newlineOffset;
-        [newlineOffset, blankFinish] = this.nestedListParse(
+        const [newlineOffset, blankFinish2] = this.nestedListParse(
             this.stateMachine.inputLines.slice(offset),
                 {
  inputOffset: this.stateMachine.absLineOffset() + 1,
@@ -891,7 +891,8 @@ initialState: 'EnumeratedList',
                            auto: sequence === '#',
 },
 },
-);
+	);
+	blankFinish = blankFinish2;
         this.gotoLine(newlineOffset);
         if (!blankFinish) {
             this.parent.add(this.unindent_warning('Enumerated list'));
@@ -924,7 +925,10 @@ initialState: 'EnumeratedList',
         this.parent.add(bulletlist);
         bulletlist.attributes.bullet = match.result[0].substring(0, 1);
 
-        let [i, blankFinish] = this.list_item(match.pattern.lastIndex + match.result[0].length); /* -1 ? */
+        const [i, blankFinish1] = this.list_item(
+	    match.pattern.lastIndex + match.result[0].length,
+); /* -1 ? */
+	let blankFinish = blankFinish1;
         /* istanbul ignore if */
         if (!i) {
             throw new Error('no node');
@@ -932,16 +936,16 @@ initialState: 'EnumeratedList',
 
         bulletlist.append(i);
         const offset = this.stateMachine.lineOffset + 1;
-        let newLineOffset;
-        [newLineOffset, blankFinish] = this.nestedListParse(this.stateMachine.inputLines.slice(offset), {
+        const [newLineOffset, blankFinish2] = this.nestedListParse(this.stateMachine.inputLines.slice(offset), {
  inputOffset: this.stateMachine.absLineOffset() + 1,
                                                                                                            node: bulletlist,
 initialState: 'BulletList',
                                                                                                            blankFinish,
-});
+	});
+	blankFinish = blankFnish2;
         this.gotoLine(newLineOffset);
         if (!blankFinish) {
-            // this.parent.append(this.unindentWarning('Bullet list'))
+            this.parent.add(this.unindentWarning('Bullet list'));
         }
         return [[], nextState, []];
     }
