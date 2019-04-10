@@ -1,4 +1,5 @@
-import { Component,__version__ } from './index'
+import { __version__ } from './index';
+import Component from './Component'
 import languages from './languages';
 
 export default class Writer extends Component {

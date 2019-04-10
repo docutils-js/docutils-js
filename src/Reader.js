@@ -1,4 +1,4 @@
-import { Component } from './index';
+import Component from './Component'
 import universal from './transforms/universal';
 import parsers from './parsers';
 import utils from './utils';

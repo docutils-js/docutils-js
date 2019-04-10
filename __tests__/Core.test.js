@@ -26,28 +26,7 @@ const defaultSettings = {
     idPrefix: '',
 };
 
-test.skip('cmdline', () => {
-    const description = (`${'Generates Docutils-native XML from standalone '
-			     + 'reStructuredText sources.  '}${defaultDescription}`);
-
-    return new Promise((resolve, reject) => {
-	publishCmdLine({
- debug: true,
-			 argv: ['in.rst'],
-writerName: 'xml',
-description,
-		       },
-		       (error) => {
-			   if (error) {
-			       reject(error);
-			       return;
-			   }
-			   resolve();
-		       });
-    });
-});
-
-test('1', () => {
+test.only('full rst2xml pipeline with specific input', () => {
     const settings = { ...defaultSettings };
     const args = { ...defaultArgs };
 
@@ -58,13 +37,10 @@ test('1', () => {
     };
 
     const { readerName, parserName, writerName } = args;
-    const source = new StringInput({ source: `Docutils-general:
+    const source = new StringInput({ source: `
+Want to learn about \`my favorite programming language\`_?
 
-* \`Docutils Front-End Tools <user/tools.html>\`__
-* \`Docutils Configuration <user/config.html>\`__
-* \`Docutils Mailing Lists <user/mailing-lists.html>\`__
-* \`Docutils Link List <user/links.html>\`__
-` });
+.. _my favorite programming language: http://www.python.org` });
         const destination = new StringOutput({});
     const pub = new Publisher({
  source, destination, settings, debug: true, debugFn
@@ -84,6 +60,9 @@ test('1', () => {
 });
 
 test.each([['Title', 'Title\n=====\nParagraph.'],
+	   ['bullet from spec', `- This is a bullet list.
+
+- Bullets can be "*", "+", or "-".`],
 	   ['Random', '* bullet\n* bullet\n\n '],
 	   ['Random 2', 'Header 1\n========\nText\n\nHeader 2\n-------'],
 	   ['Random 2', 'Test.\nTest2\nTest3\n-----'],

@@ -62,7 +62,7 @@ export class StateMachine {
             debug = false;
         }
 	if(debug && !debugFn) {
-	    throw new Error("unexpected");
+	    //throw new Error("unexpected lack of debug function");
 	    debugFn = console.log;
 	}
 	this.debugFn = debugFn;

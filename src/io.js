@@ -1,48 +1,8 @@
-import { TransformSpec }  from './index';
+import TransformSpec  from './TransformSpec';
 import { createReadStream } from 'fs';
 import ErrorOutput from './ErrorOutput';
-
-class Input extends TransformSpec {
-    constructor({source, sourcePath, encoding, errorHandler}) {
-	super();
-	this.encoding = encoding;
-	this.errorHandler=errorHandler;
-	this.source = source;
-	this.sourcePath = sourcePath;
-	if(!sourcePath) {
-	    this.sourcePath = this.defaultSourcePath;
-	}
-	this.successfulEncoding = undefined;
-    }
-
-    async read() {
-	throw new Error("not implemented");
-    }
-
-    decode(data) {
-	return data;
-    }
-}
-
-class Output extends TransformSpec {
-    constructor(destination, destinationPath, encoding, errorHandler) {
-	super({});
-	this.encoding = encoding;
-	this.errorHandler = errorHandler || 'strict'
-	this.destination = destination;
-	this.destinationPath = destinationPath;
-	if(!destinationPath) {
-	    this.destinationPath = this.defaultDestinationPath;
-	}
-    }
-
-    write(data) {
-	process.stdout.write(data);
-    }
-
-    encode(data) {
-    }
-}
+import Input from './io/Input';
+import Output from './io/Output';
 
 export class StringInput extends Input {
     read(cb) {

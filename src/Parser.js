@@ -1,4 +1,4 @@
-import { Component } from './index'
+import Component from './Component'
 import { UnimplementedException } from './Exceptions';
 
 class Parser extends Component {

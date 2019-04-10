@@ -20,11 +20,18 @@ export default class Transformer {
 	this.sorted = 0
 	const urr = []
 	for( let i of components ) {
-//	    console.log(i);
-	    urr.push(i.unknownReferenceResolvers);
+	    console.log(`collecting unknownReferenceResolver from component ${i}`);
+	    if(i.unknownReferenceResolvers) {
+		urr.push(i.unknownReferenceResolvers);
+	    }
 	}
 //	console.log('urr is ')
-//	console.log(urr);
+	//	console.log(urr);
+	for (const f of urr) {
+	    if(typeof f === 'undefined') {
+		throw new ApplicationError('Unexpected undefined value in ist of unknown reference resolvers');
+	    }
+	}
 	const decoratedList = urr.map(f => [f.priority, f]);
 	decoratedList.sort()
 	this.unknownReferenceResolvers.push(...decoratedList.map(f => f[1]));
