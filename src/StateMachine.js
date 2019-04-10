@@ -1,6 +1,6 @@
 import UnknownStateError from './UnknownStateError';
 import ErrorOutput from './ErrorOutput';
-import { EOFError, InvalidArgumentsError, UnimplementedError as Unimp } from './Exceptions';
+import { ApplicationError, EOFError, InvalidArgumentsError, UnimplementedError as Unimp } from './Exceptions';
 
 export class TransitionCorrection extends Error {
     constructor(...args) {
@@ -35,6 +35,85 @@ function isIterable(obj) {
 function __getClass(object) {
   return Object.prototype.toString.call(object)
     .match(/^\[object\s(.*)\]$/)[1];
+}
+
+
+/* Our original class delegates to its array,
+   whereas I'm not sure an Array can be implemented without extending it
+*/
+export class ViewList extends Array {
+    constructor(initlist, source, items, parent, parentOffset) {
+        super(...initlist);
+        this.items = [];
+        this.parent = parent;
+        this.parentOffset = parentOffset;
+
+        if (initlist instanceof ViewList) {
+//          this.data = [...initlist.data]
+            this.items = [...initlist.items];
+        } else if (initlist) {
+//          this.data = [...initlist]
+            if (items) {
+                this.items = items;
+            } else {
+                this.items = [];
+                for (let i = 0; i < initlist.length; i += 1) {
+                    this.items.push([source, i]);
+                }
+            }
+        }
+    }
+
+    slice(start, end) {
+        const initList = [];
+        if (end == null) {
+            end = this.length;
+        }
+
+        for (let i = start; i < Math.min(end, this.length); i += 1) {
+            initList.push(this[i]);
+        }
+        return new this.constructor(initList);
+    }
+
+    info(i) {
+        if (i === this.items.length && this.items.length > 0) {
+            return [this.items[i - 1][0], null];
+        }
+        if (i < 0 || i >= this.items.length) {
+            throw new ApplicationError('Out of range');
+        }
+        return this.items[i];
+    }
+
+    trimStart(n = 1) {
+        if (n > this.length) {
+            // raise IndexError("Size of trim too large; can't trim %s items "
+              //               "from a list of size %s." % (n, len(self.data)))
+        } else if (n < 0) {
+            throw Error('Trim size must be >= 0.');
+        }
+        for (let i = 0; i < n; i += 1) {
+            this.shift();
+        }
+        if (this.parent) {
+            this.parentOffset += n;
+        }
+    }
+
+    trimEnd(n = 1) {
+        /* Remove items from the end of the list, without touching the parent. */
+/*        if n > len(self.data):
+            raise IndexError("Size of trim too large; can't trim %s items "
+                             "from a list of size %s." % (n, len(self.data)))
+        elif n < 0:
+            raise IndexError('Trim size must be >= 0.')
+*/
+        for (let i = 0; i < n; i += 1) {
+            this.pop();
+            this.items.pop();
+        }
+    }
 }
 
 export class StringList extends ViewList {
@@ -138,7 +217,7 @@ export class StringList extends ViewList {
         /* Remove items from the start of the list, without touching the parent. */
         if (n > this.length) {
             throw new Error(`Size of trim too large; can't trim ${n} items `
-                            + `from a list of size ${self.length}`);
+                            + `from a list of size ${this.length}`);
         } else if (n < 0) {
             throw new Error('Trim size must be >= 0.');
         }
@@ -264,6 +343,7 @@ export class StateMachine {
 //          console.log(context);
             results.push(...result);
             while (true) {
+		const doContinue = false;
                 try {
                     try {
                         this.nextLine();
@@ -319,6 +399,7 @@ export class StateMachine {
                               '\nStateMachine.run: TransitionCorrection to '
                               'state "%s", transition %s.'
                               % (state.__class__.__name__, transitions[0])) */
+			/* Cant continue, makes no sense? ??  */
                         continue;
                     } else if (error instanceof StateCorrection) {
                         this.previousLine();
@@ -338,7 +419,8 @@ export class StateMachine {
                         throw error;
                     }
                 }
-                // transitions = undefined /* we need this somehow, its part of a try, except, else */
+		/* we need this somehow, its part of a try, except, else */
+                // transitions = undefined
                 state = this.getState(nextState);
             }
         } catch (error) {
@@ -361,7 +443,7 @@ export class StateMachine {
             }
             this.currentState = nextState;
         }
-        if (!this.states.hasOwnProperty(this.currentState)) {
+        if (!Object.hasOwnProperty(this.states, this.currentState)) {
             throw new UnknownStateError(this.currentState);
         }
         return this.states[this.currentState];
@@ -510,7 +592,7 @@ src;
             return block;
         } catch (error) {
             if (error instanceof UnexpectedIndentationError) {
-                block = err.args[0];
+                block = error.args[0];
                 this.nextLine(block.length - 1); // advance to last line of block
             }
             throw error;
@@ -560,7 +642,7 @@ src;
         const stateName = stateClass.name;
 //      console.log(`adding state ${stateName}`);
 
-        if (this.states.hasOwnProperty(stateName)) {
+        if (Object.hasOwnProperty(this.states, stateName)) {
             throw new DuplicateStateError(stateName);
         }
         const r = new stateClass({ stateMachine: this, debug: this.debug });
@@ -766,7 +848,8 @@ export class StateMachineWS extends StateMachine {
             stripIndent = true;
         }
         let offset = this.absLineOffset();
-        const [indented, indent, blankFinish] = this.inputLines.getIndented({ start: this.lineOffset, untilBlank, stripIndent });
+        const [indented, indent, blankFinish] = this.inputLines.getIndented({
+	    start: this.lineOffset, untilBlank, stripIndent });
         if (indented) {
             this.nextLine(indented.length - 1);
         }
@@ -884,7 +967,8 @@ export class StateWS extends State {
     }
 
     knownIndent(match, context, nextState) {
-        const [indetned, ineOffset, blankFinish] = this.stateMachine.getKnownIndented(match.end()); // fail
+        const [indetned, ineOffset, blankFinish] = this.stateMachine.getKnownIndented(
+	    match.end());
         const knownIndentSm = this.knownIdentSm;
         const sm = new knownIndentSm({
  debug: this.debug,
@@ -926,82 +1010,4 @@ export function string2lines(astring, args) {
         result.pop();
     }
     return result.map(expandtabs);
-}
-
-/* Our original class delegates to its array,
-   whereas I'm not sure an Array can be implemented without extending it
-*/
-export class ViewList extends Array {
-    constructor(initlist, source, items, parent, parentOffset) {
-        super(...initlist);
-        this.items = [];
-        this.parent = parent;
-        this.parentOffset = parentOffset;
-
-        if (initlist instanceof ViewList) {
-//          this.data = [...initlist.data]
-            this.items = [...initlist.items];
-        } else if (initlist) {
-//          this.data = [...initlist]
-            if (items) {
-                this.items = items;
-            } else {
-                this.items = [];
-                for (let i = 0; i < initlist.length; i += 1) {
-                    this.items.push([source, i]);
-                }
-            }
-        }
-    }
-
-    slice(start, end) {
-        const initList = [];
-        if (end == null) {
-            end = this.length;
-        }
-
-        for (let i = start; i < Math.min(end, this.length); i += 1) {
-            initList.push(this[i]);
-        }
-        return new this.constructor(initList);
-    }
-
-    info(i) {
-        if (i === this.items.length && this.items.length > 0) {
-            return [this.items[i - 1][0], null];
-        }
-	if(i < 0 || i >= this.items.length) {
-	    throw new ApplicationError("Out of range");
-	}
-        return this.items[i];
-    }
-
-    trimStart(n = 1) {
-        if (n > this.length) {
-            // raise IndexError("Size of trim too large; can't trim %s items "
-              //               "from a list of size %s." % (n, len(self.data)))
-        } else if (n < 0) {
-            throw Error('Trim size must be >= 0.');
-        }
-        for (let i = 0; i < n; i += 1) {
-            this.shift();
-        }
-        if (this.parent) {
-            this.parentOffset += n;
-        }
-    }
-
-    trimEnd(n = 1) {
-        /* Remove items from the end of the list, without touching the parent. */
-/*        if n > len(self.data):
-            raise IndexError("Size of trim too large; can't trim %s items "
-                             "from a list of size %s." % (n, len(self.data)))
-        elif n < 0:
-            raise IndexError('Trim size must be >= 0.')
-*/
-        for (let i = 0; i < n; i += 1) {
-            this.pop();
-            this.items.pop();
-        }
-    }
 }
