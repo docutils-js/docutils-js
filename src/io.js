@@ -17,16 +17,18 @@ export class StringOutput extends Output {
 	this.defaultDestinationPath = '<string>'
     }
     
-
     write(data) {
-        //self.destination = self.encode(data)
+        //self.destination = self.encode(data) // fixme encoding
+	if(Array.isArray(data)) {
+	    data = JSON.stringify(data);
+	}
 	this.destination = data;
 	return this.destination;
     }
 }
 
 export class FileInput extends Input {
-    /* ew, too much logic for a constructor, with side effects and shit! */
+    /* ew, too much logic for a constructor, with side effects etc! */
     constructor(args) {
 	super(args);
 	let { source, sourcePath, encoding, errorHandler, autoClose,

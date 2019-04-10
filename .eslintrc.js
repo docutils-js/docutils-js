@@ -15,5 +15,13 @@ module.exports = {
     rules: {
 	"indent": ["off"],
 	"class-methods-use-this": ["off"],
+	"prefer-destructuring": ["off"],
+	"no-param-reassign":["off"],
+	"new-cap": ["off"],
+	"no-underscore-dangle": ["off"],
+	"no-unused-vars": ["warn"],
+	"camelcase": ["warn"],
+	"no-tabs": ["warn"],
+	"no-mixed-spaces-and-tabs": ["warn"],
   },
 };

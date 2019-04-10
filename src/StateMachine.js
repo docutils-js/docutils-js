@@ -428,7 +428,7 @@ src;
 		    this.debugFn(`\nStateMachine.checkLine: Matched transition '"${name}" in state "${state.constructor.name}`);
 		}
 //              console.log(`pattern match for ${name}`);
-                const r = method({ pattern, result, input: this.line }, context, nextState);
+                const r = method.bind(state)({ pattern, result, input: this.line }, context, nextState);
                 if (r === undefined) {
                         throw new Error();
                 }
@@ -603,7 +603,7 @@ export class State {
             throw new Error(`cant find method ${name} on ${this.constructor.name}`);
         }
 
-        const method = this[name].bind(this);
+        const method = this[name];
 
         return [pattern, method, nextState];
     }

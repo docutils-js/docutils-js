@@ -60,10 +60,21 @@ Want to learn about \`my favorite programming language\`_?
 });
 
 test.each([['Title', 'Title\n=====\nParagraph.'],
+	   ['Short overline', '===\nTitle\n===\n'],
+	   ['Short overline 2', '===\nTitle\n'],
+	   ['Incomplete title', '=====\nTitle\n'],
 	   ['bullet from spec', `- This is a bullet list.
 
 - Bullets can be "*", "+", or "-".`],
 	   ['Bullet no unindent', '* bullet'],
+	   ['Nested bullets', '* bullet\n\n + bullet\n\n + bullet\n\n* bullet\n'],
+	   ['Transition correction', '====::\n'],
+	   ['Mixed bullets', '* bullet\n+ bullet\n'],
+	   ['Transition marker', '-------\n\n'],
+	   ['Bullet list, invalid input', '* bullet\ninvalid'],
+	   ['Bullet list, invalid input line', '* bullet\n-----------'],
+	   ['Bullet list, invalid input field marker', '* bullet\n:Hello: foo\n'],
+	   ['Bullet list, invalid input doctest', '* bullet\n>>> foo\n'],
 	   ['Field list', `:Author: David Goodger
 :Contact: docutils-develop@lists.sourceforge.net
 :Revision: $Revision: 8205 $
@@ -87,6 +98,14 @@ test.each([['Title', 'Title\n=====\nParagraph.'],
               spaces_and_linebreaks = 'are preserved'
               markup_processing = None
 `],
+	   ['literal block without blank finish', `      Literal blocks are either indented or line-prefix-quoted blocks,
+      and indicated with a double-colon ("::") at the end of the
+      preceding paragraph (right here -->)::
+
+          if literal_block:
+              text = 'is left as-is'
+              spaces_and_linebreaks = 'are preserved'
+              markup_processing = None`],
 	   ['block quote', `      Block quotes consist of indented body elements:
 
           This theory, that is mine, is mine.
@@ -100,6 +119,14 @@ test.each([['Title', 'Title\n=====\nParagraph.'],
 `],
 	   ['substitution definition', `.. |symbol here| image:: symbol.png\n`],
 	   ['definition list', `what
+    Definition lists associate a term with a definition.
+
+how
+    The term is a one-line phrase, and the definition is one
+    or more paragraphs or body elements, indented relative to
+    the term.
+`],
+	   ['definition list with classifier term', `term : classifier\n   test\n\nwhat
     Definition lists associate a term with a definition.
 
 how

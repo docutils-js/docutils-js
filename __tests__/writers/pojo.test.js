@@ -1,6 +1,6 @@
 import { Publisher, publishCmdLine, defaultDescription } from '../../src/Core';
 import { Source } from '../../src/Sources';
-import { StringInput } from '../../src/io';
+import { StringInput, StringOutput } from '../../src/io';
 import Output from '../../src/io/Output';
 jest.mock('../../src/io/Output');
 
@@ -46,7 +46,7 @@ I like food.
 
 `});
     
-    const destination = new Output({});
+    const destination = new StringOutput({});
     const pub = new Publisher({
 	source, destination, settings, debug: true, debugFn
     });
@@ -57,7 +57,7 @@ I like food.
 		reject(error);
 		return;
 	    }
-	    expect(destination).toMatchSnapshot();
+	    expect(JSON.parse(destination.destination)).toMatchSnapshot();
 	    currentLogLines.length = 0;
 	    resolve();
 	});

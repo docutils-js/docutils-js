@@ -18,6 +18,7 @@ const nonWhitespaceBefore = '(?<!\\s)';
 const nonWhitespaceEscapeBefore = '(?<![\\s\\x00])';
 const nonUnescapedWhitespaceEscapeBefore = '(?<!(?<!\\x00)[\\s\\x00])';
 const nonWhitespaceAfter = '(?!\\s)';
+const classifierDelimiterRegexp = new RegExp(' +: +');
 
 const { StringList } = statemachine;
 
@@ -307,6 +308,7 @@ matchTitles: true,
         const data = lines.join('\n').trimEnd();
         let text;
         let literalnext;
+	console.log(data);
         if (/(?<!\\)(\\\\)*::$/.test(data)) {
             if (data.length === 2) {
                 return [[], 1];
@@ -775,6 +777,7 @@ initialState: 'Explicit',
     }
 
     block_quote(indented, lineOffset) {
+        /* istanbul ignore if */
         if (!indented) {
             throw new Error();
         }
@@ -1818,7 +1821,7 @@ srcline;
         const node_list = [term_node];
         text_nodes.forEach((node) => {
             if (node instanceof nodes.Text) {
-                const parts = node.astext().split(this.classifier_delimiter); // fixme
+                const parts = node.astext().split(classifierDelimiterRegexp);
                 if (parts.length === 1) {
                     node_list[node_list.length - 1].add(node);
                 } else {
@@ -1937,7 +1940,7 @@ export class Line extends SpecializedText {
             if (error instanceof EOFError) {
                 const blocktext = `${overline}\n${title}`;
                 if (overline.trimEnd().length < 4) {
-                    this.short_overline(context, blocktext, lineno, 2);
+                    this.shortOverline(context, blocktext, lineno, 2);
                 } else {
                     const msg = this.reporter.severe(
                         'Incomplete section title.',
@@ -1957,7 +1960,7 @@ export class Line extends SpecializedText {
         if (!this.transitions.underline[0].test(underline)) {
             const blocktext = `${overline}\n${title}\n${underline}`;
             if (overline.trimEnd().length < 4) {
-                this.short_overline(context, blocktext, lineno, 2);
+                this.shortOverline(context, blocktext, lineno, 2);
             } else {
                 const msg = this.reporter.severe(
                     'Missing matching underline for section title overline.',
@@ -1970,7 +1973,7 @@ export class Line extends SpecializedText {
         } else if (overline !== underline) {
             const blocktext = `${overline}\n${title}\n${underline}`;
             if (overline.trimEnd().length < 4) {
-                this.short_overline(context, blocktext, lineno, 2);
+                this.shortOverline(context, blocktext, lineno, 2);
             } else {
                 const msg = this.reporter.severe(
                     'Title overline & underline mismatch.',
@@ -1986,7 +1989,7 @@ export class Line extends SpecializedText {
         if (columnWidth(title) > overline.length) {
             const blocktext = `${overline}\n${title}\n${underline}`;
             if (overline.trimEnd().length() < 4) {
-                this.short_overline(context, blocktext, lineno, 2);
+                this.shortOverline(context, blocktext, lineno, 2);
             } else {
                 const msg = this.reporter.warning(
                     'Title overline too short.',
@@ -2010,7 +2013,7 @@ export class Line extends SpecializedText {
         const blocktext = `${overline}\n${this.stateMachine.line}`;
         const lineno = this.stateMachine.absLineNumber() - 1;
         if (overline.trimEnd().length < 4) {
-            this.short_overline(context, blocktext, lineno, 1);
+            this.shortOverline(context, blocktext, lineno, 1);
         }
         const msg = this.reporter.error(
             'Invalid section title or transition marker.',
@@ -2028,7 +2031,7 @@ export class Line extends SpecializedText {
             { line: lineno },
 );
         this.parent.add(msg);
-        this.state_correction(context, lines);
+        this.stateCorrection(context, lines);
     }
 
     stateCorrection(context, lines = 1) {
@@ -2288,7 +2291,7 @@ export const stateClasses = [Body, BulletList, DefinitionList,
         const blocktext = overline + '\n' + this.stateMachine.line
         const lineno = this.stateMachine.absLineNumber() - 1
 //        if len(overline.rstrip()) < 4:
-//            self.short_overline(context, blocktext, lineno, 1)
+//            self.shortOverline(context, blocktext, lineno, 1)
         const msg = this.reporter.error(
               'Invalid section title or transition marker.',
             [new nodes.literal_block(blocktext, blocktext)],

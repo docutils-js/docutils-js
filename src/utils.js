@@ -2,7 +2,7 @@ import * as nodes from './nodes';
 import { InvalidArgumentsError, SystemMessage, UnimplementedError as Unimp } from './Exceptions'
 //export { SystemMessge };
 
-export function column_width(text) {
+export function columnWidth(text) { //fixme
     return text.length;
 }
 export function isIterable(obj) {
