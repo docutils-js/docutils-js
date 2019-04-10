@@ -8,3 +8,4 @@ lib
 .idea
 *.log
 in.rst
+coverage
