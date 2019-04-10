@@ -6,11 +6,10 @@ export class TransitionCorrection extends Error {
     constructor(...args) {
 	super(...args);
 	this.args = args;
-	if(Error.captureStackTrace) {
+	if (Error.captureStackTrace) {
 	    Error.captureStackTrace(this, TransitionCorrection);
 	}
     }
-
 }
 export class UnexpectedIndentationError extends Error {
 }
@@ -18,11 +17,10 @@ export class StateCorrection extends Error {
     constructor(...args) {
         super(...args);
         this.args = args;
-        if(Error.captureStackTrace) {
+        if (Error.captureStackTrace) {
             Error.captureStackTrace(this, StateCorrection);
         }
     }
-
 }
 
 function isIterable(obj) {
@@ -50,7 +48,9 @@ export class StateMachine {
         - `debug`: a boolean; produce verbose output if true (nonzero).
         */
 
-    constructor({ stateClasses, initialState, debug, debugFn }) {
+    constructor({
+ stateClasses, initialState, debug, debugFn,
+}) {
         /* Perform some sanity checking on arguments */
         if (stateClasses == null || stateClasses.length === 0) {
             throw new InvalidArgumentsError('stateClasses');
@@ -61,8 +61,8 @@ export class StateMachine {
         if (!debug) {
             debug = false;
         }
-	if(debug && !debugFn) {
-	    //throw new Error("unexpected lack of debug function");
+	if (debug && !debugFn) {
+	    // throw new Error("unexpected lack of debug function");
 	    debugFn = console.log;
 	}
 	this.debugFn = debugFn;
@@ -89,7 +89,9 @@ export class StateMachine {
     }
 
     /* Faithful to python implementation. */
-    run({ inputLines, inputOffset, context, inputSource, initialState}) {
+    run({
+ inputLines, inputOffset, context, inputSource, initialState,
+}) {
         /*
         Run the state machine on `input_lines`. Return results (a list).
 
@@ -130,8 +132,8 @@ export class StateMachine {
         if (!this.currentState) {
             console.log('No current state');
         }
-        if(this.debug) {
-	    this.debugFn(`\nStateMachine.run: input_lines (line_offset=${this.lineOffset}):\n| ` + this.inputLines.join('\n| '));
+        if (this.debug) {
+	    this.debugFn(`\nStateMachine.run: input_lines (line_offset=${this.lineOffset}):\n| ${this.inputLines.join('\n| ')}`);
 	}
         let transitions;
         const results = [];
@@ -139,11 +141,11 @@ export class StateMachine {
         let nextState;
         let result;
         try {
-            if(this.debug) {
+            if (this.debug) {
 		this.debugFn('\nStateMachine.run: bof transition');
 	    }
             [context, result] = state.bof(context);
-	    if(!Array.isArray(context)) {
+	    if (!Array.isArray(context)) {
 		throw new Error('expecting array');
 	    }
 //	    console.log(context);
@@ -152,22 +154,23 @@ export class StateMachine {
                 try {
                     try {
                         this.nextLine();
-			if(this.debug) {
-			    if(Number.isNaN(this.lineOffset)) {
+			if (this.debug) {
+			    if (Number.isNaN(this.lineOffset)) {
 				throw new Error();
 			    }
-			    
+
 			    const rinfo = this.inputLines.info(
-                                this.lineOffset)
-                            if(!isIterable(rinfo)) {
+                                this.lineOffset,
+);
+                            if (!isIterable(rinfo)) {
                                 throw new Error();
                             }
-                            const [ source, offset ] = rinfo
+                            const [source, offset] = rinfo;
 			    this.debugFn(`\nStateMachine.run: line (source=${source}, offset=${offset}):\n| ${this.line}`);
 			}
 //			console.log(context);
-			if(!Array.isArray(context)) {
-			    throw new Error("context should be array");
+			if (!Array.isArray(context)) {
+			    throw new Error('context should be array');
 			}
 
                         const r = this.checkLine(context, state, transitions);
@@ -175,8 +178,8 @@ export class StateMachine {
                             throw new Error(`Expect iterable result, got: ${r}`);
                         }
                         [context, nextState, result] = r;
-			if(!Array.isArray(context)) {
-			    throw new Error("context should be array");
+			if (!Array.isArray(context)) {
+			    throw new Error('context should be array');
 			}
                         if (!isIterable(result)) {
                             throw new Error(`Expect iterable result, got: ${result}`);
@@ -184,7 +187,7 @@ export class StateMachine {
                         results.push(...result);
                     } catch (error) {
                         if (error instanceof EOFError) {
-			    if(this.debug) {
+			    if (this.debug) {
 				this.debugFn(`\nStateMachine.run: ${state.constructor.name}.eof transition`);
 			    }
                             result = state.eof(context);
@@ -402,13 +405,13 @@ src;
     }
 
     checkLine(context, state, transitions) {
-	if(!Array.isArray(context)) {
-	    throw new Error("context should be array");
+	if (!Array.isArray(context)) {
+	    throw new Error('context should be array');
 	}
-	if(this.debug) {
+	if (this.debug) {
             this.debugFn(`\nStateMachine.check_line: state="${state.constructor.name}", transitions=${transitions}.`);
 	}
-	//console.log(`checking line ${this.line}`);
+	// console.log(`checking line ${this.line}`);
         if (transitions === undefined) {
             transitions = state.transitionOrder;
         }
@@ -424,7 +427,7 @@ src;
 //          console.log(`checkLine: ${name} ${pattern} ${nextState}`);
             const result = pattern.exec(this.line);
             if (result) {
-		if(this.debug) {
+		if (this.debug) {
 		    this.debugFn(`\nStateMachine.checkLine: Matched transition '"${name}" in state "${state.constructor.name}`);
 		}
 //              console.log(`pattern match for ${name}`);
@@ -476,28 +479,25 @@ src;
 
     notifyObservers() {
         let observer;
-        for (let observer of this.observers) {
-            if(observer === undefined) {
-                throw newError("undefined observer");
+        for (const observer of this.observers) {
+            if (observer === undefined) {
+                throw newError('undefined observer');
             }
-	    try
-	    {
+	    try {
 		let info = [];
 		try {
                     info = this.inputLines.info(this.lineOffset);
 		} catch (err) {
 		}
-		if(info === undefined) {
-                    //throw new Error("undefined info");
+		if (info === undefined) {
+                    // throw new Error("undefined info");
                     continue;
                 }
-		if(!isIterable(info)) {
-                    throw new Error("isIterable");
-
+		if (!isIterable(info)) {
+                    throw new Error('isIterable');
                 }
 		observer(...info);
-	    }
-	    catch(err) {
+	    } catch (err) {
 		console.log(err.stack);
 	    }
         }
@@ -520,8 +520,8 @@ export class State {
         }
 
         this.stateMachine = stateMachine;
-        this.debug = debug; 
-	
+        this.debug = debug;
+
         if (!this.nestedSm) {
             this.nestedSm = this.stateMachine.constructor;
         }
@@ -593,9 +593,8 @@ export class State {
         let pattern = this.patterns[name];
         if (!(pattern instanceof RegExp)) {
             try {
-
                 pattern = new RegExp(`^${pattern}`);
-            } catch(error) {
+            } catch (error) {
                 throw error;
             }
         }
@@ -632,11 +631,11 @@ export class State {
     }
 
     noMatch(context, transitions) {
-	return [context, null, []]
+	return [context, null, []];
     }
 
     bof(context) {
-	return [context, []]
+	return [context, []];
     }
 
     eof(context) {
@@ -683,7 +682,9 @@ blankFinish;
         return [indented, offset, blankFinish];
     }
 
-    getFirstKnownIndented({ indent, untilBlank, stripIndent, stripTop, }) {
+    getFirstKnownIndented({
+ indent, untilBlank, stripIndent, stripTop,
+}) {
         let indented;
 	let blankFinish;
         if (stripIndent === undefined) {
@@ -757,14 +758,14 @@ export class StateWS extends State {
     indent(match, context, nextState) {
         const [indented, indent, lineOffset, blankFinish] = this.stateMachine.getIndented({});
 	const IndentSm = this.indentSm;
-	console.log(`instantiating indentsm`);
+	console.log('instantiating indentsm');
 	console.log(this.indentSmKwargs);
         const sm = new IndentSm({ debug: this.debug, ...this.indentSmKwargs });
-	if(!sm.run) {
+	if (!sm.run) {
 	    console.log(Object.keys(sm));
 	    throw Error(`no sm run ${this} ${IndentSm.constructor.name}`);
 	}
-	
+
         const results = sm.run({ indented, inputOffset: lineOffset });
         return [context, nextState, results];
     }
@@ -781,7 +782,7 @@ export class StateWS extends State {
     }
 
     firstKnownIndent(match, context, nextState) {
-        const [indented, lineOffset, blankFinish] = this.stateMachine.getFirstKnownIndented({ indent: match.result.index + match.result[0].length});
+        const [indented, lineOffset, blankFinish] = this.stateMachine.getFirstKnownIndented({ indent: match.result.index + match.result[0].length });
         const KnownIndentSm = this.knownIndentSm;
         const sm = new KnownIndentSm({ debug: this.debug, ...this.knownIndentSmKwargs });
         const results = sm.run({ indented, inputOffset: lineOffset });
@@ -791,7 +792,7 @@ export class StateWS extends State {
 
 function expandtabs(string) {
     let tabIndex;
-    while((tabIndex = string.indexOf('\t')) !== -1) {
+    while ((tabIndex = string.indexOf('\t')) !== -1) {
         string = string.substring(0, tabIndex) + Array(tabIndex % 8).map(x => ' ').join('') + string.substring(tabIndex + 1);
     }
     return string;
@@ -808,11 +809,10 @@ export function string2lines(astring, args) {
         tabWidth = 8;
     }
     const result = astring.split('\n');
-    if(astring[astring.length - 1] === '\n') {
+    if (astring[astring.length - 1] === '\n') {
         result.pop();
     }
     return result.map(expandtabs);
-
 }
 
 /* Our original class delegates to its array,
@@ -856,26 +856,25 @@ export class ViewList extends Array {
     info(i) {
 	try {
 	    return this.items[i];
-	}
-	catch(error) {
-            if(i === this.items.length) {
-                return [this.items[i - 1][0], None]
+	} catch (error) {
+            if (i === this.items.length) {
+                return [this.items[i - 1][0], None];
 	    }
 	}
     }
 
-    trimStart(n=1) {
-        if(n > this.length) {
-            //raise IndexError("Size of trim too large; can't trim %s items "
+    trimStart(n = 1) {
+        if (n > this.length) {
+            // raise IndexError("Size of trim too large; can't trim %s items "
               //               "from a list of size %s." % (n, len(self.data)))
-        } else if(n < 0) {
-            throw Error('Trim size must be >= 0.')
+        } else if (n < 0) {
+            throw Error('Trim size must be >= 0.');
 	}
-	for(let i = 0; i < n; i++) {
+	for (let i = 0; i < n; i++) {
 	    this.shift();
 	}
-        if(this.parent) {
-            this.parentOffset += n
+        if (this.parent) {
+            this.parentOffset += n;
 	}
     }
 
@@ -887,7 +886,7 @@ export class ViewList extends Array {
         elif n < 0:
             raise IndexError('Trim size must be >= 0.')
 */
-	for(let i = 0; i < n; i++) {
+	for (let i = 0; i < n; i++) {
 	    this.pop();
 	    this.items.pop();
 	}
@@ -895,12 +894,12 @@ export class ViewList extends Array {
 }
 
 export class StringList extends ViewList {
-    trimLeft(length, start=0, end) {
-        if(end === undefined) {
+    trimLeft(length, start = 0, end) {
+        if (end === undefined) {
             end = this.length;
         }
         for (let i = start; i < Math.min(end, this.length); i++) {
-            if(typeof this[i] === 'undefined') {
+            if (typeof this[i] === 'undefined') {
                 throw new Error(`${i} ${this.length}`);
             }
             this[i] = this[i].substring(length);
@@ -925,7 +924,9 @@ export class StringList extends ViewList {
         return this.slice(start, end);
     }
 
-    getIndented({ start, untilBlank, stripIndent, blockIndent, firstIndent }) {
+    getIndented({
+ start, untilBlank, stripIndent, blockIndent, firstIndent,
+}) {
         if (start == null) {
                 start = 0;
         }
@@ -988,17 +989,18 @@ export class StringList extends ViewList {
     replace() {
         throw new UnimplementedException('replace');
     }
-    trimTop(n=1) {
+
+    trimTop(n = 1) {
         /* Remove items from the start of the list, without touching the parent. */
-        if(n > this.length) {
-            throw new Error(`Size of trim too large; can't trim ${n} items `+
-                            `from a list of size ${self.length}`);
+        if (n > this.length) {
+            throw new Error(`Size of trim too large; can't trim ${n} items `
+                            + `from a list of size ${self.length}`);
 	} else if (n < 0) {
-            throw new Error('Trim size must be >= 0.')
+            throw new Error('Trim size must be >= 0.');
 	}
 	this.splice(0, n);
 	this.items.splice(0, n);
-	if(this.parent) {
+	if (this.parent) {
 	    this.parentOffset += n;
 	}
     }
