@@ -21,7 +21,7 @@ export default class Transformer {
 	const urr = []
 	for( let i of components ) {
 	    if(typeof i !== 'undefined'){
-		console.log(`collecting unknownReferenceResolver from component ${i}`);
+//		console.log(`collecting unknownReferenceResolver from component ${i}`);
 		if(i.unknownReferenceResolvers) {
 		    urr.push(i.unknownReferenceResolvers);
 		}

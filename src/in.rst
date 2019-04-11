@@ -1,2 +1,4 @@
-* bullet
-  
+
+Want to learn about `my favorite programming language`_?
+
+.. _my favorite programming language: http://www.python.org

@@ -1,6 +1,7 @@
 import { Publisher, publishCmdLine, defaultDescription } from '../src/Core';
 import { Source } from '../src/Sources';
 import { StringInput, StringOutput } from '../src/io';
+import * as nodes from '../src/nodes';
 
 const currentLogLines = [];
 
@@ -26,7 +27,7 @@ const defaultSettings = {
     idPrefix: '',
 };
 
-test('full rst2xml pipeline with specific input', () => {
+test.skip,('full rst2xml pipeline with specific input', () => {
     const settings = { ...defaultSettings };
     const args = { ...defaultArgs };
 
@@ -60,6 +61,9 @@ Want to learn about \`my favorite programming language\`_?
 });
 
 test.each([['Title', 'Title\n=====\nParagraph.'],
+	   ['program lang',`Want to learn about \`my favorite programming language\`_?
+
+.. _my favorite programming language: http://www.python.org`],
 	   ['Random indent', '  \n   \n \n     \n\n  \n'],
 	   ['Anonymous reference', '__ http://www.python.org\n'],
 	   ['Links', `.. _A ReStructuredText Primer: ../../user/rst/quickstart.html
@@ -162,13 +166,13 @@ This is a test.
 	   ['Inline followed by emphasis', '**hello** and *goodbye*'],
 	   ['docutils title', '==========================================\n Docutils_ Project Documentation Overview\n==========================================\n'],
 	   ['Paragraph ending in ::', 'This is my paragraph ending in::\n'],
-	   ['grid table', `         +------------------------+------------+----------+
-         | Header row, column 1   | Header 2   | Header 3 |
-         +========================+============+==========+
-         | body row 1, column 1   | column 2   | column 3 |
-         +------------------------+------------+----------+
-         | body row 2             | Cells may span        |
-         +------------------------+-----------------------+
+	   ['grid table', `+------------------------+------------+----------+
+| Header row, column 1   | Header 2   | Header 3 |
++========================+============+==========+
+| body row 1, column 1   | column 2   | column 3 |
++------------------------+------------+----------+
+| body row 2             | Cells may span        |
++------------------------+-----------------------+
 `],
 	   ['simple table', `         ====================  ==========  ==========
          Header row, column 1  Header 2    Header 3
@@ -229,6 +233,24 @@ item.
 			  reject(error);
 			  return;
 		      }
+		      const document = pub.document;
+		      const Visitor = class extends nodes.GenericNodeVisitor {
+			  default_departure(node) {
+			      /**/
+			  }
+			  default_visit(node) {
+			      if(node.attributes && node.attributes.refuri) {
+				  console.log(node.attributes.refuri);
+				  if(!/^https?:\/\//.test(node.attributes.refuri)) {
+				      const msg = `Invalid refuri ${node.attributes.refuri}`;
+				      const messages = [document.reporter.warning(msg, [], {})];
+				      node.add(messages);
+				  }
+			      }
+			  }
+		      };
+		      const visitor = new Visitor(document)
+		      document.walkabout(visitor);
 		      expect(destination.destination).toMatchSnapshot();
 		      currentLogLines.length = 0;
 		      resolve();

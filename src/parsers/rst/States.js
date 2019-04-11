@@ -8,7 +8,6 @@ import {
 
 /* import RSTStateMachine from './RSTStateMachine';
 import Inliner from './Inliner'; */
-// import * as roles from './Roles';
 
 import {
  ApplicationError, DataError, EOFError, InvalidArgumentsError, UnimplementedError as Unimp,
@@ -19,6 +18,11 @@ const nonWhitespaceEscapeBefore = '(?<![\\s\\x00])';
 const nonUnescapedWhitespaceEscapeBefore = '(?<!(?<!\\x00)[\\s\\x00])';
 const nonWhitespaceAfter = '(?!\\s)';
 const classifierDelimiterRegexp = new RegExp(' +: +');
+const simpleTableBorderPat = /=+[ =]*$/;
+const gridTableTopPat = /\+-[-+]+-\+ *$/;
+const    emailPattern = `%(emailc)s+(?:\.%(emailc)s+)*(?<!\x00)@%(emailc)s+(?:\.%(emailc)s*)*%(uri_end)s`;
+//email=re.compile(self.email_pattern % args + '$',
+//                 re.VERBOSE | re.UNICODE),
 
 const { StringList } = statemachine;
 
@@ -77,11 +81,12 @@ class RSTState extends StateWS {
         this.nestedSm = NestedStateMachine;
         this.nestedSmCache = [];
         this.stateClasses = stateClasses;
+
         this.nestedSmKwargs = {
             stateClasses: this.stateClasses,
             initialState: 'Body',
-            debug: args.stateMachine.debug,
-            debugFn: args.stateMachine.debugFn,
+            debug: args && args.stateMachine ? args.stateMachine.debug : false,
+            debugFn: args && args.stateMachine ?args.stateMachine.debugFn : console.log,
         };
     }
 
@@ -308,7 +313,7 @@ matchTitles: true,
         const data = lines.join('\n').trimEnd();
         let text;
         let literalnext;
-	console.log(data);
+//	console.log(data);
         if (/(?<!\\)(\\\\)*::$/.test(data)) {
             if (data.length === 2) {
                 return [[], 1];
@@ -438,7 +443,7 @@ export class Body extends RSTState {
             option_marker: `${pats.option}(, ${pats.option})*(  +| ?$)`,
             doctest: '>>>( +|$)',
             line_block: '\\|( +|$)',
-            grid_table_Top: this.gridTableTopPat,
+            grid_table_top: this.gridTableTopPat,
                 simple_table_top: this.simpleTableTopPat,
             explicit_markup: '\\.\\.( +|$)',
             anonymous: '__( +|)',
@@ -451,8 +456,8 @@ export class Body extends RSTState {
 
         this.explicit = {};
         this.explicit.patterns = {
-            target: new RegExp(`(_|(?!_)(\`?)(?![ \`])(.+?)${nonWhitespaceEscapeBefore})(?<!(?<!\\x00):)${nonWhitespaceEscapeBefore}[ ]?:([ ]+|$)`),
-            reference: new RegExp(`((${simplename})_|\`(?![ ])(.+?)${nonWhitespaceEscapeBefore}\`_)$`), // ((?P<simple>%(simplename)s)_|`(?![ ])(?P<phrase>.+?)%(non_whitespace_escape_before)s`_)$'),
+            target: new RegExp(`^(_|(?!_)(\`?)(?![ \`])(.+?)${nonWhitespaceEscapeBefore})(?<!(?<!\\x00):)${nonWhitespaceEscapeBefore}[ ]?:([ ]+|$)`),
+            reference: new RegExp(`^((${simplename})_|\`(?![ ])(.+?)${nonWhitespaceEscapeBefore}\`_)$`), // ((?P<simple>%(simplename)s)_|`(?![ ])(?P<phrase>.+?)%(non_whitespace_escape_before)s`_)$'),
             substitution: new RegExp('zzzz'), // ((?![ ])(?P<name>.+?)%(non_whitespace_escape_before)s\\|)([ ]+|$)'),
         };
 
@@ -461,7 +466,7 @@ export class Body extends RSTState {
             [this.citation.bind(this),
            new RegExp(`\\.\\.[ ]+\\[(${simplename})\\]([ ]+|$)`)],
             [this.hyperlink_target.bind(this),
-             new RegExp('\\.\\.[ ]+(?![ ]|$)')],
+             new RegExp('\\.\\.[ ]+_(?![ ]|$)')],
             [this.substitution_def.bind(this),
              new RegExp('\\.\\.[ ]+\\|(?![ ]|$)')],
             [this.directive.bind(this),
@@ -470,48 +475,95 @@ export class Body extends RSTState {
     }
 
     footnote(match) {
-        /* src, srcline = self.state_machine.get_source_and_line()
-          indented, indent, offset, blank_finish = \
-          self.state_machine.get_first_known_indented(match.end())
-          label = match.group(1)
-          name = normalizeName(label)
-          footnote = nodes.footnote('\n'.join(indented))
-          footnote.source = src
-          footnote.line = srcline
-          if name[0] == '#':              # auto-numbered
-          name = name[1:]             # autonumber label
-          footnote['auto'] = 1
-          if name:
-          footnote['names'].append(name)
-          self.document.note_autofootnote(footnote)
-          elif name == '*':               # auto-symbol
-          name = ''
-          footnote['auto'] = '*'
-          self.document.note_symbol_footnote(footnote)
-          else:                           # manually numbered
-          footnote += nodes.label('', label)
-          footnote['names'].append(name)
-          self.document.note_footnote(footnote)
-          if name:
-          self.document.note_explicit_target(footnote, footnote)
-          else:
-          self.document.set_id(footnote, footnote)
-          if indented:
-          self.nested_parse(indented, input_offset=offset, node=footnote)
-          return [footnote], blank_finish
-        */
+        const [ src, srcline ] = this.stateMachine.getSourceAndLine()
+        const [ indented, indent, offset, blank_finish ] =
+	      this.stateMachine.getFirstKnownIndented( { indent: match.index + match[0].length });
+        const label = match[1]
+        const name = normalizeName(label)
+        const footnote = new nodes.footnote(indented.join('\n'))
+        footnote.source = src
+        footnote.line = srcline
+        if(name[0] === '#') { // auto-numbered
+            const name = name.substring(1) // autonumber label
+            footnote.attributes['auto'] = 1
+            if(name) {
+		footnote.attributes['names'].push(name)
+	    }
+            this.document.noteAutofootnote(footnote)
+	} else if (name === '*') {// auto-symbol
+            const name = ''
+            footnote.attributes['auto'] = '*'
+            this.document.noteSymbolFootnote(footnote)
+	} else {
+            // manually numbered
+            footnote.add(new nodes.label('', label))
+            footnote.attributes['names'].push(name)
+            this.document.noteFootnote(footnote)
+	}
+        if(name) {
+	    this.document.noteExplicitTarget(footnote, footnote)
+	} else {
+	    this.document.setId(footnote, footnote)
+	}
+
+        if(indented && indented.length) {
+            this.nestedParse( indented, { inputOffset: offset, node: footnote});
+	}
+        return [[footnote], blank_finish];
     }
 
     citation(match) {
-        throw new Unimp('citation');
+	const [ src, srcline]  = this.stateMachine.getSourceAndLine()
+	const [ indented, indent, offset, blank_finish ] =
+	      this.stateMachine.getFirstKnownIndented(match.index + match[0].length);
+	const label = match[1]
+	const name = normalizeName(label)
+	const citation = new nodes.citation(indented.join('\n'));
+
+	citation.source = src
+	citation.line = srcline
+	citation.add(new nodes.label('', label))
+	citation.attributes['names'].push(name)
+	this.document.noteCitation(citation)
+	this.document.noteExplicitTarget(citation, citation)
+	if(indented && indented.length) {
+	    this.nestedParse(indented, {inputOffset: offset, node: citation});
+	}
+	return[ [citation], blank_finish]
+
     }
 
     hyperlink_target(match) {
-        throw new Unimp('hyperlink_target');
+        const pattern = this.explicit.patterns.target;
+        const lineno = this.stateMachine.absLineNumber();
+        const [block, indent, offset, blank_finish] = this.stateMachine.getFirstKnownIndented({ indent: match.index + match[0].length, untilBlank: true, stripIndent: false });
+        const blocktext = match.input.substring(0, match.index + match[0].length) + block.join('\n');
+        const block2 = [];
+        block.forEach(line => block2.push(escape2null(line)));
+        let escaped = block2[0];
+        let blockindex = 0;
+        let targetmatch;
+        while (true) {
+            targetmatch = pattern.exec(escaped);
+            if (targetmatch) {
+                break;
+            }
+	    blockindex += 1;
+	    if (blockindex === block2.length) {
+                throw new MarkupError('malformed hyperlink target.');
+            }
+            escaped += block2[blockindex];
+        }
+        block2.splice(0, blockindex);
+        block2[0] = (`${block2[0]} `).substring(targetmatch.index + targetmatch[0].length - escape.length + 1).trim();
+        const target = this.make_target(block2, blocktext, lineno,
+                                  targetmatch[3]);
+        return [[target], blank_finish];
     }
 
     make_target(block, block_text, lineno, target_name) {
         const [target_type, data] = this.parse_target(block, block_text, lineno);
+	console.log(`target type if ${target_type} and data is ${data}`);
         if (target_type === 'refname') {
             const target = new nodes.target(block_text, '', [], { refname: normalizeName(data) });
             target.indirectReferenceName = data;
@@ -527,6 +579,7 @@ export class Body extends RSTState {
     }
 
     parse_target(block, block_text, lineno) {
+	console.log(`parse_target(${block}, ${block_text}, ${lineno})`);
         /* """
         Determine the type of reference of a target.
 
@@ -564,7 +617,7 @@ export class Body extends RSTState {
         target.line = lineno;
         if (targetname) {
             const name = normalizeName(unescape(targetname));
-            target.attributes.names.append(name);
+            target.attributes.names.push(name);
             if (refuri) {
                 const uri = this.inliner.adjust_uri(refuri);
                 /* istanbul ignore else */
@@ -605,6 +658,7 @@ export class Body extends RSTState {
     }
 
     run_directive(directive, match, type_name, option_presets) {
+        throw new Error("no run_directive");
 /*        """
         Parse a directive then run its directive function.
 
@@ -630,30 +684,30 @@ export class Body extends RSTState {
         if isinstance(directive, (FunctionType, MethodType)):
             from docutils.parsers.rst import convert_directive_function
             directive = convert_directive_function(directive)
-        lineno = self.state_machine.abs_line_number()
-        initial_line_offset = self.state_machine.line_offset
+        lineno = this.state_machine.abs_line_number()
+        initial_line_offset = this.state_machine.line_offset
         indented, indent, line_offset, blank_finish \
-                  = self.state_machine.get_first_known_indented(match.end(),
+                  = this.state_machine.get_first_known_indented(match.end(),
                                                                 strip_top=0)
-        block_text = '\n'.join(self.state_machine.input_lines[
-            initial_line_offset : self.state_machine.line_offset + 1])
+        block_text = '\n'.join(this.state_machine.input_lines[
+            initial_line_offset : this.state_machine.line_offset + 1])
         try:
             arguments, options, content, content_offset = (
-                self.parse_directive_block(indented, line_offset,
+                this.parse_directive_block(indented, line_offset,
                                            directive, option_presets))
         except MarkupError, detail:
-            error = self.reporter.error(
+            error = this.reporter.error(
                 'Error in "%s" directive:\n%s.' % (type_name,
                                                    ' '.join(detail.args)),
                 nodes.literal_block(block_text, block_text), line=lineno)
             return [error], blank_finish
         directive_instance = directive(
             type_name, arguments, options, content, lineno,
-            content_offset, block_text, self, self.state_machine)
+            content_offset, block_text, this, this.state_machine)
         try:
             result = directive_instance.run()
         except docutils.parsers.rst.DirectiveError, error:
-            msg_node = self.reporter.system_message(error.level, error.msg,
+            msg_node = this.reporter.system_message(error.level, error.msg,
                                                     line=lineno)
             msg_node += nodes.literal_block(block_text, block_text)
             result = [msg_node]
@@ -664,17 +718,17 @@ export class Body extends RSTState {
                    ('Directive "%s" returned non-Node object (index %s): %r'
                     % (type_name, i, result[i]))
         return (result,
-                blank_finish or self.state_machine.is_next_line_blank())
+                blank_finish or this.state_machine.is_next_line_blank())
         */
-        throw new Unimp('run_Directive');
+        //throw new Unimp('run_Directive');
     }
 
     comment(match) {
-        /* if not match.string[match.end():].strip() \
-              and self.state_machine.is_next_line_blank(): # an empty comment?
+        /* if(!match.string[match.end():].strip() \
+              and this.state_machine.is_next_line_blank(): # an empty comment?
             return [nodes.comment()], 1 # "A tiny but practical wart."
         indented, indent, offset, blank_finish = \
-              self.state_machine.get_first_known_indented(match.end())
+              this.state_machine.get_first_known_indented(match.end())
         while indented and not indented[-1].strip():
             indented.trim_end()
         text = '\n'.join(indented)
@@ -684,7 +738,11 @@ export class Body extends RSTState {
 
     explicit_markup(match, context, next_state) {
         /* """Footnotes, hyperlink targets, directives, comments.""" */
-        const [nodelist, blank_finish] = this.explicit_construct(match);
+	const r = this.explicit_construct(match);
+	if(!isIterable(r)) {
+	    throw new Error("");
+	}
+        const [nodelist, blank_finish] = r;
         this.parent.add(nodelist);
         this.explicit_list(blank_finish);
         return [[], next_state, []];
@@ -696,14 +754,18 @@ export class Body extends RSTState {
         const errors = [];
         for (const [method, pattern] of this.explicit.constructs) {
 //      this.explicit.constructs.forEach(([ method, pattern ]) =>{
-            const expmatch = pattern.exec(`^${match.result.input}`);
+            const expmatch = pattern.exec(match.result.input);
             if (expmatch) {
                 try {
-                    return method(expmatch); /* can also use bind */
+                    const r = method(expmatch); /* can also use bind */
+                    if(!isIterable(r)) {
+                        throw new Error(`eed iterable from method related to ${pattern}`)
+                    }
+                    return r;
                 } catch (error) {
                     if (error instanceof MarkupError) {
                         const lineno = this.stateMachine.absLineNumber();
-                        const message = error.args.join(' ');
+                        const message = error.args ? error.args.join(' ') : '';
                         errors.push(this.reporter.warning(message, [], { line: lineno }));
                         break;
                     }
@@ -1082,7 +1144,7 @@ initialState: 'EnumeratedList',
 
     parse_field_marker(match) {
         /* """Extract & return field name from a field marker match.""" */
-        console.log(match);
+//        console.log(match);
         let field = match.result[0].substring(1);
         field = field.substring(0, field.lastIndexOf(':'));
         return field;
@@ -1269,17 +1331,17 @@ initialState: 'LineBlock',
         return [line, messages, blank_finish];
     }
 
-    nest_line_block_lines(self, block) {
-        /*
-        for index in range(1, len(block)):
-            if getattr(block[index], 'indent', None) is None:
-                block[index].indent = block[index - 1].indent
-        self.nest_line_block_segment(block)
-        */
+    nest_line_block_lines(block) {
+	for(let i = 1; i < blck.length; i+= 1) {
+	    if(typeof block[index].indent === 'undefined') {
+		block[index].indent = block[index - 1].indent
+	    }
+	}
+        this.nest_line_block_segment(block)
     }
 
 /*
-    def nest_line_block_segment(self, block):
+    def nest_line_block_segment(this, block):
         indents = [item.indent for item in block]
         least = min(indents)
         new_items = []
@@ -1289,179 +1351,232 @@ initialState: 'LineBlock',
                 new_block.append(item)
             else:
                 if len(new_block):
-                    self.nest_line_block_segment(new_block)
+                    this.nest_line_block_segment(new_block)
                     new_items.append(new_block)
                     new_block = nodes.line_block()
                 new_items.append(item)
         if len(new_block):
-            self.nest_line_block_segment(new_block)
+            this.nest_line_block_segment(new_block)
             new_items.append(new_block)
         block[:] = new_items
 */
     grid_table_top(match, context, next_state) {
         // """Top border of a full table."""
         return this.table_top(match, context, next_state,
-                              this.isolate_grid_table,
+                              this.isolate_grid_table.bind(this),
                               tableparser.GridTableParser);
     }
 
     simple_table_top(match, context, next_state) {
         /* """Top border of a simple table.""" */
         return this.table_top(match, context, next_state,
-                              this.isolate_simple_table,
+                              this.isolate_simple_table.bind(this),
                               tableparser.SimpleTableParser);
     }
 
-/*
-    def table_top(self, match, context, next_state,
-                  isolate_function, parser_class):
-        """Top border of a generic table."""
-        nodelist, blank_finish = self.table(isolate_function, parser_class)
-        self.parent += nodelist
-        if not blank_finish:
-            msg = self.reporter.warning(
-                'Blank line required after table.',
-                line=this.stateMachine.absLineNumber()+1)
-            self.parent += msg
-        return [], next_state, []
+    table_top(match, context,next_state,isolate_function, parser_class) {
+        //"""Top border of a generic table."""
+        const [ nodelist, blank_finish ] = this.table(isolate_function, parser_class)
+        this.parent.add( nodelist)
+        if(! blank_finish) {
+            const msg = this.reporter.warning(
+                'Blank line required after table.', [],
+                { line: this.stateMachine.absLineNumber()+1});
+            this.parent.add(msg);
+	}
+        return [[], next_state, []]
+    }
 
-    def table(self, isolate_function, parser_class):
-        """Parse a table."""
-        block, messages, blank_finish = isolate_function()
-        if block:
-            try:
-                parser = parser_class()
-                tabledata = parser.parse(block)
-                tableline = (this.stateMachine.absLineNumber() - len(block)
-                             + 1)
-                table = self.build_table(tabledata, tableline)
-                nodelist = [table] + messages
-            except tableparser.TableMarkupError, err:
-                nodelist = self.malformed_table(block, ' '.join(err.args),
-                                                offset=err.offset) + messages
-        else:
+    table(isolate_function, parser_class) {
+        //"""Parse a table."""
+	const r = isolate_function();
+	if(!isIterable(r)) {
+	    throw new Error();
+	}
+        const [block, messages, blank_finish] = r;
+	let nodelist;
+        if(block && block.length) {
+            try {
+                const parser = new parser_class()
+                const tabledata = parser.parse(block)
+                const tableline = (this.stateMachine.absLineNumber() - block.length + 1)
+                const table = this.build_table(tabledata, tableline)
+                nodelist = [table, ... messages]
+	    } catch(error) {
+		if(error instanceof tableparser.TableMarkupError) {
+                    nodelist = [...this.malformed_table(block, error.args? error.args.join(' ') : '',
+							error.offset), ...messages];
+		} else {
+		    throw error;
+		}
+	    }
+	} else {
             nodelist = messages
-        return nodelist, blank_finish
+	}
+        return [nodelist, blank_finish]
+    }
 
-    def isolate_grid_table(self):
-        messages = []
-        blank_finish = 1
-        try:
-            block = this.stateMachine.get_text_block(flush_left=True)
-        except statemachine.UnexpectedIndentationError, err:
-            block, src, srcline = err.args
-            messages.append(self.reporter.error('Unexpected indentation.',
-                                                source=src, line=srcline))
-            blank_finish = 0
+    isolate_grid_table() {
+	const messages = []
+	let block;
+	let blank_finish = 1
+        try {
+            block = this.stateMachine.getTextBlock(0, true);
+	} catch(error) {
+	    if(error instanceof statemachine.UnexpectedIndentationError) {
+		const [ block, src, srcline ] = err.args
+		messages.add(this.reporter.error('Unexpected indentation.',[],
+                                                 { source: src, line: srcline}));
+		blank_finish = 0
+	    }
+	}
+
+	if(!block) {
+	    throw new Error();
+	}
+
         block.disconnect()
-        # for East Asian chars:
-        block.pad_double_width(self.double_width_pad_char)
-        width = len(block[0].strip())
-        for i in range(len(block)):
-            block[i] = block[i].strip()
-            if block[i][0] not in '+|': # check left edge
+        // for East Asian chars:
+        block.padDoubleWidth(this.doubleWidthPadChar)
+        const width = block[0].trim().length
+	for(let i = 0; i<block.length; i+= 1) {
+            block[i] = block[i].trim()
+            if(block[i][0] !== '+' && block[i][0] !== '|') {//check left edge
                 blank_finish = 0
-                this.stateMachine.previous_line(len(block) - i)
-                del block[i:]
-                break
-        if not self.grid_table_top_pat.match(block[-1]): # find bottom
+                this.stateMachine.previousLine(block.length - i)
+		block.splice(i, block.length - i);
+                break;
+	    }
+	}
+        if(!gridTableTopPat.test(block[block.length - 1])) {// find bottom
             blank_finish = 0
-            # from second-last to third line of table:
-            for i in range(len(block) - 2, 1, -1):
-                if self.grid_table_top_pat.match(block[i]):
-                    this.stateMachine.previous_line(len(block) - i + 1)
-                    del block[i+1:]
-                    break
-            else:
-                messages.extend(self.malformed_table(block))
-                return [], messages, blank_finish
-        for i in range(len(block)):     # check right edge
-            if len(block[i]) != width or block[i][-1] not in '+|':
-                messages.extend(self.malformed_table(block))
-                return [], messages, blank_finish
-        return block, messages, blank_finish
+	    // from second-last to third line of table:
+	    let myBreak = false;
+	    for(let i = block.length - 2; i >= 1; i -= 1) { //fixme test
+		//for i in range(len(block) - 2, 1, -1):
+                if(this.grid_table_top_pat.test(block[i])) {
+                    this.stateMachine.previousLine(block.length - i + 1)
+		    block.splice(i + 1, block.length - (i + 1));
+		    myBreak = true;
+                    break;
+		}
+	    }
+	    if(!myBreak) {
+                messages.push(...this.malformed_table(block));
+                return [[], messages, blank_finish];
+	    }
+	}
 
-    def isolate_simple_table(self):
-        start = this.stateMachine.line_offset
-        lines = this.stateMachine.input_lines
-        limit = len(lines) - 1
-        toplen = len(lines[start].strip())
-        pattern_match = self.simple_table_border_pat.match
-        found = 0
-        found_at = None
-        i = start + 1
-        while i <= limit:
-            line = lines[i]
-            match = pattern_match(line)
-            if match:
-                if len(line.strip()) != toplen:
-                    this.stateMachine.next_line(i - start)
-                    messages = self.malformed_table(
-                        lines[start:i+1], 'Bottom/header table border does '
-                        'not match top border.')
-                    return [], messages, i == limit or not lines[i+1].strip()
+        for(let i = 0; i < block.length; i += 1) { // check right edge
+            if(block[i].length !== width || !/[\+\|]/.test(block[i][block[i].length-1])) {
+                messages.push(...this.malformed_table(block))
+                return [[], messages, blank_finish];
+	    }
+	}
+        return [block, messages, blank_finish]
+    }
+
+    isolate_simple_table() {
+        const start = this.stateMachine.lineOffset
+        const lines = this.stateMachine.inputLines
+        const limit = lines.length - 1
+        const toplen = lines[start].trim().length;
+        const pattern_match = simpleTableBorderPat.exec.bind(simpleTableBorderPat);
+        let found = 0
+        let found_at = undefined;
+        let i = start + 1
+	let myBreak = false;
+	let end;
+        while( i <= limit) {
+            const line = lines[i];
+            const match = pattern_match(line);
+            if(match) {
+                if(line.trim().length !== toplen) {
+                    this.stateMachine.nextLine(i - start)
+                    const messages = this.malformed_table(
+                        lines.slice(start, i + 1),
+			'Bottom/header table border does not match top border.')
+                    return [[], messages, i === limit || !lines[i+1].trim()];
+		}
                 found += 1
                 found_at = i
-                if found == 2 or i == limit or not lines[i+1].strip():
+                if(found === 2 || i === limit || !lines[i+1].trim()) {
                     end = i
-                    break
+		    myBreak = true;
+		}
+	    }
             i += 1
-        else:                           # reached end of input_lines
-            if found:
+	}
+	let block;
+	if(!myBreak) {
+	    // reached end of input_lines
+	    let extra;
+            if(found) {
                 extra = ' or no blank line after table bottom'
-                this.stateMachine.next_line(found_at - start)
-                block = lines[start:found_at+1]
-            else:
+                this.stateMachine.nextLine(found_at - start)
+                block = lines.slice(start, found_at+1)
+	    } else {
                 extra = ''
                 this.stateMachine.next_line(i - start - 1)
-                block = lines[start:]
-            messages = self.malformed_table(
-                block, 'No bottom table border found%s.' % extra)
-            return [], messages, not extra
-        this.stateMachine.next_line(end - start)
-        block = lines[start:end+1]
-        # for East Asian chars:
-        block.pad_double_width(self.double_width_pad_char)
-        return block, [], end == limit or not lines[end+1].strip()
+                block = lines.slice(start);
+	    }
+            const messages = this.malformed_table(
+                block, `No bottom table border found${extra}`)
+            return [[], messages, !extra]
+	}
+        this.stateMachine.nextLine(end - start)
+        block = lines.slice(start, end+1)
+	// for East Asian chars:
+        block.padDoubleWidth(this.doubleWidthPadChar)
+        return [block, [], end === limit || !lines[end+1].trim()]
+    }
 
-    def malformed_table(self, block, detail='', offset=0):
-        block.replace(self.double_width_pad_char, '')
-        data = '\n'.join(block)
-        message = 'Malformed table.'
-        startline = this.stateMachine.absLineNumber() - len(block) + 1
-        if detail:
+    malformed_table(block, detail='', offset=0) {
+	block.replace(this.doubleWidthPadChar, '');
+        const data = block.join('\n')
+        const message = 'Malformed table.'
+        const startline = this.stateMachine.absLineNumber() - block.length + 1
+        if(detail) {
             message += '\n' + detail
-        error = self.reporter.error(message, nodes.literal_block(data, data),
-                                    line=startline+offset)
+	}
+        const error = this.reporter.error(message, [new nodes.literal_block(data, data)], {line:startline+offset})
         return [error]
-
-    def build_table(self, tabledata, tableline, stub_columns=0, widths=None):
-        colwidths, headrows, bodyrows = tabledata
-        table = nodes.table()
-        if widths == 'auto':
-            table['classes'] += ['colwidths-auto']
-        elif widths: # "grid" or list of integers
-            table['classes'] += ['colwidths-given']
-        tgroup = nodes.tgroup(cols=len(colwidths))
-        table += tgroup
-        for colwidth in colwidths:
-            colspec = nodes.colspec(colwidth=colwidth)
-            if stub_columns:
-                colspec.attributes['stub'] = 1
-                stub_columns -= 1
-            tgroup += colspec
-        if headrows:
-            thead = nodes.thead()
-            tgroup += thead
-            for row in headrows:
-                thead += self.build_table_row(row, tableline)
-        tbody = nodes.tbody()
-        tgroup += tbody
-        for row in bodyrows:
-            tbody += self.build_table_row(row, tableline)
+    }
+    build_table( tabledata, tableline, stub_columns=0, widths) {
+	const [ colwidths, headrows, bodyrows ] = tabledata
+	const table = new nodes.table()
+	if(widths === 'auto') {
+	    table.attributes['classes'].push('colwidths-auto');
+	} else if(widths) {//: # "grid" or list of integers
+	    table.attributes['classes'].push(['colwidths-given'])
+	}
+	const tgroup = new nodes.tgroup('', [], { cols: colwidths.length });
+        table.add(tgroup)
+        for(colwidth in colwidths) {
+	    const colspec = new nodes.colspec('', [], { colwidth });
+	    if(stub_columns)  {
+		colspec.attributes['stub'] = 1
+		stub_columns -= 1
+	    }
+            tgroup.add(colspec);
+	}
+        if(headrows) {
+            const thead = new nodes.thead('', '', [], {})
+            tgroup.add(thead)
+            for(let row of headrows) {
+                thead.add(this.build_table_row(row, tableline));
+	    }
+	}
+        const tbody = new nodes.tbody()
+        tgroup.add(tbody)
+        for(let row of bodyrows) {
+            tbody.add(this.build_table_row(row, tableline))
+	}
         return table
+    }
+	/*
 
-    def build_table_row(self, rowdata, tableline):
+    def build_table_row(this, rowdata, tableline):
         row = nodes.row()
         for cell in rowdata:
             if cell is None:
@@ -1475,7 +1590,7 @@ initialState: 'LineBlock',
             entry = nodes.entry(**attributes)
             row += entry
             if ''.join(cellblock):
-                self.nested_parse(cellblock, input_offset=tableline+offset,
+                this.nested_parse(cellblock, input_offset=tableline+offset,
                                   node=entry)
         return row
 
@@ -1829,7 +1944,7 @@ srcline;
                     node_list[node_list.length - 1].add(textnode);
                     for (const part of parts.slice(1)) {
                         node_list.push(
-                            new nodes.classifier(unescape(part, false), part),
+                            new nodes.classifier(unescape(part, false), [part]),
 );
                     }
                 }
@@ -1987,7 +2102,7 @@ export class Line extends SpecializedText {
         const messages = [];
         if (columnWidth(title) > overline.length) {
             const blocktext = `${overline}\n${title}\n${underline}`;
-            if (overline.trimEnd().length() < 4) {
+            if (overline.trimEnd().length < 4) {
                 this.shortOverline(context, blocktext, lineno, 2);
             } else {
                 const msg = this.reporter.warning(
@@ -2106,7 +2221,7 @@ export class SpecializedBody extends Body {
 export class BulletList extends SpecializedBody {
     bullet(match, context, nextState) {
         if (match.result.input[0] !== this.parent.attributes.bullet) {
-            this.invalidInput();
+            this.invalid_input();
         }
         const [listitem, blankFinish] = this.list_item(match.result.index + match.result[0].length);
         this.parent.add(listitem);
@@ -2210,6 +2325,31 @@ class Explicit extends SpecializedBody {
         return [[], next_state, []];
     }
 
+    explicit_construct(match) {
+        // """Determine which explicit construct this is, parse & return it."""
+        const errors = [];
+        for (const [method, pattern] of this.explicit.constructs) {
+            const expmatch = pattern.exec(match.result.input);
+            if (expmatch) {
+                try {
+                    const r = method(expmatch);
+//		    console.log(r);
+		    return r;
+		} catch (error) {
+		    if (error instanceof MarkupError) {
+			const lineno = this.stateMachine.absLineNumber();
+			const message = ' '.join(error.args);
+			errors.push(this.reporter.warning(message, [], { line: lineno }));
+			break;
+		    }
+		    throw error;
+		}
+	    }
+	}
+        const [nodelist, blank_finish] = this.comment(match);
+        return [[...nodelist, ...errors], blank_finish];
+    }
+
     anonymous(match, context, next_state) {
         // """Anonymous hyperlink targets."""
         const [nodelist, blank_finish] = this.anonymous_target(match);
@@ -2290,12 +2430,12 @@ export const stateClasses = [Body, BulletList, DefinitionList,
         const blocktext = overline + '\n' + this.stateMachine.line
         const lineno = this.stateMachine.absLineNumber() - 1
 //        if len(overline.rstrip()) < 4:
-//            self.shortOverline(context, blocktext, lineno, 1)
+//            this.shortOverline(context, blocktext, lineno, 1)
         const msg = this.reporter.error(
               'Invalid section title or transition marker.',
             [new nodes.literal_block(blocktext, blocktext)],
             { line: lineno })
-        self.parent.add(msg)
+        this.parent.add(msg)
         return [[], 'Body', []]
     }
 */

@@ -2,6 +2,25 @@ import * as nodes from './nodes';
 import { InvalidArgumentsError, SystemMessage, UnimplementedError as Unimp } from './Exceptions'
 //export { SystemMessge };
 
+export function getTrimFootnoteRefSpace(settings) {
+    /*    """
+    Return whether or not to trim footnote space.
+
+    If trim_footnote_reference_space is not None, return it.
+
+    If trim_footnote_reference_space is None, return False unless the
+    footnote reference style is 'superscript'.
+    """*/
+    return false;
+}
+/*
+    if settings.trim_footnote_reference_space is None:
+        return hasattr(settings, 'footnote_references') and \
+               settings.footnote_references == 'superscript'
+    else:
+        return settings.trim_footnote_reference_space
+*/
+
 export function columnWidth(text) { //fixme
     return text.length;
 }

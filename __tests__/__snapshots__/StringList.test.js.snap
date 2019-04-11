@@ -1,0 +1,78 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`0 1`] = `
+StringList [
+  "test",
+  "123",
+  "lalala",
+]
+`;
+
+exports[`0 2`] = `
+StringList [
+  "t",
+  "",
+  "ala",
+]
+`;
+
+exports[`0 3`] = `
+StringList [
+  "",
+  "ala",
+]
+`;
+
+exports[`0 splice: final 1`] = `
+StringList [
+  "123",
+  "lalala",
+]
+`;
+
+exports[`0 splice: original 1`] = `
+StringList [
+  "test",
+  "123",
+  "lalala",
+]
+`;
+
+exports[`0 splice: splice return 1`] = `
+StringList [
+  "test",
+]
+`;
+
+exports[`constructor 1`] = `
+Array [
+  Array [
+    "source",
+    0,
+  ],
+  Array [
+    "source",
+    1,
+  ],
+]
+`;
+
+exports[`constructor with parent 1`] = `
+Array [
+  Array [
+    "source",
+    0,
+  ],
+  Array [
+    "source",
+    1,
+  ],
+]
+`;
+
+exports[`constructor with parent 2`] = `
+StringList [
+  "a",
+  "b",
+]
+`;

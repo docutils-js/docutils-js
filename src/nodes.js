@@ -545,12 +545,17 @@ export class document extends Element {
 	if(this.refNames[node.refname]) {
 	    this.refNames[node.refname].push(node);
 	} else {
-	    this.refNames[node.refName] = a;
+	    this.refNames[node.refname] = a;
 	}
     }
 
     noteRefId(node) {
-	this.refIds.setDefault(node.refid, []).push(node);
+	const a = [node];
+	if(this.refIds[node.refid]) {
+	    this.refIds[node.refid].push(node);
+	} else {
+	    this.refIds[node.refid] = a;
+	}
     }
 
     noteIndirectTarget(target) {
@@ -591,7 +596,12 @@ export class document extends Element {
 
     noteFootnoteRef(ref) {
 	this.setId(ref);
-	this.footnoteRefs.setDefault(ref.refname, []).append(ref);
+	const a = [ref];
+	if(this.footnoteRefs[ref.refname]) {
+	    this.footnoteRefs[ref.refname].push(ref);
+	} else {
+	    this.footnoteRefs[ref.refname] = a;
+	}
 	this.noteRefname(ref);
     }
 
@@ -678,6 +688,7 @@ class container(General, Element): pass
 class bullet_list(Sequential, Element): pass
 class enumerated_list(Sequential, Element): pass
 class list_item(Part, Element): pass*/
+export class classifier extends TextElement {}
 export class definition_list extends Element {}
 export class definition_list_item extends Element {}
 export class term extends TextElement {}
@@ -699,6 +710,10 @@ export class emphasis extends TextElement {} // Inline
 export class strong extends TextElement {} // Inline
 export class literal extends TextElement {} // Inline
 export class reference extends TextElement {} // General, Inline, Referential
+export class footnote_reference extends TextElement {} // General, Inline, Referential
+export class citation_reference extends TextElement {} // General, Inline, Referential
+export class substitution_reference extends TextElement {} // General, Inline, Referential
+export class title_reference extends TextElement {} // General, Inline, Referential
 
 export class problematic extends TextElement {} // Inline
 

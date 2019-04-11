@@ -7,7 +7,7 @@ class Publisher {
     constructor(args) {
 	let { reader, parser, writer, source, sourceClass, destination,
 	      destinationClass, settings, debugFn }  = args;
-	console.log(source);
+//	console.log(source);
 	/* Terrible defaults ! */
 	if(!sourceClass) {
 	    sourceClass = FileInput;
@@ -148,7 +148,7 @@ class Publisher {
 	    if(this.settings === undefined) {
 		this.processCommandLine({ argv, usage, description, settingsSpec, configSection, settingsOverrides});
 	    }
-	    console.log(this.source);
+	    //console.log(this.source);
 	    this.setIO();
 
 	    //KM

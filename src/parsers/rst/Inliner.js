@@ -1,10 +1,21 @@
 import * as nodes from '../../nodes';
-import { isIterable } from '../../utils';
+import { isIterable, getTrimFootnoteRefSpace } from '../../utils';
 import { matchChars } from '../../utils/punctuationChars';
+import * as roles from './Roles';
 
 const normalize_name = nodes.fullyNormalizeName;
 
 const simplename = '\W+';
+
+const uric = `[-_.!~*'()[\\];/:@&=+$,%a-zA-Z0-9\\x00]`;
+//# Delimiter indicating the end of a URI (not part of the URI):
+const uri_end_delim = `[>]`
+const urilast = `[_~*/=+a-zA-Z0-9]`
+const uri_end = `(?:${urilast}|${uric}(?=${uri_end_delim}))`
+const emailc =  '[-_!~*\'{|}/#?^`&=+$%a-zA-Z0-9\\x00]';
+const emailPattern = `${emailc}+(?:\.${emailc}+)*(?<!\x00)@${emailc}+(?:\.${emailc}*)*%(uri_end)s`;
+//email=re.compile(self.email_pattern % args + '$',
+//                 re.VERBOSE | re.UNICODE),
 
 function buildRegexp(definition, compile = true) {
     const di = (isIterable(definition));
@@ -84,9 +95,9 @@ class Inliner {
             '`': this.interpreted_or_phrase_ref.bind(this),
             '_`': this.inline_internal_target.bind(this),
             '_': this.reference.bind(this),
+            ']_': this.footnote_reference.bind(this)
 	};
         /*
-                    ']_': this.footnote_reference.bind(this)
                     '|': this.substitution_reference.bind(this)
                     '__': this.anonymous_reference.bind(this)}
 */
@@ -139,13 +150,13 @@ class Inliner {
     }
 
     footnote_reference( match, lineno) {
-	const label = match.group['footnotelabel']
+	const label = match.groups['footnotelabel']
 	const refname = normalize_name(label)
 	const string = match.result.input
 	let before = string.substring(0, match.result.index)
 	let remaining = string.substring(match.result.index + match.result[0].length);
 	let refnode;
-	if(match.group['citationlabel']) {
+	if(match.groups['citationlabel']) {
             refnode = new nodes.citation_reference('[%s]_' % label, [],
 						   { refname })
             refnode += nodes.Text(label)
@@ -155,20 +166,20 @@ class Inliner {
             if(refname[0] === '#') {
 		const refname = refname.substring(1);
 		refnode.attributes['auto'] = 1
-		this.document.note_autofootnote_ref(refnode)
+		this.document.noteAutofootnoteRef(refnode)
 	    } else if(refname === '*') {
                 refname = ''
                 refnode.attributes['auto'] = '*'
-                this.document.note_symbol_footnote_ref(
+                this.document.noteSymbolFootnoteRef(
                     refnode)
 	    } else {
-                refnode,add(new nodes.Text(label))
+                refnode.add(new nodes.Text(label))
 	    }
             if(refname) {
                 refnode.attributes['refname'] = refname
-                this.document.note_footnote_ref(refnode)
+                this.document.noteFootnoteRef(refnode)
 	    }
-            if(utils.getTrimFootnoteRefSpace(this.document.settings)) {
+            if(getTrimFootnoteRefSpace(this.document.settings)) {
                 before = before.trimRight()
 	    }
 	}
@@ -516,7 +527,7 @@ esn;
             substitution_ref: new RegExp(this.nonWhitespaceEscapeBefore
 					 + '(\\|_{0,2})'
 					 + endStringSuffix),
-            //email: new RegExp(this.email_pattern // fixme % args + '$',
+            email: new RegExp(emailPattern), // fixme % args + '$',
             //re.VERBOSE | re.UNICODE),
 	    //            uri: new RegExp(${startStringPrefix} + '((([a-zA-Z][a-zA-Z0-9.+-]*):(((//?)?
 	    /*
@@ -650,8 +661,18 @@ sysmessages;
 	return [new nodes.Text(unescape(text), unescape(text, true))];
     }
 
+    adjust_uri( uri) {
+	console.log(uri);
+        const match = this.patterns.email.exec(uri)
+        if(match) {
+            return 'mailto:' + uri
+	} else {
+            return uri
+	}
+    }
+    
     interpreted(rawsource, text, role, lineno) {
-        const [ role_fn, messages ] = [ undefined, [] ];//roles.role(role, self.language, lineno, self.reporter) // fixme
+        const [ role_fn, messages ] = roles.role(role, this.language, lineno, this.reporter);
         if(role_fn) {
             [ nodes, messages2 ] = role_fn(role, rawsource, text, lineno, this)
 	    try{

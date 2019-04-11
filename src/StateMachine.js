@@ -65,7 +65,7 @@ export class ViewList extends Array {
     offset(i) {
 	return this.info(i)[1];
     }
-    
+
     disconnect() {
 	this.parent = undefined;
     }
@@ -94,6 +94,9 @@ export class ViewList extends Array {
         const initList = [];
         if (end == null) {
             end = this.length;
+        }
+        if(typeof start === 'undefined') {
+            start = 0;
         }
 
         for (let i = start; i < Math.min(end, this.length); i += 1) {
@@ -232,15 +235,46 @@ export class StringList extends ViewList {
     }
 
     get2dBlock(top, left, bottom, right, stripIndent) {
-        throw new Unimp('get2dblock');
+	if(typeof stripIndent === 'undefined') {
+	    stripIndent= true;
+	}
+        const block = self.slice(top, bottom)
+        let indent = right;
+        for(i = 0; i < block.length; i += 1) {
+	    // get slice from line, care for combining characters
+            const ci = utils.column_indices(block[i])
+	    if(left < 0 || left >= ci.length) {
+		left += block[i].length - ci.length
+	    } else {
+                left = ci[left]
+	    }
+	    if(right < 0 || right >= ci.length) {
+                right += block[i].length - ci.length
+	    } else{
+                right = ci[right]
+	    }
+            block[i] = line = block[i].substring(left, right).trimEnd();
+            if(line) {
+                indent = Math.min(indent, line.length - line.trimStart().length);
+	    }
+	}
+        if(strip_indent && 0 < indent < right) {
+	    for(let i = 0; i < this.length; i += 1) {
+		this[i] = this[i].substring(indent);
+	    }
+	}
+        return block
     }
 
     padDoubleWidth() {
-        throw new Unimp('padDoublewidth');
+	//        throw new Unimp('padDoublewidth');
+
     }
 
-    replace() {
-        throw new Unimp('replace');
+    replace(old, newStr) {
+	for(let i = 0; i < this.length; i++) {
+	    this[i] = this[i].replace(old, newStr);
+	}
     }
 
     trimTop(n = 1) {
@@ -348,7 +382,7 @@ export class StateMachine {
                 inputLines = [inputLines];
             }
 	    /* note: construct stringist with inputSource */
-	    
+
             this.inputLines = new StringList(inputLines, inputSource);
 //          console.log(this.inputLines);
         }

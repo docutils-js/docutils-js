@@ -16,7 +16,7 @@ and produce a well-formed data structure suitable for building a CALS table.
 import { DataError } from '../../Exceptions';
 import { strip_combining_chars } from '../../utils';
 
-class TableMarkupError extends DataError {
+export class TableMarkupError extends DataError {
     /*"""
     Raise if there is any problem with table markup.
 
@@ -25,7 +25,7 @@ class TableMarkupError extends DataError {
     """*/
 
     constructor(message, offset) {
-	super.constructor(message);
+	super(message);
 	this.offset = offset;
     }
 }
@@ -38,7 +38,7 @@ class TableParser {
     _init() {
 	this.head_body_separator_pat = None
 	//"""Matches the row separator between head rows and body rows."""
-	
+
 	this.double_width_pad_char = '\x00'
 	//"""Padding character for East Asian double-width text."""
     }
@@ -56,25 +56,23 @@ class TableParser {
         this.setup(block)
         this.find_head_body_sep()
         this.parse_table()
-        const structure = self.structure_from_cells()
+        const structure = this.structure_from_cells()
         return structure
     }
 
     find_head_body_sep() {
 	/*
         """Look for a head/body row separator line; store the line index."""
-        for i in range(len(self.block)):
-            line = self.block[i]
-            if self.head_body_separator_pat.match(line):
-                if self.head_body_sep:
-                    raise TableMarkupError(
-                        'Multiple head/body row separators '
-                        '(table lines %s and %s); only one allowed.'
-                        % (self.head_body_sep+1, i+1), offset=i)
+	for(let i  = 0; i < this.block.length; i += 1) {
+	const line = this.block[i]
+        if(this.head_body_separator_pat.exec(line)) {
+                if(this.head_body_sep) {
+                    throw new TableMarkupError(
+                        `Multiple head/body row separators (table lines ${this.head_body_sep+1} and ${i+1}); only one allowed.`, { offset: i
                 else:
-                    self.head_body_sep = i
-                    self.block[i] = line.replace('=', '-')
-        if self.head_body_sep == 0 or self.head_body_sep == (len(self.block)
+                    this.head_body_sep = i
+                    this.block[i] = line.replace('=', '-')
+        if this.head_body_sep == 0 or this.head_body_sep == (len(this.block)
                                                              - 1):
             raise TableMarkupError('The head/body row separator may not be '
                                    'the first or last line of the table.',
@@ -156,7 +154,7 @@ export class GridTableParser extends TableParser {
     parse_table() {
         /*"""
         Start with a queue of upper-left corners, containing the upper-left
-        corner of the table itself. Trace out one rectangular cell, remember
+        corner of the table itthis. Trace out one rectangular cell, remember
         it, and add its upper-right and lower-left corners to the queue of
         potential upper-left corners of further cells. Process the queue in
         top-to-bottom order, keeping track of how much of each text column has
@@ -165,50 +163,56 @@ export class GridTableParser extends TableParser {
         We'll end up knowing all the row and column boundaries, cell positions
         and their dimensions.
         """*/
-	/* here fixme
-        corners = [(0, 0)]
-        while corners:
-            top, left = corners.pop(0)
-            if top == self.bottom or left == self.right \
-                  or top <= self.done[left]:
+        const corners = [[0, 0]]
+        while(corners.length) {
+	    const [ top, left ] = corners.pop(0)
+            if(top === this.bottom || left === this.right ||
+               top <= this.done[left]) {
                 continue
-            result = self.scan_cell(top, left)
-            if not result:
-                continue
-            bottom, right, rowseps, colseps = result
-            update_dict_of_lists(self.rowseps, rowseps)
-            update_dict_of_lists(self.colseps, colseps)
-            self.mark_done(top, left, bottom, right)
-            cellblock = self.block.get_2D_block(top + 1, left + 1,
-                                                bottom, right)
-            cellblock.disconnect()      # lines in cell can't sync with parent
-            cellblock.replace(self.double_width_pad_char, '')
-            self.cells.append((top, left, bottom, right, cellblock))
-            corners.extend([(top, right), (bottom, left)])
-            corners.sort()
-        if not self.check_parse_complete():
-            raise TableMarkupError('Malformed table; parse incomplete.')
-
-    def mark_done(self, top, left, bottom, right):
-        """For keeping track of how much of each text column has been seen."""
-        before = top - 1
-        after = bottom - 1
-        for col in range(left, right):
-            assert self.done[col] == before
-            self.done[col] = after
-
+	    }
+            const result = this.scan_cell(top, left)
+            if(!result) {
+                continue;
+	    }
+            const [ bottom, right, rowseps, colseps ] = result
+            update_dict_of_lists(this.rowseps, rowseps)
+            update_dict_of_lists(this.colseps, colseps)
+            this.mark_done(top, left, bottom, right)
+            const cellblock = this.block.get_2D_block(top + 1, left + 1,
+                                                      bottom, right)
+            cellblock.disconnect()      // lines in cell can't sync with parent
+            cellblock.replace(this.doubleWidthPadChar, '')
+            this.cells.push([top, left, bottom, right, cellblock])
+            corners.push(...[[top, right], [bottom, left]])
+            //corners.sort()
+	}
+        if(!this.check_parse_complete()) {
+            throw new TableMarkupError('Malformed table; parse incomplete.');
+	}
+    }
+    
+    mark_done( top, left, bottom, right) {
+        //"""For keeping track of how much of each text column has been seen."""
+        const before = top - 1
+        const after = bottom - 1
+        for(let col = left; col < right; col++) {
+	    //assert this.done[col] == before
+	    this.done[col] = after
+	}
+    }
+    /*
     def check_parse_complete(self):
         """Each text column should have been completely seen."""
-        last = self.bottom - 1
-        for col in range(self.right):
-            if self.done[col] != last:
+        last = this.bottom - 1
+        for col in range(this.right):
+            if this.done[col] != last:
                 return False
         return True
 
     def scan_cell(self, top, left):
         """Starting at the top-left corner, start tracing out a cell."""
-        assert self.block[top][left] == '+'
-        result = self.scan_right(top, left)
+        assert this.block[top][left] == '+'
+        result = this.scan_right(top, left)
         return result
 
     def scan_right(self, top, left):
@@ -217,11 +221,11 @@ export class GridTableParser extends TableParser {
         boundaries ('+').
         """
         colseps = {}
-        line = self.block[top]
-        for i in range(left + 1, self.right + 1):
+        line = this.block[top]
+        for i in range(left + 1, this.right + 1):
             if line[i] == '+':
                 colseps[i] = [top]
-                result = self.scan_down(top, left, i)
+                result = this.scan_down(top, left, i)
                 if result:
                     bottom, rowseps, newcolseps = result
                     update_dict_of_lists(colseps, newcolseps)
@@ -236,15 +240,15 @@ export class GridTableParser extends TableParser {
         boundaries.
         """
         rowseps = {}
-        for i in range(top + 1, self.bottom + 1):
-            if self.block[i][right] == '+':
+        for i in range(top + 1, this.bottom + 1):
+            if this.block[i][right] == '+':
                 rowseps[i] = [right]
-                result = self.scan_left(top, left, i, right)
+                result = this.scan_left(top, left, i, right)
                 if result:
                     newrowseps, colseps = result
                     update_dict_of_lists(rowseps, newrowseps)
                     return i, rowseps, colseps
-            elif self.block[i][right] != '|':
+            elif this.block[i][right] != '|':
                 return None
         return None
 
@@ -254,7 +258,7 @@ export class GridTableParser extends TableParser {
         It must line up with the starting point.
         """
         colseps = {}
-        line = self.block[bottom]
+        line = this.block[bottom]
         for i in range(right - 1, left, -1):
             if line[i] == '+':
                 colseps[i] = [bottom]
@@ -262,7 +266,7 @@ export class GridTableParser extends TableParser {
                 return None
         if line[left] != '+':
             return None
-        result = self.scan_up(top, left, bottom, right)
+        result = this.scan_up(top, left, bottom, right)
         if result is not None:
             rowseps = result
             return rowseps, colseps
@@ -274,63 +278,73 @@ export class GridTableParser extends TableParser {
         """
         rowseps = {}
         for i in range(bottom - 1, top, -1):
-            if self.block[i][left] == '+':
+            if this.block[i][left] == '+':
                 rowseps[i] = [left]
-            elif self.block[i][left] != '|':
+            elif this.block[i][left] != '|':
                 return None
         return rowseps
-
-    def structure_from_cells(self):
-        """
+    */
+    
+    structure_from_cells() {
+        /*"""
         From the data collected by `scan_cell()`, convert to the final data
         structure.
-        """
-        rowseps = self.rowseps.keys()   # list of row boundaries
-        rowseps.sort()
-        rowindex = {}
-        for i in range(len(rowseps)):
-            rowindex[rowseps[i]] = i    # row boundary -> row number mapping
-        colseps = self.colseps.keys()   # list of column boundaries
-        colseps.sort()
-        colindex = {}
-        for i in range(len(colseps)):
-            colindex[colseps[i]] = i    # column boundary -> col number map
-        colspecs = [(colseps[i] - colseps[i - 1] - 1)
-                    for i in range(1, len(colseps))] # list of column widths
-        # prepare an empty table with the correct number of rows & columns
-        onerow = [None for i in range(len(colseps) - 1)]
-        rows = [onerow[:] for i in range(len(rowseps) - 1)]
-        # keep track of # of cells remaining; should reduce to zero
-        remaining = (len(rowseps) - 1) * (len(colseps) - 1)
-        for top, left, bottom, right, block in self.cells:
-            rownum = rowindex[top]
-            colnum = colindex[left]
-            assert rows[rownum][colnum] is None, (
+        """*/
+        const rowseps = Object.keys(this.rowseps); //.keys()   # list of row boundaries
+        //rowseps.sort()//?
+        const rowindex = {}
+	for(let i = 0; i < rowseps.length; i+= 1) {
+            rowindex[rowseps[i]] = i    // row boundary -> row number mapping
+	}
+        const colseps = Object.keys(this.colseps)   // list of column boundaries
+        //colseps.sort()
+        const colindex = {}
+        for(let i = 0; i < colseps.length; i+= 1) {
+            colindex[colseps[i]] = i    // column boundary -> col number map
+	}
+	const colspecs = [];
+	for(let i = 1; i < colseps.length ; i+=1) {
+	    colspecs.push(colseps[i] - colseps[i - 1] - 1);
+	}
+	//prepare an empty table with the correct number of rows & columns
+	const onerow = new Array(colseps.length - 1).fill(undefined);
+	const rows = [];
+	for(let i = 0; i <colseps.length - 1; i+=1) {
+	    rows.append(onerow.slice());
+	}
+	// keep track of # of cells remaining; should reduce to zero
+        let remaining = (rowseps.length - 1) * (colseps.length - 1)
+        for(const [top, left, bottom, right, block] of this.cells) {
+            const rownum = rowindex[top]
+            const colnum = colindex[left]
+            /*assert rows[rownum][colnum] is None, (
                   'Cell (row %s, column %s) already used.'
-                  % (rownum + 1, colnum + 1))
-            morerows = rowindex[bottom] - rownum - 1
-            morecols = colindex[right] - colnum - 1
+                  % (rownum + 1, colnum + 1))*/
+            const morerows = rowindex[bottom] - rownum - 1
+            const morecols = colindex[right] - colnum - 1
             remaining -= (morerows + 1) * (morecols + 1)
-            # write the cell into the table
+	    // write the cell into the table
             rows[rownum][colnum] = (morerows, morecols, top + 1, block)
-        assert remaining == 0, 'Unused cells remaining.'
-        if self.head_body_sep:          # separate head rows from body rows
-            numheadrows = rowindex[self.head_body_sep]
-            headrows = rows[:numheadrows]
-            bodyrows = rows[numheadrows:]
-        else:
+	}
+        //assert remaining == 0, 'Unused cells remaining.'
+	let numheadrows;
+	let bodyrows
+	let headrows;
+        if(this.head_body_sep) {//:          # separate head rows from body rows
+            numheadrows = rowindex[this.head_body_sep]
+            headrows = rows.slice(undefined, numheadrows);
+            bodyrows = rows.slice(numheadrows)
+	} else {
             headrows = []
             bodyrows = rows
-        return (colspecs, headrows, bodyrows)
-	*/
+	}
+        return [colspecs, headrows, bodyrows]
     }
+    
 }
 
 export class SimpleTableParser extends TableParser {
-}
-/*
-
-    """
+    /*"""
     Parse a simple table using `parse()`.
 
     Here's an example of a simple table::
@@ -373,170 +387,216 @@ export class SimpleTableParser extends TableParser {
           [(0, 1, 10, ['4 is a span'])],
           [(0, 0, 12, ['5']),
            (0, 0, 12, [''])]])
-    """
+    """*/
 
-    head_body_separator_pat = re.compile('=[ =]*$')
-    span_pat = re.compile('-[ -]*$')
 
-    def setup(self, block):
-        self.block = block[:]           # make a copy; it will be modified
-        self.block.disconnect()         # don't propagate changes to parent
-        # Convert top & bottom borders to column span underlines:
-        self.block[0] = self.block[0].replace('=', '-')
-        self.block[-1] = self.block[-1].replace('=', '-')
-        self.head_body_sep = None
-        self.columns = []
-        self.border_end = None
-        self.table = []
-        self.done = [-1] * len(block[0])
-        self.rowseps = {0: [0]}
-        self.colseps = {0: [0]}
 
-    def parse_table(self):
-        """
+    /*head_body_separator_pat = re.compile('=[ =]*$')
+    span_pat = re.compile('-[ -]*$')*/
+
+    setup(block) {
+	this.block = block.slice();//[:]           # make a copy; it will be modified
+	this.block.disconnect()        // don't propagate changes to parent
+	// Convert top & bottom borders to column span underlines:
+	if(this.block.length > 0 && this.block[0]) {
+	    this.block[0] = this.block[0].replace('=', '-')
+	    this.block[this.block.length-1] = this.block[this.block.length-1].replace('=', '-')
+	}
+        this.head_body_sep = undefined
+        this.columns = []
+        this.border_end = undefined
+        this.table = []
+        this.done = new Array(block[0].length).fill(-1);
+        this.rowseps = {0: [0]}
+        this.colseps = {0: [0]}
+    }
+
+    parse_table() {
+/*"""
         First determine the column boundaries from the top border, then
         process rows.  Each row may consist of multiple lines; accumulate
-        lines until a row is complete.  Call `self.parse_row` to finish the
+        lines until a row is complete.  Call `this.parse_row` to finish the
         job.
-        """
-        # Top border must fully describe all table columns.
-        self.columns = self.parse_columns(self.block[0], 0)
-        self.border_end = self.columns[-1][1]
-        firststart, firstend = self.columns[0]
-        offset = 1                      # skip top border
-        start = 1
-        text_found = None
-        while offset < len(self.block):
-            line = self.block[offset]
-            if self.span_pat.match(line):
-                # Column span underline or border; row is complete.
-                self.parse_row(self.block[start:offset], start,
-                               (line.rstrip(), offset))
+        """*/
+
+	// Top border must fully describe all table columns.
+	if(!this.block[0]) {
+	    throw new Error("here");
+	}
+        this.columns = this.parse_columns(this.block[0], 0)
+        this.border_end = this.columns[-1][1]
+        const [ firststart, firstend ] = this.columns[0]
+        let offset = 1                      //skip top border
+        let start = 1
+        let text_found = undefined;
+        while(offset < this.block.length) {
+            const line = this.block[offset]
+            if(this.span_pat.test(line)) {
+		// Column span underline or border; row is complete.
+                this.parse_row(this.block.slice(start, offset), start,
+                               [line.trimEnd(), offset])
                 start = offset + 1
                 text_found = None
-            elif line[firststart:firstend].strip():
-                # First column not blank, therefore it's a new row.
-                if text_found and offset != start:
-                    self.parse_row(self.block[start:offset], start)
+	    } else if(line.substring(firststart, firstend).trim()) {
+		// First column not blank, therefore it's a new row.
+                if(text_found && offset !== start) {
+                    this.parse_row(this.block.slice(start, offset), start)
+		}
                 start = offset
                 text_found = 1
-            elif not text_found:
+	    } else if(!text_found) {
                 start = offset + 1
+	    }
             offset += 1
+	}
+    }
 
-    def parse_columns(self, line, offset):
-        """
+    parse_columns(line, offset) {
+/*        """
         Given a column span underline, return a list of (begin, end) pairs.
-        """
-        cols = []
-        end = 0
-        while True:
-            begin = line.find('-', end)
-            end = line.find(' ', begin)
-            if begin < 0:
-                break
-            if end < 0:
-                end = len(line)
-            cols.append((begin, end))
-        if self.columns:
-            if cols[-1][1] != self.border_end:
-                raise TableMarkupError('Column span incomplete in table '
-                                       'line %s.' % (offset+1),
-                                       offset=offset)
-            # Allow for an unbounded rightmost column:
-            cols[-1] = (cols[-1][0], self.columns[-1][1])
+        """*/
+	const cols = [];
+	let end = 0
+	while(true) {
+	    const begin = line.indexOf('-', end)
+	    end = line.indexOf(' ', begin)
+	    if(begin < 0) {
+		break;
+	    }
+	    if(end < 0) {
+		end = line.length;
+	    }
+	    cols.push([begin, end])
+	}
+	if(this.columns) {
+	    if(cols[cols.length-1][1] !== this.border_end) {
+                throw new TableMarkupError(`Column span incomplete in table line ${offset+1}.`, { offset: offset });
+	    }
+	    // Allow for an unbounded rightmost column:
+	    cols[cols.length-1] = [cols[cols.length-1][0], this.columns[this.columns.length-1][1]]
+	}
         return cols
-
-    def init_row(self, colspec, offset):
-        i = 0
-        cells = []
-        for start, end in colspec:
-            morecols = 0
-            try:
-                assert start == self.columns[i][0]
-                while end != self.columns[i][1]:
+    }
+    init_row(colspec, offset) {
+	let i = 0
+	const  cells = []
+        for(const [ start, end ] of colspec) {
+            let morecols = 0
+            try {
+		//                assert start == this.columns[i][0]
+                while(end !== this.columns[i][1]) {
                     i += 1
                     morecols += 1
-            except (AssertionError, IndexError):
-                raise TableMarkupError('Column span alignment problem '
-                                       'in table line %s.' % (offset+2),
-                                       offset=offset+1)
-            cells.append([0, morecols, offset, []])
-            i += 1
-        return cells
+		}
+	    } catch(error) {
+		throw error;
+		/*            except (AssertionError, IndexError):
+			      raise TableMarkupError('Column span alignment problem '
+                              'in table line %s.' % (offset+2),
+                              offset=offset+1)
+		*/
+	    }
 
-    def parse_row(self, lines, start, spanline=None):
-        """
-        Given the text `lines` of a row, parse it and append to `self.table`.
+            cells.push([0, morecols, offset, []])
+            i += 1
+	}
+
+        return cells
+    }
+
+
+    parse_row(lines, start, spanline) {
+        /*"""
+        Given the text `lines` of a row, parse it and append to `this.table`.
 
         The row is parsed according to the current column spec (either
-        `spanline` if provided or `self.columns`).  For each column, extract
+        `spanline` if provided or `this.columns`).  For each column, extract
         text from each line, and check for text in column margins.  Finally,
         adjust for insignificant whitespace.
-        """
-        if not (lines or spanline):
-            # No new row, just blank lines.
-            return
-        if spanline:
-            columns = self.parse_columns(*spanline)
-            span_offset = spanline[1]
-        else:
-            columns = self.columns[:]
-            span_offset = start
-        self.check_columns(lines, start, columns)
-        row = self.init_row(columns, start)
-        for i in range(len(columns)):
-            start, end = columns[i]
-            cellblock = lines.get_2D_block(0, start, len(lines), end)
-            cellblock.disconnect()      # lines in cell can't sync with parent
-            cellblock.replace(self.double_width_pad_char, '')
-            row[i][3] = cellblock
-        self.table.append(row)
+        """*/
 
-    def check_columns(self, lines, first_line, columns):
-        """
+        if(!((lines && lines.length) || spanline)) {
+	    //# No new row, just blank lines.
+            return;
+	}
+	let columns;
+	let span_offset;
+        if(spanline) {
+            columns = this.parse_columns(...spanline)
+            span_offset = spanline[1]
+	} else {
+            columns = this.columns.slice();
+            span_offset = start;
+	}
+        this.check_columns(lines, start, columns)
+        const row = this.init_row(columns, start)
+	for(let i = 0; i < columns.length; i++) {
+            const [ start, end] = columns[i] ;
+            const cellblock = lines.get2DBlock(0, start, lines.length, end)
+            cellblock.disconnect()      // lines in cell can't sync with parent
+            cellblock.replace(this.doubleWidthPadChar, '')
+            row[i][3] = cellblock
+	}
+        this.table.push(row)
+    }
+
+    check_columns(lines, first_line, columns) {
+        /*"""
         Check for text in column margins and text overflow in the last column.
         Raise TableMarkupError if anything but whitespace is in column margins.
         Adjust the end value for the last column if there is text overflow.
-        """
-        # "Infinite" value for a dummy last column's beginning, used to
-        # check for text overflow:
-        columns.append((sys.maxint, None))
-        lastcol = len(columns) - 2
-        # combining characters do not contribute to the column width
-        lines = [strip_combining_chars(line) for line in lines]
-
-        for i in range(len(columns) - 1):
-            start, end = columns[i]
-            nextstart = columns[i+1][0]
-            offset = 0
-            for line in lines:
-                if i == lastcol and line[end:].strip():
-                    text = line[start:].rstrip()
-                    new_end = start + len(text)
-                    main_start, main_end = self.columns[-1]
-                    columns[i] = (start, max(main_end, new_end))
-                    if new_end > main_end:
-                        self.columns[-1] = (main_start, new_end)
-                elif line[end:nextstart].strip():
-                    raise TableMarkupError('Text in column margin '
-                        'in table line %s.' % (first_line+offset+1),
-                        offset=first_line+offset)
+        """*/
+	// "Infinite" value for a dummy last column's beginning, used to
+        // check for text overflow:
+        columns.push([ 2 ** 31 - 1, undefined]);
+        const lastcol = columns.length = 2
+	// combining characters do not contribute to the column width
+	const lines2 = []
+	for(i = 0; i < lines.length; i++) {
+	    lines[i] = stripCombiningChars(lines[i]);
+	}
+	let text;
+        for(let i = 0; i < columns.length - 1; i += 1) {
+            const [ start, end ] = columns[i];
+            const nextstart = columns[i+1][0]
+            let offset = 0
+            for(line of lines) {
+                if(i === lastcol && line.substring(end).trim()) {
+                    const text = line.substring(start).trimEnd();
+                    const new_end = start + text.length;
+                    const [ main_start, main_end ] = this.columns[this.columns.length - 11]
+                    columns[i] = [start, Math.max(main_end, new_end)]
+                    if(new_end > main_end) {
+                        this.columns[this.columns.length-1] = [main_start, new_end]
+		    }
+		}else if(line.substring(end, nextstart).trim()) {
+                    throw new TableMarkupError(
+			`Text in column margin in table line ${first_line+offset+1}.`,
+			{ offset: first_line+offset});
+		}
                 offset += 1
+	    }
+	}
         columns.pop()
+    }
 
-    def structure_from_cells(self):
-        colspecs = [end - start for start, end in self.columns]
+    structure_from_cells() {
+/*
+for(const [start, end 
+  const colspecs = [end - start for start, end in this.columns]
         first_body_row = 0
-        if self.head_body_sep:
-            for i in range(len(self.table)):
-                if self.table[i][0][2] > self.head_body_sep:
+        if this.head_body_sep:
+            for i in range(len(this.table)):
+                if this.table[i][0][2] > this.head_body_sep:
                     first_body_row = i
                     break
-        return (colspecs, self.table[:first_body_row],
-                self.table[first_body_row:])
+        return (colspecs, this.table[:first_body_row],
+                this.table[first_body_row:])
 
-
+*/
+    }
+}
+/*
 def update_dict_of_lists(master, newdata):
     """
     Extend the list values of `master` with those from `newdata`.
