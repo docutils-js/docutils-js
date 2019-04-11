@@ -58,14 +58,36 @@ export class ViewList extends Array {
         }
     }
 
+    source(i){
+	return this.info(i)[0];
+    }
+
+    offset(i) {
+	return this.info(i)[1];
+    }
+    
+    disconnect() {
+	this.parent = undefined;
+    }
+
     splice(index, num, ...elems) {
+	console.log(`enter slice ${index} ${num} [${elems.length}]`);
+	console.log(`input: ${JSON.stringify(this)}`);
 	let index2 = index;
 	let num2 = num;
-	for(let i = 0; i < this.length - num; i += 1) {
+	const returnAry = [];
+	for(let i = index; i < this.length - num; i += 1) {
+	    if(i < index + num) {
+		returnAry.push(this[i]);
+	    }
+	    console.log(`setting this[${i}] to this[${i + num}]`);
 	    this[i] = this[i + num];
 	}
+	console.log(`setting length to ${this.length - num}`);
 	this.length = this.length - num;
 	this.push(...elems);
+	console.log(`returning ${JSON.stringify(returnAry)}`);
+	return new this.constructor(returnAry);
     }
 
     slice(start, end) {
@@ -325,6 +347,8 @@ export class StateMachine {
             if (!isIterable(inputLines)) {
                 inputLines = [inputLines];
             }
+	    /* note: construct stringist with inputSource */
+	    
             this.inputLines = new StringList(inputLines, inputSource);
 //          console.log(this.inputLines);
         }
