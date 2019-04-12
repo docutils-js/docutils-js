@@ -1404,6 +1404,8 @@ initialState: 'LineBlock',
                 nodelist = [table, ... messages]
 	    } catch(error) {
 		if(error instanceof tableparser.TableMarkupError) {
+		    console.log(error);
+		    throw error;
                     nodelist = [...this.malformed_table(block, error.args? error.args.join(' ') : '',
 							error.offset), ...messages];
 		} else {
@@ -1532,6 +1534,7 @@ initialState: 'LineBlock',
     }
 
     malformed_table(block, detail='', offset=0) {
+	throw new Error(detail);
 	block.replace(this.doubleWidthPadChar, '');
         const data = block.join('\n')
         const message = 'Malformed table.'

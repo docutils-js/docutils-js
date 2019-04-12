@@ -16,7 +16,7 @@ and produce a well-formed data structure suitable for building a CALS table.
 import { DataError } from '../../Exceptions';
 import { strip_combining_chars } from '../../utils';
 
-export class TableMarkupError extends DataError {
+class TableMarkupError extends DataError {
     /*"""
     Raise if there is any problem with table markup.
 
@@ -63,25 +63,26 @@ class TableParser {
     find_head_body_sep() {
 	/*
         """Look for a head/body row separator line; store the line index."""
-	for(let i  = 0; i < this.block.length; i += 1) {
-	const line = this.block[i]
-        if(this.head_body_separator_pat.exec(line)) {
-                if(this.head_body_sep) {
-                    throw new TableMarkupError(
-                        `Multiple head/body row separators (table lines ${this.head_body_sep+1} and ${i+1}); only one allowed.`, { offset: i
-                else:
-                    this.head_body_sep = i
-                    this.block[i] = line.replace('=', '-')
-        if this.head_body_sep == 0 or this.head_body_sep == (len(this.block)
-                                                             - 1):
-            raise TableMarkupError('The head/body row separator may not be '
-                                   'the first or last line of the table.',
-                                   offset=i)
 	*/
+	for(let i  = 0; i < this.block.length; i += 1) {
+	    const line = this.block[i]
+            if(this.headBodySeparatorPat.test(line)) {
+                if(this.headBodySep) {
+                    throw new TableMarkupError(
+                        `Multiple head/body row separators (table lines ${this.headBodySep+1} and ${i+1}); only one allowed.`, i);
+		} else {
+                    this.headBodySep = i
+                    this.block[i] = line.replace('=', '-')
+		}
+	    }
+	}
+        if(this.headBodySep === 0 || this.headBodySep == (this.block.length - 1)) {
+            throw new TableMarkupError('The head/body row separator may not be the first or last line of the table.', i);
+	}
     }
 }
 
-export class GridTableParser extends TableParser {
+class GridTableParser extends TableParser {
     /*"""
     Parse a grid table using `parse()`.
 
@@ -136,7 +137,7 @@ export class GridTableParser extends TableParser {
 
     _init() {
 	super._init();
-	this.head_body_separator_pat = new RegExp('\\+=[=+]+=\\+ *$');
+	this.headBodySeparator_pat = new RegExp('\\+=[=+]+=\\+ *$');
     }
 
     setup(block) {
@@ -144,7 +145,7 @@ export class GridTableParser extends TableParser {
         this.block.disconnect()     //    # don't propagate changes to parent
         this.bottom = block.length - 1
         this.right = block[0].length - 1
-        this.head_body_sep = null
+        this.headBodySep = null
         this.done = new Array(block[0].length).fill(-1);
         this.cells = []
         this.rowseps = {0: [0]}
@@ -184,15 +185,15 @@ export class GridTableParser extends TableParser {
             cellblock.replace(this.doubleWidthPadChar, '')
             this.cells.push([top, left, bottom, right, cellblock])
             corners.push(...[[top, right], [bottom, left]])
-            //corners.sort()
-	}
+            corners.sort()
+        }
         if(!this.check_parse_complete()) {
             throw new TableMarkupError('Malformed table; parse incomplete.');
-	}
+        }
     }
     
     mark_done( top, left, bottom, right) {
-        //"""For keeping track of how much of each text column has been seen."""
+        //"""For keepoing track of how much of each text column has been seen."""
         const before = top - 1
         const after = bottom - 1
         for(let col = left; col < right; col++) {
@@ -200,90 +201,115 @@ export class GridTableParser extends TableParser {
 	    this.done[col] = after
 	}
     }
-    /*
-    def check_parse_complete(self):
-        """Each text column should have been completely seen."""
-        last = this.bottom - 1
-        for col in range(this.right):
-            if this.done[col] != last:
-                return False
-        return True
 
-    def scan_cell(self, top, left):
-        """Starting at the top-left corner, start tracing out a cell."""
-        assert this.block[top][left] == '+'
-        result = this.scan_right(top, left)
+    check_parse_complete() {
+        /*"""Each text column should have been completely seen."""*/
+        const last = this.bottom - 1
+	for(let i = 0; i < this.right; i += 1) {
+            if(this.done[i] !== last) {
+		console.log(`${this.done[i]} !== ${last}`);
+                return false;
+	    }
+	}
+        return true
+    }
+    
+    scan_cell(top, left) {
+        /*"""Starting at the top-left corner, start tracing out a cell."""*/
+        //assert this.block[top][left] == '+'
+        const result = this.scan_right(top, left)
         return result
+    }
 
-    def scan_right(self, top, left):
+    scan_right(top, left) {
+/*
         """
         Look for the top-right corner of the cell, and make note of all column
         boundaries ('+').
         """
-        colseps = {}
-        line = this.block[top]
-        for i in range(left + 1, this.right + 1):
-            if line[i] == '+':
+*/
+        const colseps = {}
+        const line = this.block[top]
+	for(let i = left + 1; i < this.right + 1; i+= 1) {
+            if(line[i] === '+') {
                 colseps[i] = [top]
-                result = this.scan_down(top, left, i)
-                if result:
-                    bottom, rowseps, newcolseps = result
+                const result = this.scan_down(top, left, i)
+                if(result) {
+                    [ bottom, rowseps, newcolseps ] = result
                     update_dict_of_lists(colseps, newcolseps)
-                    return bottom, i, rowseps, colseps
-            elif line[i] != '-':
-                return None
-        return None
-
-    def scan_down(self, top, left, right):
-        """
+                    return [ bottom, i, rowseps, colseps ]
+		}
+	    } else if(line[i] !== '-') {
+                return null;
+	    }
+	}
+        return null;
+    }
+    
+    scan_down(self, top, left, right) {
+/*        """
         Look for the bottom-right corner of the cell, making note of all row
         boundaries.
-        """
-        rowseps = {}
-        for i in range(top + 1, this.bottom + 1):
-            if this.block[i][right] == '+':
+        """*/
+        const rowseps = {}
+	for(let i = top + 1; i < this.bottom + 1; i+= 1) {
+            if(this.block[i][right] === '+') {
                 rowseps[i] = [right]
-                result = this.scan_left(top, left, i, right)
-                if result:
-                    newrowseps, colseps = result
+                const result = this.scan_left(top, left, i, right)
+                if(result) {
+                    const [ newrowseps, colseps ] = result
                     update_dict_of_lists(rowseps, newrowseps)
-                    return i, rowseps, colseps
-            elif this.block[i][right] != '|':
-                return None
-        return None
-
-    def scan_left(self, top, left, bottom, right):
-        """
+                    return [ i, rowseps, colseps ]
+		}
+	    } else if(this.block[i][right] !== '|') {
+                return null;
+	    }
+	}
+        return null;
+    }
+    
+    scan_left(self, top, left, bottom, right) {
+        /*"""
         Noting column boundaries, look for the bottom-left corner of the cell.
         It must line up with the starting point.
-        """
-        colseps = {}
-        line = this.block[bottom]
-        for i in range(right - 1, left, -1):
-            if line[i] == '+':
-                colseps[i] = [bottom]
-            elif line[i] != '-':
-                return None
-        if line[left] != '+':
-            return None
-        result = this.scan_up(top, left, bottom, right)
-        if result is not None:
-            rowseps = result
-            return rowseps, colseps
-        return None
+        """*/
 
-    def scan_up(self, top, left, bottom, right):
-        """
+        const colseps = {}
+        const line = this.block[bottom]
+	for(let i = right - 1; i > left; i=-1) {
+            if( line[i] === '+') {
+                colseps[i] = [bottom]
+	    }
+	    else  if(line[i] !== '-') {
+                return null;
+	    }
+	}
+	if( line[left] !== '+') {
+            return null;
+	}
+        const result = this.scan_up(top, left, bottom, right)
+        if(result != null) {
+            rowseps = result
+            return [ rowseps, colseps ];
+	}
+        return null;
+    }
+
+    scan_up(self, top, left, bottom, right) {
+/*        """
         Noting row boundaries, see if we can return to the starting point.
-        """
-        rowseps = {}
-        for i in range(bottom - 1, top, -1):
-            if this.block[i][left] == '+':
+        """*/
+	const rowseps = {}
+	for(i = bottom - 1; i > top; i -= 1) {
+            if(this.block[i][left] === '+') {
                 rowseps[i] = [left]
-            elif this.block[i][left] != '|':
-                return None
+	    } else if(this.block[i][left] !== '|') {
+                return null;
+	    }
+	}
         return rowseps
-    */
+    }
+    
     
     structure_from_cells() {
         /*"""
@@ -330,8 +356,8 @@ export class GridTableParser extends TableParser {
 	let numheadrows;
 	let bodyrows
 	let headrows;
-        if(this.head_body_sep) {//:          # separate head rows from body rows
-            numheadrows = rowindex[this.head_body_sep]
+        if(this.headBodySep) {//:          # separate head rows from body rows
+            numheadrows = rowindex[this.headBodySep]
             headrows = rows.slice(undefined, numheadrows);
             bodyrows = rows.slice(numheadrows)
 	} else {
@@ -342,8 +368,9 @@ export class GridTableParser extends TableParser {
     }
     
 }
+		    GridTableParser.headBodySeparatorPat = /\\+=[=+]+=\\+ *$/;
 
-export class SimpleTableParser extends TableParser {
+class SimpleTableParser extends TableParser {
     /*"""
     Parse a simple table using `parse()`.
 
@@ -391,7 +418,7 @@ export class SimpleTableParser extends TableParser {
 
 
 
-    /*head_body_separator_pat = re.compile('=[ =]*$')
+    /*headBodySeparator_pat = re.compile('=[ =]*$')
     span_pat = re.compile('-[ -]*$')*/
 
     setup(block) {
@@ -402,7 +429,7 @@ export class SimpleTableParser extends TableParser {
 	    this.block[0] = this.block[0].replace('=', '-')
 	    this.block[this.block.length-1] = this.block[this.block.length-1].replace('=', '-')
 	}
-        this.head_body_sep = undefined
+        this.headBodySep = undefined
         this.columns = []
         this.border_end = undefined
         this.table = []
@@ -581,28 +608,35 @@ export class SimpleTableParser extends TableParser {
     }
 
     structure_from_cells() {
-/*
-for(const [start, end 
-  const colspecs = [end - start for start, end in this.columns]
-        first_body_row = 0
-        if this.head_body_sep:
-            for i in range(len(this.table)):
-                if this.table[i][0][2] > this.head_body_sep:
+	const colspecs = this.columns.map(([ start, end ]) => end - start);
+        let first_body_row = 0
+        if(this.headBodySep) 
+            for(i = 0; i< this.table.length; i+= 1) {
+                if(this.table[i][0][2] > this.headBodySep) {
                     first_body_row = i
-                    break
-        return (colspecs, this.table[:first_body_row],
-                this.table[first_body_row:])
-
-*/
+                    break;
+		}
+	    }
+        return [colspecs, this.table.slice(0, first_body_row),
+                this.table.slice(first_body_row)]
     }
 }
-/*
-def update_dict_of_lists(master, newdata):
-    """
-    Extend the list values of `master` with those from `newdata`.
+
+function update_dict_of_lists(master, newdata) {
+    Object.entries(newdata).forEach(([key, values]) => {
+	if(master[key]) {
+	    master[key].push(...values);
+	} else {
+	    master[key] = [...values];
+	}
+    });
+}
+/*    Extend the list values of `master` with those from `newdata`.
 
     Both parameters must be dictionaries containing list values.
     """
     for key, values in newdata.items():
         master.setdefault(key, []).extend(values)
 */
+export { GridTableParser, SimpleTableParser, TableMarkupError };
+
