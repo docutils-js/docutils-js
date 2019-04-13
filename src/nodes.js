@@ -742,7 +742,12 @@ export class literal_block extends FixedTextElement {}
 export class doctest_block extends FixedTextElement {}
 export class math_block extends FixedTextElement {}
 export class line_block extends Element { }
-
+export class line extends TextElement {
+    _init(...args) {
+	super._init(...args);
+	this.indent = undefined;
+    }
+} // Part
 export class block_quote extends Element{ }
 export class attribution extends TextElement{ }
 export class attention extends Element{ }

@@ -95,11 +95,11 @@ class Inliner {
             '`': this.interpreted_or_phrase_ref.bind(this),
             '_`': this.inline_internal_target.bind(this),
             '_': this.reference.bind(this),
-            ']_': this.footnote_reference.bind(this)
+            ']_': this.footnote_reference.bind(this),
+            '|': this.substitution_reference.bind(this),
+            '__': this.anonymous_reference.bind(this),
 	};
         /*
-                    '|': this.substitution_reference.bind(this)
-                    '__': this.anonymous_reference.bind(this)}
 */
 
         this.implicitDispatch = [];
@@ -151,7 +151,7 @@ class Inliner {
 
     footnote_reference( match, lineno) {
 	const label = match.groups['footnotelabel']
-	const refname = normalize_name(label)
+	let refname = normalize_name(label)
 	const string = match.result.input
 	let before = string.substring(0, match.result.index)
 	let remaining = string.substring(match.result.index + match.result[0].length);
@@ -164,7 +164,7 @@ class Inliner {
 	} else {
             refnode = new nodes.footnote_reference('[%s]_' % label)
             if(refname[0] === '#') {
-		const refname = refname.substring(1);
+		refname = refname.substring(1);
 		refnode.attributes['auto'] = 1
 		this.document.noteAutofootnoteRef(refnode)
 	    } else if(refname === '*') {

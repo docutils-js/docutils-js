@@ -478,19 +478,19 @@ export class Body extends RSTState {
         const [src, srcline] = this.stateMachine.getSourceAndLine();
         const [indented, indent, offset, blank_finish] = this.stateMachine.getFirstKnownIndented({ indent: match.index + match[0].length });
         const label = match[1];
-        const name = normalizeName(label);
+        let name = normalizeName(label);
         const footnote = new nodes.footnote(indented.join('\n'));
         footnote.source = src;
         footnote.line = srcline;
         if (name[0] === '#') { // auto-numbered
-            const name = name.substring(1); // autonumber label
+            name = name.substring(1); // autonumber label
             footnote.attributes.auto = 1;
             if (name) {
 		footnote.attributes.names.push(name);
 	    }
             this.document.noteAutofootnote(footnote);
 	} else if (name === '*') { // auto-symbol
-            const name = '';
+            name = '';
             footnote.attributes.auto = '*';
             this.document.noteSymbolFootnote(footnote);
 	} else {
@@ -1282,11 +1282,11 @@ initialState: 'EnumeratedList',
         block.add(line);
         this.parent.add(messages);
         if (!blankFinish) {
-            const offset = this.stateMachine.line_offset + 1; // next line
+            const offset = this.stateMachine.lineOffset + 1; // next line
             const [new_line_offset, blankFinish2] = this.nestedListParse(
                 this.stateMachine.inputLines.slice(offset),
                 {
- inputOffset: this.stateMachine.abs_line_offset() + 1,
+ inputOffset: this.stateMachine.absLineOffset() + 1,
                   node: block,
 initialState: 'LineBlock',
                   blankFinish: 0,
@@ -1302,8 +1302,8 @@ initialState: 'LineBlock',
 ));
         }
         if (block.children.length) {
-            if (block[0].indent == null) {
-                block[0].indent = 0;
+            if (block.children[0].indent == null) {
+                block.children[0].indent = 0;
             }
             this.nest_line_block_lines(block);
         }
@@ -1312,7 +1312,7 @@ initialState: 'LineBlock',
 
     line_block_line(match, lineno) {
         // """Return one line element of a line_block."""
-        const [indented, indent, line_offset, blank_finish] = this.stateMachine.get_first_known_indented(
+        const [indented, indent, line_offset, blank_finish] = this.stateMachine.getFirstKnownIndented(
             {
  indent: match.result.index + match.result[0].length,
               untilBlank: true,
@@ -1329,7 +1329,7 @@ initialState: 'LineBlock',
     }
 
     nest_line_block_lines(block) {
-	for (let i = 1; i < blck.length; i += 1) {
+	for (let i = 1; i < block.length; i += 1) {
 	    if (typeof block[index].indent === 'undefined') {
 		block[index].indent = block[index - 1].indent;
 	    }
@@ -1337,26 +1337,42 @@ initialState: 'LineBlock',
         this.nest_line_block_segment(block);
     }
 
-/*
-    def nest_line_block_segment(this, block):
-        indents = [item.indent for item in block]
-        least = min(indents)
-        new_items = []
-        new_block = nodes.line_block()
-        for item in block:
-            if item.indent > least:
-                new_block.append(item)
-            else:
-                if len(new_block):
+    nest_line_block_segment(block) {
+	const indents = [];
+	let least;
+	for(let i = 0; i < block.length; i++) {
+	    const indent = block[i].indent;
+	    if(typeof least === 'undefined' || indent < least) {
+		least = indent;
+	    }
+	    indents.push(block[i].indent);
+	}
+        const new_items = [];
+        let new_block = new nodes.line_block()
+	for(let i = 0; i < block.length; i++) {
+	    const item = block[i];
+            if(item.indent > least) {
+                new_block.add(item)
+	    } else {
+                if(new_block.children.length) {
                     this.nest_line_block_segment(new_block)
-                    new_items.append(new_block)
-                    new_block = nodes.line_block()
-                new_items.append(item)
-        if len(new_block):
+                    new_items.push(new_block)
+                    new_block = new nodes.line_block()
+		}
+                new_items.push(item)
+	    }
+	}
+        if(new_block.length) {
             this.nest_line_block_segment(new_block)
-            new_items.append(new_block)
-        block[:] = new_items
-*/
+            new_items.push(new_block);
+	}
+	// fixme does this detach?
+	for(let i  =0; i < new_items.length; i++) {
+	    block[i] = new_items[i];
+	}
+	block.length = new_items.length;
+    }
+
     grid_table_top(match, context, next_state) {
         // """Top border of a full table."""
         return this.table_top(match, context, next_state,
