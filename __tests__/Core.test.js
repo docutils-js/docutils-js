@@ -155,7 +155,12 @@ how
     or more paragraphs or body elements, indented relative to
     the term.
 `],
-
+	   ['Footnote', `.. [1] A footnote contains body elements, consistently
+   indented by at least 3 spaces.`],
+	   ['Image Directive', `.. image:: mylogo.png\n`],
+	   ['Comment', `.. Comments begin with two dots and a space.  Anything may
+   follow, except for the syntax of footnotes/citations,
+   hyperlink targets, directives, or substitution definitions.`],
 	   ['Random', '* bullet\n* bullet\n\n '],
 	   ['Random 2', 'Header 1\n========\nText\n\nHeader 2\n-------'],
 	   ['Random 2', 'Test.\nTest2\nTest3\n-----'],
