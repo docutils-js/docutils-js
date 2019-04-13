@@ -27,7 +27,7 @@ const defaultSettings = {
     idPrefix: '',
 };
 
-test('full rst2xml pipeline with specific input', () => {
+test.only('full rst2xml pipeline with specific input', () => {
     const settings = { ...defaultSettings };
     const args = { ...defaultArgs };
 
@@ -38,19 +38,14 @@ test('full rst2xml pipeline with specific input', () => {
     };
 
     const { readerName, parserName, writerName } = args;
-    const source = new StringInput({ source: `+------------------------+------------+----------+----------+
-| Header row, column 1   | Header 2   | Header 3 | Header 4 |
-| (header rows optional) |            |          |          |
-+========================+============+==========+==========+
-| body row 1, column 1   | column 2   | column 3 | column 4 |
-+------------------------+------------+----------+----------+
-| body row 2             | Cells may span columns.          |
-+------------------------+------------+---------------------+
-| body row 3             | Cells may  | - Table cells       |
-+------------------------+ span rows. | - contain           |
-| body row 4             |            | - body elements.    |
-+------------------------+------------+---------------------+`
-				      });
+    const source = new StringInput({ source: `..
+   Local Variables:
+   mode: indented-text
+   indent-tabs-mode: nil
+   sentence-end-double-space: t
+   fill-column: 70
+   End:
+`				      });
         const destination = new StringOutput({});
     const pub = new Publisher({
  source, destination, settings, debug: true, debugFn
@@ -84,6 +79,11 @@ test.each([['Title', 'Title\n=====\nParagraph.'],
 	   ['Short overline', '===\nTitle\n===\n'],
 	   ['Short overline 2', '===\nTitle\n'],
 	   ['Incomplete title', '=====\nTitle\n'],
+	   ['Line block with continuation line', `| Lend us a couple of bob till Thursday.
+| I'm absolutely skint.
+| But I'm expecting a postal order and I can pay you back
+  as soon as it comes.
+| Love, Ewan.`],
 	   ['bullet from spec', `- This is a bullet list.
 
 - Bullets can be "*", "+", or "-".`],

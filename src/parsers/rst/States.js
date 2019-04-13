@@ -721,16 +721,18 @@ export class Body extends RSTState {
     }
 
     comment(match) {
-        /* if(!match.string[match.end():].strip() \
-              and this.state_machine.is_next_line_blank(): # an empty comment?
-            return [nodes.comment()], 1 # "A tiny but practical wart."
-        indented, indent, offset, blank_finish = \
-              this.state_machine.get_first_known_indented(match.end())
-        while indented and not indented[-1].strip():
-            indented.trim_end()
-        text = '\n'.join(indented)
-        return [nodes.comment(text, text)], blank_finish */
-        return [[], true];
+	const matchEnd = match.result.index + match.result[0].length;
+        if(!match.result.input.substring(matchEnd).trim() &&
+           this.stateMachine.isNextLineBlank()) { //# an empty comment?
+            return [[new nodes.comment()], 1] // "A tiny but practical wart."
+        }
+        const [ indented, indent, offset, blank_finish ] =
+              this.stateMachine.getFirstKnownIndented({ indent: matchEnd });
+        while(indented && indented.length && !indented[indented.length - 1].trim()) {
+            indented.trimEnd()
+        }
+        const text = indented.join('\n');
+        return [[new nodes.comment(text, text)], blank_finish];
     }
 
     explicit_markup(match, context, next_state) {
@@ -774,25 +776,24 @@ export class Body extends RSTState {
         return [[...nodelist], [...errors], blank_finish];
     }
 
-    explicit_list(blank_finish) {
+    explicit_list(blankFinish) {
         /* """
         Create a nested state machine for a series of explicit markup
         constructs (including anonymous hyperlink targets).
         """ */
         const offset = this.stateMachine.lineOffset + 1; // next line
-            let newline_offset;
-        [newline_offset, blank_finish] = this.nestedListParse(
+        const [newline_offset, blankFinish1] = this.nestedListParse(
             this.stateMachine.inputLines.slice(offset),
             {
  inputOffset: this.stateMachine.absLineOffset() + 1,
               node: this.parent,
 initialState: 'Explicit',
-              blankFinish: blank_finish,
+              blankFinish,
               matchTitles: this.stateMachine.matchTitles,
 },
 );
         this.gotoLine(newline_offset);
-        if (!blank_finish) {
+        if (!blankFinish1) {
             this.parent.add(this.unindentWarning('Explicit markup'));
         }
     }
