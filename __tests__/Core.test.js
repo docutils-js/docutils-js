@@ -276,7 +276,7 @@ item.
 			  }
 			  default_visit(node) {
 			      if(node.attributes && node.attributes.refuri) {
-				  console.log(node.attributes.refuri);
+//				  console.log(node.attributes.refuri);
 				  if(!/^https?:\/\//.test(node.attributes.refuri)) {
 				      const msg = `Invalid refuri ${node.attributes.refuri}`;
 				      const messages = [document.reporter.warning(msg, [], {})];

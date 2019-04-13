@@ -3,8 +3,10 @@ import * as nodes from '../../nodes';
 import * as directives from './directives';
 import * as tableparser from './tableparser';
 import {
-  columnWidth, unescape, isIterable, escape2null, splitEscapedWhitespace,
+  columnWidth, isIterable, escape2null, splitEscapedWhitespace,
 } from '../../utils';
+import unescape from '../../utils/unescape';
+
 
 /* import RSTStateMachine from './RSTStateMachine';
 import Inliner from './Inliner'; */
@@ -569,7 +571,7 @@ export class Body extends RSTState {
 
     make_target(block, block_text, lineno, target_name) {
         const [target_type, data] = this.parse_target(block, block_text, lineno);
-        console.log(`target type if ${target_type} and data is ${data}`);
+//        console.log(`target type if ${target_type} and data is ${data}`);
         if (target_type === 'refname') {
             const target = new nodes.target(block_text, '', [], { refname: normalizeName(data) });
             target.indirectReferenceName = data;
@@ -585,7 +587,7 @@ export class Body extends RSTState {
     }
 
     parse_target(block, block_text, lineno) {
-        console.log(`parse_target(${block}, ${block_text}, ${lineno})`);
+//        console.log(`parse_target(${block}, ${block_text}, ${lineno})`);
         /* """
         Determine the type of reference of a target.
 
