@@ -23,5 +23,5 @@ test('findCombiningChars', () => {
     expect(utils.findCombiningChars('A t̆ab̆lĕ')).toEqual([3, 6, 9])
 });
 test('columnIndicies', () => {
-    expect(utils.columnIndicies('A t̆ab̆lĕ')).toEqual([1, 2, 4, 5, 7, 8])
+    expect(utils.columnIndicies('A t̆ab̆lĕ')).toEqual([0, 1, 2, 4, 5, 7, 8])
 });

@@ -349,13 +349,14 @@ if(typeof right === 'undefined') {
         structure.
         """ */
         const rowseps = Object.keys(this.rowseps); // .keys()   # list of row boundaries
-        rowseps.sort()
+        rowseps.sort((a, b) => a - b);
+
         const rowindex = {};
         for (let i = 0; i < rowseps.length; i += 1) {
             rowindex[rowseps[i]] = i; // row boundary -> row number mapping
         }
         const colseps = Object.keys(this.colseps); // list of column boundaries
-        colseps.sort()
+        rowseps.sort((a, b) => a - b);
         const colindex = {};
         for (let i = 0; i < colseps.length; i += 1) {
             colindex[colseps[i]] = i; // column boundary -> col number map
@@ -367,7 +368,7 @@ if(typeof right === 'undefined') {
         // prepare an empty table with the correct number of rows & columns
         const onerow = new Array(colseps.length - 1).fill(undefined);
         const rows = [];
-        for (let i = 0; i < colseps.length - 1; i += 1) {
+        for (let i = 0; i < rowseps.length - 1; i += 1) {
             rows.push(onerow.slice());
         }
         // keep track of # of cells remaining; should reduce to zero
@@ -382,9 +383,12 @@ if(typeof right === 'undefined') {
             const morecols = colindex[right] - colnum - 1;
             remaining -= (morerows + 1) * (morecols + 1);
             // write the cell into the table
+	    console.log(`rows[${rownum}][${colnum}] = [${morerows}, ${morecols}, ${top + 1}, ${block}]`);
             rows[rownum][colnum] = [morerows, morecols, top + 1, block];
         }
-        // assert remaining == 0, 'Unused cells remaining.'
+	if(remaining !== 0) {
+	    throw new Error('Unused cells remaining.');
+	}
         let numheadrows;
         let bodyrows;
         let headrows;

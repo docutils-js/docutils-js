@@ -27,7 +27,7 @@ const defaultSettings = {
     idPrefix: '',
 };
 
-test('full rst2xml pipeline with specific input', () => {
+test.only('full rst2xml pipeline with specific input', () => {
     const settings = { ...defaultSettings };
     const args = { ...defaultArgs };
 
@@ -38,14 +38,19 @@ test('full rst2xml pipeline with specific input', () => {
     };
 
     const { readerName, parserName, writerName } = args;
-    const source = new StringInput({ source: `+------------------------+------------+----------+
-| Header row, column 1   | Header 2   | Header 3 |
-+========================+============+==========+
-| body row 1, column 1   | column 2   | column 3 |
-+------------------------+------------+----------+
-| body row 2             | Cells may span        |
-+------------------------+-----------------------+
-` });
+    const source = new StringInput({ source: `+------------------------+------------+----------+----------+
+| Header row, column 1   | Header 2   | Header 3 | Header 4 |
+| (header rows optional) |            |          |          |
++========================+============+==========+==========+
+| body row 1, column 1   | column 2   | column 3 | column 4 |
++------------------------+------------+----------+----------+
+| body row 2             | Cells may span columns.          |
++------------------------+------------+---------------------+
+| body row 3             | Cells may  | - Table cells       |
++------------------------+ span rows. | - contain           |
+| body row 4             |            | - body elements.    |
++------------------------+------------+---------------------+`
+				      });
         const destination = new StringOutput({});
     const pub = new Publisher({
  source, destination, settings, debug: true, debugFn
@@ -170,6 +175,18 @@ This is a test.
 	   ['Inline followed by emphasis', '**hello** and *goodbye*'],
 	   ['docutils title', '==========================================\n Docutils_ Project Documentation Overview\n==========================================\n'],
 	   ['Paragraph ending in ::', 'This is my paragraph ending in::\n'],
+	   ['more complex grid table', `+------------------------+------------+----------+----------+
+| Header row, column 1   | Header 2   | Header 3 | Header 4 |
+| (header rows optional) |            |          |          |
++========================+============+==========+==========+
+| body row 1, column 1   | column 2   | column 3 | column 4 |
++------------------------+------------+----------+----------+
+| body row 2             | Cells may span columns.          |
++------------------------+------------+---------------------+
+| body row 3             | Cells may  | - Table cells       |
++------------------------+ span rows. | - contain           |
+| body row 4             |            | - body elements.    |
++------------------------+------------+---------------------+`],
 	   ['grid table', `+------------------------+------------+----------+
 | Header row, column 1   | Header 2   | Header 3 |
 +========================+============+==========+
