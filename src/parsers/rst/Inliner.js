@@ -2,19 +2,21 @@ import * as nodes from '../../nodes';
 import { isIterable, getTrimFootnoteRefSpace, splitEscapedWhitespace } from '../../utils';
 import { matchChars } from '../../utils/punctuationChars';
 import * as roles from './Roles';
+import { ApplicationError } from '../../Exceptions';
+
 
 const normalize_name = nodes.fullyNormalizeName;
 
-const simplename = '\W+';
+const simplename = '\\w+';
 
-const uric = `[-_.!~*'()[\\];/:@&=+$,%a-zA-Z0-9\\x00]`;
-//# Delimiter indicating the end of a URI (not part of the URI):
-const uri_end_delim = `[>]`
-const urilast = `[_~*/=+a-zA-Z0-9]`
-const uri_end = `(?:${urilast}|${uric}(?=${uri_end_delim}))`
-const emailc =  '[-_!~*\'{|}/#?^`&=+$%a-zA-Z0-9\\x00]';
+const uric = '[-_.!~*\'()[\\];/:@&=+$,%a-zA-Z0-9\\x00]';
+// # Delimiter indicating the end of a URI (not part of the URI):
+const uri_end_delim = '[>]';
+const urilast = '[_~*/=+a-zA-Z0-9]';
+const uri_end = `(?:${urilast}|${uric}(?=${uri_end_delim}))`;
+const emailc = '[-_!~*\'{|}/#?^`&=+$%a-zA-Z0-9\\x00]';
 const emailPattern = `${emailc}+(?:\.${emailc}+)*(?<!\x00)@${emailc}+(?:\.${emailc}*)*%(uri_end)s`;
-//email=re.compile(self.email_pattern % args + '$',
+// email=re.compile(self.email_pattern % args + '$',
 //                 re.VERBOSE | re.UNICODE),
 
 function buildRegexp(definition, compile = true) {
@@ -94,116 +96,119 @@ class Inliner {
             '``': this.literal.bind(this),
             '`': this.interpreted_or_phrase_ref.bind(this),
             '_`': this.inline_internal_target.bind(this),
-            '_': this.reference.bind(this),
+            _: this.reference.bind(this),
             ']_': this.footnote_reference.bind(this),
             '|': this.substitution_reference.bind(this),
-            '__': this.anonymous_reference.bind(this),
+            __: this.anonymous_reference.bind(this),
 	};
         /*
 */
 
         this.implicitDispatch = [];
         this.nonWhitespaceAfter = '';
-	this.nonWhitespaceBefore = '(?<!\\s)'
+	this.nonWhitespaceBefore = '(?<!\\s)';
         this.nonWhitespaceEscapeBefore = '(?<![\\s\\x00])';
 
-	this.nonUnescapedWhitespaceEscapeBefore = '(?<!(?<!\\x00)[\\s\\x00])'
-
+	this.nonUnescapedWhitespaceEscapeBefore = '(?<!(?<!\\x00)[\\s\\x00])';
     }
 
     inline_internal_target(match, lineno) {
-        const [ before, inlines, remaining, sysmessages, endstring ] = this.inline_obj( match, lineno, this.patterns.target, nodes.target );
-        if(inlines && inlines.length && inlines[0] instanceof nodes.target) {
-            //assert len(inlines) == 1
-            const target = inlines[0]
-            const name = normalize_name(target.astext())
-            target.attributes['names'].push(name)
-            this.document.noteExplicitTarget(target, this.parent)
+        const [before, inlines, remaining, sysmessages, endstring] = this.inline_obj(match, lineno, this.patterns.target, nodes.target);
+        if (inlines && inlines.length && inlines[0] instanceof nodes.target) {
+            // assert len(inlines) == 1
+            const target = inlines[0];
+            const name = normalize_name(target.astext());
+            target.attributes.names.push(name);
+            this.document.noteExplicitTarget(target, this.parent);
 	}
-        return [ before, inlines, remaining, sysmessages ]
+        return [before, inlines, remaining, sysmessages];
     }
 
     substitution_reference(match, lineno) {
-        const [ before, inlines, remaining, sysmessages, endstring ] = this.inline_obj(
+        const [before, inlines, remaining, sysmessages, endstring] = this.inline_obj(
               match, lineno, this.patterns.substitution_ref,
-              nodes.substitution_reference)
-        if(inlines.length === 1) {
-            const subrefNode = inlines[0]
-            if(subrefNode instanceof nodes.substitution_reference) {
-                const subrefText = subrefNode.astext()
-                this.document.note_substitution_ref(subrefNode, subrefText)
-		if(endstring[endstring.length - 1] === '_') {
+              nodes.substitution_reference,
+);
+        if (inlines.length === 1) {
+            const subrefNode = inlines[0];
+            if (subrefNode instanceof nodes.substitution_reference) {
+                const subrefText = subrefNode.astext();
+                this.document.note_substitution_ref(subrefNode, subrefText);
+		if (endstring[endstring.length - 1] === '_') {
                     const referenceNode = new nodes.reference(
-                        '|' + subrefText + endstring, '')
-                    if(endstring.endsWith('__')) {
-                        referenceNode.attributes['anonymous'] = 1
+                        `|${subrefText}${endstring}`, '',
+);
+                    if (endstring.endsWith('__')) {
+                        referenceNode.attributes.anonymous = 1;
 		    } else {
-                        referenceNode.attributes['refname'] = normalize_name(subrefText)
-                        this.document.note_refname(reference_node)
+                        referenceNode.attributes.refname = normalize_name(subrefText);
+                        this.document.note_refname(referenceNode);
 		    }
-                    referenceNode.add(subrefNode)
-                    const inlines = [reference_node]
+                    referenceNode.add(subrefNode);
+                    inlines[0] = referenceNode;
 		}
 	    }
 	}
-        return [before, inlines, remaining, sysmessages]
+        return [before, inlines, remaining, sysmessages];
     }
 
-    footnote_reference( match, lineno) {
-	const label = match.groups['footnotelabel']
-	let refname = normalize_name(label)
-	const string = match.result.input
-	let before = string.substring(0, match.result.index)
-	let remaining = string.substring(match.result.index + match.result[0].length);
+    footnote_reference(match, lineno) {
+	const label = match.groups.footnotelabel;
+	let refname = normalize_name(label);
+	const string = match.result.input;
+	let before = string.substring(0, match.result.index);
+	const remaining = string.substring(match.result.index + match.result[0].length);
 	let refnode;
-	if(match.groups['citationlabel']) {
+	if (match.groups.citationlabel) {
             refnode = new nodes.citation_reference('[%s]_' % label, [],
-						   { refname })
-            refnode += nodes.Text(label)
-            this.document.note_citation_ref(refnode)
+						   { refname });
+            refnode += nodes.Text(label);
+            this.document.note_citation_ref(refnode);
 	} else {
-            refnode = new nodes.footnote_reference('[%s]_' % label)
-            if(refname[0] === '#') {
+            refnode = new nodes.footnote_reference('[%s]_' % label);
+            if (refname[0] === '#') {
 		refname = refname.substring(1);
-		refnode.attributes['auto'] = 1
-		this.document.noteAutofootnoteRef(refnode)
-	    } else if(refname === '*') {
-                refname = ''
-                refnode.attributes['auto'] = '*'
+		refnode.attributes.auto = 1;
+		this.document.noteAutofootnoteRef(refnode);
+	    } else if (refname === '*') {
+                refname = '';
+                refnode.attributes.auto = '*';
                 this.document.noteSymbolFootnoteRef(
-                    refnode)
+                    refnode,
+);
 	    } else {
-                refnode.add(new nodes.Text(label))
+                refnode.add(new nodes.Text(label));
 	    }
-            if(refname) {
-                refnode.attributes['refname'] = refname
-                this.document.noteFootnoteRef(refnode)
+            if (refname) {
+                refnode.attributes.refname = refname;
+                this.document.noteFootnoteRef(refnode);
 	    }
-            if(getTrimFootnoteRefSpace(this.document.settings)) {
-                before = before.trimRight()
+            if (getTrimFootnoteRefSpace(this.document.settings)) {
+                before = before.trimRight();
 	    }
 	}
-        return [before, [refnode], remaining, []]
+        return [before, [refnode], remaining, []];
     }
 
-    reference(match, lineno, anonymous=false) {
-        const referencename = match.groups['refname']
-        const refname = normalize_name(referencename)
+    reference(match, lineno, anonymous = false) {
+        const referencename = match.groups.refname;
+        const refname = normalize_name(referencename);
         const referencenode = new nodes.reference(
-            referencename + match.groups['refend'], referencename,
+            referencename + match.groups.refend, referencename,
             [],
-            { name: nodes.whitespaceNormalizeName(referencename)})
-        referencenode.children[0].rawsource = referencename
-        if(anonymous) {
-            referencenode.attributes['anonymous'] = 1
+            { name: nodes.whitespaceNormalizeName(referencename) },
+);
+        referencenode.children[0].rawsource = referencename;
+        if (anonymous) {
+            referencenode.attributes.anonymous = 1;
 	} else {
-            referencenode.attributes['refname'] = refname
-            this.document.noteRefname(referencenode)
+            referencenode.attributes.refname = refname;
+            this.document.noteRefname(referencenode);
 	}
-        const string = match.result.input
-        const matchstart = match.result.index
-        const matchend = match.result.index + match.result[0].length
-        return [string.substring(0, matchstart), [referencenode], string.substring(matchend), []]
+        const string = match.result.input;
+        const matchstart = match.result.index;
+        const matchend = match.result.index + match.result[0].length;
+        return [string.substring(0, matchstart), [referencenode], string.substring(matchend), []];
     }
 
     anonymous_reference(match, lineno) {
@@ -229,66 +234,68 @@ class Inliner {
     }
 
     interpreted_or_phrase_ref(match, lineno) {
-        const end_pattern = this.patterns.interpreted_or_phrase_ref
-        const string = match.match.input
-	//console.log(match.groups);
-	const matchstart = match.match.index
-        const matchend = matchstart + match.match[0].length
-        const rolestart = matchstart
-        let role = match.groups['role']
-        let position = ''
-        if(role) {
-            role = role.substring(1, role.length - 1)
-            position = 'prefix'
-	} else if(this.quoted_start(match)) {
-            return [string.substring(0, matchend), [], string.substring(matchend), []]
+        const end_pattern = this.patterns.interpreted_or_phrase_ref;
+        const string = match.match.input;
+	// console.log(match.groups);
+	const matchstart = match.match.index;
+        const matchend = matchstart + match.match[0].length;
+        const rolestart = matchstart;
+        let role = match.groups.role;
+        let position = '';
+        if (role) {
+            role = role.substring(1, role.length - 1);
+            position = 'prefix';
+	} else if (this.quoted_start(match)) {
+            return [string.substring(0, matchend), [], string.substring(matchend), []];
 	}
         const endmatch = end_pattern.exec(string.substring(matchend));
-        if(endmatch && endmatch[1].length) {
-            const textend = matchend + endmatch.index + endmatch[0].length
-	    if(endmatch[3]) {
-                if(role) {
-                    const msg = self.reporter.warning(
-                        'Multiple roles in interpreted text (both '+
-                        'prefix and suffix present; only one allowed).',
-                        [], { line: lineno })
-                    const text = unescape(string.substring(rolestart, textend), true)
-                    const prb = this.problematic(text, text, msg)
+        if (endmatch && endmatch[1].length) {
+            const textend = matchend + endmatch.index + endmatch[0].length;
+	    if (endmatch[3]) {
+                if (role) {
+                    const msg = this.reporter.warning(
+                        'Multiple roles in interpreted text (both '
+                        + 'prefix and suffix present; only one allowed).',
+                        [], { line: lineno },
+);
+                    const text = unescape(string.substring(rolestart, textend), true);
+                    const prb = this.problematic(text, text, msg);
                     return [string.substring(0, rolestart), [prb], string.substring(textend), [msg]];
 		}
                 role = endmatch[3];
-		role = role.substring(1, role.length - 1)
-                position = 'suffix'
+		role = role.substring(1, role.length - 1);
+                position = 'suffix';
 	    }
             const escaped = endmatch.input.substring(0, endmatch.index);
-            const rawsource = unescape(string.substring(matchstart, textend), true)
-            if(rawsource[rawsource.length - 1] === '_') {
-                if(role) {
+            let rawsource = unescape(string.substring(matchstart, textend), true);
+            if (rawsource[rawsource.length - 1] === '_') {
+                if (role) {
                     const msg = this.reporter.warning(
-                        `Mismatch: both interpreted text role ${position} and `+
-                            `reference suffix.`, [], { line: lineno })
+                        `Mismatch: both interpreted text role ${position} and `
+                            + 'reference suffix.', [], { line: lineno },
+);
                     const text = unescape(string.substring(rolestart, textend), true);
-                    const prb = this.problematic(text, text, msg)
-                    return [string.substring(0, rolestart), [prb], string.substring(textend), [msg]]
+                    const prb = this.problematic(text, text, msg);
+                    return [string.substring(0, rolestart), [prb], string.substring(textend), [msg]];
 		}
-                return this.phrase_ref(string.substring(0, matchstart), string.substring(textend), rawsource, escaped, unescape(escaped))
-	    } else {
-                const rawsource = unescape(string.substring(rolestart, textend), true);
-                const [ nodelist, messages ] = this.interpreted(rawsource, escaped, role, lineno)
-                return [string.substring(0, rolestart), nodelist,
-                        string.substring(textend), messages]
+                return this.phrase_ref(string.substring(0, matchstart), string.substring(textend), rawsource, escaped, unescape(escaped));
 	    }
+                rawsource = unescape(string.substring(rolestart, textend), true);
+                const [nodelist, messages] = this.interpreted(rawsource, escaped, role, lineno);
+                return [string.substring(0, rolestart), nodelist,
+                        string.substring(textend), messages];
 	}
         const msg = this.reporter.warning(
-            'Inline interpreted text or phrase reference start-string '+
-		'without end-string.', [], {line: lineno})
+            'Inline interpreted text or phrase reference start-string '
+		+ 'without end-string.', [], { line: lineno },
+);
         const text = unescape(string.substring(matchstart, matchend), true);
-        const prb = this.problematic(text, text, msg)
-        return [string.substring(0, match.match.index), [prb], string.substring(matchend), [msg]]
+        const prb = this.problematic(text, text, msg);
+        return [string.substring(0, match.match.index), [prb], string.substring(matchend), [msg]];
     }
 
     phrase_ref(before, after, rawsource, escaped, text) {
-	const match = this.patterns.embedded_link.exec(escaped)
+	const match = this.patterns.embedded_link.exec(escaped);
 	let aliastype;
 	let aliastext;
 	let rawaliastext;
@@ -296,106 +303,104 @@ class Inliner {
 	let alias;
 	let target;
 	let alias_parts;
-if(!rawsource) {
+if (!rawsource) {
     rawsource = '';
 }
-        if(match) {// # embedded <URI> or <alias_>
+        if (match) { // # embedded <URI> or <alias_>
             text = unescape(escaped.substring(0, match.index));
             rawtext = unescape(escaped.substring(0, match.index), true);
-	    aliastext = unescape(match[2])
-            rawaliastext = unescape(match[2], true)
-            const underscore_escaped = rawaliastext.endsWith('\\_')
-            if(aliastext.endsWith('_') && ! (underscore_escaped
+	    aliastext = unescape(match[2]);
+            rawaliastext = unescape(match[2], true);
+            const underscore_escaped = rawaliastext.endsWith('\\_');
+            if (aliastext.endsWith('_') && !(underscore_escaped
                                              || this.patterns.uri.exec(aliastext))) {
-                aliastype = 'name'
+                aliastype = 'name';
                 alias = normalize_name(aliastext.substring(0, aliastext.length - 1));
-                target = new nodes.target(match[1], '',[], {refname: alias});
+                target = new nodes.target(match[1], '', [], { refname: alias });
                 target.indirectReferenceName = aliastext.substring(0, aliastext.length - 1);
 	    } else {
-                aliastype = 'uri'
+                aliastype = 'uri';
                 alias_parts = splitEscapedWhitespace(match[2]);
-		/* this behaves differently from python's split with no args */
-		alias = alias_parts.map(part => unescape(part).split(/\s+/).join('')).join(' ');
+                /* this behaves differently from python's split with no args */
+                alias = alias_parts.map(part => unescape(part).split(/\s+/).join('')).join(' ');
 		console.log(`alias is ${alias}`);
-                alias = this.adjust_uri(alias)
-                if(alias.endsWith('\\_')) {
-                    alias = alias.substring(0, alias.length - 2) +'_';
+                alias = this.adjust_uri(alias);
+                if (alias.endsWith('\\_')) {
+                    alias = `${alias.substring(0, alias.length - 2)}_`;
 		}
                 target = new nodes.target(match[1], '', [], { refuri: alias });
-                target.referenced = 1 //  1 or truE???
+                target.referenced = 1; //  1 or truE???
 	    }
-	    if(!aliastext) {
+	    if (!aliastext) {
                 throw new ApplicationError(`problem with embedded link: ${aliastext}`);
 	    }
-            if(!text) {
-                text = alias
-                rawtext = rawaliastext
+            if (!text) {
+                text = alias;
+                rawtext = rawaliastext;
 	    }
 	} else {
-            target = null
-            rawtext = unescape(escaped, true)
+            target = null;
+            rawtext = unescape(escaped, true);
 	}
 
-        const refname = normalize_name(text)
-        const reference = new nodes.reference(rawsource, text,  [],
+        const refname = normalize_name(text);
+        const reference = new nodes.reference(rawsource, text, [],
 					{ name: nodes.whitespaceNormalizeName(text) });
-        reference.children[0].rawsource = rawtext
-        const node_list = [reference]
+        reference.children[0].rawsource = rawtext;
+        const node_list = [reference];
 
-        if(rawsource.endsWith('__')) {
-            if(target && (aliastype === 'name')) {
-                reference.attributes['refname'] = alias;
-                this.document.noteRefname(reference)
+        if (rawsource.endsWith('__')) {
+            if (target && (aliastype === 'name')) {
+                reference.attributes.refname = alias;
+                this.document.noteRefname(reference);
 		// commented out in docutils.
-		//# self.document.note_indirect_target(target) # required?
-	    } else if(target && (aliastype === 'uri')) {
-		reference.attributes['refuri'] = alias;
-	    }else {
-                reference.attributes['anonymous'] = 1;
+		// # self.document.note_indirect_target(target) # required?
+	    } else if (target && (aliastype === 'uri')) {
+		reference.attributes.refuri = alias;
+	    } else {
+                reference.attributes.anonymous = 1;
 	    }
-	} else{
-            if(target) {
-                target.attributes['names'].push(refname);
-                if(aliastype === 'name') {
-                    reference.attributes['refname'] = alias;
-                    this.document.noteIndirectTarget(target)
+	} else if (target) {
+                target.attributes.names.push(refname);
+                if (aliastype === 'name') {
+                    reference.attributes.refname = alias;
+                    this.document.noteIndirectTarget(target);
                     this.document.noteRefname(reference);
 		} else {
-                    reference.attributes['refuri'] = alias;
-                    this.document.noteExplicitTarget(target, this.parent)
-		    //original source commented out
-		    //# target.note_referenced_by(name=refname)
+                    reference.attributes.refuri = alias;
+                    this.document.noteExplicitTarget(target, this.parent);
+		    // original source commented out
+		    // # target.note_referenced_by(name=refname)
 		}
-                node_list.push(target)
+                node_list.push(target);
 	    } else {
-                reference.attributes['refname'] = refname;
+                reference.attributes.refname = refname;
                 this.document.noteRefname(reference);
 	    }
-	}
-        return [before, node_list, after, []]
+        return [before, node_list, after, []];
     }
 
     quoted_start(match) {
-        /*"""Test if inline markup start-string is 'quoted'.
+        /* """Test if inline markup start-string is 'quoted'.
 
         'Quoted' in this context means the start-string is enclosed in a pair
         of matching opening/closing delimiters (not necessarily quotes)
         or at the end of the match.
-        """*/
-        const string = match.result.input
-        const start = match.result.index
-        if(start === 0) { // start-string at beginning of text
+        """ */
+        const string = match.result.input;
+        const start = match.result.index;
+        if (start === 0) { // start-string at beginning of text
             return false;
 	}
         let poststart;
-        const prestart = string[start - 1]
+        const prestart = string[start - 1];
         try {
 	    poststart = string.substr(match.result.index + match.result[0].length, 1);
-	} catch(error) {
+	} catch (error) {
 	    console.log(error.constructor.name);
 	    return true; // not "quoted" but no markup start-string either
 	}
-        return matchChars(prestart, poststart)
+        return matchChars(prestart, poststart);
     }
 
     inline_obj(match, lineno, end_pattern, nodeclass,
@@ -411,7 +416,7 @@ if(!rawsource) {
 //      console.log(match);
         const string = match.match.input;
         const matchstart = string.indexOf(match.groups.start);
-        if (matchstart == -1) {
+        if (matchstart === -1) {
             throw new Error('');
         }
 
@@ -521,14 +526,14 @@ esn;
             emphasis: new RegExp(`${this.nonWhitespaceEscapeBefore}(\\*)${endStringSuffix}`),
             strong: new RegExp(`${this.nonWhitespaceEscapeBefore}(\\*\\*)${endStringSuffix}`),
             interpreted_or_phrase_ref: new RegExp(`${this.nonUnescapedWhitespaceEscapeBefore}(\`((:${this.simplename}:)?(__?)?))${endStringSuffix}`),
-	    embedded_link: new RegExp('((?:[ \\n]+|^)<' + this.nonWhitespaceAfter + '(([^<>]|\\x00[<>])+)' + this.nonWhitespaceEscapeBefore + '>)$'),
-	    literal: new RegExp(this.nonWhitespaceBefore + '(``)' + endStringSuffix),
-	    target: new RegExp(this.nonWhitespaceEscapeBefore + '(`)' + endStringSuffix),
-            substitution_ref: new RegExp(this.nonWhitespaceEscapeBefore
-					 + '(\\|_{0,2})'
-					 + endStringSuffix),
+	    embedded_link: new RegExp(`((?:[ \\n]+|^)<${this.nonWhitespaceAfter}(([^<>]|\\x00[<>])+)${this.nonWhitespaceEscapeBefore}>)$`),
+	    literal: new RegExp(`${this.nonWhitespaceBefore}(\`\`)${endStringSuffix}`),
+	    target: new RegExp(`${this.nonWhitespaceEscapeBefore}(\`)${endStringSuffix}`),
+            substitution_ref: new RegExp(`${this.nonWhitespaceEscapeBefore
+					  }(\\|_{0,2})${
+					  endStringSuffix}`),
             email: new RegExp(emailPattern), // fixme % args + '$',
-            //re.VERBOSE | re.UNICODE),
+            // re.VERBOSE | re.UNICODE),
 	    uri: new RegExp(`${startStringPrefix}((([a-zA-Z][a-zA-Z0-9.+-]*):(((//?)?${uric}*${uri_end})(\\?${uric}*${uri_end})?(\\#${uri_end})?))|(${emailPattern}))${endStringSuffix}`),
 /*          pep=re.compile(
                 r"""
@@ -543,10 +548,10 @@ esn;
                 r"""
                 %(start_string_prefix)s
                 (RFC(-|\s+)?(?P<rfcnum>\d+))
-                %(end_string_suffix)s""" % args, re.VERBOSE | re.UNICODE))*/
+                %(end_string_suffix)s""" % args, re.VERBOSE | re.UNICODE)) */
 
         };
-        //console.log(this.patterns.initial);
+        // console.log(this.patterns.initial);
     }
 
     parse(text, { lineno, memo, parent }) {
@@ -570,7 +575,7 @@ esn;
                 const rr = {};
 
                 this.patterns.initial[1].forEach((x, index) => {
-                    if(x != null) {
+                    if (x != null) {
                         rr[x] = match[index];
                     }
                 });
@@ -583,10 +588,10 @@ esn;
 sysmessages;
                 [before, inlines, remaining, sysmessages] = method({ result: match, match, groups: rr }, lineno);
                 unprocessed.push(before);
-                if(!isIterable(sysmessages)) {
+                if (!isIterable(sysmessages)) {
                     throw new Error(`Expecting iterable, got ${sysmessages}`);
                 }
-                messages.push(...sysmessages)
+                messages.push(...sysmessages);
                 if (inlines) {
                     processed.push(...this.implicit_inline(unprocessed.join(''),
                                                        lineno));
@@ -611,8 +616,8 @@ sysmessages;
         the text before and after the match.  Return a list of `nodes.Text`
         and inline element nodes.
 	*/
-        if(!text) {
-            return []
+        if (!text) {
+            return [];
 	}
 
 /*        for pattern, method in self.implicit_dispatch:
@@ -630,7 +635,7 @@ sysmessages;
 	return [new nodes.Text(unescape(text), unescape(text, true))];
     }
 
-    adjust_uri( uri) {
+    adjust_uri(uri) {
         return uri;
     }
     /*
@@ -641,35 +646,34 @@ sysmessages;
 	} else {
             return uri
 	}
-    }*/
+    } */
 
     interpreted(rawsource, text, role, lineno) {
-        const [ role_fn, messages ] = roles.role(role, this.language, lineno, this.reporter);
-        if(role_fn) {
-            [ nodes, messages2 ] = role_fn(role, rawsource, text, lineno, this)
-	    try{
-                nodes[0][0].rawsource = unescape(text, true)
-	    }
-	    catch(error)
-	    {
-		//except IndexError:
-                //pass
+        const [role_fn, messages] = roles.role(role, this.language, lineno, this.reporter);
+        if (role_fn) {
+            const [theNodes, messages2] = role_fn(role, rawsource, text, lineno, this);
+	    try {
+                theNodes.children[0].children[0].rawsource = unescape(text, true);
+	    } catch (error) {
+		// except IndexError:
+                // pass
 		throw error;
 	    }
-            return [ nodes, messages.extend(messages2) ]
-	}else {
+            return [theNodes, messages.extend(messages2)];
+	}
             const msg = this.reporter.error(
                 `Unknown interpreted text role "${role}".`, [],
-                { line: lineno } )
+                { line: lineno },
+);
             return [[this.problematic(rawsource, rawsource, msg)],
                     [...messages, msg]];
-	}
     }
 
     literal(match, lineno) {
-        const [ before, inlines, remaining, sysmessages, endstring ] = this.inline_obj(
-            match, lineno, this.patterns.literal, nodes.literal, true)
-        return [ before, inlines, remaining, sysmessages ]
+        const [before, inlines, remaining, sysmessages, endstring] = this.inline_obj(
+            match, lineno, this.patterns.literal, nodes.literal, true,
+);
+        return [before, inlines, remaining, sysmessages];
     }
 }
 

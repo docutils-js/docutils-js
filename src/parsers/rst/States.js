@@ -313,7 +313,7 @@ matchTitles: true,
         const data = lines.join('\n').trimEnd();
         let text;
         let literalnext;
-//	console.log(data);
+//      console.log(data);
         if (/(?<!\\)(\\\\)*::$/.test(data)) {
             if (data.length === 2) {
                 return [[], 1];
@@ -443,8 +443,7 @@ export class Body extends RSTState {
             option_marker: `${pats.option}(, ${pats.option})*(  +| ?$)`,
             doctest: '>>>( +|$)',
             line_block: '\\|( +|$)',
-            grid_table_top: this.gridTableTopPat,
-                simple_table_top: this.simpleTableTopPat,
+            simple_table_top: this.simpleTableTopPat,
             explicit_markup: '\\.\\.( +|$)',
             anonymous: '__( +|)',
             line: `(${pats.nonalphanum7bit})\\1* *$`,
@@ -476,7 +475,9 @@ export class Body extends RSTState {
 
     footnote(match) {
         const [src, srcline] = this.stateMachine.getSourceAndLine();
-        const [indented, indent, offset, blank_finish] = this.stateMachine.getFirstKnownIndented({ indent: match.index + match[0].length });
+        const [indented, indent, offset, blank_finish] = this.stateMachine.getFirstKnownIndented(
+            { indent: match.index + match[0].length },
+);
         const label = match[1];
         let name = normalizeName(label);
         const footnote = new nodes.footnote(indented.join('\n'));
@@ -486,54 +487,62 @@ export class Body extends RSTState {
             name = name.substring(1); // autonumber label
             footnote.attributes.auto = 1;
             if (name) {
-		footnote.attributes.names.push(name);
-	    }
+                footnote.attributes.names.push(name);
+            }
             this.document.noteAutofootnote(footnote);
-	} else if (name === '*') { // auto-symbol
+        } else if (name === '*') { // auto-symbol
             name = '';
             footnote.attributes.auto = '*';
             this.document.noteSymbolFootnote(footnote);
-	} else {
+        } else {
             // manually numbered
             footnote.add(new nodes.label('', label));
             footnote.attributes.names.push(name);
             this.document.noteFootnote(footnote);
-	}
+        }
         if (name) {
-	    this.document.noteExplicitTarget(footnote, footnote);
-	} else {
-	    this.document.setId(footnote, footnote);
-	}
+            this.document.noteExplicitTarget(footnote, footnote);
+        } else {
+            this.document.setId(footnote, footnote);
+        }
 
         if (indented && indented.length) {
             this.nestedParse(indented, { inputOffset: offset, node: footnote });
-	}
+        }
         return [[footnote], blank_finish];
     }
 
     citation(match) {
-	const [src, srcline] = this.stateMachine.getSourceAndLine();
-	const [indented, indent, offset, blank_finish] = this.stateMachine.getFirstKnownIndented(match.index + match[0].length);
-	const label = match[1];
-	const name = normalizeName(label);
-	const citation = new nodes.citation(indented.join('\n'));
+        const [src, srcline] = this.stateMachine.getSourceAndLine();
+        const [indented, indent, offset, blank_finish] = this.stateMachine.getFirstKnownIndented({
+            indent: match.index + match[0].length,
+        });
+        const label = match[1];
+        const name = normalizeName(label);
+        const citation = new nodes.citation(indented.join('\n'));
 
-	citation.source = src;
-	citation.line = srcline;
-	citation.add(new nodes.label('', label));
-	citation.attributes.names.push(name);
-	this.document.noteCitation(citation);
-	this.document.noteExplicitTarget(citation, citation);
-	if (indented && indented.length) {
-	    this.nestedParse(indented, { inputOffset: offset, node: citation });
-	}
-	return [[citation], blank_finish];
+        citation.source = src;
+        citation.line = srcline;
+        citation.add(new nodes.label('', label));
+        citation.attributes.names.push(name);
+        this.document.noteCitation(citation);
+        this.document.noteExplicitTarget(citation, citation);
+        if (indented && indented.length) {
+            this.nestedParse(indented, { inputOffset: offset, node: citation });
+        }
+        return [[citation], blank_finish];
     }
 
     hyperlink_target(match) {
         const pattern = this.explicit.patterns.target;
         const lineno = this.stateMachine.absLineNumber();
-        const [block, indent, offset, blank_finish] = this.stateMachine.getFirstKnownIndented({ indent: match.index + match[0].length, untilBlank: true, stripIndent: false });
+        const [block, indent, offset, blank_finish] = this.stateMachine.getFirstKnownIndented(
+		  {
+ indent: match.index + match[0].length,
+		    untilBlank: true,
+		    stripIndent: false,
+		  },
+);
         const blocktext = match.input.substring(0, match.index + match[0].length) + block.join('\n');
         const block2 = [];
         block.forEach(line => block2.push(escape2null(line)));
@@ -545,8 +554,8 @@ export class Body extends RSTState {
             if (targetmatch) {
                 break;
             }
-	    blockindex += 1;
-	    if (blockindex === block2.length) {
+            blockindex += 1;
+            if (blockindex === block2.length) {
                 throw new MarkupError('malformed hyperlink target.');
             }
             escaped += block2[blockindex];
@@ -560,7 +569,7 @@ export class Body extends RSTState {
 
     make_target(block, block_text, lineno, target_name) {
         const [target_type, data] = this.parse_target(block, block_text, lineno);
-	console.log(`target type if ${target_type} and data is ${data}`);
+        console.log(`target type if ${target_type} and data is ${data}`);
         if (target_type === 'refname') {
             const target = new nodes.target(block_text, '', [], { refname: normalizeName(data) });
             target.indirectReferenceName = data;
@@ -576,7 +585,7 @@ export class Body extends RSTState {
     }
 
     parse_target(block, block_text, lineno) {
-	console.log(`parse_target(${block}, ${block_text}, ${lineno})`);
+        console.log(`parse_target(${block}, ${block_text}, ${lineno})`);
         /* """
         Determine the type of reference of a target.
 
@@ -607,7 +616,7 @@ export class Body extends RSTState {
         if (!match) {
             return null;
         }
-	return unescape(match[2] || match[3]);
+        return unescape(match[2] || match[3]);
     }
 
     add_target(targetname, refuri, target, lineno) {
@@ -721,15 +730,14 @@ export class Body extends RSTState {
     }
 
     comment(match) {
-	const matchEnd = match.result.index + match.result[0].length;
-        if(!match.result.input.substring(matchEnd).trim() &&
-           this.stateMachine.isNextLineBlank()) { //# an empty comment?
-            return [[new nodes.comment()], 1] // "A tiny but practical wart."
+        const matchEnd = match.result.index + match.result[0].length;
+        if (!match.result.input.substring(matchEnd).trim()
+           && this.stateMachine.isNextLineBlank()) { // # an empty comment?
+            return [[new nodes.comment()], 1]; // "A tiny but practical wart."
         }
-        const [ indented, indent, offset, blank_finish ] =
-              this.stateMachine.getFirstKnownIndented({ indent: matchEnd });
-        while(indented && indented.length && !indented[indented.length - 1].trim()) {
-            indented.trimEnd()
+        const [indented, indent, offset, blank_finish] = this.stateMachine.getFirstKnownIndented({ indent: matchEnd });
+        while (indented && indented.length && !indented[indented.length - 1].trim()) {
+            indented.trimEnd();
         }
         const text = indented.join('\n');
         return [[new nodes.comment(text, text)], blank_finish];
@@ -737,10 +745,10 @@ export class Body extends RSTState {
 
     explicit_markup(match, context, next_state) {
         /* """Footnotes, hyperlink targets, directives, comments.""" */
-	const r = this.explicit_construct(match);
-	if (!isIterable(r)) {
-	    throw new Error('');
-	}
+        const r = this.explicit_construct(match);
+        if (!isIterable(r)) {
+            throw new Error('');
+        }
         const [nodelist, blank_finish] = r;
         this.parent.add(nodelist);
         this.explicit_list(blank_finish);
@@ -1123,7 +1131,7 @@ initialState: 'EnumeratedList',
         const [src, srcline] = this.stateMachine.getSourceAndLine();
         const lineno = this.stateMachine.absLineNumber();
         const [indented, indent, lineOffset, blankFinish] = this.stateMachine.getFirstKnownIndented(
-		  { indent: match.result.index + match.result[0].length },
+                  { indent: match.result.index + match.result[0].length },
 );
         const field_node = new nodes.field();
         field_node.source = src;
@@ -1131,7 +1139,7 @@ initialState: 'EnumeratedList',
         const [name_nodes, name_messages] = this.inline_text(name, lineno);
         field_node.add(new nodes.field_name(name, '', name_nodes, {}));
         const field_body = new nodes.field_body(
-	    indented.join('\n'), name_messages, {},
+            indented.join('\n'), name_messages, {},
 );
         field_node.add(field_body);
         if (indented && indented.length) {
@@ -1166,9 +1174,9 @@ initialState: 'EnumeratedList',
                 const msg = this.reporter.error(`Invalid option list marker: ${error}`);
                 this.parent.add(msg);
                 const [indented, indent, line_offset, blankFinish2] = this.stateMachine.getFirstKnownIndented(
-			  { indent: match.result.index + match.result[0].length },
+                          { indent: match.result.index + match.result[0].length },
 );
-		blankFinish = blankFinish2;
+                blankFinish = blankFinish2;
                 const elements = this.block_quote(indented, line_offset);
                 this.parent.add(elements);
                 if (!blankFinish) {
@@ -1313,7 +1321,8 @@ initialState: 'LineBlock',
 
     line_block_line(match, lineno) {
         // """Return one line element of a line_block."""
-        const [indented, indent, line_offset, blank_finish] = this.stateMachine.getFirstKnownIndented(
+        const [indented, indent, line_offset, blank_finish] = this
+	      .stateMachine.getFirstKnownIndented(
             {
  indent: match.result.index + match.result[0].length,
               untilBlank: true,
@@ -1330,48 +1339,48 @@ initialState: 'LineBlock',
     }
 
     nest_line_block_lines(block) {
-	for (let i = 1; i < block.length; i += 1) {
-	    if (typeof block[index].indent === 'undefined') {
-		block[index].indent = block[index - 1].indent;
-	    }
-	}
+        for (let i = 1; i < block.length; i += 1) {
+            if (typeof block[index].indent === 'undefined') {
+                block[index].indent = block[index - 1].indent;
+            }
+        }
         this.nest_line_block_segment(block);
     }
 
     nest_line_block_segment(block) {
-	const indents = [];
-	let least;
-	for(let i = 0; i < block.length; i++) {
-	    const indent = block[i].indent;
-	    if(typeof least === 'undefined' || indent < least) {
-		least = indent;
-	    }
-	    indents.push(block[i].indent);
-	}
+        const indents = [];
+        let least;
+        for (let i = 0; i < block.length; i += 1) {
+            const indent = block[i].indent;
+            if (typeof least === 'undefined' || indent < least) {
+                least = indent;
+            }
+            indents.push(block[i].indent);
+        }
         const new_items = [];
-        let new_block = new nodes.line_block()
-	for(let i = 0; i < block.length; i++) {
-	    const item = block[i];
-            if(item.indent > least) {
-                new_block.add(item)
-	    } else {
-                if(new_block.children.length) {
-                    this.nest_line_block_segment(new_block)
-                    new_items.push(new_block)
-                    new_block = new nodes.line_block()
-		}
-                new_items.push(item)
-	    }
-	}
-        if(new_block.length) {
-            this.nest_line_block_segment(new_block)
+        let new_block = new nodes.line_block();
+        for (let i = 0; i < block.length; i += 1) {
+            const item = block[i];
+            if (item.indent > least) {
+                new_block.add(item);
+            } else {
+                if (new_block.children.length) {
+                    this.nest_line_block_segment(new_block);
+                    new_items.push(new_block);
+                    new_block = new nodes.line_block();
+                }
+                new_items.push(item);
+            }
+        }
+        if (new_block.length) {
+            this.nest_line_block_segment(new_block);
             new_items.push(new_block);
-	}
-	// fixme does this detach?
-	for(let i  =0; i < new_items.length; i++) {
-	    block[i] = new_items[i];
-	}
-	block.length = new_items.length;
+        }
+        // fixme does this detach?
+        for (let i = 0; i < new_items.length; i += 1) {
+            block[i] = new_items[i];
+        }
+        block.length = new_items.length;
     }
 
     grid_table_top(match, context, next_state) {
@@ -1398,18 +1407,18 @@ initialState: 'LineBlock',
                 { line: this.stateMachine.absLineNumber() + 1 },
 );
             this.parent.add(msg);
-	}
+        }
         return [[], next_state, []];
     }
 
     table(isolate_function, parser_class) {
         // """Parse a table."""
-	const r = isolate_function();
-	if (!isIterable(r)) {
-	    throw new Error();
-	}
+        const r = isolate_function();
+        if (!isIterable(r)) {
+            throw new Error();
+        }
         const [block, messages, blank_finish] = r;
-	let nodelist;
+        let nodelist;
         if (block && block.length) {
             try {
                 const parser = new parser_class();
@@ -1417,79 +1426,79 @@ initialState: 'LineBlock',
                 const tableline = (this.stateMachine.absLineNumber() - block.length + 1);
                 const table = this.build_table(tabledata, tableline);
                 nodelist = [table, ...messages];
-	    } catch (error) {
-		if (error instanceof tableparser.TableMarkupError) {
-		    console.log(error);
-		    throw error;
+            } catch (error) {
+                if (error instanceof tableparser.TableMarkupError) {
+                    console.log(error);
+                    throw error;
                     nodelist = [...this.malformed_table(block, error.args ? error.args.join(' ') : '',
-							error.offset), ...messages];
-		} else {
-		    throw error;
-		}
-	    }
-	} else {
+                                                        error.offset), ...messages];
+                } else {
+                    throw error;
+                }
+            }
+        } else {
             nodelist = messages;
-	}
+        }
         return [nodelist, blank_finish];
     }
 
     isolate_grid_table() {
-	const messages = [];
-	let block;
-	let blank_finish = 1;
+        const messages = [];
+        let block;
+        let blank_finish = 1;
         try {
             block = this.stateMachine.getTextBlock(0, true);
-	} catch (error) {
-	    if (error instanceof statemachine.UnexpectedIndentationError) {
-		const [block, src, srcline] = err.args;
-		messages.add(this.reporter.error('Unexpected indentation.', [],
+        } catch (error) {
+            if (error instanceof statemachine.UnexpectedIndentationError) {
+                const [block, src, srcline] = err.args;
+                messages.add(this.reporter.error('Unexpected indentation.', [],
                                                  { source: src, line: srcline }));
-		blank_finish = 0;
-	    }
-	}
+                blank_finish = 0;
+            }
+        }
 
-	if (!block) {
-	    throw new Error();
-	}
+        if (!block) {
+            throw new Error();
+        }
 
         block.disconnect();
         // for East Asian chars:
         block.padDoubleWidth(this.doubleWidthPadChar);
         const width = block[0].trim().length;
-	for (let i = 0; i < block.length; i += 1) {
+        for (let i = 0; i < block.length; i += 1) {
             block[i] = block[i].trim();
             if (block[i][0] !== '+' && block[i][0] !== '|') { // check left edge
                 blank_finish = 0;
                 this.stateMachine.previousLine(block.length - i);
-		block.splice(i, block.length - i);
+                block.splice(i, block.length - i);
                 break;
-	    }
-	}
+            }
+        }
         if (!gridTableTopPat.test(block[block.length - 1])) { // find bottom
             blank_finish = 0;
-	    // from second-last to third line of table:
-	    let myBreak = false;
-	    for (let i = block.length - 2; i >= 1; i -= 1) { // fixme test
-		// for i in range(len(block) - 2, 1, -1):
+            // from second-last to third line of table:
+            let myBreak = false;
+            for (let i = block.length - 2; i >= 1; i -= 1) { // fixme test
+                // for i in range(len(block) - 2, 1, -1):
                 if (this.grid_table_top_pat.test(block[i])) {
                     this.stateMachine.previousLine(block.length - i + 1);
-		    block.splice(i + 1, block.length - (i + 1));
-		    myBreak = true;
+                    block.splice(i + 1, block.length - (i + 1));
+                    myBreak = true;
                     break;
-		}
-	    }
-	    if (!myBreak) {
+                }
+            }
+            if (!myBreak) {
                 messages.push(...this.malformed_table(block));
                 return [[], messages, blank_finish];
-	    }
-	}
+            }
+        }
 
         for (let i = 0; i < block.length; i += 1) { // check right edge
             if (block[i].length !== width || !/[\+\|]/.test(block[i][block[i].length - 1])) {
                 messages.push(...this.malformed_table(block));
                 return [[], messages, blank_finish];
-	    }
-	}
+            }
+        }
         return [block, messages, blank_finish];
     }
 
@@ -1502,8 +1511,8 @@ initialState: 'LineBlock',
         let found = 0;
         let found_at;
         let i = start + 1;
-	let myBreak = false;
-	let end;
+        let myBreak = false;
+        let end;
         while (i <= limit) {
             const line = lines[i];
             const match = pattern_match(line);
@@ -1512,113 +1521,119 @@ initialState: 'LineBlock',
                     this.stateMachine.nextLine(i - start);
                     const messages = this.malformed_table(
                         lines.slice(start, i + 1),
-			'Bottom/header table border does not match top border.',
+                        'Bottom/header table border does not match top border.',
 );
                     return [[], messages, i === limit || !lines[i + 1].trim()];
-		}
+                }
                 found += 1;
                 found_at = i;
                 if (found === 2 || i === limit || !lines[i + 1].trim()) {
                     end = i;
-		    myBreak = true;
-		}
-	    }
+                    myBreak = true;
+                }
+            }
             i += 1;
-	}
-	let block;
-	if (!myBreak) {
-	    // reached end of input_lines
-	    let extra;
+        }
+        let block;
+        if (!myBreak) {
+            // reached end of input_lines
+            let extra;
             if (found) {
                 extra = ' or no blank line after table bottom';
                 this.stateMachine.nextLine(found_at - start);
                 block = lines.slice(start, found_at + 1);
-	    } else {
+            } else {
                 extra = '';
                 this.stateMachine.next_line(i - start - 1);
                 block = lines.slice(start);
-	    }
+            }
             const messages = this.malformed_table(
                 block, `No bottom table border found${extra}`,
 );
             return [[], messages, !extra];
-	}
+        }
         this.stateMachine.nextLine(end - start);
         block = lines.slice(start, end + 1);
-	// for East Asian chars:
+        // for East Asian chars:
         block.padDoubleWidth(this.doubleWidthPadChar);
         return [block, [], end === limit || !lines[end + 1].trim()];
     }
 
     malformed_table(block, detail = '', offset = 0) {
-	throw new Error(detail);
-	block.replace(this.doubleWidthPadChar, '');
+        throw new Error(detail);
+        block.replace(this.doubleWidthPadChar, '');
         const data = block.join('\n');
         const message = 'Malformed table.';
         const startline = this.stateMachine.absLineNumber() - block.length + 1;
         if (detail) {
             message += `\n${detail}`;
-	}
-        const error = this.reporter.error(message, [new nodes.literal_block(data, data)], { line: startline + offset });
+        }
+        const error = this.reporter.error(
+            message,
+            [new nodes.literal_block(data, data)],
+            { line: startline + offset },
+        );
         return [error];
     }
 
     build_table(tabledata, tableline, stub_columns = 0, widths) {
-	const [colwidths, headrows, bodyrows] = tabledata;
-	const table = new nodes.table();
-	if (widths === 'auto') {
-	    table.attributes.classes.push('colwidths-auto');
-	} else if (widths) { // : # "grid" or list of integers
-	    table.attributes.classes.push(['colwidths-given']);
-	}
-	const tgroup = new nodes.tgroup('', [], { cols: colwidths.length });
+        const [colwidths, headrows, bodyrows] = tabledata;
+        const table = new nodes.table();
+        if (widths === 'auto') {
+            table.attributes.classes.push('colwidths-auto');
+        } else if (widths) { // : # "grid" or list of integers
+            table.attributes.classes.push(['colwidths-given']);
+        }
+        const tgroup = new nodes.tgroup('', [], { cols: colwidths.length });
         table.add(tgroup);
-        for (let colwidth of colwidths) {
-	    const colspec = new nodes.colspec('', [], { colwidth });
-	    if (stub_columns) {
-		colspec.attributes.stub = 1;
-		stub_columns -= 1;
-	    }
+        for (const colwidth of colwidths) {
+            const colspec = new nodes.colspec('', [], { colwidth });
+            if (stub_columns) {
+                colspec.attributes.stub = 1;
+                stub_columns -= 1;
+            }
             tgroup.add(colspec);
-	}
+        }
         if (headrows) {
             const thead = new nodes.thead('', '', [], {});
             tgroup.add(thead);
             for (const row of headrows) {
                 thead.add(this.build_table_row(row, tableline));
-	    }
-	}
+            }
+        }
         const tbody = new nodes.tbody();
         tgroup.add(tbody);
         for (const row of bodyrows) {
             tbody.add(this.build_table_row(row, tableline));
-	}
+        }
         return table;
     }
 
 
     build_table_row(rowdata, tableline) {
-        const row = new nodes.row('', [], {})
-        for(let cell of rowdata) {
-            if(typeof cell === 'undefined') {
+        const row = new nodes.row('', [], {});
+        for (const cell of rowdata) {
+            if (typeof cell === 'undefined') {
                 continue;
-	    }
-            const [ morerows, morecols, offset, cellblock ] = cell
-            const attributes = {}
-            if(morerows) {
-                attributes['morerows'] = morerows
-	    }
-            if(morecols) {
-                attributes['morecols'] = morecols
-	    }
-            const entry = new nodes.entry('', [], attributes)
+            }
+            const [morerows, morecols, offset, cellblock] = cell;
+            const attributes = {};
+            if (morerows) {
+                attributes.morerows = morerows;
+            }
+            if (morecols) {
+                attributes.morecols = morecols;
+            }
+            const entry = new nodes.entry('', [], attributes);
             row.add(entry);
-            if(cellblock.join('')) {
-                this.nestedParse(cellblock, { inputOffset: tableline+offset,
-					      node: entry });
-	    }
-	}
-        return row
+            if (cellblock.join('')) {
+                this.nestedParse(cellblock, {
+ inputOffset: tableline + offset,
+                                              node: entry,
+});
+            }
+        }
+        return row;
     }
 
     line(match, context, nextState) {

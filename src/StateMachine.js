@@ -59,11 +59,11 @@ export class ViewList extends Array {
     }
 
     source(i) {
-	return this.info(i)[0];
+        return this.info(i)[0];
     }
 
     offset(i) {
-	return this.info(i)[1];
+        return this.info(i)[1];
     }
 
     disconnect() {
@@ -253,7 +253,7 @@ export class StringList extends ViewList {
             } else {
                 right = ci[right];
             }
-	    const line = block[i].substring(left, right).trimEnd();
+            const line = block[i].substring(left, right).trimEnd();
             block[i] = line;
             if (line) {
                 indent = Math.min(indent, line.length - line.trimStart().length);
