@@ -39,7 +39,7 @@ class TableParser {
 	this._init(...args);
     }
 
-    _init() {
+    _init(...args) {
         // """Matches the row separator between head rows and body rows."""
         this.headbodyseparatorpat = undefined;
 
@@ -453,7 +453,7 @@ class SimpleTableParser extends TableParser {
     """ */
 
     _init(...args) {
-        super.init(...args);
+        super._init(...args);
         this.headBodySeparatorPat = /=[ =]*$/;
         this.spanPath = /-[ -]*$/;
     }
@@ -463,8 +463,8 @@ class SimpleTableParser extends TableParser {
         this.block.disconnect(); // don't propagate changes to parent
         // Convert top & bottom borders to column span underlines:
         if (this.block.length > 0 && this.block[0]) {
-            this.block[0] = this.block[0].replace('=', '-');
-            this.block[this.block.length - 1] = this.block[this.block.length - 1].replace('=', '-');
+            this.block[0] = this.block[0].replace(/=/g, '-');
+            this.block[this.block.length - 1] = this.block[this.block.length - 1].replace(/=/g, '-');
         }
         this.headBodySep = undefined;
         this.columns = [];

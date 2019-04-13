@@ -274,7 +274,7 @@ export class StringList extends ViewList {
 
     replace(old, newStr) {
         for (let i = 0; i < this.length; i++) {
-            this[i] = this[i].replace(old, newStr);
+            this[i] = this[i].replace(old, newStr); // fix me !!
         }
     }
 

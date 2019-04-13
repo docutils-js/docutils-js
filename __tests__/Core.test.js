@@ -27,7 +27,7 @@ const defaultSettings = {
     idPrefix: '',
 };
 
-test.only('full rst2xml pipeline with specific input', () => {
+test.skip('full rst2xml pipeline with specific input', () => {
     const settings = { ...defaultSettings };
     const args = { ...defaultArgs };
 
@@ -38,13 +38,14 @@ test.only('full rst2xml pipeline with specific input', () => {
     };
 
     const { readerName, parserName, writerName } = args;
-    const source = new StringInput({ source: `..
-   Local Variables:
-   mode: indented-text
-   indent-tabs-mode: nil
-   sentence-end-double-space: t
-   fill-column: 70
-   End:
+    const source = new StringInput({ source: `Configuration settings:
+\`footnote_references <footnote_references setting_>\`_.
+
+.. _footnote: ../doctree.html#footnote
+.. _label: ../doctree.html#label
+.. _footnote_references setting:
+   ../../user/config.html#footnote-references-html4css1-writer
+
 `				      });
         const destination = new StringOutput({});
     const pub = new Publisher({
@@ -90,6 +91,15 @@ test.each([['Title', 'Title\n=====\nParagraph.'],
 	   ['Bullet no unindent', '* bullet'],
 	   ['Nested bullets', '* bullet\n\n + bullet\n\n + bullet\n\n* bullet\n'],
 	   ['Transition correction', '====::\n'],
+	   ['Excerpt 1', `Configuration settings:
+\`footnote_references <footnote_references setting_>\`_.
+
+.. _footnote: ../doctree.html#footnote
+.. _label: ../doctree.html#label
+.. _footnote_references setting:
+   ../../user/config.html#footnote-references-html4css1-writer
+
+`],
 	   ['Mixed bullets', '* bullet\n+ bullet\n'],
 	   ['Transition marker', '-------\n\n'],
 	   ['Bullet list, invalid input', '* bullet\ninvalid'],

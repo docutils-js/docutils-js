@@ -1,5 +1,5 @@
 import * as nodes from '../../nodes';
-import { isIterable, getTrimFootnoteRefSpace } from '../../utils';
+import { isIterable, getTrimFootnoteRefSpace, splitEscapedWhitespace } from '../../utils';
 import { matchChars } from '../../utils/punctuationChars';
 import * as roles from './Roles';
 
@@ -260,7 +260,7 @@ class Inliner {
 		role = role.substring(1, role.length - 1)
                 position = 'suffix'
 	    }
-            const escaped = endmatch.input.substring(0, endmatch.index + 1);
+            const escaped = endmatch.input.substring(0, endmatch.index);
             const rawsource = unescape(string.substring(matchstart, textend), true)
             if(rawsource[rawsource.length - 1] === '_') {
                 if(role) {
@@ -306,14 +306,14 @@ if(!rawsource) {
             rawaliastext = unescape(match[2], true)
             const underscore_escaped = rawaliastext.endsWith('\\_')
             if(aliastext.endsWith('_') && ! (underscore_escaped
-                                             || self.patterns.uri.exec('^' + aliastext))) {
+                                             || this.patterns.uri.exec(aliastext))) {
                 aliastype = 'name'
                 alias = normalize_name(aliastext.substring(0, aliastext.length - 1));
-                target = new nodes.target(match[1], [], {refname: alias});
+                target = new nodes.target(match[1], '',[], {refname: alias});
                 target.indirectReferenceName = aliastext.substring(0, aliastext.length - 1);
 	    } else {
                 aliastype = 'uri'
-                alias_parts = split_escaped_whitespace(match[2]);
+                alias_parts = splitEscapedWhitespace(match[2]);
 		/* this behaves differently from python's split with no args */
 		alias = alias_parts.map(part => unescape(part).split(/\s+/).join('')).join(' ');
 		console.log(`alias is ${alias}`);
@@ -321,7 +321,7 @@ if(!rawsource) {
                 if(alias.endsWith('\\_')) {
                     alias = alias.substring(0, alias.length - 2) +'_';
 		}
-                target = new nodes.target(match[1], [], { refuri: alias });
+                target = new nodes.target(match[1], '', [], { refuri: alias });
                 target.referenced = 1 //  1 or truE???
 	    }
 	    if(!aliastext) {
@@ -529,38 +529,7 @@ esn;
 					 + endStringSuffix),
             email: new RegExp(emailPattern), // fixme % args + '$',
             //re.VERBOSE | re.UNICODE),
-	    //            uri: new RegExp(${startStringPrefix} + '((([a-zA-Z][a-zA-Z0-9.+-]*):(((//?)?
-	    /*
-                (?P<whole>
-                  (?P<absolute>           # absolute URI
-                    (?P<scheme>             # scheme (http, ftp, mailto)
-                      [a-zA-Z][a-zA-Z0-9.+-]*
-                    )
-                    :
-                    (
-                      (                       # either:
-                        (//?)?                  # hierarchical URI
-                        %(uric)s*               # URI characters
-                        %(uri_end)s             # final URI char
-                      )
-                      (                       # optional query
-                        \?%(uric)s*
-                        %(uri_end)s
-                      )?
-                      (                       # optional fragment
-                        \#%(uric)s*
-                        %(uri_end)s
-                      )?
-                    )
-                  )
-                |                       # *OR*
-                  (?P<email>              # email address
-                    """ + self.email_pattern + r"""
-                  )
-                )
-                %(end_string_suffix)s
-                """) % args, re.VERBOSE | re.UNICODE),
-                   */
+	    uri: new RegExp(`${startStringPrefix}((([a-zA-Z][a-zA-Z0-9.+-]*):(((//?)?${uric}*${uri_end})(\\?${uric}*${uri_end})?(\\#${uri_end})?))|(${emailPattern}))${endStringSuffix}`),
 /*          pep=re.compile(
                 r"""
                 %(start_string_prefix)s
@@ -662,6 +631,9 @@ sysmessages;
     }
 
     adjust_uri( uri) {
+        return uri;
+    }
+    /*
 	console.log(uri);
         const match = this.patterns.email.exec(uri)
         if(match) {
@@ -669,8 +641,8 @@ sysmessages;
 	} else {
             return uri
 	}
-    }
-    
+    }*/
+
     interpreted(rawsource, text, role, lineno) {
         const [ role_fn, messages ] = roles.role(role, this.language, lineno, this.reporter);
         if(role_fn) {

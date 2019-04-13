@@ -1,6 +1,8 @@
-#!/usr/bin/env babel-node
+#!/usr/bin/env node
 
-//require("@babel/polyfill");
+require("@babel/polyfill");
+
+var baseSettings = require('../lib/baseSettings').default;
 
 var path = require('path')
 function _getCallerFile() {
@@ -34,23 +36,32 @@ function _getCallerFile() {
     return [callerfile, callerlineno];
 }
 
-var _Core = require("../src/Core");
+var _Core = require("../lib/Core");
 
 function log(...args) {
     process.stderr.write(path.relative(__dirname,  _getCallerFile().join(':')) + ": " +args.map(x => typeof x == 'string' ? x : JSON.stringify(x)).join(' ') + "\n");
 }
-console.log = log;
+//console.log = log;
 
 const argv = process.argv.slice(2);
 console.log(argv);
 const description = 'Generates Docutils-native XML from standalone ' + 'reStructuredText sources.  ' + _Core.defaultDescription;
 (0, _Core.publishCmdLine)({
+    settings: { ...baseSettings, _source: 'in.rst' },
     debugFn: (msg) => {
 	console.log(`here ${msg}`);
     },
     argv,
     writerName: 'xml',
     description
-}, (...args) => {
+}, (error, ...args) => {
+    if(error) {
+	if(error.error) {
+	    throw error['error']
+	} else {
+	    throw error;
+	}
+    }
+    console.log(...args);
 });
 

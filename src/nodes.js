@@ -5,7 +5,7 @@ import xmlescape from 'xml-escape';
 
 function serial_escape(value) {
     //"""Escape string values that are elements of a list, for serialization."""
-    return value.replace('\\', '\\\\').replace(' ', '\\ ')
+    return value.replace(/\\/g, '\\\\').replace(/ /g, '\\ ')
 }
 
 function pseudo_quoteattr(value) {

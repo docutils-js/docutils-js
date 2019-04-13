@@ -107,7 +107,10 @@ class Publisher {
     }
 
     setSource({source, sourcePath}) {
-	if(sourcePath === undefined) {
+	console.log(`${source} ${sourcePath}`);
+	if(typeof sourcePath === 'undefined') {
+	    console.log(`setting sourcePath to ${this.settings._source}`);
+	    console.log(this.settings);
 	    sourcePath = this.settings._source;
 	}else {
 	    this.settings._source = sourcePath;
@@ -117,7 +120,7 @@ class Publisher {
 	    this.source = new sourceClass({source, sourcePath, encoding:
 						this.settings.inputEncoding});
 	} catch(error) {
-	    throw new ApplicationError(`Unable to instantiate Source class ${this.sourceClass.constructor.name}: ${error.message}`);
+	    throw new ApplicationError(`Unable to instantiate Source class ${this.sourceClass.constructor.name}: ${error.message}`, { error } );
 	}
     }
 

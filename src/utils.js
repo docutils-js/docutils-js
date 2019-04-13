@@ -229,7 +229,7 @@ export function unescape(text, restoreBackslashes=false, respectWhitespace=false
 
 	}
     if(restoreBackslashes) {
-        return text.replace('\x00', '\\');
+        return text.replace(/\x00/g, '\\');
     } else {
 	return ['\x00 ', '\x00\n', '\x00'].reduce((a, v) => { return a.split(v).join('') },text||'')
     }

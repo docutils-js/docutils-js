@@ -47,6 +47,8 @@ export class SystemMessage extends Error {
 export class ApplicationError extends Error {
     constructor(...params) {
 	super(...params);
+	const [ message, kwargs ] = params;
+	this.error = kwargs ? kwargs.error : undefined;
 	if(Error.captureStackTrace) {
 	    Error.captureStackTrace(this, Error);
 	}
