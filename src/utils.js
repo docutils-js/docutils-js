@@ -1,6 +1,8 @@
+
 import * as nodes from './nodes';
 import { InvalidArgumentsError, SystemMessage, UnimplementedError as Unimp } from './Exceptions'
 //export { SystemMessge };
+import { combining } from './utils/combining';
 
 export function getTrimFootnoteRefSpace(settings) {
     /*    """
@@ -253,6 +255,49 @@ export function splitEscapedWhitespace(text) {
     }
     return s;
 }
+
+export function columnIndicies(text) {
+    const stringIndicies = new Array(text.length);
+    for(let  i = 0; i < text.length; i++) {
+	stringIndicies[i] = i;
+    }
+    findCombiningChars(text).forEach((index) => {
+        stringIndicies[index] = undefined;
+    });
+
+    return stringIndicies.filter(i => typeof i !== 'undefined');
+}
+
+/*    """Indices of Unicode string `text` when skipping combining characters.
+
+    >>> from docutils.utils import column_indices
+    >>> column_indices(u'A t ab le ')
+    [0, 1, 2, 4, 5, 7, 8]
+
+    """*/
+    // TODO: account for asian wide chars here instead of using dummy
+    // replacements in the tableparser?
+/*    string_indices = range(len(text))
+    findCombiningChars(text).forEach((index) => {
+        string_indices[index] = undefined;
+    });
+    return [i for i in string_indices if i is not None]
+}
+*/
+export function findCombiningChars(text) {
+/*"""Return indices of all combining chars in  Unicode string `text`.
+
+    >>> from docutils.utils import find_combining_chars
+    >>> find_combining_chars(u'A t ab le ')
+    [3, 6, 9]
+
+    """*/
+    return text.split('').map((c, i) => {
+	const r = combining[text.codePointAt(i)]
+	return [r, i];
+    }).filter(([r, i]) => r).map(([r, i]) => i);
+}
+
 
 export default {
     newDocument,

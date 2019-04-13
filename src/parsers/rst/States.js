@@ -20,8 +20,8 @@ const nonWhitespaceAfter = '(?!\\s)';
 const classifierDelimiterRegexp = new RegExp(' +: +');
 const simpleTableBorderPat = /=+[ =]*$/;
 const gridTableTopPat = /\+-[-+]+-\+ *$/;
-const    emailPattern = `%(emailc)s+(?:\.%(emailc)s+)*(?<!\x00)@%(emailc)s+(?:\.%(emailc)s*)*%(uri_end)s`;
-//email=re.compile(self.email_pattern % args + '$',
+const emailPattern = '%(emailc)s+(?:\.%(emailc)s+)*(?<!\x00)@%(emailc)s+(?:\.%(emailc)s*)*%(uri_end)s';
+// email=re.compile(self.email_pattern % args + '$',
 //                 re.VERBOSE | re.UNICODE),
 
 const { StringList } = statemachine;
@@ -86,7 +86,7 @@ class RSTState extends StateWS {
             stateClasses: this.stateClasses,
             initialState: 'Body',
             debug: args && args.stateMachine ? args.stateMachine.debug : false,
-            debugFn: args && args.stateMachine ?args.stateMachine.debugFn : console.log,
+            debugFn: args && args.stateMachine ? args.stateMachine.debugFn : console.log,
         };
     }
 
@@ -475,62 +475,59 @@ export class Body extends RSTState {
     }
 
     footnote(match) {
-        const [ src, srcline ] = this.stateMachine.getSourceAndLine()
-        const [ indented, indent, offset, blank_finish ] =
-	      this.stateMachine.getFirstKnownIndented( { indent: match.index + match[0].length });
-        const label = match[1]
-        const name = normalizeName(label)
-        const footnote = new nodes.footnote(indented.join('\n'))
-        footnote.source = src
-        footnote.line = srcline
-        if(name[0] === '#') { // auto-numbered
-            const name = name.substring(1) // autonumber label
-            footnote.attributes['auto'] = 1
-            if(name) {
-		footnote.attributes['names'].push(name)
+        const [src, srcline] = this.stateMachine.getSourceAndLine();
+        const [indented, indent, offset, blank_finish] = this.stateMachine.getFirstKnownIndented({ indent: match.index + match[0].length });
+        const label = match[1];
+        const name = normalizeName(label);
+        const footnote = new nodes.footnote(indented.join('\n'));
+        footnote.source = src;
+        footnote.line = srcline;
+        if (name[0] === '#') { // auto-numbered
+            const name = name.substring(1); // autonumber label
+            footnote.attributes.auto = 1;
+            if (name) {
+		footnote.attributes.names.push(name);
 	    }
-            this.document.noteAutofootnote(footnote)
-	} else if (name === '*') {// auto-symbol
-            const name = ''
-            footnote.attributes['auto'] = '*'
-            this.document.noteSymbolFootnote(footnote)
+            this.document.noteAutofootnote(footnote);
+	} else if (name === '*') { // auto-symbol
+            const name = '';
+            footnote.attributes.auto = '*';
+            this.document.noteSymbolFootnote(footnote);
 	} else {
             // manually numbered
-            footnote.add(new nodes.label('', label))
-            footnote.attributes['names'].push(name)
-            this.document.noteFootnote(footnote)
+            footnote.add(new nodes.label('', label));
+            footnote.attributes.names.push(name);
+            this.document.noteFootnote(footnote);
 	}
-        if(name) {
-	    this.document.noteExplicitTarget(footnote, footnote)
+        if (name) {
+	    this.document.noteExplicitTarget(footnote, footnote);
 	} else {
-	    this.document.setId(footnote, footnote)
+	    this.document.setId(footnote, footnote);
 	}
 
-        if(indented && indented.length) {
-            this.nestedParse( indented, { inputOffset: offset, node: footnote});
+        if (indented && indented.length) {
+            this.nestedParse(indented, { inputOffset: offset, node: footnote });
 	}
         return [[footnote], blank_finish];
     }
 
     citation(match) {
-	const [ src, srcline]  = this.stateMachine.getSourceAndLine()
-	const [ indented, indent, offset, blank_finish ] =
-	      this.stateMachine.getFirstKnownIndented(match.index + match[0].length);
-	const label = match[1]
-	const name = normalizeName(label)
+	const [src, srcline] = this.stateMachine.getSourceAndLine();
+	const [indented, indent, offset, blank_finish] = this.stateMachine.getFirstKnownIndented(match.index + match[0].length);
+	const label = match[1];
+	const name = normalizeName(label);
 	const citation = new nodes.citation(indented.join('\n'));
 
-	citation.source = src
-	citation.line = srcline
-	citation.add(new nodes.label('', label))
-	citation.attributes['names'].push(name)
-	this.document.noteCitation(citation)
-	this.document.noteExplicitTarget(citation, citation)
-	if(indented && indented.length) {
-	    this.nestedParse(indented, {inputOffset: offset, node: citation});
+	citation.source = src;
+	citation.line = srcline;
+	citation.add(new nodes.label('', label));
+	citation.attributes.names.push(name);
+	this.document.noteCitation(citation);
+	this.document.noteExplicitTarget(citation, citation);
+	if (indented && indented.length) {
+	    this.nestedParse(indented, { inputOffset: offset, node: citation });
 	}
-	return[ [citation], blank_finish]
-
+	return [[citation], blank_finish];
     }
 
     hyperlink_target(match) {
@@ -658,7 +655,7 @@ export class Body extends RSTState {
     }
 
     run_directive(directive, match, type_name, option_presets) {
-        throw new Error("no run_directive");
+        throw new Error('no run_directive');
 /*        """
         Parse a directive then run its directive function.
 
@@ -720,7 +717,7 @@ export class Body extends RSTState {
         return (result,
                 blank_finish or this.state_machine.is_next_line_blank())
         */
-        //throw new Unimp('run_Directive');
+        // throw new Unimp('run_Directive');
     }
 
     comment(match) {
@@ -739,8 +736,8 @@ export class Body extends RSTState {
     explicit_markup(match, context, next_state) {
         /* """Footnotes, hyperlink targets, directives, comments.""" */
 	const r = this.explicit_construct(match);
-	if(!isIterable(r)) {
-	    throw new Error("");
+	if (!isIterable(r)) {
+	    throw new Error('');
 	}
         const [nodelist, blank_finish] = r;
         this.parent.add(nodelist);
@@ -758,8 +755,8 @@ export class Body extends RSTState {
             if (expmatch) {
                 try {
                     const r = method(expmatch); /* can also use bind */
-                    if(!isIterable(r)) {
-                        throw new Error(`eed iterable from method related to ${pattern}`)
+                    if (!isIterable(r)) {
+                        throw new Error(`eed iterable from method related to ${pattern}`);
                     }
                     return r;
                 } catch (error) {
@@ -1332,12 +1329,12 @@ initialState: 'LineBlock',
     }
 
     nest_line_block_lines(block) {
-	for(let i = 1; i < blck.length; i+= 1) {
-	    if(typeof block[index].indent === 'undefined') {
-		block[index].indent = block[index - 1].indent
+	for (let i = 1; i < blck.length; i += 1) {
+	    if (typeof block[index].indent === 'undefined') {
+		block[index].indent = block[index - 1].indent;
 	    }
 	}
-        this.nest_line_block_segment(block)
+        this.nest_line_block_segment(block);
     }
 
 /*
@@ -1374,230 +1371,239 @@ initialState: 'LineBlock',
                               tableparser.SimpleTableParser);
     }
 
-    table_top(match, context,next_state,isolate_function, parser_class) {
-        //"""Top border of a generic table."""
-        const [ nodelist, blank_finish ] = this.table(isolate_function, parser_class)
-        this.parent.add( nodelist)
-        if(! blank_finish) {
+    table_top(match, context, next_state, isolate_function, parser_class) {
+        // """Top border of a generic table."""
+        const [nodelist, blank_finish] = this.table(isolate_function, parser_class);
+        this.parent.add(nodelist);
+        if (!blank_finish) {
             const msg = this.reporter.warning(
                 'Blank line required after table.', [],
-                { line: this.stateMachine.absLineNumber()+1});
+                { line: this.stateMachine.absLineNumber() + 1 },
+);
             this.parent.add(msg);
 	}
-        return [[], next_state, []]
+        return [[], next_state, []];
     }
 
     table(isolate_function, parser_class) {
-        //"""Parse a table."""
+        // """Parse a table."""
 	const r = isolate_function();
-	if(!isIterable(r)) {
+	if (!isIterable(r)) {
 	    throw new Error();
 	}
         const [block, messages, blank_finish] = r;
 	let nodelist;
-        if(block && block.length) {
+        if (block && block.length) {
             try {
-                const parser = new parser_class()
-                const tabledata = parser.parse(block)
-                const tableline = (this.stateMachine.absLineNumber() - block.length + 1)
-                const table = this.build_table(tabledata, tableline)
-                nodelist = [table, ... messages]
-	    } catch(error) {
-		if(error instanceof tableparser.TableMarkupError) {
+                const parser = new parser_class();
+                const tabledata = parser.parse(block);
+                const tableline = (this.stateMachine.absLineNumber() - block.length + 1);
+                const table = this.build_table(tabledata, tableline);
+                nodelist = [table, ...messages];
+	    } catch (error) {
+		if (error instanceof tableparser.TableMarkupError) {
 		    console.log(error);
 		    throw error;
-                    nodelist = [...this.malformed_table(block, error.args? error.args.join(' ') : '',
+                    nodelist = [...this.malformed_table(block, error.args ? error.args.join(' ') : '',
 							error.offset), ...messages];
 		} else {
 		    throw error;
 		}
 	    }
 	} else {
-            nodelist = messages
+            nodelist = messages;
 	}
-        return [nodelist, blank_finish]
+        return [nodelist, blank_finish];
     }
 
     isolate_grid_table() {
-	const messages = []
+	const messages = [];
 	let block;
-	let blank_finish = 1
+	let blank_finish = 1;
         try {
             block = this.stateMachine.getTextBlock(0, true);
-	} catch(error) {
-	    if(error instanceof statemachine.UnexpectedIndentationError) {
-		const [ block, src, srcline ] = err.args
-		messages.add(this.reporter.error('Unexpected indentation.',[],
-                                                 { source: src, line: srcline}));
-		blank_finish = 0
+	} catch (error) {
+	    if (error instanceof statemachine.UnexpectedIndentationError) {
+		const [block, src, srcline] = err.args;
+		messages.add(this.reporter.error('Unexpected indentation.', [],
+                                                 { source: src, line: srcline }));
+		blank_finish = 0;
 	    }
 	}
 
-	if(!block) {
+	if (!block) {
 	    throw new Error();
 	}
 
-        block.disconnect()
+        block.disconnect();
         // for East Asian chars:
-        block.padDoubleWidth(this.doubleWidthPadChar)
-        const width = block[0].trim().length
-	for(let i = 0; i<block.length; i+= 1) {
-            block[i] = block[i].trim()
-            if(block[i][0] !== '+' && block[i][0] !== '|') {//check left edge
-                blank_finish = 0
-                this.stateMachine.previousLine(block.length - i)
+        block.padDoubleWidth(this.doubleWidthPadChar);
+        const width = block[0].trim().length;
+	for (let i = 0; i < block.length; i += 1) {
+            block[i] = block[i].trim();
+            if (block[i][0] !== '+' && block[i][0] !== '|') { // check left edge
+                blank_finish = 0;
+                this.stateMachine.previousLine(block.length - i);
 		block.splice(i, block.length - i);
                 break;
 	    }
 	}
-        if(!gridTableTopPat.test(block[block.length - 1])) {// find bottom
-            blank_finish = 0
+        if (!gridTableTopPat.test(block[block.length - 1])) { // find bottom
+            blank_finish = 0;
 	    // from second-last to third line of table:
 	    let myBreak = false;
-	    for(let i = block.length - 2; i >= 1; i -= 1) { //fixme test
-		//for i in range(len(block) - 2, 1, -1):
-                if(this.grid_table_top_pat.test(block[i])) {
-                    this.stateMachine.previousLine(block.length - i + 1)
+	    for (let i = block.length - 2; i >= 1; i -= 1) { // fixme test
+		// for i in range(len(block) - 2, 1, -1):
+                if (this.grid_table_top_pat.test(block[i])) {
+                    this.stateMachine.previousLine(block.length - i + 1);
 		    block.splice(i + 1, block.length - (i + 1));
 		    myBreak = true;
                     break;
 		}
 	    }
-	    if(!myBreak) {
+	    if (!myBreak) {
                 messages.push(...this.malformed_table(block));
                 return [[], messages, blank_finish];
 	    }
 	}
 
-        for(let i = 0; i < block.length; i += 1) { // check right edge
-            if(block[i].length !== width || !/[\+\|]/.test(block[i][block[i].length-1])) {
-                messages.push(...this.malformed_table(block))
+        for (let i = 0; i < block.length; i += 1) { // check right edge
+            if (block[i].length !== width || !/[\+\|]/.test(block[i][block[i].length - 1])) {
+                messages.push(...this.malformed_table(block));
                 return [[], messages, blank_finish];
 	    }
 	}
-        return [block, messages, blank_finish]
+        return [block, messages, blank_finish];
     }
 
     isolate_simple_table() {
-        const start = this.stateMachine.lineOffset
-        const lines = this.stateMachine.inputLines
-        const limit = lines.length - 1
+        const start = this.stateMachine.lineOffset;
+        const lines = this.stateMachine.inputLines;
+        const limit = lines.length - 1;
         const toplen = lines[start].trim().length;
         const pattern_match = simpleTableBorderPat.exec.bind(simpleTableBorderPat);
-        let found = 0
-        let found_at = undefined;
-        let i = start + 1
+        let found = 0;
+        let found_at;
+        let i = start + 1;
 	let myBreak = false;
 	let end;
-        while( i <= limit) {
+        while (i <= limit) {
             const line = lines[i];
             const match = pattern_match(line);
-            if(match) {
-                if(line.trim().length !== toplen) {
-                    this.stateMachine.nextLine(i - start)
+            if (match) {
+                if (line.trim().length !== toplen) {
+                    this.stateMachine.nextLine(i - start);
                     const messages = this.malformed_table(
                         lines.slice(start, i + 1),
-			'Bottom/header table border does not match top border.')
-                    return [[], messages, i === limit || !lines[i+1].trim()];
+			'Bottom/header table border does not match top border.',
+);
+                    return [[], messages, i === limit || !lines[i + 1].trim()];
 		}
-                found += 1
-                found_at = i
-                if(found === 2 || i === limit || !lines[i+1].trim()) {
-                    end = i
+                found += 1;
+                found_at = i;
+                if (found === 2 || i === limit || !lines[i + 1].trim()) {
+                    end = i;
 		    myBreak = true;
 		}
 	    }
-            i += 1
+            i += 1;
 	}
 	let block;
-	if(!myBreak) {
+	if (!myBreak) {
 	    // reached end of input_lines
 	    let extra;
-            if(found) {
-                extra = ' or no blank line after table bottom'
-                this.stateMachine.nextLine(found_at - start)
-                block = lines.slice(start, found_at+1)
+            if (found) {
+                extra = ' or no blank line after table bottom';
+                this.stateMachine.nextLine(found_at - start);
+                block = lines.slice(start, found_at + 1);
 	    } else {
-                extra = ''
-                this.stateMachine.next_line(i - start - 1)
+                extra = '';
+                this.stateMachine.next_line(i - start - 1);
                 block = lines.slice(start);
 	    }
             const messages = this.malformed_table(
-                block, `No bottom table border found${extra}`)
-            return [[], messages, !extra]
+                block, `No bottom table border found${extra}`,
+);
+            return [[], messages, !extra];
 	}
-        this.stateMachine.nextLine(end - start)
-        block = lines.slice(start, end+1)
+        this.stateMachine.nextLine(end - start);
+        block = lines.slice(start, end + 1);
 	// for East Asian chars:
-        block.padDoubleWidth(this.doubleWidthPadChar)
-        return [block, [], end === limit || !lines[end+1].trim()]
+        block.padDoubleWidth(this.doubleWidthPadChar);
+        return [block, [], end === limit || !lines[end + 1].trim()];
     }
 
-    malformed_table(block, detail='', offset=0) {
+    malformed_table(block, detail = '', offset = 0) {
 	throw new Error(detail);
 	block.replace(this.doubleWidthPadChar, '');
-        const data = block.join('\n')
-        const message = 'Malformed table.'
-        const startline = this.stateMachine.absLineNumber() - block.length + 1
-        if(detail) {
-            message += '\n' + detail
+        const data = block.join('\n');
+        const message = 'Malformed table.';
+        const startline = this.stateMachine.absLineNumber() - block.length + 1;
+        if (detail) {
+            message += `\n${detail}`;
 	}
-        const error = this.reporter.error(message, [new nodes.literal_block(data, data)], {line:startline+offset})
-        return [error]
+        const error = this.reporter.error(message, [new nodes.literal_block(data, data)], { line: startline + offset });
+        return [error];
     }
-    build_table( tabledata, tableline, stub_columns=0, widths) {
-	const [ colwidths, headrows, bodyrows ] = tabledata
-	const table = new nodes.table()
-	if(widths === 'auto') {
-	    table.attributes['classes'].push('colwidths-auto');
-	} else if(widths) {//: # "grid" or list of integers
-	    table.attributes['classes'].push(['colwidths-given'])
+
+    build_table(tabledata, tableline, stub_columns = 0, widths) {
+	const [colwidths, headrows, bodyrows] = tabledata;
+	const table = new nodes.table();
+	if (widths === 'auto') {
+	    table.attributes.classes.push('colwidths-auto');
+	} else if (widths) { // : # "grid" or list of integers
+	    table.attributes.classes.push(['colwidths-given']);
 	}
 	const tgroup = new nodes.tgroup('', [], { cols: colwidths.length });
-        table.add(tgroup)
-        for(colwidth in colwidths) {
+        table.add(tgroup);
+        for (let colwidth of colwidths) {
 	    const colspec = new nodes.colspec('', [], { colwidth });
-	    if(stub_columns)  {
-		colspec.attributes['stub'] = 1
-		stub_columns -= 1
+	    if (stub_columns) {
+		colspec.attributes.stub = 1;
+		stub_columns -= 1;
 	    }
             tgroup.add(colspec);
 	}
-        if(headrows) {
-            const thead = new nodes.thead('', '', [], {})
-            tgroup.add(thead)
-            for(let row of headrows) {
+        if (headrows) {
+            const thead = new nodes.thead('', '', [], {});
+            tgroup.add(thead);
+            for (const row of headrows) {
                 thead.add(this.build_table_row(row, tableline));
 	    }
 	}
-        const tbody = new nodes.tbody()
-        tgroup.add(tbody)
-        for(let row of bodyrows) {
-            tbody.add(this.build_table_row(row, tableline))
+        const tbody = new nodes.tbody();
+        tgroup.add(tbody);
+        for (const row of bodyrows) {
+            tbody.add(this.build_table_row(row, tableline));
 	}
-        return table
+        return table;
     }
-	/*
 
-    def build_table_row(this, rowdata, tableline):
-        row = nodes.row()
-        for cell in rowdata:
-            if cell is None:
-                continue
-            morerows, morecols, offset, cellblock = cell
-            attributes = {}
-            if morerows:
+
+    build_table_row(rowdata, tableline) {
+        const row = new nodes.row('', [], {})
+        for(let cell of rowdata) {
+            if(typeof cell === 'undefined') {
+                continue;
+	    }
+            const [ morerows, morecols, offset, cellblock ] = cell
+            const attributes = {}
+            if(morerows) {
                 attributes['morerows'] = morerows
-            if morecols:
+	    }
+            if(morecols) {
                 attributes['morecols'] = morecols
-            entry = nodes.entry(**attributes)
-            row += entry
-            if ''.join(cellblock):
-                this.nested_parse(cellblock, input_offset=tableline+offset,
-                                  node=entry)
+	    }
+            const entry = new nodes.entry('', [], attributes)
+            row.add(entry);
+            if(cellblock.join('')) {
+                this.nestedParse(cellblock, { inputOffset: tableline+offset,
+					      node: entry });
+	    }
+	}
         return row
+    }
 
-*/
     line(match, context, nextState) {
         if (this.stateMachine.matchTitles) {
             return [[match.input], 'Line', []];

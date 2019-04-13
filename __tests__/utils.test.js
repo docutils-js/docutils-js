@@ -15,6 +15,13 @@ test('1', () => {
     r.debug('hello');
 });
 
-test.only('2', () => {
+test('2', () => {
     expect(utils.unescape('d\x00 e\x00\nrp')).toBe('derp');
+});
+
+test('findCombiningChars', () => {
+    expect(utils.findCombiningChars('A t̆ab̆lĕ')).toEqual([3, 6, 9])
+});
+test('columnIndicies', () => {
+    expect(utils.columnIndicies('A t̆ab̆lĕ')).toEqual([1, 2, 4, 5, 7, 8])
 });

@@ -27,7 +27,7 @@ const defaultSettings = {
     idPrefix: '',
 };
 
-test.skip,('full rst2xml pipeline with specific input', () => {
+test.only('full rst2xml pipeline with specific input', () => {
     const settings = { ...defaultSettings };
     const args = { ...defaultArgs };
 
@@ -38,10 +38,14 @@ test.skip,('full rst2xml pipeline with specific input', () => {
     };
 
     const { readerName, parserName, writerName } = args;
-    const source = new StringInput({ source: `
-Want to learn about \`my favorite programming language\`_?
-
-.. _my favorite programming language: http://www.python.org` });
+    const source = new StringInput({ source: `+------------------------+------------+----------+
+| Header row, column 1   | Header 2   | Header 3 |
++========================+============+==========+
+| body row 1, column 1   | column 2   | column 3 |
++------------------------+------------+----------+
+| body row 2             | Cells may span        |
++------------------------+-----------------------+
+` });
         const destination = new StringOutput({});
     const pub = new Publisher({
  source, destination, settings, debug: true, debugFn

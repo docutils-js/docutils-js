@@ -1,6 +1,6 @@
 import UnknownStateError from './UnknownStateError';
 import ErrorOutput from './ErrorOutput';
-import { isIterable } from './utils';
+import { isIterable, columnIndicies } from './utils';
 import {
  ApplicationError, EOFError, InvalidArgumentsError, UnimplementedError as Unimp,
 } from './Exceptions';
@@ -58,7 +58,7 @@ export class ViewList extends Array {
         }
     }
 
-    source(i){
+    source(i) {
 	return this.info(i)[0];
     }
 
@@ -67,27 +67,27 @@ export class ViewList extends Array {
     }
 
     disconnect() {
-	this.parent = undefined;
+        this.parent = undefined;
     }
 
     splice(index, num, ...elems) {
-	console.log(`enter slice ${index} ${num} [${elems.length}]`);
-	console.log(`input: ${JSON.stringify(this)}`);
-	let index2 = index;
-	let num2 = num;
-	const returnAry = [];
-	for(let i = index; i < this.length - num; i += 1) {
-	    if(i < index + num) {
-		returnAry.push(this[i]);
-	    }
-	    console.log(`setting this[${i}] to this[${i + num}]`);
-	    this[i] = this[i + num];
-	}
-	console.log(`setting length to ${this.length - num}`);
-	this.length = this.length - num;
-	this.push(...elems);
-	console.log(`returning ${JSON.stringify(returnAry)}`);
-	return new this.constructor(returnAry);
+        console.log(`enter slice ${index} ${num} [${elems.length}]`);
+        console.log(`input: ${JSON.stringify(this)}`);
+        const index2 = index;
+        const num2 = num;
+        const returnAry = [];
+        for (let i = index; i < this.length - num; i += 1) {
+            if (i < index + num) {
+                returnAry.push(this[i]);
+            }
+            console.log(`setting this[${i}] to this[${i + num}]`);
+            this[i] = this[i + num];
+        }
+        console.log(`setting length to ${this.length - num}`);
+        this.length = this.length - num;
+        this.push(...elems);
+        console.log(`returning ${JSON.stringify(returnAry)}`);
+        return new this.constructor(returnAry);
     }
 
     slice(start, end) {
@@ -95,7 +95,7 @@ export class ViewList extends Array {
         if (end == null) {
             end = this.length;
         }
-        if(typeof start === 'undefined') {
+        if (typeof start === 'undefined') {
             start = 0;
         }
 
@@ -109,7 +109,7 @@ export class ViewList extends Array {
         if (i === this.items.length && this.items.length > 0) {
             return [this.items[i - 1][0], null];
         }
-	/* istanbul ignore if */
+        /* istanbul ignore if */
         if (i < 0 || i >= this.items.length) {
             throw new ApplicationError('Out of range');
         }
@@ -117,9 +117,9 @@ export class ViewList extends Array {
     }
 
     trimStart(n = 1) {
-	/* istanbul ignore if */
+        /* istanbul ignore if */
         if (n > this.length) {
-	    // fixme
+            // fixme
             // raise IndexError("Size of trim too large; can't trim %s items "
               //               "from a list of size %s." % (n, len(self.data)))
         } else if (n < 0) {
@@ -154,7 +154,7 @@ export class StringList extends ViewList {
             end = this.length;
         }
         for (let i = start; i < Math.min(end, this.length); i += 1) {
-	    /* istanbul ignore if */
+            /* istanbul ignore if */
             if (typeof this[i] === 'undefined') {
                 throw new Error(`${i} ${this.length}`);
             }
@@ -235,51 +235,52 @@ export class StringList extends ViewList {
     }
 
     get2dBlock(top, left, bottom, right, stripIndent) {
-	if(typeof stripIndent === 'undefined') {
-	    stripIndent= true;
-	}
-        const block = self.slice(top, bottom)
+        if (typeof stripIndent === 'undefined') {
+            stripIndent = true;
+        }
+        const block = this.slice(top, bottom);
         let indent = right;
-        for(i = 0; i < block.length; i += 1) {
-	    // get slice from line, care for combining characters
-            const ci = utils.column_indices(block[i])
-	    if(left < 0 || left >= ci.length) {
-		left += block[i].length - ci.length
-	    } else {
-                left = ci[left]
-	    }
-	    if(right < 0 || right >= ci.length) {
-                right += block[i].length - ci.length
-	    } else{
-                right = ci[right]
-	    }
-            block[i] = line = block[i].substring(left, right).trimEnd();
-            if(line) {
+        for (let i = 0; i < block.length; i += 1) {
+            // get slice from line, care for combining characters
+            const ci = columnIndicies(block[i]);
+            if (left < 0 || left >= ci.length) {
+                left += block[i].length - ci.length;
+            } else {
+                left = ci[left];
+            }
+            if (right < 0 || right >= ci.length) {
+                right += block[i].length - ci.length;
+            } else {
+                right = ci[right];
+            }
+	    const line = block[i].substring(left, right).trimEnd();
+            block[i] = line;
+            if (line) {
                 indent = Math.min(indent, line.length - line.trimStart().length);
-	    }
-	}
-        if(strip_indent && 0 < indent < right) {
-	    for(let i = 0; i < this.length; i += 1) {
-		this[i] = this[i].substring(indent);
-	    }
-	}
-        return block
+            }
+        }
+        if (stripIndent && indent > 0 < right) {
+            for (let i = 0; i < block.length; i += 1) {
+                block[i] = block[i].substring(indent);
+            }
+        }
+        return block;
     }
 
     padDoubleWidth() {
-	//        throw new Unimp('padDoublewidth');
+        //        throw new Unimp('padDoublewidth');
 
     }
 
     replace(old, newStr) {
-	for(let i = 0; i < this.length; i++) {
-	    this[i] = this[i].replace(old, newStr);
-	}
+        for (let i = 0; i < this.length; i++) {
+            this[i] = this[i].replace(old, newStr);
+        }
     }
 
     trimTop(n = 1) {
         /* Remove items from the start of the list, without touching the parent. */
-	/* istanbul ignore if */
+        /* istanbul ignore if */
         if (n > this.length) {
             throw new Error(`Size of trim too large; can't trim ${n} items `
                             + `from a list of size ${this.length}`);
@@ -309,7 +310,7 @@ export class StateMachine {
  stateClasses, initialState, debug, debugFn,
 }) {
         /* Perform some sanity checking on arguments */
-	/* istanbul ignore if */
+        /* istanbul ignore if */
         if (stateClasses == null || stateClasses.length === 0) {
             throw new InvalidArgumentsError('stateClasses');
         }
@@ -381,7 +382,7 @@ export class StateMachine {
             if (!isIterable(inputLines)) {
                 inputLines = [inputLines];
             }
-	    /* note: construct stringist with inputSource */
+            /* note: construct stringist with inputSource */
 
             this.inputLines = new StringList(inputLines, inputSource);
 //          console.log(this.inputLines);
@@ -417,7 +418,7 @@ export class StateMachine {
                         this.nextLine();
                         if (this.debug) {
                             if (Number.isNaN(this.lineOffset)) {
-				/* istanbul ignore if */
+                                /* istanbul ignore if */
                                 throw new Error();
                             }
 
@@ -425,29 +426,29 @@ export class StateMachine {
                                 this.lineOffset,
 );
                             if (!isIterable(rinfo)) {
-				/* istanbul ignore if */
+                                /* istanbul ignore if */
                                 throw new Error();
                             }
                             const [source, offset] = rinfo;
                             this.debugFn(`\nStateMachine.run: line (source=${source}, offset=${offset}):\n| ${this.line}`);
                         }
 //                      console.log(context);
-			/* istanbul ignore if */
+                        /* istanbul ignore if */
                         if (!Array.isArray(context)) {
                             throw new Error('context should be array');
                         }
 
                         const r = this.checkLine(context, state, transitions);
-			/* istanbul ignore if */
+                        /* istanbul ignore if */
                         if (!isIterable(r)) {
                             throw new Error(`Expect iterable result, got: ${r}`);
                         }
                         [context, nextState, result] = r;
-			/* istanbul ignore if */
+                        /* istanbul ignore if */
                         if (!Array.isArray(context)) {
                             throw new Error('context should be array');
                         }
-			/* istanbul ignore if */
+                        /* istanbul ignore if */
                         if (!isIterable(result)) {
                             throw new Error(`Expect iterable result, got: ${result}`);
                         }
@@ -674,7 +675,7 @@ src;
     }
 
     checkLine(context, state, transitions) {
-	/* istanbul ignore if */
+        /* istanbul ignore if */
         if (!Array.isArray(context)) {
             throw new Error('context should be array');
         }
@@ -690,7 +691,7 @@ src;
 //          throw new Error("no transitions");
 //      }
 
-	//        console.log(transitions);
+        //        console.log(transitions);
         for (const name of transitions) {
             const [pattern, method, nextState] = state.transitions[name];
             //      console.log(method);
@@ -702,7 +703,7 @@ src;
                 }
 //              console.log(`pattern match for ${name}`);
                 const r = method.bind(state)({ pattern, result, input: this.line }, context, nextState);
-		/* istanbul ignore if */
+                /* istanbul ignore if */
                 if (r === undefined) {
                         throw new Error();
                 }
@@ -751,7 +752,7 @@ src;
     notifyObservers() {
         let observer;
         for (const observer of this.observers) {
-	    /* istanbul ignore if */
+            /* istanbul ignore if */
             if (observer === undefined) {
                 throw new ApplicationError('undefined observer');
             }
@@ -760,9 +761,9 @@ src;
                 try {
                     info = this.inputLines.info(this.lineOffset);
                 } catch (err) {
-		    /* Empty */
+                    /* Empty */
                 }
-		/* istanbul ignore if */
+                /* istanbul ignore if */
                 if (info === undefined) {
                     // throw new Error("undefined info");
                     continue;
@@ -789,7 +790,7 @@ export class State {
         // this.wsInitialTransitions = args.wsInitialTransitions;
 
         this.addInitialTransitions();
-	/* istanbul ignore if */
+        /* istanbul ignore if */
         if (!stateMachine) {
             throw new Error('Need statemachine');
         }
@@ -800,8 +801,8 @@ export class State {
         if (!this.nestedSm) {
             this.nestedSm = this.stateMachine.constructor;
         }
-	// fix me - this needs revision
-	/* istanbul ignore if */
+        // fix me - this needs revision
+        /* istanbul ignore if */
         if (!this.nestedSmKwargs) {
             console.log('I am bogus');
             throw new Error();
@@ -887,16 +888,16 @@ export class State {
     makeTransitions(nameList) {
         const names = [];
         const transitions = {};
-	/* istanbul ignore if */
+        /* istanbul ignore if */
         if (!Array.isArray(nameList)) {
             console.log('warning, not an array');
             throw new Error('not array');
         }
 
-	/* check what happens with throw inside here */
-	nameList.forEach((namestate) => {
+        /* check what happens with throw inside here */
+        nameList.forEach((namestate) => {
             if (namestate == null) {
-		/* istanbul ignore if */
+                /* istanbul ignore if */
                 throw new InvalidArgumentsError('nameList contains null');
             }
             if (!Array.isArray(namestate)) {
@@ -935,9 +936,9 @@ export class StateMachineWS extends StateMachine {
         }
         let offset = this.absLineOffset();
         const [indented, indent, blankFinish] = this.inputLines.getIndented({
-	    start: this.lineOffset,
-	    untilBlank,
-	    stripIndent,
+            start: this.lineOffset,
+            untilBlank,
+            stripIndent,
 });
         if (indented) {
             this.nextLine(indented.length - 1);
@@ -1088,8 +1089,8 @@ export function string2lines(astring, args) {
     if (!astring) {
         astring = '';
     }
-    if(!args) {
-	args = {};
+    if (!args) {
+        args = {};
     }
 
     let { tabWidth, convertWhitespace, whitespace } = args;
