@@ -27,7 +27,7 @@ const defaultSettings = {
     idPrefix: '',
 };
 
-test.only('full rst2xml pipeline with specific input', () => {
+test('full rst2xml pipeline with specific input', () => {
     const settings = { ...defaultSettings };
     const args = { ...defaultArgs };
 

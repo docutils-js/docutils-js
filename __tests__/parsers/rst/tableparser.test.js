@@ -1,4 +1,4 @@
-import {GridTableParser } from '../../../src/rst/parser/tableparser';
+import {GridTableParser } from '../../../src/parsers/rst/tableparser';
 
 test('gridtableparser', () => {
     const g = new GridTableParser();
