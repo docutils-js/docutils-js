@@ -73,8 +73,8 @@ export class ViewList extends Array {
     }
 
     splice(index, num, ...elems) {
-        console.log(`enter slice ${index} ${num} [${elems.length}]`);
-        console.log(`input: ${JSON.stringify(this)}`);
+//        console.log(`enter slice ${index} ${num} [${elems.length}]`);
+//        console.log(`input: ${JSON.stringify(this)}`);
         const index2 = index;
         const num2 = num;
         const returnAry = [];
@@ -82,13 +82,13 @@ export class ViewList extends Array {
             if (i < index + num) {
                 returnAry.push(this[i]);
             }
-            console.log(`setting this[${i}] to this[${i + num}]`);
+//            console.log(`setting this[${i}] to this[${i + num}]`);
             this[i] = this[i + num];
         }
-        console.log(`setting length to ${this.length - num}`);
+//        console.log(`setting length to ${this.length - num}`);
         this.length = this.length - num;
         this.push(...elems);
-        console.log(`returning ${JSON.stringify(returnAry)}`);
+//        console.log(`returning ${JSON.stringify(returnAry)}`);
         return new this.constructor(returnAry);
     }
 
