@@ -34,7 +34,6 @@ viewlist: splice, slice, info, trimStart, trimEnd
 
 const lines = [["test\n123\nlalala\n"]];
 const lineArray = lines.map((lines,index) => [index.toString(), new StringList(string2lines(lines[0]))]);
-console.log(lineArray);
 
 test.each(lineArray)('%s', (index, lines) => {
     const s = lines.slice(0, lines.length);
