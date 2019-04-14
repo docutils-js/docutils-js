@@ -412,8 +412,8 @@ export class document extends Element {
 	this.autofootnotes = []
 	this.autofootnoteRefs = []
 	this.symbolFootnotes = []
-	this.symbolFootnooteRefs = []
-	this.footNotes = []
+	this.symbolFootnoteRefs = []
+	this.footnotes = []
 	this.citations = []
 	this.autofootnoteStart = 1
 	this.symbolFootnoteStart = 0
