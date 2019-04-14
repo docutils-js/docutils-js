@@ -366,7 +366,6 @@ export class Body extends RSTState {
     }
 
     run_directive(directive, match, type_name, option_presets) {
-        throw new Error('no run_directive');
 /*        """
         Parse a directive then run its directive function.
 
@@ -388,47 +387,50 @@ export class Body extends RSTState {
         Returns a 2-tuple: list of nodes, and a "blank finish" boolean.
         """ */
 
-        /*
-        if isinstance(directive, (FunctionType, MethodType)):
+/*        if isinstance(directive, (FunctionType, MethodType)):
             from docutils.parsers.rst import convert_directive_function
             directive = convert_directive_function(directive)
-        lineno = this.state_machine.abs_line_number()
-        initial_line_offset = this.state_machine.line_offset
-        indented, indent, line_offset, blank_finish \
-                  = this.state_machine.get_first_known_indented(match.end(),
-                                                                strip_top=0)
-        block_text = '\n'.join(this.state_machine.input_lines[
-            initial_line_offset : this.state_machine.line_offset + 1])
-        try:
-            arguments, options, content, content_offset = (
-                this.parse_directive_block(indented, line_offset,
-                                           directive, option_presets))
-        except MarkupError, detail:
-            error = this.reporter.error(
-                'Error in "%s" directive:\n%s.' % (type_name,
-                                                   ' '.join(detail.args)),
-                nodes.literal_block(block_text, block_text), line=lineno)
-            return [error], blank_finish
-        directive_instance = directive(
-            type_name, arguments, options, content, lineno,
-            content_offset, block_text, this, this.state_machine)
-        try:
+*/
+        const lineno = this.stateMachine.absLineNumber();
+        const initial_line_offset = this.stateMachine.lineOffset
+        const [ indented, indent, line_offset, blank_finish ] = this.stateMachine.getFirstKnownIndented(
+	    { indent: match.result.index + match.result[0].length,
+	      stripTop: 0 });
+        const block_text = this.stateMachine.inputLines.slice(initial_line_offset, this.stateMachine.lineOffset + 1);
+        try {
+            const [ args, options, content, content_offset ] = this.parse_directive_block(
+		indented,
+		line_offset,
+		directive,
+		option_presets,
+	    )
+	} catch(error) {
+	    if(error instanceof MarkupError) {
+		const err = this.reporter.error(`Error in "${type_name}" directive:\n${detail.args.join(' ')}`,
+						[new nodes.literal_block(block_text, block_text)],
+						{ line: lineno });
+		return [[err], blank_finish]
+	    }
+	}
+        const directive_instance = new directive(
+            type_name, args, options, content, lineno,
+            content_offset, block_text, this, this.stateMachine)
+        try {
             result = directive_instance.run()
-        except docutils.parsers.rst.DirectiveError, error:
-            msg_node = this.reporter.system_message(error.level, error.msg,
-                                                    line=lineno)
-            msg_node += nodes.literal_block(block_text, block_text)
-            result = [msg_node]
-        assert isinstance(result, list), \
+	} catch(error) {
+            const msg_node = this.reporter.system_message(error.level, error.msg, [], { line: lineno });
+            msg_node.add(new nodes.literal_block(block_text, block_text));
+            result = [msg_node];
+	}
+/*        assert isinstance(result, list), \
                'Directive "%s" must return a list of nodes.' % type_name
         for i in range(len(result)):
             assert isinstance(result[i], nodes.Node), \
                    ('Directive "%s" returned non-Node object (index %s): %r'
                     % (type_name, i, result[i]))
-        return (result,
-                blank_finish or this.state_machine.is_next_line_blank())
-        */
-        // throw new Unimp('run_Directive');
+*/
+        return [result,
+                blank_finish || this.stateMachine.isNextLineBlank()];
     }
 
     comment(match) {

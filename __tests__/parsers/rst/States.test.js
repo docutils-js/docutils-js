@@ -3,12 +3,12 @@ import RSTStateMachine from '../../../src/parsers/rst/RSTStateMachine';
 jest.mock('../../../src/parsers/rst/RSTStateMachine');
 
 function createsm() {
-        const sm = new RSTStateMachine({ stateClasses, initialState: 'Body',
+    const sm = new RSTStateMachine({ stateClasses, initialState: 'Body',
 				     debug: true,
-					 debugFn: console.log });
+				     debugFn: console.log });
     return sm;
 }
-test.only('Body patterns', () => {
+test('Body patterns', () => {
     const stateMachine = createsm();
     const body = new Body({ stateMachine });
     expect(body.patterns).toMatchSnapshot();

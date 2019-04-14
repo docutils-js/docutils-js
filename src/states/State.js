@@ -72,11 +72,13 @@ class State {
     }
 
     addTransition(name, transition) {
-        throw new Unimp();
+	this.transitionOrder.splice(0, 0, name);
+	this.transitions[name] = transition;
     }
 
     removeTransition(name) {
-        throw new Unimp();
+	delete this.transitions[name];
+	this.transitionOrder.splice(this.transitionOrder.indexOf(name), 1);
     }
 
     makeTransition(name, nextState) {
