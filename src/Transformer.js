@@ -26,7 +26,7 @@ export default class Transformer {
 		    urr.push(i.unknownReferenceResolvers);
 		}
 	    } else {
-		console.log('component is undefined. fixme');
+//		console.log('component is undefined. fixme');
 	    }
 	}
 //	console.log('urr is ')

@@ -4,6 +4,8 @@ import { isIterable, columnIndicies } from './utils';
 import {
  ApplicationError, EOFError, InvalidArgumentsError, UnimplementedError as Unimp,
 } from './Exceptions';
+import State from './states/State';
+import StateWS from './states/StateWS';
 
 export class TransitionCorrection extends Error {
     constructor(...args) {
@@ -71,8 +73,8 @@ export class ViewList extends Array {
     }
 
     splice(index, num, ...elems) {
-        console.log(`enter slice ${index} ${num} [${elems.length}]`);
-        console.log(`input: ${JSON.stringify(this)}`);
+//        console.log(`enter slice ${index} ${num} [${elems.length}]`);
+//        console.log(`input: ${JSON.stringify(this)}`);
         const index2 = index;
         const num2 = num;
         const returnAry = [];
@@ -80,13 +82,13 @@ export class ViewList extends Array {
             if (i < index + num) {
                 returnAry.push(this[i]);
             }
-            console.log(`setting this[${i}] to this[${i + num}]`);
+//            console.log(`setting this[${i}] to this[${i + num}]`);
             this[i] = this[i + num];
         }
-        console.log(`setting length to ${this.length - num}`);
+//        console.log(`setting length to ${this.length - num}`);
         this.length = this.length - num;
         this.push(...elems);
-        console.log(`returning ${JSON.stringify(returnAry)}`);
+//        console.log(`returning ${JSON.stringify(returnAry)}`);
         return new this.constructor(returnAry);
     }
 
@@ -779,304 +781,7 @@ src;
     }
 }
 
-export class State {
-    constructor(args) {
-        const { stateMachine, debug } = args;
-        this._init(args);
-        this.transitionOrder = [];
-        this.transitions = {};
-        // this.patterns = {}
-        // this.initialTransitions = args.initialTransitions;
-        // this.wsInitialTransitions = args.wsInitialTransitions;
 
-        this.addInitialTransitions();
-        /* istanbul ignore if */
-        if (!stateMachine) {
-            throw new Error('Need statemachine');
-        }
-
-        this.stateMachine = stateMachine;
-        this.debug = debug;
-
-        if (!this.nestedSm) {
-            this.nestedSm = this.stateMachine.constructor;
-        }
-        // fix me - this needs revision
-        /* istanbul ignore if */
-        if (!this.nestedSmKwargs) {
-            console.log('I am bogus');
-            throw new Error();
-            this.nestedSmKwargs = {
-                stateClasses: [this.constructor],
-                initialState: this.constructor.name,
-                debug: this.debug,
-                debugFn: this.debugFn,
-            };
-        }
-    }
-
-    _init() {
-            /* empty */
-        this.patterns = {};
-        this.initialTransitions = null;
-        this.nestedSm = null;
-    }
-
-    runtimeInit() {
-        /* empty */
-    }
-
-    unlink() {
-        this.stateMachine = undefined;
-    }
-
-    addInitialTransitions() {
-        if (this.initialTransitions) {
-            const [names, transitions] = this.makeTransitions(this.initialTransitions);
-            this.addTransitions(names, transitions);
-        }
-    }
-
-    addTransitions(names, transitions) {
-        names.forEach(((name) => {
-            if (name in this.transitions) {
-                throw new DuplicateTransitionError(name);
-            }
-            if (!(name in transitions)) {
-                throw new UnknownTrransitionError(name);
-            }
-        }));
-        this.transitionOrder.splice(0, 0, ...names);
-        Object.keys(transitions).forEach((key) => {
-            this.transitions[key] = transitions[key];
-        });
-    }
-
-    addTransition(name, transition) {
-        throw new Unimp();
-    }
-
-    removeTransition(name) {
-        throw new Unimp();
-    }
-
-    makeTransition(name, nextState) {
-        if (name == null) {
-            throw new InvalidArgumentsError('need transition name');
-        }
-        if (nextState === undefined) {
-            nextState = this.constructor.name;
-        }
-
-        let pattern = this.patterns[name];
-        if (!(pattern instanceof RegExp)) {
-            try {
-                pattern = new RegExp(`^${pattern}`);
-            } catch (error) {
-                throw error;
-            }
-        }
-        if (typeof (this[name]) !== 'function') {
-            throw new Error(`cant find method ${name} on ${this.constructor.name}`);
-        }
-
-        const method = this[name];
-
-        return [pattern, method, nextState];
-    }
-
-    makeTransitions(nameList) {
-        const names = [];
-        const transitions = {};
-        /* istanbul ignore if */
-        if (!Array.isArray(nameList)) {
-            console.log('warning, not an array');
-            throw new Error('not array');
-        }
-
-        /* check what happens with throw inside here */
-        nameList.forEach((namestate) => {
-            if (namestate == null) {
-                /* istanbul ignore if */
-                throw new InvalidArgumentsError('nameList contains null');
-            }
-            if (!Array.isArray(namestate)) {
-                transitions[namestate] = this.makeTransition(namestate);
-                names.push(namestate);
-            } else {
-                transitions[namestate[0]] = this.makeTransition(...namestate);
-                names.push(namestate[0]);
-            }
-        });
-
-        return [names, transitions];
-    }
-
-    noMatch(context, transitions) {
-        return [context, null, []];
-    }
-
-    bof(context) {
-        return [context, []];
-    }
-
-    eof(context) {
-        return [];
-    }
-
-    nop(match, context, nextState) {
-        return [context, nextState, []];
-    }
-}
-
-export class StateMachineWS extends StateMachine {
-    getIndented({ untilBlank, stripIndent }) {
-        if (stripIndent === undefined) {
-            stripIndent = true;
-        }
-        let offset = this.absLineOffset();
-        const [indented, indent, blankFinish] = this.inputLines.getIndented({
-            start: this.lineOffset,
-            untilBlank,
-            stripIndent,
-});
-        if (indented) {
-            this.nextLine(indented.length - 1);
-        }
-        while (indented && indented.length && !(indented[0].trim())) {
-            indented.trimStart();
-            offset += 1;
-        }
-        return [indented, indent, offset, blankFinish];
-    }
-
-    getKnownIndented({ indent, untilBlank, stripIndent }) {
-        let indented; let
-blankFinish;
-        if (stripIndent === undefined) {
-            stripIndent = true;
-        }
-        let offset = this.absLineOffset();
-        [indented, indent, blankFinish] = this.inputLines.getIndented({
- start: this.lineOffset, untilBlank, stripIndent, blockIndent: indent,
-});
-        this.nextLine(indented.length - 1);
-        while (indented.length && !(indented[0].trim())) {
-            indented.trimStart();
-            offset += 1;
-        }
-        return [indented, offset, blankFinish];
-    }
-
-    getFirstKnownIndented({
- indent, untilBlank, stripIndent, stripTop,
-}) {
-        let indented;
-        let blankFinish;
-        if (stripIndent === undefined) {
-            stripIndent = true;
-        }
-        if (stripTop === undefined) {
-            stripTop = true;
-        }
-        let offset = this.absLineOffset();
-        [indented, indent, blankFinish] = this.inputLines.getIndented({
-            start: this.lineOffset,
-untilBlank,
-stripIndent,
-            firstIndent: indent,
-});
-        this.nextLine(indented.length - 1);
-        if (stripTop) {
-            while (indented.length && !(indented[0].trim())) {
-                indented.trimStart();
-                offset += 1;
-            }
-        }
-        return [indented, indent, offset, blankFinish];
-    }
-}
-
-export class StateWS extends State {
-    constructor(args) {
-        super(args);
-        if (!this.indentSm) {
-            this.indentSm = this.nestedSm;
-        }
-        if (!this.indentSmKwargs) {
-            this.indentSmKwargs = this.nestedSmKwargs;
-        }
-        if (!this.knownIndentSm) {
-            this.knownIndentSm = this.indentSm;
-        }
-        if (!this.knownIndentSmKwargs) {
-            this.knownIndentSmKwargs = this.indentSmKwargs;
-        }
-    }
-
-    _init(args) {
-        super._init(args);
-        this.indentSm = null;
-        this.indentSmKwargs = null;
-        this.knownIndentSm = null;
-        this.knownIndentSmKwargs = null;
-        this.wsPatterns = {
- blank: ' *$',
-                           indent: ' +',
-};
-        this.wsInitialTransitions = ['blank', 'indent'];
-    }
-
-    addInitialTransitions() {
-        super.addInitialTransitions();
-        if (!this.patterns) {
-            this.patterns = {};
-        }
-        this.patterns = { ...this.patterns, ...this.wsPatterns };
-        const [names, transitions] = this.makeTransitions(this.wsInitialTransitions);
-        this.addTransitions(names, transitions);
-    }
-
-    blank(match, context, nextState) {
-        return this.nop(match, context, nextState);
-    }
-
-    indent(match, context, nextState) {
-        const [indented, indent, lineOffset, blankFinish] = this.stateMachine.getIndented({});
-        const IndentSm = this.indentSm;
-        console.log('instantiating indentsm');
-        console.log(this.indentSmKwargs);
-        const sm = new IndentSm({ debug: this.debug, ...this.indentSmKwargs });
-        if (!sm.run) {
-            console.log(Object.keys(sm));
-            throw Error(`no sm run ${this} ${IndentSm.constructor.name}`);
-        }
-
-        const results = sm.run({ indented, inputOffset: lineOffset });
-        return [context, nextState, results];
-    }
-
-    knownIndent(match, context, nextState) {
-        const [indetned, ineOffset, blankFinish] = this.stateMachine.getKnownIndented(
-            match.end(),
-);
-        const knownIndentSm = this.knownIdentSm;
-        const sm = new knownIndentSm({
- debug: this.debug,
-                                       ...this.knownIndentSmKwargs,
-});
-        const results = sm.run({ indented, inputOffset: lineOffset });
-        return [context, nextState, results];
-    }
-
-    firstKnownIndent(match, context, nextState) {
-        const [indented, lineOffset, blankFinish] = this.stateMachine.getFirstKnownIndented({ indent: match.result.index + match.result[0].length });
-        const KnownIndentSm = this.knownIndentSm;
-        const sm = new KnownIndentSm({ debug: this.debug, ...this.knownIndentSmKwargs });
-        const results = sm.run({ indented, inputOffset: lineOffset });
-        return [context, nextState, results];
-    }
-}
 
 function expandtabs(string) {
     let tabIndex;

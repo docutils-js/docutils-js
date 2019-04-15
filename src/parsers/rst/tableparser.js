@@ -194,7 +194,7 @@ class GridTableParser extends TableParser {
             cellblock.replace(this.doubleWidthPadChar, '');
             this.cells.push([top, left, bottom, right, cellblock]);
             corners.push(...[[top, right], [bottom, left]]);
-	    console.log(corners.toString());
+//	    console.log(corners.toString());
 	    corners.sort((a, b) => {
 		const [ rowA, colA  ] = a;
 		const [ rowB, colB ] = b;
@@ -383,7 +383,7 @@ if(typeof right === 'undefined') {
             const morecols = colindex[right] - colnum - 1;
             remaining -= (morerows + 1) * (morecols + 1);
             // write the cell into the table
-	    console.log(`rows[${rownum}][${colnum}] = [${morerows}, ${morecols}, ${top + 1}, ${block}]`);
+//	    console.log(`rows[${rownum}][${colnum}] = [${morerows}, ${morecols}, ${top + 1}, ${block}]`);
             rows[rownum][colnum] = [morerows, morecols, top + 1, block];
         }
 	if(remaining !== 0) {

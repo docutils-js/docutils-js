@@ -1,4 +1,4 @@
-import { StateMachineWS } from '../../StateMachine';
+import StateMachineWS from '../../StateMachineWS';
 import Inliner from './Inliner';
 import * as languages from '../../languages';
 

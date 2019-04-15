@@ -18,7 +18,6 @@ test('setId', () => {
     const d = newDocument({}, baseSettings);
     const p = new nodes.paragraph('test', 'test', [], {});
     const id = d.setId(p);
-    console.log(id);
 });
 test('paragraph text unescaped', () =>
 {

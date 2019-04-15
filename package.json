@@ -30,7 +30,9 @@
     "jest-cli": "^24.7.1",
     "jest-junit": "^6.3.0",
     "nyc": "^13.3.0",
-    "prettier": "^1.16.4"
+    "prettier": "^1.16.4",
+    "xmldom": "^0.1.27",
+    "xpath": "^0.0.27"
   },
   "jest": {
     "reporters": [

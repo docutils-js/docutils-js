@@ -2,9 +2,12 @@ import * as statemachine from '../../StateMachine';
 import * as nodes from '../../nodes';
 import * as directives from './directives';
 import * as tableparser from './tableparser';
+import RSTState from './states/RSTState';
 import {
-  columnWidth, unescape, isIterable, escape2null, splitEscapedWhitespace,
+  columnWidth, isIterable, escape2null, splitEscapedWhitespace,
 } from '../../utils';
+import unescape from '../../utils/unescape';
+
 
 /* import RSTStateMachine from './RSTStateMachine';
 import Inliner from './Inliner'; */
@@ -40,307 +43,6 @@ function escapeRegExp(string) {
   return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
 }
 
-class NestedStateMachine extends StateMachineWS {
-    run({
- inputLines, inputOffset, memo, node, matchTitles,
-    }) {
-        /* istanbul ignore if */
-        if (!inputLines) {
-            throw new Error('need inputlines');
-        }
-
-        /* istanbul ignore if */
-        if (matchTitles === undefined) {
-            this.matchTitles = true;
-        } else {
-            this.matchTitles = matchTitles;
-        }
-        this.memo = memo;
-        this.document = memo.document;
-        /* istanbul ignore if */
-        if (!this.document) {
-            throw new Error('need document');
-        }
-
-        this.attachObserver(this.document.noteSource.bind(this.document));
-        this.reporter = memo.reporter;
-        this.language = memo.language;
-        this.node = node;
-        const results = super.run({ inputLines, inputOffset });
-        /* istanbul ignore if */
-        if (results === undefined) {
-            throw new Error();
-        }
-        return results;
-    }
-}
-
-class RSTState extends StateWS {
-    _init(args) {
-        super._init(args);
-        this.nestedSm = NestedStateMachine;
-        this.nestedSmCache = [];
-        this.stateClasses = stateClasses;
-
-        this.nestedSmKwargs = {
-            stateClasses: this.stateClasses,
-            initialState: 'Body',
-            debug: args && args.stateMachine ? args.stateMachine.debug : false,
-            debugFn: args && args.stateMachine ? args.stateMachine.debugFn : console.log,
-        };
-    }
-
-    runtimeInit() {
-        super.runtimeInit();
-        const { memo } = this.stateMachine;
-        this.memo = memo;
-        this.reporter = memo.reporter;
-        this.inliner = memo.inliner;
-        this.document = memo.document;
-        this.parent = this.stateMachine.node;
-        if (!this.reporter.getSourceAndLine) {
-            this.reporter.getSourceAndLine = this.stateMachine.getSourceAndLine;
-        }
-    }
-
-    gotoLine(absLineOffset) {
-        try {
-            this.stateMachine.gotoLine(absLineOffset);
-        } catch (ex) {
-            /* test for eof error? */
-        }
-    }
-
-    /* istanbul ignore next */
-    noMatch(context, transitions) {
-        this.reporter.severe(`Internal error: no transition pattern match.  State: "${this.constructor.name}"; transitions: ${transitions}; context: ${context}; current line: ${this.stateMachine.line}.`);
-        return [context, null, []];
-    }
-
-    bof() {
-        return [[], []];
-    }
-
-    nestedParse(block, {
- inputOffset, node, matchTitles, stateMachineClass, stateMachineKwargs,
-}) {
-        /* istanbul ignore if */
-        if (!this.memo || !this.memo.document) {
-            throw new Error('need memo');
-        }
-        /* istanbul ignore if */
-        if (!block) {
-            throw new Error('need block');
-        }
-
-        let useDefault = 0;
-        if (!stateMachineClass) {
-            stateMachineClass = this.nestedSm;
-            useDefault += 1;
-        }
-        if (!stateMachineKwargs) {
-            stateMachineKwargs = this.nestedSmKwargs;
-            useDefault += 1;
-        }
-        const blockLength = block.length;
-
-        let stateMachine;
-        if (useDefault === 2 && this.nestedSmCache.length > 0) {
-            stateMachine = this.nestedSmCache.pop();
-        }
-
-        if (!stateMachine) {
-        /* istanbul ignore if */
-            if (!stateMachineKwargs.stateClasses) {
-                throw new InvalidArgumentsError('stateClasses');
-            }
-//          if(!stateMachineKwargs.document) {
-//              throw new Error("expectinf document")
-//          }
-            stateMachine = new stateMachineClass({
- debug: this.debug,
-                                                  ...stateMachineKwargs,
-});
-        }
-        stateMachine.run({
- inputLines: block,
-inputOffset,
-memo: this.memo,
-                          node,
-matchTitles,
-});
-        if (useDefault === 2) {
-            this.nestedSmCache.push(stateMachine);
-        } else {
-            stateMachine.unlink();
-        }
-        const newOffset = stateMachine.absLineOffset();
-        if (block.parent && (block.length - blockLength) !== 0) {
-            this.stateMachine.nextLine(block.length - blockLength);
-        }
-        return newOffset;
-    }
-
-    nestedListParse(block, {
- inputOffset, node, initialState,
-                     blankFinish, blankFinishState, extraSettings,
-                     matchTitles,
-                     stateMachineClass,
-                     stateMachineKwargs,
-}) {
-        if (extraSettings == null) {
-                extraSettings = {};
-        }
-        if (!stateMachineClass) {
-            stateMachineClass = this.nestedSm;
-        }
-        if (!stateMachineKwargs) {
-            stateMachineKwargs = { ...this.nestedSmKwargs };
-        }
-        stateMachineKwargs.initialState = initialState;
-        const stateMachine = new stateMachineClass({
- debug: this.debug,
-                                                    ...stateMachineKwargs,
-});
-        if (!blankFinishState) {
-            blankFinishState = initialState;
-        }
-        /* istanbul ignore if */
-        if (!(blankFinishState in stateMachine.states)) {
-            throw new InvalidArgumentsError(`invalid state ${blankFinishState}`);
-        }
-
-        stateMachine.states[blankFinishState].blankFinish = blankFinish;
-        Object.keys(extraSettings).forEach((key) => {
-            stateMachine.states[initialState][key] = extraSettings[key];
-        });
-        stateMachine.run({
- inputLines: block,
-inputOffset,
-memo: this.memo,
-                          node,
-matchTitles,
-});
-        blankFinish = stateMachine.states[blankFinishState].blankFinish;
-        stateMachine.unlink();
-        return [stateMachine.absLineOffset(), blankFinish];
-    }
-
-    section({
- title, source, style, lineno, messages,
-}) {
-        if (this.checkSubsection({ source, style, lineno })) {
-            this.newSubsection({ title, lineno, messages });
-        }
-    }
-
-    checkSubsection({ source, style, lineno }) {
-        const { memo } = this;
-        const title_styles = memo.titleStyles;
-        const mylevel = memo.sectionLevel;
-        let level = 0;
-        level = title_styles.indexOf(style) + 1;
-        if (level === 0) {
-            if (title_styles.length === memo.sectionLevel) { // new subsection
-                title_styles.push(style);
-                return 1;
-            }
-                this.parent.add(this.title_inconsistent(source, lineno));
-                return null;
-        }
-        if (level <= mylevel) { //            // sibling or supersection
-            memo.sectionLevel = level; // bubble up to parent section
-            if (style.length === 2) {
-                memo.sectionBubbleUpKludge = true;
-            }
-            // back up 2 lines for underline title, 3 for overline title
-            this.stateMachine.previousLine(style.length + 1);
-            throw new EOFError(); // let parent section re-evaluate
-        }
-
-        if (level === mylevel + 1) { // immediate subsection
-            return 1;
-        }
-            this.parent.add(this.title_inconsistent(source, lineno));
-            return undefined;
-    }
-
-    title_inconsistent(sourcetext, lineno) {
-        const error = this.reporter.severe(
-            'Title level inconsistent:', [new nodes.literal_block('', sourcetext)], { line: lineno },
-);
-        return error;
-    }
-
-
-    newSubsection({ title, lineno, messages }) {
-        const { memo } = this;
-        const mylevel = memo.sectionLevel;
-        memo.sectionLevel += 1;
-        const section_node = new nodes.section();
-        this.parent.add(section_node);
-        const [textnodes, title_messages] = this.inline_text(title, lineno);
-        const titlenode = new nodes.title(title, '', textnodes);
-        const name = normalizeName(titlenode.astext());
-        section_node.attributes.names.push(name);
-        section_node.add(titlenode);
-        section_node.add(messages);
-        section_node.add(title_messages);
-        this.document.noteImplicitTarget(section_node, section_node);
-        const offset = this.stateMachine.lineOffset + 1;
-        const absoffset = this.stateMachine.absLineOffset() + 1;
-        const newabsoffset = this.nestedParse(
-            this.stateMachine.inputLines.slice(offset), {
- inputOffset: absoffset,
-                                                         node: section_node,
-matchTitles: true,
-},
-);
-        this.gotoLine(newabsoffset);
-        if (memo.sectionLevel <= mylevel) {
-            throw new EOFError();
-        }
-
-            memo.sectionLevel = mylevel;
-    }
-
-    unindentWarning(nodeName) {
-        const lineno = this.stateMachine.absLineNumber() + 1;
-        return this.reporter.warning(`${nodeName} ends without a blank line; unexpected unindent.`, { line: lineno });
-    }
-
-    paragraph(lines, lineno) {
-        const data = lines.join('\n').trimEnd();
-        let text;
-        let literalnext;
-//      console.log(data);
-        if (/(?<!\\)(\\\\)*::$/.test(data)) {
-            if (data.length === 2) {
-                return [[], 1];
-            }
-            if (' \n'.indexOf(data[data.length - 3]) !== -1) {
-                text = data.substring(0, data.length - 3).replace(/\s*$/, '');
-            } else {
-                text = data.substring(0, data.length - 1);
-            }
-            literalnext = 1;
-        } else {
-            text = data;
-            literalnext = 0;
-        }
-        const r = this.inline_text(text, lineno);
-        const [textnodes, messages] = r;
-        const p = new nodes.paragraph(data, '', textnodes);
-        [p.source, p.line] = this.stateMachine.getSourceAndLine(lineno);
-        return [[p, ...messages], literalnext];
-    }
-
-    inline_text(text, lineno) {
-        const r = this.inliner.parse(text, { lineno, memo: this.memo, parent: this.parent });
-//      console.log(r);
-        return r;
-    }
-}
 
 function _loweralpha_to_int() {
 }
@@ -569,7 +271,7 @@ export class Body extends RSTState {
 
     make_target(block, block_text, lineno, target_name) {
         const [target_type, data] = this.parse_target(block, block_text, lineno);
-        console.log(`target type if ${target_type} and data is ${data}`);
+//        console.log(`target type if ${target_type} and data is ${data}`);
         if (target_type === 'refname') {
             const target = new nodes.target(block_text, '', [], { refname: normalizeName(data) });
             target.indirectReferenceName = data;
@@ -585,7 +287,7 @@ export class Body extends RSTState {
     }
 
     parse_target(block, block_text, lineno) {
-        console.log(`parse_target(${block}, ${block_text}, ${lineno})`);
+//        console.log(`parse_target(${block}, ${block_text}, ${lineno})`);
         /* """
         Determine the type of reference of a target.
 
@@ -664,7 +366,6 @@ export class Body extends RSTState {
     }
 
     run_directive(directive, match, type_name, option_presets) {
-        throw new Error('no run_directive');
 /*        """
         Parse a directive then run its directive function.
 
@@ -686,47 +387,50 @@ export class Body extends RSTState {
         Returns a 2-tuple: list of nodes, and a "blank finish" boolean.
         """ */
 
-        /*
-        if isinstance(directive, (FunctionType, MethodType)):
+/*        if isinstance(directive, (FunctionType, MethodType)):
             from docutils.parsers.rst import convert_directive_function
             directive = convert_directive_function(directive)
-        lineno = this.state_machine.abs_line_number()
-        initial_line_offset = this.state_machine.line_offset
-        indented, indent, line_offset, blank_finish \
-                  = this.state_machine.get_first_known_indented(match.end(),
-                                                                strip_top=0)
-        block_text = '\n'.join(this.state_machine.input_lines[
-            initial_line_offset : this.state_machine.line_offset + 1])
-        try:
-            arguments, options, content, content_offset = (
-                this.parse_directive_block(indented, line_offset,
-                                           directive, option_presets))
-        except MarkupError, detail:
-            error = this.reporter.error(
-                'Error in "%s" directive:\n%s.' % (type_name,
-                                                   ' '.join(detail.args)),
-                nodes.literal_block(block_text, block_text), line=lineno)
-            return [error], blank_finish
-        directive_instance = directive(
-            type_name, arguments, options, content, lineno,
-            content_offset, block_text, this, this.state_machine)
-        try:
+*/
+        const lineno = this.stateMachine.absLineNumber();
+        const initial_line_offset = this.stateMachine.lineOffset
+        const [ indented, indent, line_offset, blank_finish ] = this.stateMachine.getFirstKnownIndented(
+	    { indent: match.result.index + match.result[0].length,
+	      stripTop: 0 });
+        const block_text = this.stateMachine.inputLines.slice(initial_line_offset, this.stateMachine.lineOffset + 1);
+        try {
+            const [ args, options, content, content_offset ] = this.parse_directive_block(
+		indented,
+		line_offset,
+		directive,
+		option_presets,
+	    )
+	} catch(error) {
+	    if(error instanceof MarkupError) {
+		const err = this.reporter.error(`Error in "${type_name}" directive:\n${detail.args.join(' ')}`,
+						[new nodes.literal_block(block_text, block_text)],
+						{ line: lineno });
+		return [[err], blank_finish]
+	    }
+	}
+        const directive_instance = new directive(
+            type_name, args, options, content, lineno,
+            content_offset, block_text, this, this.stateMachine)
+        try {
             result = directive_instance.run()
-        except docutils.parsers.rst.DirectiveError, error:
-            msg_node = this.reporter.system_message(error.level, error.msg,
-                                                    line=lineno)
-            msg_node += nodes.literal_block(block_text, block_text)
-            result = [msg_node]
-        assert isinstance(result, list), \
+	} catch(error) {
+            const msg_node = this.reporter.system_message(error.level, error.msg, [], { line: lineno });
+            msg_node.add(new nodes.literal_block(block_text, block_text));
+            result = [msg_node];
+	}
+/*        assert isinstance(result, list), \
                'Directive "%s" must return a list of nodes.' % type_name
         for i in range(len(result)):
             assert isinstance(result[i], nodes.Node), \
                    ('Directive "%s" returned non-Node object (index %s): %r'
                     % (type_name, i, result[i]))
-        return (result,
-                blank_finish or this.state_machine.is_next_line_blank())
-        */
-        // throw new Unimp('run_Directive');
+*/
+        return [result,
+                blank_finish || this.stateMachine.isNextLineBlank()];
     }
 
     comment(match) {

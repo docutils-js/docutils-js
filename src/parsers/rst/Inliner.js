@@ -153,6 +153,7 @@ class Inliner {
     }
 
     footnote_reference(match, lineno) {
+	console.log(`in footnote_reference : ${match.result}`);
 	const label = match.groups.footnotelabel;
 	let refname = normalize_name(label);
 	const string = match.result.input;

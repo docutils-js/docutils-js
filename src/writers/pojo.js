@@ -22,14 +22,14 @@ class POJOTranslator extends GenericNodeVisitor {
 	const me = [node.tagname, node.attlist(), []];
 	this.ancestors.push(me);
 	this.level += 1;
-	console.log(this.level);
+//	console.log(this.level);
     }
 
     default_departure(node) {
 	const me = this.ancestors.pop();
 	if(this.level === 1) {
 	    this.root = me;
-	    console.log(JSON.stringify(me));
+//	    console.log(JSON.stringify(me));
 	} else {
 	    const parent = this.ancestors[this.ancestors.length -1];
 	    parent[2].push(me);

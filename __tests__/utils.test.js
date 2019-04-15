@@ -1,4 +1,5 @@
 import * as utils from '../src/utils';
+import unescape from '../src/utils/unescape';
 
 test('1', () => {
     const r = utils.newReporter({}, {
@@ -16,7 +17,7 @@ test('1', () => {
 });
 
 test('2', () => {
-    expect(utils.unescape('d\x00 e\x00\nrp')).toBe('derp');
+    expect(unescape('d\x00 e\x00\nrp')).toBe('derp');
 });
 
 test('findCombiningChars', () => {

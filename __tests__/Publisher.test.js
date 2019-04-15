@@ -42,7 +42,7 @@ beforeEach(() => {
       newDocument: () => newDocument({}, publishingSettings),
       read: (source, parser, settings, cb) => {
         // call this.source.rad ??
-        console.log(`in read ${cb}`);
+//        console.log(`in read ${cb}`);
         cb(
           undefined,
           /* expects document */ newDocument({}, publishingSettings)
@@ -55,7 +55,7 @@ beforeEach(() => {
     return {
       getTransforms: () => [],
       write: (document, destination) => {
-        console.log(`in write ${document}`);
+//        console.log(`in write ${document}`);
         return document;
       },
       assembleParts: () => {}
@@ -70,11 +70,11 @@ test("Instantiate publisher", () => {
   const writer = new Writer();
   const source = new Input({});
   const destination = new Output();
-  console.log(Output);
-  console.log(reader);
+//  console.log(Output);
+//  console.log(reader);
   // destination is the correspondence to 'input'
   // which is called 'source'
-  console.log(source);
+//  console.log(source);
   const publisher = new Publisher({
     source,
     reader,
