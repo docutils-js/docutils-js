@@ -59,8 +59,8 @@ test.each([['`test`:foo:'],
 	  ])('%s', (a) => {
     const inliner = new Inliner();
     inliner.initCustomizations({});
-    const document = newDocument({}, baseSettings);
-    const reporter = newReporter({}, {});
+	      const document = newDocument({}, { ...baseSettings });
+	      const reporter = newReporter({}, { ...baseSettings });
     let language;
     const memo = {
  document,

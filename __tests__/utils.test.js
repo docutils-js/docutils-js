@@ -1,14 +1,9 @@
 import * as utils from '../src/utils';
 import unescape from '../src/utils/unescape';
+import baseSettings from '../src/baseSettings';
 
 test('1', () => {
-    const r = utils.newReporter({}, {
- debug: true,
-				      reportLevel: 0,
-				      warningStream: {
-					  write: process.stdout.write.bind(process.stdout),
-				      },
-				    });
+    const r = utils.newReporter({}, { ...baseSettings });
 
 //    r.attachObserver(node => {
 //	console.log(node.children[0].children[0].astext());

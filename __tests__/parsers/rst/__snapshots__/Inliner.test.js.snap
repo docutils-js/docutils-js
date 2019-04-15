@@ -12,9 +12,9 @@ exports[`\`test\` 1`] = `"<problematic ids=\\"id2\\" refid=\\"id1\\">\`test\`</p
 
 exports[`\`test\` 2`] = `"<system_message ids=\\"id1\\" backrefs=\\"id2\\" line=\\"1\\"><paragraph>Unknown interpreted text role \\"\\".</paragraph></system_message>"`;
 
-exports[`\`test\`:foo: 1`] = `"<problematic ids=\\"id2\\" refid=\\"id1\\">\`test\`:foo:</problematic>"`;
+exports[`\`test\`:foo: 1`] = `"<title_reference>test</title_reference>"`;
 
-exports[`\`test\`:foo: 2`] = `"<system_message ids=\\"id1\\" backrefs=\\"id2\\" line=\\"1\\"><paragraph>Unknown interpreted text role \\"foo\\".</paragraph></system_message>"`;
+exports[`\`test\`:foo: 2`] = `""`;
 
 exports[`Eat **lots** of *food*. 1`] = `"Eat <strong>lots</strong> of <emphasis>food</emphasis>."`;
 
