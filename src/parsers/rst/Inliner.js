@@ -32,6 +32,7 @@ function buildRegexp(definition, compile = true) {
         prefixNames = [...prefix];
         prefix = pr;
     }
+    /* istanbul ignore if */
     if (suffix === undefined) {
         throw new Error();
     }
@@ -43,6 +44,7 @@ function buildRegexp(definition, compile = true) {
         suffix = sr;
     }
 
+    /* istanbul ignore if */
     if (!fakeTuple) {
         throw new Error();
     }
@@ -50,6 +52,7 @@ function buildRegexp(definition, compile = true) {
 //    console.log(`buildRegexp(${name} - ${pi})`);
     const partStrings = [];
 //    console.log(parts);
+    /* istanbul ignore if */
     if (parts === undefined) {
         throw new Error();
     }
@@ -656,13 +659,13 @@ esn;
         if (role_fn) {
             const [theNodes, messages2] = role_fn(role, rawsource, text, lineno, this);
 	    try {
-                theNodes.children[0].children[0].rawsource = unescape(text, true);
+                theNodes[0].children[0].rawsource = unescape(text, true);
 	    } catch (error) {
 		if(!(error instanceof TypeError)) {
 		    throw error;
 		}
 	    }
-            return [theNodes, messages.push(...messages2)];
+            return [theNodes, [...messages, ...messages2]];
 	}
             const msg = this.reporter.error(
                 `Unknown interpreted text role "${role}".`, [],

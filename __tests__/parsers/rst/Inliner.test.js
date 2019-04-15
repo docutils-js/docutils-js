@@ -34,7 +34,7 @@ function dumpNodes(nodes) {
 test('inliner 1', () => {
     const inliner = new Inliner();
     inliner.initCustomizations({});
-    const document = newDocument({}, baseSettings);
+    const document = newDocument({}, { ... baseSettings });
     const reporter = newReporter({}, {});
     let language;
     const memo = {
