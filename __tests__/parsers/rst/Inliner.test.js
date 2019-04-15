@@ -35,7 +35,7 @@ test('inliner 1', () => {
     const inliner = new Inliner();
     inliner.initCustomizations({});
     const document = newDocument({}, { ... baseSettings });
-    const reporter = newReporter({}, {});
+    const reporter = newReporter({}, { ...baseSettings });
     let language;
     const memo = {
 	document,
