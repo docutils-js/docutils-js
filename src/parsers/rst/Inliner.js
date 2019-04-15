@@ -585,7 +585,9 @@ esn;
                     throw new Error(`Invalid dispatch ${mname}`);
                 }
                 let before; let inlines; let
-sysmessages;
+		sysmessages;
+		console.log(`name is ${mname}`);
+
                 [before, inlines, remaining, sysmessages] = method({ result: match, match, groups: rr }, lineno);
                 unprocessed.push(before);
                 if (!isIterable(sysmessages)) {
@@ -655,11 +657,11 @@ sysmessages;
 	    try {
                 theNodes.children[0].children[0].rawsource = unescape(text, true);
 	    } catch (error) {
-		// except IndexError:
-                // pass
-		throw error;
+		if(!(error instanceof TypeError)) {
+		    throw error;
+		}
 	    }
-            return [theNodes, messages.extend(messages2)];
+            return [theNodes, messages.push(...messages2)];
 	}
             const msg = this.reporter.error(
                 `Unknown interpreted text role "${role}".`, [],

@@ -2,6 +2,8 @@ import { Publisher, publishCmdLine, defaultDescription } from '../../src/Core';
 import { Source } from '../../src/Sources';
 import { StringInput, StringOutput } from '../../src/io';
 import Output from '../../src/io/Output';
+import baseSettings from '../../src/baseSettings';
+
 jest.mock('../../src/io/Output');
 
 const currentLogLines = [];
@@ -22,12 +24,7 @@ const defaultArgs = {
     writerName: 'pojo',
 };
 
-/* should pull from baseSettings */
-const defaultSettings = {
-    debug: true,
-    autoIdPrefix: 'auto',
-    idPrefix: '',
-};
+const defaultSettings = { ... baseSettings };
 
 test.only('rst2pojo pipeline', () => {
     const settings = { ...defaultSettings };

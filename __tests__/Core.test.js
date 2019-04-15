@@ -2,6 +2,7 @@ import { Publisher, publishCmdLine, defaultDescription } from '../src/Core';
 import { Source } from '../src/Sources';
 import { StringInput, StringOutput } from '../src/io';
 import * as nodes from '../src/nodes';
+import baseSettings from '../src/baseSettings';
 
 const currentLogLines = [];
 
@@ -21,11 +22,7 @@ const defaultArgs = {
     writerName: 'xml',
 };
 
-const defaultSettings = {
-    debug: true,
-    autoIdPrefix: 'auto',
-    idPrefix: '',
-};
+const defaultSettings = { ... baseSettings };
 
 test.skip('full rst2xml pipeline with specific input', () => {
     const settings = { ...defaultSettings };
@@ -69,6 +66,7 @@ test.each([['Title', 'Title\n=====\nParagraph.'],
 	   ['program lang',`Want to learn about \`my favorite programming language\`_?
 
 .. _my favorite programming language: http://www.python.org`],
+	   ['interpreted text with no role', `\`test\``],
 	   ['Random indent', '  \n   \n \n     \n\n  \n'],
 	   ['Anonymous reference', '__ http://www.python.org\n'],
 	   ['Links', `.. _A ReStructuredText Primer: ../../user/rst/quickstart.html

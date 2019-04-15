@@ -143,7 +143,7 @@ export class Node {
     walkabout(visitor) {
         let callDepart = true;
         let stop = false;
-        visitor.document.reporter.debug(`docutils.nodes.Node.walkabout calling dispatch_visit for ${this}`);
+        visitor.document.reporter.debug(`docutils.nodes.Node.walkabout calling dispatch_visit`);
         try {
             try {
                 visitor.dispatchVisit(this);

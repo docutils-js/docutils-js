@@ -4,6 +4,10 @@ import * as docutils from '../index';
 import * as nodes from '../nodes';
 
 function escapeXml(unsafe) {
+    console.log(`unsafe is ${unsafe}`);
+    if(typeof unsafe === 'undefined') {
+	throw new Error("need unsafE");
+    }
     return unsafe.replace(/[<>&'"]/g, function (c) {
         switch (c) {
             case '<': return '&lt;';

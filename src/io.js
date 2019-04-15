@@ -6,6 +6,11 @@ import Output from './io/Output';
 import { ApplicationError } from'./Exceptions';
 
 export class StringInput extends Input {
+    constructor(...args) {
+	super(...args);
+	this.sourcePath = '<string>';
+    }
+	
     read(cb) {
 	cb(undefined, this.source);
     }
