@@ -3,7 +3,9 @@
 exports[`rst2pojo pipeline 1`] = `
 Array [
   "document",
-  Object {},
+  Object {
+    "source": "<string>",
+  },
   Array [
     Array [
       "section",
