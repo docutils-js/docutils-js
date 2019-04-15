@@ -248,7 +248,24 @@ item.
    with the beginning of the footnote label.  The ".."
    marker is what determines the indentation.
 `],
-           ['tabs', 'hello\ttabs\n'],
+    ['tabs', 'hello\ttabs\n'],
+    ['footnote reference strangeness', `If [#note]_ is the first footnote reference, it will show up as
+"[1]".  We can refer to it again as [#note]_ and again see
+"[1]".  We can also refer to it as note_ (an ordinary internal
+hyperlink reference).
+
+.. [#note] This is the footnote labeled "note".`],
+    ['footnotes multiple refs', `[#]_ is a reference to footnote 1, and [#]_ is a reference to
+footnote 2.
+
+.. [#] This is footnote 1.
+.. [#] This is footnote 2.
+.. [#] This is footnote 3.
+
+[#]_ is a reference to footnote 3.`],
+    ['footnote auto-symbol', `Here is a symbolic footnote reference: [*]_.
+
+.. [*] This is the footnote.`],
          ])('%s', (...inputAry) => {
              const [a, raw, opts] = inputAry;
              const myOpts = opts || {};
