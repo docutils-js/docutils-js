@@ -409,10 +409,12 @@ if (!rawsource) {
 
     inline_obj(match, lineno, end_pattern, nodeclass,
                 restore_backslashes = false) {
+		/* istanbul ignore if */
         if (typeof nodeclass !== 'function') {
             throw new Error();
         }
 
+		/* istanbul ignore if */
         if (!(end_pattern instanceof RegExp)) {
             throw new Error('');
         }
@@ -420,6 +422,7 @@ if (!rawsource) {
 //      console.log(match);
         const string = match.match.input;
         const matchstart = string.indexOf(match.groups.start);
+		/* istanbul ignore if */
         if (matchstart === -1) {
             throw new Error('');
         }
@@ -585,6 +588,7 @@ esn;
                 });
 		const mname = rr.start || rr.backquote || rr.refend || rr.fnend;
                 const method = this.dispatch[mname];
+		/* istanbul ignore if */
                 if (typeof method !== 'function') {
                     throw new Error(`Invalid dispatch ${mname}`);
                 }
@@ -594,6 +598,7 @@ esn;
 
                 [before, inlines, remaining, sysmessages] = method({ result: match, match, groups: rr }, lineno);
                 unprocessed.push(before);
+		/* istanbul ignore if */
                 if (!isIterable(sysmessages)) {
                     throw new Error(`Expecting iterable, got ${sysmessages}`);
                 }
@@ -657,7 +662,7 @@ esn;
     interpreted(rawsource, text, role, lineno) {
         const [role_fn, messages] = roles.role(role, this.language, lineno, this.reporter);
         if (role_fn) {
-            const [theNodes, messages2] = role_fn(role, rawsource, text, lineno, this);
+            const [theNodes, messages2] = role_fn.invoke(role, rawsource, text, lineno, this);
 	    try {
                 theNodes[0].children[0].rawsource = unescape(text, true);
 	    } catch (error) {

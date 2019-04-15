@@ -13,14 +13,14 @@ export const defaultDescription = ('Reads from <source> (default is stdin) and w
 
 export function publishCmdLine(args, cb) {
     const _defaults = { readerName: 'standalone',
-			parserName: 'restructuredtext',
-			usage: defaultUsage,
-			description: defaultDescription,
-			enableExitStatus: true };
+                        parserName: 'restructuredtext',
+                        usage: defaultUsage,
+                        description: defaultDescription,
+                        enableExitStatus: true };
     args = { ..._defaults, ...args }
     const { reader, readerName, parser, parserName, writer, writerName,
       settings, settingsSpec, settingsOverrides, configSection,
-	    enableExitStatus, argv, usage, description } = args;
+            enableExitStatus, argv, usage, description } = args;
     const pub = new Publisher({reader, parser, writer, settings});
     pub.setComponents(readerName, parserName, writerName);
     pub.publish({argv, usage, description, settingsSpec, settingsOverrides, configSection, enableExitStatus }, cb);

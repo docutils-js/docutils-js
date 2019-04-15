@@ -63,6 +63,10 @@ test.each([
            ['interpreted text with no role', '`test`'],
            ['interpreted text role prefix', ':role:`test`'],
            ['interpreted text role suffix', '`test`:role:'],
+           ['interpreted text role emphasis prefix', ':emphasis:`test`'],
+           ['interpreted text role emphasis suffix', '`test`:emphasis:'],
+           ['interpreted text with no end string suffix', '`test'],
+           ['interpreted text with both roles', ':role:`test`:role:'],
            ['Random indent', '  \n   \n \n     \n\n  \n'],
            ['Anonymous reference', '__ http://www.python.org\n'],
            ['Links', `.. _A ReStructuredText Primer: ../../user/rst/quickstart.html

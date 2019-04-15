@@ -94,14 +94,14 @@ export default class Writer extends BaseWriter {
 	super(args);
 	this.translatorClass = XMLTranslator;
     }
-    
+
     translate() {
 	const TranslatorClass = this.translatorClass;
 	const visitor = new TranslatorClass(this.document);
 	this.visitor = visitor;
 	this.document.walkabout(visitor);
 	this.output = visitor.output.join('');
-//	console.log(this.output);
+	console.log(this.output);
     }
 }
 

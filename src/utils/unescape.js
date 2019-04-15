@@ -4,10 +4,14 @@ export default function unescape(text, restoreBackslashes=false, respectWhitespa
     Backslash-escaped spaces are also removed.
     */
     // `respect_whitespace` is ignored (since introduction 2016-12-16)if(
-	if(typeof text === 'undefined') {
-		throw new Error();
+    if (typeof text === 'undefined') {
+        throw new Error();
 
-	}
+    }
+    if (typeof text.split !== 'function') {
+        throw new Error();
+    }
+
     if(restoreBackslashes) {
         return text.replace(/\x00/g, '\\');
     } else {

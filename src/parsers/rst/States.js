@@ -1689,7 +1689,7 @@ srcline;
                     node_list[node_list.length - 1].add(textnode);
                     for (const part of parts.slice(1)) {
                         node_list.push(
-                            new nodes.classifier(unescape(part, false), [part]),
+                            new nodes.classifier(unescape(part, false), part),
 );
                     }
                 }

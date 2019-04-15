@@ -1,4 +1,5 @@
 import { OptionParser as OptionParserBase } from './OptParse'
+import SettingsSpec from './SettingsSpec';
 
 function validate_strip_class() {
 }
@@ -211,6 +212,42 @@ export class OptionParser extends OptionParserBase {
 				 '_destination': null,
 				 '_config_files': null}
 	
+    }
+
+    /*
+     * For each component, first populate from the `SettingsSpec.settings_spec`
+     * structure, then from the `SettingsSpec.settings_defaults` dictionary.
+     * After all components have been processed, check for and populate from
+     * each component's `SettingsSpec.settings_default_overrides` dictionary.
+     */
+    populateFromComponents(components) {
+	components.filter(a => a != null).forEach(component => {
+            const settingsSpec = component.settingsSpec
+            this.relativePathSettings.push(...component.relativePathSettings);
+	    for(i = 0; i < settingsSpec.length; i+= 3) {
+                const [ title, description, option_spec ] = settings_spec
+                if(title) {
+                    //group = optparse.OptionGroup(self, title, description)
+                    //self.add_option_group(group)
+		} else {
+                    group = this;        // single options
+		}
+		/*
+                for (help_text, option_strings, kwargs) in option_spec:
+                    option = group.add_option(help=help_text, *option_strings,
+                                              **kwargs)
+                    if kwargs.get('action') == 'append':
+                        self.lists[option.dest] = 1
+		*/
+                if(component.settingsDefaults) {
+                    //this.defaults.update(component.settings_defaults)
+		}
+	    }
+	});
+	/*for component in components:
+            if component and component.settings_default_overrides:
+                self.defaults.update(component.settings_default_overrides)
+	*/
     }
 
     checkArgs(args) {

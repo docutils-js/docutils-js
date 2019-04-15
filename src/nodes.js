@@ -374,6 +374,9 @@ export class TextElement extends Element {
         if (!children) {
             children = [];
         }
+        if(Array.isArray(text)) {
+            throw new InvalidArgumentsError("text should not be an array");
+        }
         super(rawsource, (typeof text !== 'undefined' && text !== '') ? [new Text(text), ...children] : children, attributes);
     }
 }
