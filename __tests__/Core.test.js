@@ -82,7 +82,7 @@ test.each([
            ['Nested sections', 'Title\n=====\n\nSection-------\n\nThird@@@@@\n\nSecond\n======\n\nOoops\n@@@@@\n'],
            ['Short overline', '===\nTitle\n===\n'],
            ['Short overline 2', '===\nTitle\n'],
-           ['Incomplete title', '=====\nTitle\n'],
+    ['Incomplete title', '=====\nTitle\n', { expectError: true }],
            ['Line block with continuation line', `| Lend us a couple of bob till Thursday.
 | I'm absolutely skint.
 | But I'm expecting a postal order and I can pay you back
@@ -270,9 +270,13 @@ item.
               pub.setComponents(readerName, parserName, writerName);
               return new Promise((resolve, reject) => {
                   /* {argv, usage, description, settingsSpec, settingsOverrides, configSection, enableExitStatus } */
-                  pub.publish({}, (error, ...args) => {
+		  const fn = () => pub.publish({}, (error, ...args) => {
                       if (error) {
-                          reject(error);
+			  if(myOpts.expectError) {
+			      resolve();
+			  } else {
+                              reject(error);
+			  }
                           return;
                       }
                       const document = pub.document;
@@ -299,5 +303,6 @@ item.
                       currentLogLines.length = 0;
                       resolve();
                   });
+		  fn();
               });
           });

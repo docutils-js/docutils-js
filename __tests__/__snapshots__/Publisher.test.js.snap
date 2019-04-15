@@ -1,3 +1,5 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`Instantiate publisher #2 1`] = `"<document/>"`;
+
 exports[`Instantiate publisher 1`] = `"<document/>"`;
