@@ -50,13 +50,13 @@ test('inliner 1', () => {
     expect(messages.map(n => n.toString()).join('')).toMatchSnapshot();
 });
 
-test.each([['`test`:foo:'],
-		['I like *TV*'],
-		['Eat **lots** of *food*.'],
-		['``literal``'],
-		['_`hello`'],
-		['`test`'],
-	  ])('%s', (a) => {
+test.each([['Interpreted text', '`test`:foo:'],
+	   ['Emphasis', 'I like *TV*'],
+	   ['Bold', 'Eat **lots** of *food*.'],
+	   ['Literal', '``literal``'],
+	   ['Not sure', '_`hello`'],
+	   ['Interpreted text, no specified role', '`test`'],
+	  ])('%s', (testName, a) => {
     const inliner = new Inliner();
     inliner.initCustomizations({});
 	      const document = newDocument({}, { ...baseSettings });
