@@ -18,6 +18,7 @@ pipeline {
     }
        post {
       always {
+      publishHTML([allowMissing: false, alwaysLinkToLastBuild: true, keepAll: true, reportDir: 'coverage/lcov-html', reportFiles: 'index.html', reportName: 'Code Coverage', reportTitles: 'Project Coverage Overview'])
 		junit 'junit.xml'
 		      archiveArtifacts artifacts: 'build/*.tar.gz', fingerprint: true
 		      archiveArtifacts artifacts: '**/__snapshots__/*', fingerprint: true
