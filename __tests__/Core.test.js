@@ -72,7 +72,7 @@ test.each([
            ['Links', `.. _A ReStructuredText Primer: ../../user/rst/quickstart.html
 .. _Quick reStructuredText: ../../user/rst/quickref.html
 `],
-                   ['Anonymous via ..', '.. __: http://www.python.org\n'],
+                   ['Anonymous via two dots', '.. __: http://www.python.org\n'],
            ['Inline internal targets', `* bullet list
 
   .. _\`second item\`:
