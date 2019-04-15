@@ -24,6 +24,6 @@ exports[`I like *TV* 1`] = `"I like <emphasis>TV</emphasis>"`;
 
 exports[`I like *TV* 2`] = `""`;
 
-exports[`inliner 1 1`] = `"<problematic ids=\\"id2\\" refid=\\"id1\\">\`test\`:foo:</problematic>"`;
+exports[`inliner 1 1`] = `"<title_reference>test</title_reference>"`;
 
-exports[`inliner 1 2`] = `"<system_message ids=\\"id1\\" backrefs=\\"id2\\" line=\\"1\\"><paragraph>Unknown interpreted text role \\"foo\\".</paragraph></system_message>"`;
+exports[`inliner 1 2`] = `""`;
