@@ -1,5 +1,5 @@
 import * as nodes from './nodes';
-import { InvalidArgumentsError, SystemMessage, UnimplementedError as Unimp } from './Exceptions'
+import { ApplicationError, InvalidArgumentsError, SystemMessage, UnimplementedError as Unimp } from './Exceptions'
 //export { SystemMessge };
 import { combining } from './utils/combining';
 
@@ -194,11 +194,19 @@ function _getCallerFile() {
 }
 
 export function newReporter({sourcePath}, settings) {
+    const keys = ['reportLevel', 'haltLevel', 'warningStream', 'debug',
+		  'errorEncoding', 'errorEncodingErrorHandler'];
+    console.log(Object.keys(settings));
+    const missingKeys = keys.filter((key) => !settings.hasOwnProperty(key));
+    if(missingKeys.length) {
+	throw new ApplicationError(`Missing required keys from settings object to instantiate reporter. Missing keys ${missingKeys.map(key => `"${key}"`).join(', ')}.`);
+    }
+
     return new Reporter(sourcePath, settings.reportLevel,
 			settings.haltLevel,
 			settings.warningStream, settings.debug,
-			settings.error_encoding,
-			settings.error_encoding_error_handler)
+			settings.errorEncoding,
+			settings.errorEncodingErrorHandler)
 }
 
 export function escape2null(text) {
@@ -219,7 +227,12 @@ export function escape2null(text) {
 
 export function newDocument({sourcePath}, settings) {
     const reporter = newReporter({ sourcePath }, settings );
-    const document = new nodes.document( settings, reporter, '', [], { source: sourcePath });
+    const attrs = {};
+    if(typeof sourcePath !== 'undefined') {
+	attrs.source = sourcePath;
+    }
+
+    const document = new nodes.document( settings, reporter, '', [], attrs );
     document.noteSource(sourcePath, -1);
     return document;
 }

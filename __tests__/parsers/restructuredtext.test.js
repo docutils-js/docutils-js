@@ -2,7 +2,7 @@ import { Parser } from '../../src/parsers/restructuredtext';
 import { newDocument } from '../../src/utils';
 import baseSettings from '../../src/baseSettings';
 
-test.skip('1', () => {
+test('1', () => {
     const p = new Parser({});
     const document = newDocument({ sourcePath: '' }, baseSettings);
     p.parse('* a bullet point', document);

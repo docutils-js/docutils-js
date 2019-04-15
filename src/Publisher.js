@@ -3,6 +3,10 @@ import { ApplicationError } from'./Exceptions';
 import readers from './Readers'
 import writers from './Writers'
 
+/**
+ ** Port of docutils.core.Publisher
+ **
+ **/
 class Publisher {
     constructor(args) {
 	let { reader, parser, writer, source, sourceClass, destination,
