@@ -8,3 +8,9 @@ test('1', () => {
     p.parse('* a bullet point', document);
     expect(document.toString()).toMatchSnapshot();
 });
+
+test('rst parser no input', () => {
+    const p = new Parser({});
+    const document = newDocument({ sourcePath: '' }, baseSettings);
+    expect(() => p.parse('', document)).toThrow();
+});
