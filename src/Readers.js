@@ -1,5 +1,5 @@
 import { Component } from './index';
-import AssertError from './AssertError';
+import { AssertError } from './Exceptions';
 import utils from './utils';
 import Reader from './Reader';
 import * as standalone from './readers/standalone'

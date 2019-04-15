@@ -90,3 +90,18 @@ test("Instantiate publisher", () => {
       expect(output.toString()).toMatchSnapshot();
   });
 });
+
+test("Instantiate publisher #2", () => {
+  const reader = new Reader();
+  const writer = new Writer();
+  const source = new Input({});
+  const destination = new Output();
+  const publisher = new Publisher({ source, reader, writer, destination, settings: baseSettings });
+  publisher.publish({}, (error, output) => {
+      if (error) {
+	  throw error;
+      }
+      const write = destination.write;
+      expect(output.toString()).toMatchSnapshot();
+  });
+});

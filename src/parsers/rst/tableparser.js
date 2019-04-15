@@ -13,9 +13,8 @@ and produce a well-formed data structure suitable for building a CALS table.
     `update_dict_of_lists()`: Merge two dictionaries containing list values.
 */
 
-import { DataError } from '../../Exceptions';
+import { DataError, ASsertError } from '../../Exceptions';
 import { strip_combining_chars } from '../../utils';
-import AssertError from '../../AssertError';
 
 class TableMarkupError extends DataError {
     /* """
