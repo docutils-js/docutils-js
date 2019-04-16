@@ -42,14 +42,6 @@ function makeId(string) {
 */
 }
 
-function isIterable(obj) {
-  // checks for null and undefined
-  if (obj == null) {
-    return false;
-  }
-  return typeof obj[Symbol.iterator] === 'function';
-}
-
 function _callDefaultVisit(node) {
     return this.default_visit(node);
 }
@@ -219,6 +211,7 @@ export class GenericNodeVisitor extends NodeVisitor {
 GenericNodeVisitor.nodeClassNames = nodeClassNames;
 
 
+// mixin
 export class Titular { }
 
 export class Element extends Node {
@@ -239,7 +232,9 @@ export class Element extends Node {
         }
         Object.entries(attributes).forEach(([att, value]) => {
             att = att.toLowerCase();
+	    /* This if path never taken... why? FIXME */
             if (att in this.listAttributes) {
+		/* istanbul ignore if */
                 if (!isIterable(value)) {
                         throw new Error();
                 }
@@ -284,6 +279,7 @@ export class Element extends Node {
     }
 
     add(item, ...args) {
+	/* istanbul ignore if */
         if (args.length !== 0) {
             throw new Error('');
         }
@@ -296,30 +292,30 @@ export class Element extends Node {
 
 
     setupChild(child) {
+	/* istanbul ignore if */
         if (!(child instanceof Node)) {
             throw new InvalidArgumentsError(`Expecting node instance ${child}`);
         }
 
+	/* istanbul ignore if */
         if (!child) {
             throw new InvalidArgumentsError();
         }
 
-//      console.log(typeof child);
-//      console.log(Object.keys(child))
         child.parent = this;
         if (this.document) {
             child.document = this.documentl;
-            if (child.source === undefined) {
+            if (typeof child.source === 'undefined') {
                 child.source = this.document.currentSource;
             }
-            if (child.line === undefined) {
+            if (typeof child.line === 'undefined') {
                 child.line = this.document.currentLine;
             }
         }
     }
 
     starttag(quoteattr) {
-        if (quoteattr === undefined) {
+        if (typeof quoteattr === 'undefined') {
             quoteattr = pseudoQuoteattr;
         }
         const parts = [this.tagname];
@@ -374,6 +370,7 @@ export class TextElement extends Element {
         if (!children) {
             children = [];
         }
+	/* istanbul ignore if */
         if(Array.isArray(text)) {
             throw new InvalidArgumentsError("text should not be an array");
         }
@@ -695,45 +692,142 @@ export class FixedTextElement extends TextElement {
 */
 }
 
-export class section extends Element { } // Structural
-export class title extends TextElement { } // Titular, Prebib
+export class section extends Element {
+    constructor(...args) {
+	super(...args);
+    }
+} // Structural
 
-export class paragraph extends TextElement { } // General
+export class title extends TextElement {
+    constructor(...args) {
+	super(...args);
+    }
+} // Titular, Prebib
+
+export class paragraph extends TextElement {
+    constructor(...args) {
+	super(...args);
+    }
+} // General
 /* class compound(General, Element): pass
 class container(General, Element): pass
 class bullet_list(Sequential, Element): pass
 class enumerated_list(Sequential, Element): pass
 class list_item(Part, Element): pass */
-export class classifier extends TextElement {}
-export class definition_list extends Element {}
-export class definition_list_item extends Element {}
-export class term extends TextElement {}
-export class definition extends Element {}
+export class classifier extends TextElement {
+    constructor(...args) {
+	super(...args);
+    }
+}
+export class definition_list extends Element {
+    constructor(...args) {
+	super(...args);
+    }
+}
+export class definition_list_item extends Element {
+    constructor(...args) {
+	super(...args);
+    }
+}
+export class term extends TextElement {
+    constructor(...args) {
+	super(...args);
+    }
+}
+export class definition extends Element {
+    constructor(...args) {
+	super(...args);
+    }
+}
 /*
 class classifier(Part, TextElement): pass
 */
-export class field_list extends Element { } // (Sequential, Element
-export class field extends Element {} // (Part
-export class field_name extends TextElement {} // (Part
-export class field_body extends Element { } // (Part
+export class field_list extends Element {
+    constructor(...args) {
+	super(...args);
+    }
+} // (Sequential, Element
+export class field extends Element {
+    constructor(...args) {
+	super(...args);
+    }
+} // (Part
+export class field_name extends TextElement {
+    constructor(...args) {
+	super(...args);
+    }
+} // (Part
+export class field_body extends Element {
+    constructor(...args) {
+	super(...args);
+    }
+} // (Part
 
 
-export class bullet_list extends Element { } // Sequential
-export class list_item extends Element { }
+export class bullet_list extends Element {
+    constructor(...args) {
+	super(...args);
+    }
+} // Sequential
+export class list_item extends Element {
+    constructor(...args) {
+	super(...args);
+    }
+}
 
 /* Inline elements */
-export class emphasis extends TextElement {} // Inline
-export class strong extends TextElement {} // Inline
-export class literal extends TextElement {} // Inline
-export class reference extends TextElement {} // General, Inline, Referential
-export class footnote_reference extends TextElement {} // General, Inline, Referential
-export class citation_reference extends TextElement {} // General, Inline, Referential
-export class substitution_reference extends TextElement {} // General, Inline, Referential
-export class title_reference extends TextElement {} // General, Inline, Referential
+export class emphasis extends TextElement {
+    constructor(...args) {
+	super(...args);
+    }
+} // Inline
+export class strong extends TextElement {
+    constructor(...args) {
+	super(...args);
+    }
+} // Inline
+export class literal extends TextElement {
+    constructor(...args) {
+	super(...args);
+    }
+} // Inline
+export class reference extends TextElement {
+    constructor(...args) {
+	super(...args);
+    }
+} // General, Inline, Referential
+export class footnote_reference extends TextElement {
+    constructor(...args) {
+	super(...args);
+    }
+} // General, Inline, Referential
+export class citation_reference extends TextElement {
+    constructor(...args) {
+	super(...args);
+    }
+} // General, Inline, Referential
+export class substitution_reference extends TextElement {
+    constructor(...args) {
+	super(...args);
+    }
+} // General, Inline, Referential
+export class title_reference extends TextElement {
+    constructor(...args) {
+	super(...args);
+    }
+} // General, Inline, Referential
 
-export class problematic extends TextElement {} // Inline
+export class problematic extends TextElement {
+    constructor(...args) {
+	super(...args);
+    }
+} // Inline
 
-export class transition extends Element {} // Structura
+export class transition extends Element {
+    constructor(...args) {
+	super(...args);
+    }
+} // Structura
 
 
 export class option extends Element {
@@ -750,48 +844,192 @@ export class option_group extends Element {
     // child_text_separator = ', '
 }
 
-export class option_list extends Element { } // Sequential
-export class option_list_item extends Element { } //    child_text_separator = '
-export class option_string extends TextElement { } // (Part
-export class description extends Element { } // (Part
-export class literal_block extends FixedTextElement {}
-export class doctest_block extends FixedTextElement {}
-export class math_block extends FixedTextElement {}
-export class line_block extends Element { }
+export class option_list extends Element {
+    constructor(...args) {
+	super(...args);
+    }
+} // Sequential
+export class option_list_item extends Element {
+    constructor(...args) {
+	super(...args);
+    }
+} //    child_text_separator = '
+export class option_string extends TextElement {
+    constructor(...args) {
+	super(...args);
+    }
+} // (Part
+export class description extends Element {
+    constructor(...args) {
+	super(...args);
+    }
+} // (Part
+export class literal_block extends FixedTextElement {
+    constructor(...args) {
+	super(...args);
+    }
+}
+export class doctest_block extends FixedTextElement {
+    constructor(...args) {
+	super(...args);
+    }
+}
+export class math_block extends FixedTextElement {
+    constructor(...args) {
+	super(...args);
+    }
+}
+export class line_block extends Element {
+    constructor(...args) {
+	super(...args);
+    }
+}
 export class line extends TextElement {
     _init(...args) {
         super._init(...args);
         this.indent = undefined;
     }
 } // Part
-export class block_quote extends Element { }
-export class attribution extends TextElement { }
-export class attention extends Element { }
-export class caution extends Element { }
-export class danger extends Element { }
-export class error extends Element { }
-export class important extends Element { }
-export class note extends Element { }
-export class tip extends Element { }
-export class hint extends Element { }
-export class warning extends Element { }
-export class admonition extends Element { }
-export class comment extends FixedTextElement { }
-export class substitution_definition extends TextElement { }
-export class target extends TextElement { }
-export class footnote extends Element { }
-export class citation extends Element { }
-export class label extends TextElement { }
-export class figure extends Element { }
-export class caption extends TextElement { }
-export class legend extends Element { }
-export class table extends Element { }
-export class tgroup extends Element { }
-export class colspec extends Element { }
-export class thead extends Element { }
-export class tbody extends Element { }
-export class row extends Element { }
-export class entry extends Element { }
+export class block_quote extends Element {
+    constructor(...args) {
+	super(...args);
+    }
+}
+export class attribution extends TextElement {
+    constructor(...args) {
+	super(...args);
+    }
+}
+export class attention extends Element {
+    constructor(...args) {
+	super(...args);
+    }
+}
+export class caution extends Element {
+    constructor(...args) {
+	super(...args);
+    }
+}
+export class danger extends Element {
+    constructor(...args) {
+	super(...args);
+    }
+}
+export class error extends Element {
+    constructor(...args) {
+	super(...args);
+    }
+}
+export class important extends Element {
+    constructor(...args) {
+	super(...args);
+    }
+}
+export class note extends Element {
+    constructor(...args) {
+	super(...args);
+    }
+}
+export class tip extends Element {
+    constructor(...args) {
+	super(...args);
+    }
+}
+export class hint extends Element {
+    constructor(...args) {
+	super(...args);
+    }
+}
+export class warning extends Element {
+    constructor(...args) {
+	super(...args);
+    }
+}
+export class admonition extends Element {
+    constructor(...args) {
+	super(...args);
+    }
+}
+export class comment extends FixedTextElement {
+    constructor(...args) {
+	super(...args);
+    }
+}
+export class substitution_definition extends TextElement {
+    constructor(...args) {
+	super(...args);
+    }
+}
+export class target extends TextElement {
+    constructor(...args) {
+	super(...args);
+    }
+}
+export class footnote extends Element {
+    constructor(...args) {
+	super(...args);
+    }
+}
+export class citation extends Element {
+    constructor(...args) {
+	super(...args);
+    }
+}
+export class label extends TextElement {
+    constructor(...args) {
+	super(...args);
+    }
+}
+export class figure extends Element {
+    constructor(...args) {
+	super(...args);
+    }
+}
+export class caption extends TextElement {
+    constructor(...args) {
+	super(...args);
+    }
+}
+export class legend extends Element {
+    constructor(...args) {
+	super(...args);
+    }
+}
+export class table extends Element {
+    constructor(...args) {
+	super(...args);
+    }
+}
+export class tgroup extends Element {
+    constructor(...args) {
+	super(...args);
+    }
+}
+export class colspec extends Element {
+    constructor(...args) {
+	super(...args);
+    }
+}
+export class thead extends Element {
+    constructor(...args) {
+	super(...args);
+    }
+}
+export class tbody extends Element {
+    constructor(...args) {
+	super(...args);
+    }
+}
+export class row extends Element {
+    constructor(...args) {
+	super(...args);
+    }
+}
+export class entry extends Element {
+    constructor(...args) {
+	super(...args);
+    }
+}
 
 
 export class system_message extends Element {
