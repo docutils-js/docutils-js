@@ -1,7 +1,7 @@
 class State {
-    constructor(args) {
-        const { stateMachine, debug } = args;
-        this._init(args);
+    constructor(...args) {
+        const [ stateMachine, debug ] = args;
+        this._init(...args);
         this.transitionOrder = [];
         this.transitions = {};
         // this.patterns = {}
@@ -72,13 +72,13 @@ class State {
     }
 
     addTransition(name, transition) {
-	this.transitionOrder.splice(0, 0, name);
-	this.transitions[name] = transition;
+        this.transitionOrder.splice(0, 0, name);
+        this.transitions[name] = transition;
     }
 
     removeTransition(name) {
-	delete this.transitions[name];
-	this.transitionOrder.splice(this.transitionOrder.indexOf(name), 1);
+        delete this.transitions[name];
+        this.transitionOrder.splice(this.transitionOrder.indexOf(name), 1);
     }
 
     makeTransition(name, nextState) {

@@ -1,14 +1,14 @@
 export default class Transformer {
     constructor(document) {
-	this.transforms = []
-	this.unknownReferenceResolvers = []
-	this.document = document;
-	this.applied = []
-	this.sorted = 0
-	this.components = {}
-	this.serialno = 0
+        this.transforms = [];
+        this.unknownReferenceResolvers = [];
+        this.document = document;
+        this.applied = [];
+        this.sorted = 0;
+        this.components = {};
+        this.serialno = 0;
     }
-	
+
     populateFromComponents(...components) {
 	for(let component of components) {
 	    if(!component) {
@@ -46,6 +46,7 @@ export default class Transformer {
 	decoratedList.sort()
 	this.unknownReferenceResolvers.push(...decoratedList.map(f => f[1]));
     }
+
     applyTransforms() {
 	this.document.reporter.attachObserver(this.document.noteTransformMessage.bind(this.document));
 	while(this.transforms.length) {

@@ -1,4 +1,4 @@
-import BaseReader from '../Reader'
+import BaseReader from '../Reader';
 import * as frontend from '../FrontEnd';
 import * as references from '../transforms/references';
 
@@ -11,43 +11,55 @@ import * as references from '../transforms/references';
    Standalone file Reader for the reStructuredText markup syntax.
 */
 
-export const __docformat__ = 'reStructuredText'
+export const __docformat__ = 'reStructuredText';
 export default class Reader extends BaseReader {
     constructor(...args) {
-	super(...args);
-	
-	//"""Contexts this reader supports."""
-	this.supported = ['standalone'];
+        super(...args);
 
-	//"""A single document tree."""
-	this.document = undefined;
+        // """Contexts this reader supports."""
+        this.supported = ['standalone'];
 
-	this.settingsSpec = [
+        // """A single document tree."""
+        this.document = undefined;
+
+        this.settingsSpec = [
         'Standalone Reader',
         null,
-        [['Disable the promotion of a lone top-level section title to '+
-          'document title [and subsequent section title to document '+
-          'subtitle promotion; enabled by default].',
+        [['Disable the promotion of a lone top-level section title to '
+          + 'document title [and subsequent section title to document '
+          + 'subtitle promotion; enabled by default].',
           ['--no-doc-title'],
-          {'dest': 'doctitle_xform', 'action': 'store_false', 'default': 1,
-           'validator': frontend.validate_boolean}],
-         ['Disable the bibliographic field list transform [enabled by '+
-          'default].',
+          {
+dest: 'doctitle_xform',
+action: 'store_false',
+default: 1,
+           validator: frontend.validate_boolean,
+}],
+         ['Disable the bibliographic field list transform [enabled by '
+          + 'default].',
           ['--no-doc-info'],
-          {'dest': 'docinfo_xform', 'action': 'store_false', 'default': 1,
-           'validator': frontend.validate_boolean}],
-         ['Activate the promotion of lone subsection titles to '+
-          'section subtitles [disabled by default].',
+          {
+dest: 'docinfo_xform',
+action: 'store_false',
+default: 1,
+           validator: frontend.validate_boolean,
+}],
+         ['Activate the promotion of lone subsection titles to '
+          + 'section subtitles [disabled by default].',
           ['--section-subtitles'],
-          {'dest': 'sectsubtitle_xform', 'action': 'store_true', 'default': 0,
-           'validator': frontend.validate_boolean}],
+          {
+ dest: 'sectsubtitle_xform',
+action: 'store_true',
+default: 0,
+           validator: frontend.validate_boolean,
+}],
          ['Deactivate the promotion of lone subsection titles.',
           ['--no-section-subtitles'],
-          {'dest': 'sectsubtitle_xform', 'action': 'store_false'}],
+          { dest: 'sectsubtitle_xform', action: 'store_false' }],
         ]];
 
-	this.configSection = 'standalone reader'
-	this.configSectionDependencies = ['readers'];
+        this.configSection = 'standalone reader';
+        this.configSectionDependencies = ['readers'];
     }
 
     getTransforms() {
@@ -72,6 +84,4 @@ export default class Reader extends BaseReader {
             misc.Transitions,
             ]
 */
-
-};
-
+}

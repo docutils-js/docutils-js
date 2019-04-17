@@ -8,7 +8,7 @@ const currentLogLines = [];
 
 afterEach(() => {
     if (currentLogLines.length) {
-        console.log(`${currentLogLines.join('\n')}\n`);
+//        console.log(`${currentLogLines.join('\n')}\n`);
         currentLogLines.length = 0;
     }
 });
@@ -30,7 +30,7 @@ test('full rst2xml pipeline with specific input', () => {
 
     const debugLog = [];
     const debugFn = (msg) => {
-        console.log(msg);
+//        console.log(msg);
 //      currentLogLines.push(msg);
     };
 
@@ -273,6 +273,9 @@ footnote 2.
     ['footnote auto-symbol', `Here is a symbolic footnote reference: [*]_.
 
 .. [*] This is the footnote.`],
+    ['escaping 1', '*escape* ``with`` "\\"'],
+    ['escaping 2', '\\*escape* \\``with`` "\\\\"'],
+
          ])('%s', (...inputAry) => {
              const [a, raw, opts] = inputAry;
              const myOpts = opts || {};

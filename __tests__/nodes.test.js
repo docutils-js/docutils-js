@@ -3,6 +3,10 @@ import { newDocument } from '../src/utils';
 
 import baseSettings from '../src/baseSettings'
 
+function createNodeVisitor() {
+    return new nodes.NodeVisitor({ reporter: { debug: () => {} } });
+}
+
 test('paragraph with text', () => {
     /* constructor(rawsource, text, children, attributes) */
     const paraText = 'This is my paragraph text.';
@@ -26,3 +30,8 @@ test('paragraph text unescaped', () =>
     const p = new nodes.paragraph(text, text, [], {});
     expect(p.toString()).toEqual(expect.stringContaining('<'));
 })
+
+test('NodeVisitor.constructor', () => {
+    const visitor = createNodeVisitor();
+    
+});

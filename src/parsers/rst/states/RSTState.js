@@ -1,6 +1,5 @@
 import StateWS from '../../../states/StateWS';
 import NestedStateMachine from '../NestedStateMachine';
-import { stateClasses } from '../States';
 import * as nodes from '../../../nodes';
 import { EOFError } from '../../../Exceptions';
 
@@ -9,7 +8,7 @@ class RSTState extends StateWS {
         super._init(args);
         this.nestedSm = NestedStateMachine;
         this.nestedSmCache = [];
-        this.stateClasses = stateClasses;
+        this.stateClasses = args.stateClasses;
 
         this.nestedSmKwargs = {
             stateClasses: this.stateClasses,
@@ -79,14 +78,17 @@ class RSTState extends StateWS {
         }
 
         if (!stateMachine) {
+	    // check things ?
         /* istanbul ignore if */
-            if (!stateMachineKwargs.stateClasses) {
-                throw new InvalidArgumentsError('stateClasses');
-            }
+//            if (!stateMachineKwargs.stateClasses) {
+//                throw new InvalidArgumentsError('stateClasses');
+//            }
 //          if(!stateMachineKwargs.document) {
 //              throw new Error("expectinf document")
 //          }
             stateMachine = new stateMachineClass({
+		stateFactory: this.stateMachine.stateFactory,
+		
  debug: this.debug,
                                                   ...stateMachineKwargs,
 });
@@ -116,7 +118,8 @@ matchTitles,
                      matchTitles,
                      stateMachineClass,
                      stateMachineKwargs,
-}) {
+    }) {
+        /* istanbul ignore next */
         if (extraSettings == null) {
                 extraSettings = {};
         }
@@ -128,6 +131,7 @@ matchTitles,
         }
         stateMachineKwargs.initialState = initialState;
         const stateMachine = new stateMachineClass({
+	    stateFactory: this.stateMachine.stateFactory,
  debug: this.debug,
                                                     ...stateMachineKwargs,
 });
@@ -272,4 +276,3 @@ matchTitles: true,
 }
 
 export default RSTState;
-

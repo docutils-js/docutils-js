@@ -7,7 +7,7 @@ class RSTStateMachine extends StateMachineWS {
     run({
  inputLines, document, inputOffset, matchTitles, inliner,
 }) {
-        if(inputOffset === undefined) {
+        if (inputOffset === undefined) {
             inputOffset = 0;
         }
         if (!document) {
@@ -24,9 +24,9 @@ class RSTStateMachine extends StateMachineWS {
         }
         inliner.initCustomizations(document.settings);
         this.memo = {
-	    document,
-	    reporter: document.reporter,
-	    language: this.language,
+            document,
+            reporter: document.reporter,
+            language: this.language,
             titleStyles: [],
                       sectionLevel: 0,
                       sectionBubbleUpKludge: false,

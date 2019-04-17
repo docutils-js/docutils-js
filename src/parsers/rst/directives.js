@@ -1,10 +1,10 @@
 export function class_option(argument) {
-    /*"""
+    /* """
     Convert the argument into a list of ID-compatible strings and return it.
     (Directive option conversion function.)
 
     Raise ``ValueError`` if no argument is found.
-    """*/
+    """ */
     /*
     if argument is None:
         raise ValueError('argument required but none supplied')
@@ -19,5 +19,3 @@ export function class_option(argument) {
     */
     return [];
 }
-
-
