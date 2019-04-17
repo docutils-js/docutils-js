@@ -33,3 +33,4 @@ class CustomPublisher extends Publisher {
 	    cb(error, undefined);
 	}
     }
+}

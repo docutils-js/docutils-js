@@ -1,8 +1,3 @@
-import readers from './Readers';
-import writers from './Writers';
-import { OptionParser } from './FrontEnd';
-import { Source } from './Sources';
-import { FileInput, FileOutput } from './io';
 import Publisher from './Publisher';
 
 export { Publisher };

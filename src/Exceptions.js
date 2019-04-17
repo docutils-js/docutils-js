@@ -1,34 +1,34 @@
 export class UnimplementedError extends Error {
     constructor(message, ...params) {
-	super(...params);
-	/* instanbul ignore else */
-	if (Error.captureStackTrace) {
-	    Error.captureStackTrace(this, UnimplementedError);
-	}
-	this.message = message;
+        super(...params);
+        /* instanbul ignore else */
+        if (Error.captureStackTrace) {
+            Error.captureStackTrace(this, UnimplementedError);
+        }
+        this.message = message;
     }
 }
 
 
 export class EOFError extends Error {
     constructor(...params) {
-	super(...params);
-	/* instanbul ignore else */
-	if (Error.captureStackTrace) {
-	    Error.captureStackTrace(this, EOFError);
-	}
+        super(...params);
+        /* instanbul ignore else */
+        if (Error.captureStackTrace) {
+            Error.captureStackTrace(this, EOFError);
+        }
     }
 }
 
 
 export class InvalidArgumentsError extends Error {
     constructor(message, ...params) {
-	super(...params);
-	this.message = message;
-	/* instanbul ignore else */
-	if (Error.captureStackTrace) {
-	    Error.captureStackTrace(this, InvalidArgumentsError);
-	}
+        super(...params);
+        this.message = message;
+        /* instanbul ignore else */
+        if (Error.captureStackTrace) {
+            Error.captureStackTrace(this, InvalidArgumentsError);
+        }
     }
 }
 
@@ -37,43 +37,43 @@ export const InvalidArgumentError = InvalidArgumentsError;
 
 export class SystemMessage extends Error {
     constructor(msg, level, ...params) {
-	super(...params);
-	this.message = msg.astext();
-	this.msg = msg;
-	this.level = level;
-	/* instanbul ignore else */
-	if (Error.captureStackTrace) {
-	    Error.captureStackTrace(this, SystemMessage);
-	}
+        super(...params);
+        this.message = msg.astext();
+        this.msg = msg;
+        this.level = level;
+        /* instanbul ignore else */
+        if (Error.captureStackTrace) {
+            Error.captureStackTrace(this, SystemMessage);
+        }
     }
 }
 
 export class ApplicationError extends Error {
     constructor(...params) {
-	super(...params);
-	const [message, kwargs] = params;
-	this.error = kwargs ? kwargs.error : undefined;
-	/* instanbul ignore else */
-	if (Error.captureStackTrace) {
-	    Error.captureStackTrace(this, Error);
-	}
+        super(...params);
+        const [message, kwargs] = params;
+        this.error = kwargs ? kwargs.error : undefined;
+        /* instanbul ignore else */
+        if (Error.captureStackTrace) {
+            Error.captureStackTrace(this, Error);
+        }
     }
 }
 
 export class DataError extends ApplicationError {
     constructor(...params) {
-	super(...params);
-	/* instanbul ignore else */
-	if (Error.captureStackTrace) {
-	    Error.captureStackTrace(this, DataError);
-	}
+        super(...params);
+        /* instanbul ignore else */
+        if (Error.captureStackTrace) {
+            Error.captureStackTrace(this, DataError);
+        }
     }
 }
 
 export class AssertError extends Error {
     constructor(message, ...params) {
         super(...params);
-	/* instanbul ignore else */
+        /* instanbul ignore else */
         if (Error.captureStackTrace) {
             Error.captureStackTrace(this, AssertError);
         }

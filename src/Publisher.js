@@ -158,10 +158,9 @@ encoding:
 
     /* This doesnt seem to return anything ? */
     publish(args, cb) {
-//	console.log(`publish`)
 	const { argv, usage, description, settingsSpec, settingsOverrides, configSection, enableExitStatus 
 } = args;
-	const exit;
+	let exit;
 	try {
 	    if (this.settings === undefined) {
 		this.processCommandLine({

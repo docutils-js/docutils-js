@@ -1,4 +1,4 @@
-const default_error_encoding_error_handler = 'backslashreplace';
+const defaultErrorEncodingErrorHandler = 'backslashreplace';
 
 export default {
     tocBacklinks: 'entry',
@@ -12,7 +12,7 @@ export default {
     inputEncodingErrorHandler: 'strict',
     outputEncoding: 'utf-8',
     outputEncodingErrorHandler: 'strict',
-    errorEncodingErrorHandler: default_error_encoding_error_handler,
+    errorEncodingErrorHandler: defaultErrorEncodingErrorHandler,
     errorEncoding: 'utf-8',
     languageCode: 'en',
     recordDependencies: null,
