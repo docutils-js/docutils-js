@@ -3,15 +3,19 @@ import State from './State';
 class StateWS extends State {
     constructor(args) {
         super(args);
+        /* istanbul ignore else */
         if (!this.indentSm) {
             this.indentSm = this.nestedSm;
         }
+        /* istanbul ignore else */
         if (!this.indentSmKwargs) {
             this.indentSmKwargs = this.nestedSmKwargs;
         }
+        /* istanbul ignore else */
         if (!this.knownIndentSm) {
             this.knownIndentSm = this.indentSm;
         }
+        /* istanbul ignore else */
         if (!this.knownIndentSmKwargs) {
             this.knownIndentSmKwargs = this.indentSmKwargs;
         }
@@ -32,9 +36,6 @@ class StateWS extends State {
 
     addInitialTransitions() {
         super.addInitialTransitions();
-        if (!this.patterns) {
-            this.patterns = {};
-        }
         this.patterns = { ...this.patterns, ...this.wsPatterns };
         const [names, transitions] = this.makeTransitions(this.wsInitialTransitions);
         this.addTransitions(names, transitions);

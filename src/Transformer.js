@@ -64,7 +64,7 @@ export default class Transformer {
 		const transform = new TransformClass(this.document, { startnode: pending });
 		transform.apply(kwargs);
 	    } catch(error) {
-		throw new Error(`failure ${TransformClass}.`);
+                throw error;
 	    }
 	    this.applied.push([priority, TransformClass, pending, kwargs]);
 	}

@@ -10,23 +10,23 @@ import * as tableparser from '../tableparser';
 const nonWhitespaceEscapeBefore = RegExps.nonWhitespaceEscapeBefore;
 const simplename = RegExps.simplename;
 
-/* istanbul ignore function */
+/* istanbul ignore next */
 function _loweralpha_to_int() {
 }
 
-/* istanbul ignore function */
+/* istanbul ignore next */
 function _upperalpha_to_int() {
 }
 
-/* istanbul ignore function */
+/* istanbul ignore next */
 function _uppseralpha_to_int() {
 }
 
-/* istanbul ignore function */
+/* istanbul ignore next */
 function _lowerroman_to_int() {
 }
 
-/* istanbul ignore function */
+/* istanbul ignore next */
 function _upperroman_to_int() {
 }
 
@@ -424,6 +424,7 @@ class Body extends RSTState {
     explicit_markup(match, context, next_state) {
         /* """Footnotes, hyperlink targets, directives, comments.""" */
         const r = this.explicit_construct(match);
+        /* istanbul ignore if */
         if (!isIterable(r)) {
             throw new Error('');
         }
@@ -443,6 +444,7 @@ class Body extends RSTState {
             if (expmatch) {
                 try {
                     const r = method(expmatch); /* can also use bind */
+                    /* istanbul ignore if */
                     if (!isIterable(r)) {
                         throw new Error(`eed iterable from method related to ${pattern}`);
                     }

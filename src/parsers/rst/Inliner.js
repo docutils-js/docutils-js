@@ -461,7 +461,7 @@ rawsource;
 endStringSuffix;
         let ssn; let
 esn;
-        if (settings.character_level_inline_markup) {
+        if (settings.characterLevelInlineMarkup) {
             startStringPrefix = '(^|(?<!\\x00))';
             ssn = [null, null];
             endStringSuffix = '';
@@ -529,7 +529,7 @@ esn;
 //      const build = buildRegexp(parts, true);
 //      console.log(build[0]);
         this.patterns = {
-            initial: buildRegexp(parts, true), // KM
+            initial: buildRegexp(parts), // KM
             emphasis: new RegExp(`${this.nonWhitespaceEscapeBefore}(\\*)${endStringSuffix}`),
             strong: new RegExp(`${this.nonWhitespaceEscapeBefore}(\\*\\*)${endStringSuffix}`),
             interpreted_or_phrase_ref: new RegExp(`${this.nonUnescapedWhitespaceEscapeBefore}(\`((:${this.simplename}:)?(__?)?))${endStringSuffix}`),
@@ -666,6 +666,7 @@ esn;
             try {
                 theNodes[0].children[0].rawsource = unescape(text, true);
             } catch (error) {
+                /* istanbul ignore if */
                 if (!(error instanceof TypeError)) {
                     throw error;
                 }

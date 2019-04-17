@@ -1,33 +1,33 @@
 import { OptionParser as OptionParserBase } from './OptParse';
 import SettingsSpec from './SettingsSpec';
 
-/* istanbul ignore function */
+/* istanbul ignore next */
 function validateStripClass() {
 }
 
-/* istanbul ignore function */
+/* istanbul ignore next */
 function storeMultiple() {
 }
 
-/* istanbul ignore function */
+/* istanbul ignore next */
 function validateBoolean() {
 }
-/* istanbul ignore function */
+/* istanbul ignore next */
 function validateThreshold() {
 }
-/* istanbul ignore function */
+/* istanbul ignore next */
 function validateEncodingAndErrorHandler() {
 }
-/* istanbul ignore function */
+/* istanbul ignore next */
 function validateEncodingErrorHandler() {
 }
-/* istanbul ignore function */
+/* istanbul ignore next */
 function validateDependencyFile() {
 }
-/* istanbul ignore function */
+/* istanbul ignore next */
 function validateColonSeparatedStringList() {
 }
-/* istanbul ignore function */
+/* istanbul ignore next */
 function readConfigFile() {
 }
 

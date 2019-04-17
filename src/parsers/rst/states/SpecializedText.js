@@ -5,26 +5,32 @@ class SpecializedText extends Text {
         super._init(args);
     }
 
+    /* istanbul ignore next */
     blank() {
         this.invalidInput();
     }
 
+    /* istanbul ignore next */
     underline() {
         this.invalidInput();
     }
 
+    /* istanbul ignore next */
     indent() {
         this.invalidInput();
     }
 
+    /* istanbul ignore next */
     text() {
     this.invalidInput();
     }
 
+    /* istanbul ignore next */
     eof() {
         return [];
     }
 
+    /* istanbul ignore next */
     invalidInput() {
         console.log('invalid input, throwing eoferror');
         throw new EOFError();

@@ -70,9 +70,6 @@ class TableParser {
         let i;
         for (i = 0; i < this.block.length; i += 1) {
             const line = this.block[i];
-            if (!this.headBodySeparatorPat) {
-                throw new Error('');
-            }
             if (this.headBodySeparatorPat.test(line)) {
                 if (this.headBodySep) {
                     throw new TableMarkupError(
@@ -279,6 +276,7 @@ class GridTableParser extends TableParser {
         Look for the bottom-right corner of the cell, making note of all row
         boundaries.
         """ */
+        /* istanbul ignore if */
 if (typeof right === 'undefined') {
     right = 0;
 }
@@ -296,6 +294,7 @@ if (typeof right === 'undefined') {
                 return null;
             }
         }
+        /* istanbul ignore next */
         return null;
     }
 
@@ -322,6 +321,7 @@ if (typeof right === 'undefined') {
             const rowseps = result;
             return [rowseps, colseps];
         }
+        /* istanbul ignore next */
         return null;
     }
 

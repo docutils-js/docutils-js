@@ -10,66 +10,77 @@ class StateFactory {
 	}
     }
 
+    /* istanbul ignore next */
     createBody() {
 	return this.createState('Body');
     }
 
+    /* istanbul ignore next */
     createBulletList() {
 	return this.createState('BulletList');
     }
 
+    /* istanbul ignore next */
     createDefinition() {
 	return this.createState('Definition');
     }
 
+    /* istanbul ignore next */
     createDefinitionList() {
 	return this.createState('DefinitionList');
     }
 
+    /* istanbul ignore next */
     createEnumeratedList() {
 	return this.createState('EnumeratedList');
     }
 
+    /* istanbul ignore next */
     createExplicit() {
 	return this.createState('Explicit');
     }
 
+    /* istanbul ignore next */
     createExtensionOptions() {
 	return this.createState('ExtensionOptions');
     }
 
+    /* istanbul ignore next */
     createFieldList() {
 	return this.createState('FieldList');
     }
 
+    /* istanbul ignore next */
     createLineBlock() {
 	return this.createState('LineBlock');
     }
 
+    /* istanbul ignore next */
     createLine() {
 	return this.createState('Line');
     }
 
+    /* istanbul ignore next */
     createOptionList() {
 	return this.createState('OptionList');
     }
 
+    /* istanbul ignore next */
     createQuotedLiteralBlock() {
 	return this.createState('QuotedLiteralBlock');
     }
 
-    createRSTState() {
-	return this.createState('RSTState');
-    }
-
+    /* istanbul ignore next */
     createSpecializedBody() {
 	return this.createState('SpecializedBody');
     }
 
+    /* istanbul ignore next */
     createSpecializedText() {
 	return this.createState('SpecializedText');
     }
 
+    /* istanbul ignore next */
     createText() {
 	return this.createState('Text');
     }
