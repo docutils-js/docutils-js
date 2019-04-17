@@ -1,4 +1,5 @@
-import { StringList, string2lines } from '../src/StateMachine';
+import { string2lines } from '../src/StateMachine';
+import StringList from '../src/StringList';
 
 // from https://gist.github.com/hu9o/f4e80ed4b036fd76c31ef33dc5b32601
 // Cartesian product of arrays

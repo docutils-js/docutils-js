@@ -58,7 +58,6 @@ export class FileInput extends Input {
                 try {
                     this.source = createReadStream(sourcePath, { encoding: 'utf8' });
                 } catch (error) {
-                    console.log(error.stack);
                     throw error;
                 }
             } else {
@@ -84,13 +83,13 @@ export class FileInput extends Input {
                 // do stuff
             } else {
                 data = this.source.read();
-                if (data === null) {
-                    console.log('read returned null ?');
-                }
+//                if (data === null) {
+//                    console.log('read returned null ?');
+//                }
                 cb(undefined, data);
             }
         } catch (error) {
-            console.log(error.stack);
+//            console.log(error.stack);
             cb(error, undefined);
         }
         }, 100);

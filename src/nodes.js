@@ -70,7 +70,7 @@ export class NodeVisitor {
 //      console.log(`visiting ${nodeName}`);
         let method = this[methodName];
         if (!method) {
-            console.log('selecting unknown visit');
+//            console.log('selecting unknown visit');
             method = this.unknownVisit;
         }
         this.document.reporter.debug(`docutils.nodes.NodeVisitor.dispatch_visit calling for ${nodeName}`);
@@ -88,7 +88,7 @@ export class NodeVisitor {
 
     unknownVisit(node) {
         if (this.document.settings.strictVisitor || !(this.optional.includes(node.tagname))) {
-            console.log('throwing error');
+//            console.log('throwing error');
             throw new Error(`visiting unknown node type:${node.tagname}`);
         }
     }

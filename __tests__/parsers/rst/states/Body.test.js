@@ -1,15 +1,14 @@
-import { Body, stateClasses } from '../../../src/parsers/rst/States';
-import { StringList } from '../../../src/StateMachine';
-
-import RSTStateMachine from '../../../src/parsers/rst/RSTStateMachine';
-jest.mock('../../../src/parsers/rst/RSTStateMachine');
+import Body from '../../../../src/parsers/rst/states/Body';
+import { StringList } from '../../../../src/StateMachine';
+import RSTStateMachine from '../../../../src/parsers/rst/RSTStateMachine';
+jest.mock('../../../../src/parsers/rst/RSTStateMachine');
 
 beforeEach(() => {
     RSTStateMachine.mockClear();
 });
 
 function createRSTStateMachine() {
-    const sm = new RSTStateMachine({ stateClasses,
+    const sm = new RSTStateMachine({ stateFactory: {},
 				     initialState: 'Body',
 				     debug: true,
 				     debugFn: console.log,
@@ -26,7 +25,7 @@ function createBody(optSm) {
     return body;
 }
 
-test.skip('Body patterns', () => {
+test('Body patterns', () => {
     const body = createBody();
     /* Ensure body state patterns haven't changed. */
     RSTStateMachine.mockImplementation(({ indent, untilBlank, stripIndent }) => {
@@ -38,7 +37,7 @@ test.skip('Body patterns', () => {
     expect(body.patterns).toMatchSnapshot();
 });
     
-test.skip('Body constructor',
+test('Body constructor',
      () => {
 	 const body = createBody();
      });
@@ -47,12 +46,12 @@ test.skip('Body constructor',
 // '\\.\\.[ ]+_(?![ ]|$)'
 // Regex for reference
 // new RegExp(`^(_|(?!_)(\`?)(?![ \`])(.+?)${nonWhitespaceEscapeBefore})(?<!(?<!\\x00):)${nonWhitespaceEscapeBefore}[ ]?:([ ]+|$)`),
-test.skip('hyperlink_target, no args', () => {
+test('hyperlink_target, no args', () => {
     const body = createBody();
     expect(() => body.hyperlink_target()).toThrow();
 });
 
-test.skip('explicit hyperlink_target, with arg (malformed)', () => {
+test('explicit hyperlink_target, with arg (malformed)', () => {
     const hyperlinkSource = '.. _myname';
     const rgxp = new RegExp('\\.\\.[ ]+_(?![ ]|$)');
     const body = createBody();

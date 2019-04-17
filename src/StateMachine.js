@@ -6,6 +6,7 @@ import {
 } from './Exceptions';
 import State from './states/State';
 import StateWS from './states/StateWS';
+import StateCorrection from './StateCorrection';
 
 export class TransitionCorrection extends Error {
     constructor(...args) {
@@ -18,15 +19,6 @@ export class TransitionCorrection extends Error {
 }
 export class UnexpectedIndentationError extends Error {
 }
-export class StateCorrection extends Error {
-    constructor(...args) {
-        super(...args);
-        this.args = args;
-        if (Error.captureStackTrace) {
-            Error.captureStackTrace(this, StateCorrection);
-        }
-    }
-}
 
 function __getClass(object) {
   return Object.prototype.toString.call(object)
@@ -34,268 +26,7 @@ function __getClass(object) {
 }
 
 
-/* Our original class delegates to its array,
-   whereas I'm not sure an Array can be implemented without extending it
-*/
-export class ViewList extends Array {
-    constructor(initlist, source, items, parent, parentOffset) {
-        super(...initlist);
-        this.items = [];
-        this.parent = parent;
-        this.parentOffset = parentOffset;
-
-        if (initlist instanceof ViewList) {
-//          this.data = [...initlist.data]
-            this.items = [...initlist.items];
-        } else if (initlist) {
-//          this.data = [...initlist]
-            if (items) {
-                this.items = items;
-            } else {
-                this.items = [];
-                for (let i = 0; i < initlist.length; i += 1) {
-                    this.items.push([source, i]);
-                }
-            }
-        }
-    }
-
-    source(i) {
-        return this.info(i)[0];
-    }
-
-    offset(i) {
-        return this.info(i)[1];
-    }
-
-    disconnect() {
-        this.parent = undefined;
-    }
-
-    splice(index, num, ...elems) {
-//        console.log(`enter slice ${index} ${num} [${elems.length}]`);
-//        console.log(`input: ${JSON.stringify(this)}`);
-        const index2 = index;
-        const num2 = num;
-        const returnAry = [];
-        for (let i = index; i < this.length - num; i += 1) {
-            if (i < index + num) {
-                returnAry.push(this[i]);
-            }
-//            console.log(`setting this[${i}] to this[${i + num}]`);
-            this[i] = this[i + num];
-        }
-//        console.log(`setting length to ${this.length - num}`);
-        this.length = this.length - num;
-        this.push(...elems);
-//        console.log(`returning ${JSON.stringify(returnAry)}`);
-        return new this.constructor(returnAry);
-    }
-
-    slice(start, end) {
-        const initList = [];
-        if (end == null) {
-            end = this.length;
-        }
-        if (typeof start === 'undefined') {
-            start = 0;
-        }
-
-        for (let i = start; i < Math.min(end, this.length); i += 1) {
-            initList.push(this[i]);
-        }
-        return new this.constructor(initList);
-    }
-
-    info(i) {
-        if (i === this.items.length && this.items.length > 0) {
-            return [this.items[i - 1][0], null];
-        }
-        /* istanbul ignore if */
-        if (i < 0 || i >= this.items.length) {
-            throw new ApplicationError('Out of range');
-        }
-        return this.items[i];
-    }
-
-    trimStart(n = 1) {
-        /* istanbul ignore if */
-        if (n > this.length) {
-            // fixme
-            // raise IndexError("Size of trim too large; can't trim %s items "
-              //               "from a list of size %s." % (n, len(self.data)))
-        } else if (n < 0) {
-            throw Error('Trim size must be >= 0.');
-        }
-        for (let i = 0; i < n; i += 1) {
-            this.shift();
-        }
-        if (this.parent) {
-            this.parentOffset += n;
-        }
-    }
-
-    trimEnd(n = 1) {
-        /* Remove items from the end of the list, without touching the parent. */
-/*        if n > len(self.data):
-            raise IndexError("Size of trim too large; can't trim %s items "
-                             "from a list of size %s." % (n, len(self.data)))
-        elif n < 0:
-            raise IndexError('Trim size must be >= 0.')
-*/
-        for (let i = 0; i < n; i += 1) {
-            this.pop();
-            this.items.pop();
-        }
-    }
-}
-
-export class StringList extends ViewList {
-    trimLeft(trimLength, start = 0, end) {
-        if (end === undefined) {
-            end = this.length;
-        }
-        for (let i = start; i < Math.min(end, this.length); i += 1) {
-            /* istanbul ignore if */
-            if (typeof this[i] === 'undefined') {
-                throw new Error(`${i} ${this.length}`);
-            }
-            this[i] = this[i].substring(trimLength);
-        }
-    }
-
-    getTextBlock(start, flushLeft) {
-        let end = start;
-        const last = this.length;
-        while (end < last) {
-            const line = this[end];
-            if (!line.trim()) {
-                break;
-            }
-            if (flushLeft && (line.substring(0, 1) === ' ')) {
-                const [source, offset] = this.info(end);
-                throw new UnexpectedIndentationError(this.slice(start, end),
-                                                     source, offset + 1);
-            }
-            end += 1;
-        }
-        return this.slice(start, end);
-    }
-
-    getIndented({
- start, untilBlank, stripIndent, blockIndent, firstIndent,
-}) {
-        if (start == null) {
-                start = 0;
-        }
-        let indent = blockIndent;
-        let end = start;
-        if (blockIndent != null && firstIndent == null) {
-            firstIndent = blockIndent;
-        }
-        if (firstIndent != null) {
-            end += 1;
-        }
-        const last = this.length;
-        let blankFinish;
-        while (end < last) {
-            const line = this[end];
-            if (line && (line[0] !== ' ' || (blockIndent != null && line.substring(0, blockIndent).trim()))) {
-                blankFinish = ((end > start) && !this[end - 1].trim());
-                break;
-            }
-            const stripped = line.replace(/^\s*/, '');
-            if (!stripped) {
-                if (untilBlank) {
-                    blankFinish = 1;
-                    break;
-                }
-            } else if (blockIndent == null) {
-                const lineIndent = line.length - stripped.length;
-                if (indent == null) {
-                    indent = lineIndent;
-                } else {
-                    indent = Math.min(indent, lineIndent);
-                }
-            }
-            end += 1;
-        }
-        if (end === last) {
-            blankFinish = 1;
-        }
-
-        const block = this.slice(start, end);
-        if (firstIndent != null && block) {
-            block[0] = block[0].substring(firstIndent);
-        }
-        if (indent && stripIndent) {
-//          console.log(block.constructor.name);
-            block.trimLeft(indent, firstIndent != null ? 1 : 0);
-        }
-
-        return [block, indent || 0, blankFinish];
-    }
-
-    get2dBlock(top, left, bottom, right, stripIndent) {
-        if (typeof stripIndent === 'undefined') {
-            stripIndent = true;
-        }
-        const block = this.slice(top, bottom);
-        let indent = right;
-        for (let i = 0; i < block.length; i += 1) {
-            // get slice from line, care for combining characters
-            const ci = columnIndicies(block[i]);
-            if (left < 0 || left >= ci.length) {
-                left += block[i].length - ci.length;
-            } else {
-                left = ci[left];
-            }
-            if (right < 0 || right >= ci.length) {
-                right += block[i].length - ci.length;
-            } else {
-                right = ci[right];
-            }
-            const line = block[i].substring(left, right).trimEnd();
-            block[i] = line;
-            if (line) {
-                indent = Math.min(indent, line.length - line.trimStart().length);
-            }
-        }
-        if (stripIndent && indent > 0 < right) {
-            for (let i = 0; i < block.length; i += 1) {
-                block[i] = block[i].substring(indent);
-            }
-        }
-        return block;
-    }
-
-    padDoubleWidth() {
-        //        throw new Unimp('padDoublewidth');
-
-    }
-
-    replace(old, newStr) {
-        for (let i = 0; i < this.length; i++) {
-            this[i] = this[i].replace(old, newStr); // fix me !!
-        }
-    }
-
-    trimTop(n = 1) {
-        /* Remove items from the start of the list, without touching the parent. */
-        /* istanbul ignore if */
-        if (n > this.length) {
-            throw new Error(`Size of trim too large; can't trim ${n} items `
-                            + `from a list of size ${this.length}`);
-        } else if (n < 0) {
-            throw new Error('Trim size must be >= 0.');
-        }
-        this.splice(0, n);
-        this.items.splice(0, n);
-        if (this.parent) {
-            this.parentOffset += n;
-        }
-    }
-}
+import StringList from './StringList';
 
 export class StateMachine {
     /*
@@ -309,13 +40,13 @@ export class StateMachine {
         */
 
     constructor({
- stateClasses, initialState, debug, debugFn,
+	stateFactory, initialState, debug, debugFn,
 }) {
         /* Perform some sanity checking on arguments */
-        /* istanbul ignore if */
-        if (stateClasses == null || stateClasses.length === 0) {
-            throw new InvalidArgumentsError('stateClasses');
-        }
+//        /* istanbul ignore if */
+//        if (stateClasses == null || stateClasses.length === 0) {
+//            throw new InvalidArgumentsError('stateClasses');
+//        }
         /* Initialize instance junk that we can't do except through
            this method. */
         this._init();
@@ -326,6 +57,7 @@ export class StateMachine {
             // throw new Error("unexpected lack of debug function");
             debugFn = console.log;
         }
+	this.stateFactory = stateFactory;
         this.debugFn = debugFn;
         this.inputLines = undefined;
         this.inputOffset = 0;
@@ -335,13 +67,19 @@ export class StateMachine {
         this.initialState = initialState;
         this.currentState = initialState;
         this.states = {};
+	const stateClasses = stateFactory.getStateClasses();
+//	console.log(typeof stateClasses);
+	if(!isIterable(stateClasses)) {
+	    throw new Error(`expecting iterable, got ${stateClasses}`);
+	}
+//	console.log(stateClasses);
         this.addStates(stateClasses);
         this.observers = [];
         this._stderr = new ErrorOutput();
     }
 
     _init() {
-        // ??
+        // do-nothing
     }
 
     unlink() {
@@ -718,13 +456,17 @@ src;
     }
 
     addState(stateClass) {
+	if(typeof stateClass === 'undefined') {
+	    //throw new InvalidArgumentsError('stateClass should be a class');
+	    return;
+	}
         const stateName = stateClass.name;
-//      console.log(`adding state ${stateName}`);
+	//console.log(`adding state ${stateName}`);
 
         if (Object.hasOwnProperty(this.states, stateName)) {
             throw new DuplicateStateError(stateName);
         }
-        const r = new stateClass({ stateMachine: this, debug: this.debug });
+        const r = this.stateFactory.createState(stateName, this);
         this.states[stateName] = r;
     }
 

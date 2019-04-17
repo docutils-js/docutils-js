@@ -1,0 +1,16 @@
+import SpecializedBody from './SpecializedBody';
+
+
+class BulletList extends SpecializedBody {
+    bullet(match, context, nextState) {
+        if (match.result.input[0] !== this.parent.attributes.bullet) {
+            this.invalid_input();
+        }
+        const [listitem, blankFinish] = this.list_item(match.result.index + match.result[0].length);
+        this.parent.add(listitem);
+        this.blankFinish = blankFinish;
+        return [[], nextState, []];
+    }
+}
+
+export default BulletList;

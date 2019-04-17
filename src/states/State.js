@@ -1,7 +1,7 @@
 class State {
-    constructor(args) {
-        const { stateMachine, debug } = args;
-        this._init(args);
+    constructor(...args) {
+        const [ stateMachine, debug ] = args;
+        this._init(...args);
         this.transitionOrder = [];
         this.transitions = {};
         // this.patterns = {}

@@ -8,7 +8,7 @@ const currentLogLines = [];
 
 afterEach(() => {
     if (currentLogLines.length) {
-        console.log(`${currentLogLines.join('\n')}\n`);
+//        console.log(`${currentLogLines.join('\n')}\n`);
         currentLogLines.length = 0;
     }
 });
@@ -30,7 +30,7 @@ test('full rst2xml pipeline with specific input', () => {
 
     const debugLog = [];
     const debugFn = (msg) => {
-        console.log(msg);
+//        console.log(msg);
 //      currentLogLines.push(msg);
     };
 

@@ -42,7 +42,7 @@ export class OptionParser {
         try {
             stop = this._processArgs(largs, rargs, values);
         } catch (error) {
-            console.log(error);
+	    // ?
         }
 
         args = [...largs, ...rargs];

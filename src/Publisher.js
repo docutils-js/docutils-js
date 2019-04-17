@@ -11,7 +11,7 @@ class Publisher {
     constructor(args) {
         let {
  reader, parser, writer, source, sourceClass, destination,
-              destinationClass, settings, debugFn 
+              destinationClass, settings, debugFn,
 } = args;
 //      console.log(source);
         /* Terrible defaults ! */
@@ -68,7 +68,8 @@ class Publisher {
         }
     }
 
-    setupOptionParser({ usage, description, settingsSpec, configSection, defaults
+    setupOptionParser({
+ usage, description, settingsSpec, configSection, defaults,
 }) {
         if (configSection) {
             if (!settingsSpec) {
@@ -78,13 +79,14 @@ class Publisher {
             const parts = configSection.split();
             if (parts.length > 1 && parts[parts.length - 1] === 'application') {
                 settingsSpec.configSectionDepenendencies = ['applications'];
-
             }
         }
-        const optionParser = new OptionParser({ components: [this.parser, this.reader, this.writer, settingsSpec],
+        const optionParser = new OptionParser({
+ components: [this.parser, this.reader, this.writer, settingsSpec],
                                                defaults,
                                                readConfigFiles: true,
-                                               usage, description 
+                                               usage,
+description,
 });
 //      console.log(JSON.stringify(optionParser.settingsSpec));
         return optionParser;
@@ -92,12 +94,15 @@ class Publisher {
 
     processCommandLine({
 argv, usage, description, settingsSpec, configSection,
-                        settingsOverrides
+                        settingsOverrides,
 }) {
         const optionParser = this.setupOptionParser({
-usage, description, settingsSpec,
+usage,
+description,
+settingsSpec,
                                                configSection,
-settingsOverrides });
+settingsOverrides,
+});
         if (argv === undefined) {
             argv = process.argv.slice(2);
         }
@@ -128,10 +133,12 @@ settingsOverrides });
         }
         try {
             const sourceClass = this.sourceClass;
-            this.source = new sourceClass({ source,
+            this.source = new sourceClass({
+ source,
 sourcePath,
 encoding:
-                                                this.settings.inputEncoding });
+                                                this.settings.inputEncoding,
+});
         } catch (error) {
             throw new ApplicationError(`Unable to instantiate Source class ${this.sourceClass.constructor.name}: ${error.message}`, { error });
         }
@@ -144,10 +151,11 @@ encoding:
             this.settings._destination = destinationPath;
         }
         const destinationClass = this.destinationClass;
-        this.destination = new destinationClass({ destination,
+        this.destination = new destinationClass({
+ destination,
                                                   destinationPath,
                                                   encoding: this.settings.outputEncoding,
-                                                  errorHandler: this.settings.outputEncodingErrorHandler 
+                                                  errorHandler: this.settings.outputEncodingErrorHandler,
 });
     }
 
@@ -158,13 +166,15 @@ encoding:
 
     /* This doesnt seem to return anything ? */
     publish(args, cb) {
-        const { argv, usage, description, settingsSpec, settingsOverrides, configSection, enableExitStatus 
+        const {
+ argv, usage, description, settingsSpec, settingsOverrides, configSection, enableExitStatus,
 } = args;
         let exit;
         try {
             if (this.settings === undefined) {
                 this.processCommandLine({
- argv, usage, description, settingsSpec, configSection, settingsOverrides });
+ argv, usage, description, settingsSpec, configSection, settingsOverrides,
+});
             }
             // console.log(this.source);
             this.setIO();
@@ -188,10 +198,11 @@ encoding:
                         throw new Error('need document');
                     }
                     this.applyTransforms();
-                    const output =                        this.writer.write(this.document, this.destination);
+                    const output = this.writer.write(this.document, this.destination);
                     this.writer.assembleParts();
                     cb(undefined, output);
-                }));
+                }),
+);
         } catch (error) {
             cb(error, undefined);
         }

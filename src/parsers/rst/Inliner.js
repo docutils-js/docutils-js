@@ -156,7 +156,7 @@ class Inliner {
     }
 
     footnote_reference(match, lineno) {
-        console.log(`in footnote_reference : ${match.result}`);
+//        console.log(`in footnote_reference : ${match.result}`);
         const label = match.groups.footnotelabel;
         let refname = normalize_name(label);
         const string = match.result.input;
@@ -327,7 +327,7 @@ if (!rawsource) {
                 alias_parts = splitEscapedWhitespace(match[2]);
                 /* this behaves differently from python's split with no args */
                 alias = alias_parts.map(part => unescape(part).split(/\s+/).join('')).join(' ');
-                console.log(`alias is ${alias}`);
+//                console.log(`alias is ${alias}`);
                 alias = this.adjust_uri(alias);
                 if (alias.endsWith('\\_')) {
                     alias = `${alias.substring(0, alias.length - 2)}_`;
@@ -401,7 +401,7 @@ if (!rawsource) {
         try {
             poststart = string.substr(match.result.index + match.result[0].length, 1);
         } catch (error) {
-            console.log(error.constructor.name);
+//            console.log(error.constructor.name);
             return true; // not "quoted" but no markup start-string either
         }
         return matchChars(prestart, poststart);
@@ -594,7 +594,7 @@ esn;
                 }
                 let before; let inlines; let
                 sysmessages;
-                console.log(`name is ${mname}`);
+//                console.log(`name is ${mname}`);
 
                 [before, inlines, remaining, sysmessages] = method({ result: match, match, groups: rr }, lineno);
                 unprocessed.push(before);

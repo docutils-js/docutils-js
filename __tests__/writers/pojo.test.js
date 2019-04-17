@@ -10,7 +10,7 @@ const currentLogLines = [];
 
 afterEach(() => {
     if(currentLogLines.length) {
-	console.log(currentLogLines.join('\n') + '\n');
+//	console.log(currentLogLines.join('\n') + '\n');
 	currentLogLines.length = 0;
     }
 });
@@ -32,7 +32,7 @@ test.only('rst2pojo pipeline', () => {
 
     const debugLog = [];
     const debugFn = (msg) => {
-	console.log(msg);
+//	console.log(msg);
 //	currentLogLines.push(msg);
     };
 
