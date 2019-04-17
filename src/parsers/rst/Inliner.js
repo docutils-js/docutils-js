@@ -1,7 +1,7 @@
 import * as nodes from '../../nodes';
 import { isIterable, getTrimFootnoteRefSpace, splitEscapedWhitespace } from '../../utils';
 import { matchChars } from '../../utils/punctuationChars';
-import * as roles from './Roles';
+import roleInterface from './Roles';
 import { ApplicationError } from '../../Exceptions';
 
 
@@ -683,7 +683,7 @@ esn;
     } */
 
     interpreted(rawsource, text, role, lineno) {
-        const [roleFn, messages] = roles.role(role, this.language, lineno, this.reporter);
+        const [roleFn, messages] = roleInterface(role, this.language, lineno, this.reporter);
         if (roleFn) {
             const [theNodes, messages2] = roleFn.invoke(role, rawsource, text, lineno, this);
             try {

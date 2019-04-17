@@ -13,8 +13,8 @@ and produce a well-formed data structure suitable for building a CALS table.
     `update_dict_of_lists()`: Merge two dictionaries containing list values.
 */
 
-import { DataError, ASsertError } from '../../Exceptions';
-import { strip_combining_chars } from '../../utils';
+import { DataError, AsertError } from '../../Exceptions';
+import { stripCombiningChars } from '../../utils';
 
 class TableMarkupError extends DataError {
     /* """
@@ -453,7 +453,7 @@ class SimpleTableParser extends TableParser {
     _init(...args) {
         super._init(...args);
         this.headBodySeparatorPat = /=[ =]*$/;
-        this.spanPath = /-[ -]*$/;
+        this.spanPat = /-[ -]*$/;
     }
 
     setup(block) {
@@ -486,14 +486,14 @@ class SimpleTableParser extends TableParser {
             throw new Error('here');
         }
         this.columns = this.parse_columns(this.block[0], 0);
-        this.border_end = this.columns[-1][1];
+        this.border_end = this.columns[this.columns.length - 1][1];
         const [firststart, firstend] = this.columns[0];
         let offset = 1; // skip top border
         let start = 1;
         let text_found;
         while (offset < this.block.length) {
             const line = this.block[offset];
-            if (this.span_pat.test(line)) {
+            if (this.spanPat.test(line)) {
                 // Column span underline or border; row is complete.
                 this.parse_row(this.block.slice(start, offset), start,
                                [line.trimEnd(), offset]);
@@ -517,22 +517,32 @@ class SimpleTableParser extends TableParser {
 /*        """
         Given a column span underline, return a list of (begin, end) pairs.
         """ */
+        console.log(`parsing columns from ${line}, ${offset}`);
         const cols = [];
         let end = 0;
         while (true) {
             const begin = line.indexOf('-', end);
+            console.log(`looking for '-' begin is ${begin}`);
             end = line.indexOf(' ', begin);
+            console.log(`end is ${end}`);
             if (begin < 0) {
                 break;
             }
             if (end < 0) {
                 end = line.length;
             }
+            console.log(`pushing [${begin}, ${end}] on cols`);
             cols.push([begin, end]);
         }
-        if (this.columns) {
+
+        console.log(`checking this.columns : ${this.columns}`);
+        if (this.columns.length) {
+            if(this.border_end == null) {
+                throw new Error("no border_end value");
+            }
+            
             if (cols[cols.length - 1][1] !== this.border_end) {
-                throw new TableMarkupError(`Column span incomplete in table line ${offset + 1}.`, { offset });
+                throw new TableMarkupError(`[${cols[cols.length - 1][1]} - ${this.border_end}] Column span incomplete in table line ${offset + 1}.`, { offset });
             }
             // Allow for an unbounded rightmost column:
             cols[cols.length - 1] = [cols[cols.length - 1][0], this.columns[this.columns.length - 1][1]];
@@ -595,7 +605,7 @@ class SimpleTableParser extends TableParser {
         const row = this.init_row(columns, start);
         for (let i = 0; i < columns.length; i++) {
             const [start2, end2] = columns[i];
-            const cellblock = lines.get2DBlock(0, start2, lines.length, end2);
+            const cellblock = lines.get2dBlock(0, start2, lines.length, end2);
             cellblock.disconnect(); // lines in cell can't sync with parent
             cellblock.replace(this.doubleWidthPadChar, '');
             row[i][3] = cellblock;
