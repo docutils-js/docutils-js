@@ -1,26 +1,27 @@
 export class OptionParser {
     _getArgs(args) {
-	if(args === undefined) {
+	if (args === undefined) {
 	    args = process.argv.slice(2);
 	}
 	return args;
     }
 
     getDefaultValues() {
-	return {}
+	return {};
     }
+
     _processArgs(largs, rargs, values) {
-	while(rargs.length) {
+	while (rargs.length) {
 	    const arg = rargs[0];
 //	    console.log(`arg is ${arg}`)
-	    if(arg === "--") {
+	    if (arg === '--') {
 		rargs.splice(0);
 		return;
 	    }
-	    else if(arg.substr(0, 2) == "--") {
+	    if (arg.substr(0, 2) == '--') {
 		this._processLongOpt(rargs, values);
 	    } else {
-		return
+		return;
 	    }
 	}
     }
@@ -30,7 +31,7 @@ export class OptionParser {
 //	console.log(`in base opton parser`);
 	const rargs = this._getArgs(args);
 //	console.log(`my rargs is ${rargs}`);
-	if(values === undefined) {
+	if (values === undefined) {
 	    values = this.getDefaultValues();
 	}
 	this.rargs = rargs;
@@ -40,11 +41,11 @@ export class OptionParser {
 	let stop;
 	try {
 	    stop = this._processArgs(largs, rargs, values);
-	} catch(error) {
+	} catch (error) {
 	    console.log(error);
 	}
 
-	args = [ ...largs, ...rargs ];
+	args = [...largs, ...rargs];
 	return this.checkValues(values, args);
     }
 }

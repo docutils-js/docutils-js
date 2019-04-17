@@ -1,16 +1,16 @@
-import TransformSpec  from './TransformSpec';
 import { createReadStream } from 'fs';
+import TransformSpec from './TransformSpec';
 import ErrorOutput from './ErrorOutput';
 import Input from './io/Input';
 import Output from './io/Output';
-import { ApplicationError } from'./Exceptions';
+import { ApplicationError } from './Exceptions';
 
 export class StringInput extends Input {
     constructor(...args) {
 	super(...args);
 	this.sourcePath = '<string>';
     }
-	
+
     read(cb) {
 	cb(undefined, this.source);
     }
@@ -19,12 +19,12 @@ export class StringInput extends Input {
 export class StringOutput extends Output {
     constructor(...args) {
 	super(...args);
-	this.defaultDestinationPath = '<string>'
+	this.defaultDestinationPath = '<string>';
     }
-    
+
     write(data) {
-        //self.destination = self.encode(data) // fixme encoding
-	if(Array.isArray(data)) {
+        // self.destination = self.encode(data) // fixme encoding
+	if (Array.isArray(data)) {
 	    data = JSON.stringify(data);
 	}
 	this.destination = data;
@@ -36,27 +36,28 @@ export class FileInput extends Input {
     /* ew, too much logic for a constructor, with side effects etc! */
     constructor(args) {
 	super(args);
-	let { source, sourcePath, encoding, errorHandler, autoClose,
-	      mode } = args;
-	if(typeof source === 'undefined' && typeof sourcePath === 'undefined') {
-	    throw new ApplicationError("FileInput: Undefined source and sourcePath");
+	let {
+ source, sourcePath, encoding, errorHandler, autoClose,
+	      mode,
+} = args;
+	if (typeof source === 'undefined' && typeof sourcePath === 'undefined') {
+	    throw new ApplicationError('FileInput: Undefined source and sourcePath');
 	}
-	
-	if(autoClose === undefined) {
+
+	if (autoClose === undefined) {
 	    autoClose = true;
 	}
-	if(mode === undefined) {
+	if (mode === undefined) {
 	    mode = 'r';
 	}
-	
+
 	this.autoClose = autoClose;
-	this._stderr = new ErrorOutput()
-	if(!source) {
-	    if(sourcePath) {
+	this._stderr = new ErrorOutput();
+	if (!source) {
+	    if (sourcePath) {
 		try {
 		    this.source = createReadStream(sourcePath, { encoding: 'utf8' });
-		}
-		catch(error) {
+		} catch (error) {
 		    console.log(error.stack);
 		    throw error;
 		}
@@ -64,10 +65,10 @@ export class FileInput extends Input {
 		this.source = process.stdin;
 	    }
 	} else {
-	    
+
 	    // ??
 	}
-	if(!sourcePath) {
+	if (!sourcePath) {
 	    this.sourcePath = this.source.name;
 	}
     }
@@ -79,16 +80,16 @@ export class FileInput extends Input {
 	let data;
 	try {
 	    /* reading ? */
-	    if(this.source === process.stdin) {
+	    if (this.source === process.stdin) {
 		// do stuff
 	    } else {
 		data = this.source.read();
-		if(data === null) {
-		    console.log("read returned null ?");
+		if (data === null) {
+		    console.log('read returned null ?');
 		}
 		cb(undefined, data);
 	    }
-	} catch(error) {
+	} catch (error) {
 	    console.log(error.stack);
 	    cb(error, undefined);
 	}
@@ -100,12 +101,12 @@ export class FileInput extends Input {
     }
 
     close() {
-	if(this.source !== process.stdin) {
+	if (this.source !== process.stdin) {
 	    this.source.close();
 	}
     }
 }
 
 export class FileOutput extends Output {
-    
+
 }

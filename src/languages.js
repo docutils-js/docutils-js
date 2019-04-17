@@ -1,1 +1,1 @@
-exports.getLanguage = () => { }
+exports.getLanguage = () => { };

@@ -1,4 +1,4 @@
-const default_error_encoding_error_handler = 'backslashreplace'
+const default_error_encoding_error_handler = 'backslashreplace';
 
 export default {
     tocBacklinks: 'entry',
@@ -26,4 +26,3 @@ export default {
     strictVisitor: null,
     warningStream: null,
 };
-    

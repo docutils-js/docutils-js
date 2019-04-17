@@ -1,16 +1,15 @@
-import { Parser} from '../Parser';
-import * as rst from './restructuredtext'
+import { Parser } from '../Parser';
+import * as rst from './restructuredtext';
 
 function getParserClass(parserName) {
-    if(parserName === 'restructuredtext') {
+    if (parserName === 'restructuredtext') {
 	return rst;
     }
-    throw new Error("")
+    throw new Error('');
 //    return require(`./${parserName}.js`).default;
 }
 
-export default{
+export default {
     getParserClass,
     Parser,
-}
-
+};

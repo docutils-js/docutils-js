@@ -7,7 +7,7 @@ class RSTStateMachine extends StateMachineWS {
     run({
  inputLines, document, inputOffset, matchTitles, inliner,
 }) {
-        if(inputOffset === undefined) {
+        if (inputOffset === undefined) {
             inputOffset = 0;
         }
         if (!document) {

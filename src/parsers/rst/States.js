@@ -397,32 +397,36 @@ export class Body extends RSTState {
             directive = convert_directive_function(directive)
 */
         const lineno = this.stateMachine.absLineNumber();
-        const initial_line_offset = this.stateMachine.lineOffset
-        const [ indented, indent, line_offset, blank_finish ] = this.stateMachine.getFirstKnownIndented(
-	    { indent: match.result.index + match.result[0].length,
-	      stripTop: 0 });
+        const initial_line_offset = this.stateMachine.lineOffset;
+        const [indented, indent, line_offset, blank_finish] = this.stateMachine.getFirstKnownIndented(
+	    {
+ indent: match.result.index + match.result[0].length,
+	      stripTop: 0,
+},
+);
         const block_text = this.stateMachine.inputLines.slice(initial_line_offset, this.stateMachine.lineOffset + 1);
         try {
-            const [ args, options, content, content_offset ] = this.parse_directive_block(
+            const [args, options, content, content_offset] = this.parse_directive_block(
 		indented,
 		line_offset,
 		directive,
 		option_presets,
-	    )
-	} catch(error) {
-	    if(error instanceof MarkupError) {
+	    );
+	} catch (error) {
+	    if (error instanceof MarkupError) {
 		const err = this.reporter.error(`Error in "${type_name}" directive:\n${detail.args.join(' ')}`,
 						[new nodes.literal_block(block_text, block_text)],
 						{ line: lineno });
-		return [[err], blank_finish]
+		return [[err], blank_finish];
 	    }
 	}
         const directive_instance = new directive(
             type_name, args, options, content, lineno,
-            content_offset, block_text, this, this.stateMachine)
+            content_offset, block_text, this, this.stateMachine,
+);
         try {
-            result = directive_instance.run()
-	} catch(error) {
+            result = directive_instance.run();
+	} catch (error) {
             const msg_node = this.reporter.system_message(error.level, error.msg, [], { line: lineno });
             msg_node.add(new nodes.literal_block(block_text, block_text));
             result = [msg_node];

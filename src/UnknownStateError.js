@@ -1,7 +1,7 @@
 class UnknownStateError extends Error {
     constructor(state, ...params) {
 	super(...params);
-	if(Error.captureStackTrace) {
+	if (Error.captureStackTrace) {
 	    Error.captureStackTrace(this, UnknownStateError);
 	}
 	this.state = state;

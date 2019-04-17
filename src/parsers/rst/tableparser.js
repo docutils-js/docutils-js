@@ -70,8 +70,8 @@ class TableParser {
 	let i;
         for (i = 0; i < this.block.length; i += 1) {
             const line = this.block[i];
-            if(!this.headBodySeparatorPat) {
-                throw new Error("");
+            if (!this.headBodySeparatorPat) {
+                throw new Error('');
             }
             if (this.headBodySeparatorPat.test(line)) {
                 if (this.headBodySep) {
@@ -195,23 +195,22 @@ class GridTableParser extends TableParser {
             corners.push(...[[top, right], [bottom, left]]);
 //	    console.log(corners.toString());
 	    corners.sort((a, b) => {
-		const [ rowA, colA  ] = a;
-		const [ rowB, colB ] = b;
-		if(rowA < rowB) {
+		const [rowA, colA] = a;
+		const [rowB, colB] = b;
+		if (rowA < rowB) {
 		    return -1;
 		}
-		if(rowB < rowA) {
+		if (rowB < rowA) {
 		    return 1;
 		}
-		if(colA < colB) {
+		if (colA < colB) {
 		    return -1;
 		}
-		if(colB < colA) {
+		if (colB < colA) {
 		    return 1;
 		}
 		return 0;
 	    });
-
         }
         if (!this.check_parse_complete()) {
             throw new TableMarkupError('Malformed table; parse incomplete.');
@@ -243,8 +242,8 @@ class GridTableParser extends TableParser {
     scan_cell(top, left) {
         /* """Starting at the top-left corner, start tracing out a cell.""" */
         // assert this.block[top][left] == '+'
-        if(this.block[top][left] !== '+') {
-            throw new Error("AssertError");
+        if (this.block[top][left] !== '+') {
+            throw new Error('AssertError');
         }
         const result = this.scan_right(top, left);
         return result;
@@ -280,7 +279,7 @@ class GridTableParser extends TableParser {
         Look for the bottom-right corner of the cell, making note of all row
         boundaries.
         """ */
-if(typeof right === 'undefined') {
+if (typeof right === 'undefined') {
     right = 0;
 }
         const rowseps = {};
@@ -385,7 +384,7 @@ if(typeof right === 'undefined') {
 //	    console.log(`rows[${rownum}][${colnum}] = [${morerows}, ${morecols}, ${top + 1}, ${block}]`);
             rows[rownum][colnum] = [morerows, morecols, top + 1, block];
         }
-	if(remaining !== 0) {
+	if (remaining !== 0) {
 	    throw new Error('Unused cells remaining.');
 	}
         let numheadrows;

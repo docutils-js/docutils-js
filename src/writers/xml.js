@@ -1,14 +1,14 @@
-import BaseWriter from '../Writer'
-import{ GenericNodeVisitor}from '../nodes';
+import BaseWriter from '../Writer';
+import { GenericNodeVisitor } from '../nodes';
 import * as docutils from '../index';
 import * as nodes from '../nodes';
 
 function escapeXml(unsafe) {
     console.log(`unsafe is ${unsafe}`);
-    if(typeof unsafe === 'undefined') {
-	throw new Error("need unsafE");
+    if (typeof unsafe === 'undefined') {
+	throw new Error('need unsafE');
     }
-    return unsafe.replace(/[<>&'"]/g, function (c) {
+    return unsafe.replace(/[<>&'"]/g, (c) => {
         switch (c) {
             case '<': return '&lt;';
             case '>': return '&gt;';
@@ -28,37 +28,38 @@ class XMLTranslator extends GenericNodeVisitor {
 
 	const settings = this.settings = document.settings;
 	this.indent = this.newline = '';
-	if(settings.newlines) {
+	if (settings.newlines) {
 	    this.newline = '\n';
 	}
-	if(settings.indents) {
+	if (settings.indents) {
 	    this.newline = 'n';
-	    this.indent = '    '
+	    this.indent = '    ';
 	}
-	this.level = 0
-	this.inSimple = 0
-	this.fixedText = 0
-	this.output = []
-	if(settings.xmlDeclaration) {
+	this.level = 0;
+	this.inSimple = 0;
+	this.fixedText = 0;
+	this.output = [];
+	if (settings.xmlDeclaration) {
 	    this.output.push(this.xmlDeclaration(settings.outputEncoding));
 	}
-	if(settings.doctypeDeclaration) {
+	if (settings.doctypeDeclaration) {
 	    this.output.push(this.doctype);
 	}
 	this.output.push(this.generator);
     }
+
     default_visit(node) {
-	this.simple_nodes = [nodes.TextElement]//,                    nodes.image, nodes.colspec, nodes.transition]
+	this.simple_nodes = [nodes.TextElement];// ,                    nodes.image, nodes.colspec, nodes.transition]
 	if (!this.inSimple) {
 	    this.output.push(Array(this.level + 1).join(this.indent));
 	}
 	this.output.push(node.starttag());
 	this.level += 1;
 	// fixme should probably pick this code up
-	if (false) {//node instanceof nodes.FixedTextElement || node instanceof nodes.literal) {
-	    this.fixedText += 1
+	if (false) { // node instanceof nodes.FixedTextElement || node instanceof nodes.literal) {
+	    this.fixedText += 1;
 	} else {
-	    for (let nt of this.simple_nodes) {
+	    for (const nt of this.simple_nodes) {
 		if (node instanceof nt) {
 		    this.inSimple += 1;
 		    break;
@@ -66,12 +67,13 @@ class XMLTranslator extends GenericNodeVisitor {
 	    }
 	}
 	if (!this.inSimple) {
-	    this.output.push("\n")
+	    this.output.push('\n');
 	}
     }
+
     default_departure(node) {
-	this.level -= 1
-	if(!this.inSimple)  {
+	this.level -= 1;
+	if (!this.inSimple) {
 	    this.output.push(Array(this.level + 1).join(this.indent));
 	}
 	this.output.push(node.endtag());
@@ -80,10 +82,12 @@ class XMLTranslator extends GenericNodeVisitor {
 //	}
 	// bla
     }
+
     visit_Text(node) {
-	const text = escapeXml(node.astext())
+	const text = escapeXml(node.astext());
 	this.output.push(text);
     }
+
     depart_Text(node) {
     }
 }
@@ -110,15 +114,23 @@ Writer.settingsSpec = [
     null,
     [['Generate XML with newlines before and after tags.',
       ['--newlines'],
-      {'action': 'store_true', 'validator': 'frontend.validate_boolean'}],
+      { action: 'store_true', validator: 'frontend.validate_boolean' }],
      ['Generate XML with indents and newlines.',
-      ['--indents'], //#@ TODO use integer value for number of spaces?
-      {'action': 'store_true', 'validator': 'frontend.validate_boolean'}],
+      ['--indents'], // #@ TODO use integer value for number of spaces?
+      { action: 'store_true', validator: 'frontend.validate_boolean' }],
      ['Omit the XML declaration.  Use with caution.',
       ['--no-xml-declaration'],
-      {'dest': 'xml_declaration', 'default': 1, 'action': 'store_false',
-       'validator': 'frontend.validate_boolean'}],
+      {
+dest: 'xml_declaration',
+default: 1,
+action: 'store_false',
+       validator: 'frontend.validate_boolean',
+}],
      ['Omit the DOCTYPE declaration.',
       ['--no-doctype'],
-      {'dest': 'doctype_declaration', 'default': 1,
-       'action': 'store_false', 'validator': 'frontend.validate_boolean'}]]]
+      {
+ dest: 'doctype_declaration',
+default: 1,
+       action: 'store_false',
+validator: 'frontend.validate_boolean',
+}]]];

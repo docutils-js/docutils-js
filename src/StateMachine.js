@@ -782,7 +782,6 @@ src;
 }
 
 
-
 function expandtabs(string) {
     let tabIndex;
     while ((tabIndex = string.indexOf('\t')) !== -1) {

@@ -2,7 +2,7 @@ import { Component } from './index';
 import { AssertError } from './Exceptions';
 import utils from './utils';
 import Reader from './Reader';
-import * as standalone from './readers/standalone'
+import * as standalone from './readers/standalone';
 
 class ReReader extends Reader {
     getTransforms() {
@@ -10,16 +10,16 @@ class ReReader extends Reader {
     }
 }
 
-const _reader_aliases = {}
+const _reader_aliases = {};
 
 export function getReaderClass(readerName) {
 //    console.log(readerName);
-    if(readerName === "standalone") {
+    if (readerName === 'standalone') {
 	return standalone.default;
     }
-    throw new Error("")
+    throw new Error('');
 }
 
 export default {
     getReaderClass,
-}
+};

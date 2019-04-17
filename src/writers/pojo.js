@@ -1,5 +1,5 @@
-import BaseWriter from '../Writer'
-import{ GenericNodeVisitor}from '../nodes';
+import BaseWriter from '../Writer';
+import { GenericNodeVisitor } from '../nodes';
 import * as docutils from '../index';
 import * as nodes from '../nodes';
 
@@ -13,11 +13,12 @@ class POJOTranslator extends GenericNodeVisitor {
 	this.error = this.document.reporter.error.bind(this.document.reporter);
 
 	const settings = this.settings = document.settings;
-	this.level = 0
-	this.inSimple = 0
-	this.fixedText = 0
-	this.output = {}
+	this.level = 0;
+	this.inSimple = 0;
+	this.fixedText = 0;
+	this.output = {};
     }
+
     default_visit(node) {
 	const me = [node.tagname, node.attlist(), []];
 	this.ancestors.push(me);
@@ -27,14 +28,14 @@ class POJOTranslator extends GenericNodeVisitor {
 
     default_departure(node) {
 	const me = this.ancestors.pop();
-	if(this.level === 1) {
+	if (this.level === 1) {
 	    this.root = me;
 //	    console.log(JSON.stringify(me));
 	} else {
-	    const parent = this.ancestors[this.ancestors.length -1];
+	    const parent = this.ancestors[this.ancestors.length - 1];
 	    parent[2].push(me);
 	}
-	this.level -= 1
+	this.level -= 1;
     }
 
     visit_Text(node) {
@@ -42,9 +43,9 @@ class POJOTranslator extends GenericNodeVisitor {
 //	const text = escapeXml(node.astext())
 //	this.output.push(text);
     }
+
     depart_Text(node) {
     }
-
 }
 
 
@@ -53,7 +54,7 @@ export default class Writer extends BaseWriter {
 	super(args);
 	this.translatorClass = POJOTranslator;
     }
-    
+
     translate() {
 	const TranslatorClass = this.translatorClass;
 	const visitor = new TranslatorClass(this.document);
@@ -66,4 +67,4 @@ export default class Writer extends BaseWriter {
 Writer.settingsSpec = [
     '"Docutils-js POJO" Writer Options',
     null,
-    []]
+    []];

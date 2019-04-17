@@ -1,8 +1,6 @@
 class Parser {
-    constructor()
-    {
+    constructor() {
     }
-    
 }
 
 export default Parser;

@@ -666,7 +666,7 @@ esn;
 	    try {
                 theNodes[0].children[0].rawsource = unescape(text, true);
 	    } catch (error) {
-		if(!(error instanceof TypeError)) {
+		if (!(error instanceof TypeError)) {
 		    throw error;
 		}
 	    }

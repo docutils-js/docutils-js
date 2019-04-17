@@ -273,4 +273,3 @@ matchTitles: true,
 }
 
 export default RSTState;
-

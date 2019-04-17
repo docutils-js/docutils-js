@@ -1,13 +1,15 @@
-import TransformSpec  from '../TransformSpec';
+import TransformSpec from '../TransformSpec';
 
 class Input extends TransformSpec {
-    constructor({source, sourcePath, encoding, errorHandler}) {
+    constructor({
+ source, sourcePath, encoding, errorHandler,
+}) {
 	super();
 	this.encoding = encoding;
-	this.errorHandler=errorHandler;
+	this.errorHandler = errorHandler;
 	this.source = source;
 	this.sourcePath = sourcePath;
-	if(!sourcePath) {
+	if (!sourcePath) {
 	    this.sourcePath = this.defaultSourcePath;
 	}
 	this.successfulEncoding = undefined;
@@ -15,7 +17,7 @@ class Input extends TransformSpec {
 
     /* istanbul ignore method */
     async read() {
-	throw new Error("not implemented");
+	throw new Error('not implemented');
     }
 
     /* istanbul ignore method */
@@ -27,7 +29,6 @@ class Input extends TransformSpec {
     toString() {
 	return `Input<${this.constructor.name}>`;
     }
-
 }
 
 export default Input;

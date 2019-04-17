@@ -1,12 +1,12 @@
-import Component from './Component'
+import Component from './Component';
 import universal from './transforms/universal';
 import parsers from './parsers';
 import utils from './utils';
 
 export default class Reader extends Component {
     getTransforms() {
-	return [ /*...super.getTransforms()*/ universal.Decorations,
-		 universal.ExportInternals, universal.StripComments ];
+	return [universal.Decorations,
+		 universal.ExportInternals, universal.StripComments];
     }
 
     constructor(parser, parserName, args) {
@@ -16,7 +16,7 @@ export default class Reader extends Component {
 	this.parser = parser;
 	this.debugFn = args.debugFn;
 	this.debug = args.debug;
-	if(parser === undefined && parserName) {
+	if (parser === undefined && parserName) {
 	    this.setParser(parserName);
 	}
 	this.source = undefined;
@@ -25,8 +25,10 @@ export default class Reader extends Component {
 
     setParser(parserName) {
 	const ParserClass = parsers.getParserClass(parserName).Parser;
-	this.parser = new ParserClass({debug: this.debug,
-				       debugFn: this.debugFn });
+	this.parser = new ParserClass({
+ debug: this.debug,
+				       debugFn: this.debugFn,
+});
     }
 
     /**
@@ -37,17 +39,16 @@ export default class Reader extends Component {
       */
     read(source, parser, settings, cb) {
 	this.source = source;
-	if(!this.parser) {
+	if (!this.parser) {
 	    this.parser = parser;
 	}
 	this.settings = settings;
-	if(!this.source) {
-	    throw new Error("Need source");
+	if (!this.source) {
+	    throw new Error('Need source');
 	}
 
-	this.source.read((error, data) =>
-			 {
-			     if(error) {
+	this.source.read((error, data) => {
+			     if (error) {
 				 console.log(error.stack);
 				 cb(error);
 				 return;
@@ -63,10 +64,10 @@ export default class Reader extends Component {
     parse() {
 	const document = this.newDocument();
 	this.document = document;
-	if(this.input === undefined) {
-	    throw new Error("need input, i have " + this.input);
+	if (this.input === undefined) {
+	    throw new Error(`need input, i have ${this.input}`);
 	}
-	
+
 	this.parser.parse(this.input, document);
 	document.currentSource = document.currentLine = undefined;
     }

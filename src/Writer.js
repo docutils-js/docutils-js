@@ -1,11 +1,11 @@
 import { __version__ } from './index';
-import Component from './Component'
+import Component from './Component';
 import languages from './languages';
 
 export default class Writer extends Component {
     constructor(args) {
 	super(args);
-	this.parts = {}
+	this.parts = {};
     }
 
     write(document, destination) {
@@ -24,7 +24,7 @@ export default class Writer extends Component {
     }
 
     assembleParts() {
-	this.parts.whole= this.output;
+	this.parts.whole = this.output;
 	this.parts.encoding = this.document.settings.outputEncoding;
 	this.parts.version = __version__;
     }

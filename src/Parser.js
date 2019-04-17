@@ -1,21 +1,23 @@
-import Component from './Component'
+import Component from './Component';
 import { UnimplementedException } from './Exceptions';
 
 class Parser extends Component {
     constructor(args) {
 	super(args);
 	this.componentType = 'parser';
-	this.configSection = 'parsers'
+	this.configSection = 'parsers';
 	this.debug = args.debug;
 	this.debugFn = args.debugFn;
     }
 
     /* istanbul ignore function */
     parse(inputstring, document) {
-	throw new UnimplementedException("subclass implement parse");
+	throw new UnimplementedException('subclass implement parse');
     }
+
     setupParse(inputstring, document) {
     }
+
     finishParse() {
     }
 }

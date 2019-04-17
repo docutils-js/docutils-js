@@ -1,13 +1,13 @@
-import TransformSpec  from '../TransformSpec';
+import TransformSpec from '../TransformSpec';
 
 class Output extends TransformSpec {
     constructor(destination, destinationPath, encoding, errorHandler) {
 	super({});
 	this.encoding = encoding;
-	this.errorHandler = errorHandler || 'strict'
+	this.errorHandler = errorHandler || 'strict';
 	this.destination = destination;
 	this.destinationPath = destinationPath;
-	if(!destinationPath) {
+	if (!destinationPath) {
 	    this.destinationPath = this.defaultDestinationPath;
 	}
     }
@@ -18,14 +18,13 @@ class Output extends TransformSpec {
 
     /* istanbul ignore method */
     encode(data) {
-	return data; //fixme?
+	return data; // fixme?
     }
 
     /* istanbul ignore method */
     toString() {
 	return `Output<${this.constructor.name}>`;
     }
-
 }
 Output.componentType = 'Output';
 Output.defaultDestinationPath = null;

@@ -1,22 +1,24 @@
 import { FileInput, FileOutput } from './io';
-import { ApplicationError } from'./Exceptions';
-import readers from './Readers'
-import writers from './Writers'
+import { ApplicationError } from './Exceptions';
+import readers from './Readers';
+import writers from './Writers';
 
 /**
  ** Port of docutils.core.Publisher
  **
- **/
+ * */
 class Publisher {
     constructor(args) {
-	let { reader, parser, writer, source, sourceClass, destination,
-	      destinationClass, settings, debugFn }  = args;
+	let {
+ reader, parser, writer, source, sourceClass, destination,
+	      destinationClass, settings, debugFn 
+} = args;
 //	console.log(source);
 	/* Terrible defaults ! */
-	if(!sourceClass) {
+	if (!sourceClass) {
 	    sourceClass = FileInput;
 	}
-	if(!destinationClass) {
+	if (!destinationClass) {
 	    destinationClass = FileOutput;
 	}
 	this.debugFn = debugFn;
@@ -25,120 +27,128 @@ class Publisher {
 	this.parser = parser;
 	this.writer = writer;
 	this.source = source;
-	if(sourceClass === undefined) {
+	if (sourceClass === undefined) {
 	    this.sourceClass = Source;
 	} else {
 	    this.sourceClass = sourceClass;
 	}
 
 	this.destination = destination;
-	if(destinationClass === undefined) {
+	if (destinationClass === undefined) {
 	    this.destinationClass = Destination;
-	}
-	else {
+	} else {
 	    this.destinationClass = destinationClass;
 	}
 	this.settings = settings;
     }
 
     setReader(readerName, parser, parserName) {
-	const ReaderClass = readers.getReaderClass(readerName)
-	this.reader = new ReaderClass(parser, parserName, { debug: this.debug, debugFn: this.debugFn })
-	this.parser = this.reader.parser
+	const ReaderClass = readers.getReaderClass(readerName);
+	this.reader = new ReaderClass(parser, parserName, { debug: this.debug, debugFn: this.debugFn });
+	this.parser = this.reader.parser;
     }
 
     setWriter(writerName) {
-	const writerClass = writers.getWriterClass(writerName)
+	const writerClass = writers.getWriterClass(writerName);
 	this.writer = new writerClass();
     }
 
     setComponents(readerName, parserName, writerName) {
-	if(!this.reader) {
+	if (!this.reader) {
 	    this.setReader(readerName, this.parser, parserName);
 	}
-	if(!this.parser) {
-	    if(!this.reader.parser) {
-                this.reader.setParser(parserName)
+	if (!this.parser) {
+	    if (!this.reader.parser) {
+                this.reader.setParser(parserName);
 	    }
-	    this.parser = this.reader.parser
+	    this.parser = this.reader.parser;
 	}
-	if(!this.writer) {
-            this.setWriter(writerName)
+	if (!this.writer) {
+            this.setWriter(writerName);
 	}
     }
 
-    setupOptionParser({usage, description, settingsSpec, configSection, defaults}) {
-	if(configSection) {
-	    if(!settingsSpec) {
+    setupOptionParser({ usage, description, settingsSpec, configSection, defaults
+}) {
+	if (configSection) {
+	    if (!settingsSpec) {
 		settingsSpec = new SettingsSpec();
 	    }
 	    settingsSpec.configSection = configSection;
 	    const parts = configSection.split();
-	    if(parts.length > 1 && parts[parts.length - 1] === 'application') {
-		settingsSpec.configSectionDepenendencies = ['applications']
+	    if (parts.length > 1 && parts[parts.length - 1] === 'application') {
+		settingsSpec.configSectionDepenendencies = ['applications'];
 
 	    }
 	}
-	const optionParser = new OptionParser({components: [this.parser, this.reader, this.writer, settingsSpec],
+	const optionParser = new OptionParser({ components: [this.parser, this.reader, this.writer, settingsSpec],
 					       defaults,
 					       readConfigFiles: true,
-					       usage,description });
+					       usage, description 
+});
 //	console.log(JSON.stringify(optionParser.settingsSpec));
 	return optionParser;
     }
-    
-    processCommandLine({argv, usage, description, settingsSpec, configSection,
-			settingsOverrides}) {
-	const optionParser = this.setupOptionParser({usage,description,settingsSpec,
-					       configSection, settingsOverrides});
-	if(argv === undefined) {
+
+    processCommandLine({
+argv, usage, description, settingsSpec, configSection,
+			settingsOverrides
+}) {
+	const optionParser = this.setupOptionParser({
+usage, description, settingsSpec,
+					       configSection,
+settingsOverrides });
+	if (argv === undefined) {
 	    argv = process.argv.slice(2);
 	}
 	this.settings = optionParser.parseArgs(argv);
 	// bad! fixme
 	this.settings.idPrefix = '';
-	this.settings.autoIdPrefix = 'auto'
+	this.settings.autoIdPrefix = 'auto';
 	this.settings.debug = true; // force debug true for now
     }
 
     setIO(sourcePath, destinationPath) {
-	if(typeof this.source === 'undefined') {
-	    this.setSource({sourcePath});
+	if (typeof this.source === 'undefined') {
+	    this.setSource({ sourcePath });
 	}
-	if(this.destination === undefined) {
-	    this.setDestination({destinationPath});
+	if (this.destination === undefined) {
+	    this.setDestination({ destinationPath });
 	}
     }
 
-    setSource({source, sourcePath}) {
+    setSource({ source, sourcePath }) {
 	console.log(`${source} ${sourcePath}`);
-	if(typeof sourcePath === 'undefined') {
+	if (typeof sourcePath === 'undefined') {
 	    console.log(`setting sourcePath to ${this.settings._source}`);
 	    console.log(this.settings);
 	    sourcePath = this.settings._source;
-	}else {
+	} else {
 	    this.settings._source = sourcePath;
 	}
 	try {
 	    const sourceClass = this.sourceClass;
-	    this.source = new sourceClass({source, sourcePath, encoding:
-						this.settings.inputEncoding});
-	} catch(error) {
-	    throw new ApplicationError(`Unable to instantiate Source class ${this.sourceClass.constructor.name}: ${error.message}`, { error } );
+	    this.source = new sourceClass({ source,
+sourcePath,
+encoding:
+						this.settings.inputEncoding });
+	} catch (error) {
+	    throw new ApplicationError(`Unable to instantiate Source class ${this.sourceClass.constructor.name}: ${error.message}`, { error });
 	}
     }
 
-    setDestination({ destination, destinationPath}) {
-	if(destinationPath === undefined) {
+    setDestination({ destination, destinationPath }) {
+	if (destinationPath === undefined) {
 	    destinationPath = this.settings._destination;
-	}else{
-	    this.settings._destination= destinationPath;
+	} else {
+	    this.settings._destination = destinationPath;
 	}
 	const destinationClass = this.destinationClass;
-	this.destination = new destinationClass({destination,
+	this.destination = new destinationClass({ destination,
 						  destinationPath,
 						  encoding: this.settings.outputEncoding,
-						  errorHandler: this.settings.outputEncodingErrorHandler })
+						  errorHandler: this.settings.outputEncodingErrorHandler 
+});
     }
 
     applyTransforms() {
@@ -149,40 +159,41 @@ class Publisher {
     /* This doesnt seem to return anything ? */
     publish(args, cb) {
 //	console.log(`publish`)
-	const {argv, usage, description, settingsSpec, settingsOverrides, configSection, enableExitStatus } = args;
-	let exit = undefined;
+	const { argv, usage, description, settingsSpec, settingsOverrides, configSection, enableExitStatus 
+} = args;
+	const exit;
 	try {
-	    if(this.settings === undefined) {
-		this.processCommandLine({ argv, usage, description, settingsSpec, configSection, settingsOverrides});
+	    if (this.settings === undefined) {
+		this.processCommandLine({
+ argv, usage, description, settingsSpec, configSection, settingsOverrides });
 	    }
-	    //console.log(this.source);
+	    // console.log(this.source);
 	    this.setIO();
 
-	    //KM
+	    // KM
 //	    console.log('*** about to call read');
 	    /* we may need to change semantics here !! */
 
-	    if(typeof this.reader === 'undefined') {
+	    if (typeof this.reader === 'undefined') {
 		throw new ApplicationError('Need defined reader with "read" method');
 	    }
 	    this.reader.read(
 		this.source, this.parser, this.settings,
 		((error, document) => {
-		    if(error) {
+		    if (error) {
 			cb(error, undefined);
 			return;
 		    }
 		    this.document = document;
-		    if(!document) {
-			throw new Error("need document");
+		    if (!document) {
+			throw new Error('need document');
 		    }
-		    this.applyTransforms()
-		    const output =
-			  this.writer.write(this.document, this.destination)
+		    this.applyTransforms();
+		    const output =			  this.writer.write(this.document, this.destination);
 		    this.writer.assembleParts();
 		    cb(undefined, output);
-		}).bind(this));
-	} catch(error) {
+		}));
+	} catch (error) {
 	    cb(error, undefined);
 	}
     }

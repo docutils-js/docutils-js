@@ -135,7 +135,7 @@ export class Node {
     walkabout(visitor) {
         let callDepart = true;
         let stop = false;
-        visitor.document.reporter.debug(`docutils.nodes.Node.walkabout calling dispatch_visit`);
+        visitor.document.reporter.debug('docutils.nodes.Node.walkabout calling dispatch_visit');
         try {
             try {
                 visitor.dispatchVisit(this);
@@ -371,8 +371,8 @@ export class TextElement extends Element {
             children = [];
         }
 	/* istanbul ignore if */
-        if(Array.isArray(text)) {
-            throw new InvalidArgumentsError("text should not be an array");
+        if (Array.isArray(text)) {
+            throw new InvalidArgumentsError('text should not be an array');
         }
         super(rawsource, (typeof text !== 'undefined' && text !== '') ? [new Text(text), ...children] : children, attributes);
     }
