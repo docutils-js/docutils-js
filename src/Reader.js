@@ -1,7 +1,6 @@
 import Component from './Component';
-import universal from './transforms/universal';
+// /import universal from './transforms/universal';
 import parsers from './parsers';
-import * as utils from './utils';
 import newDocument from './newDocument';
 
 export default class Reader extends Component {
@@ -50,7 +49,6 @@ export default class Reader extends Component {
 
         this.source.read((error, data) => {
                              if (error) {
-                                 console.log(error.stack);
                                  cb(error);
                                  return;
                              }
@@ -70,7 +68,8 @@ export default class Reader extends Component {
         }
 
         this.parser.parse(this.input, document);
-        document.currentSource = document.currentLine = undefined;
+        document.currentSource = undefined;
+        document.currentLine = undefined;
     }
 
     newDocument() {

@@ -3,6 +3,8 @@ import { columnWidth, isIterable } from '../../../utils';
 import * as nodes from '../../../nodes';
 import * as RegExps from '../RegExps';
 import TransitionCorrection from '../../../TransitionCorrection';
+import UnexpectedIndentationError from '../../../UnexpectedIndentationError';
+import { EOFError } from '../../../Exceptions';
 
 
 class Text extends RSTState {
@@ -15,6 +17,7 @@ class Text extends RSTState {
         this.initialTransitions = [['underline', 'Body'], ['text', 'Body']];
     }
 
+    /* eslint-disable-next-line no-unused-vars */
     blank(match, context, nextState) {
         const [paragraph, literalnext] = this.paragraph(
             context, this.stateMachine.absLineNumber() - 1,
@@ -34,6 +37,7 @@ class Text extends RSTState {
         return [];
     }
 
+    /* eslint-disable-next-line no-unused-vars */
     indent(match, context, nextState) {
         /* """Definition list item.""" */
         const definitionlist = new nodes.definition_list();
@@ -117,7 +121,7 @@ blankFinishState: 'Definition',
         try {
             block = this.stateMachine.getTextBlock(undefined, true);
         } catch (error) {
-            if (error instanceof statemachine.UnexpectedIndentationError) {
+            if (error instanceof UnexpectedIndentationError) {
                 let src; let
 srcline;
                 [block, src, srcline] = error.args;
@@ -146,9 +150,10 @@ srcline;
         return [[], nextState, []];
     }
 
+    /* eslint-disable-next-line camelcase */
     literal_block(match, context, nextState) {
         // """Return a list of nodes."""
-        const [indented, indent, offset, blank_finish] = this.stateMachine.getIndented({});
+        const [indented, indent, offset, blankFinish] = this.stateMachine.getIndented({});
         while (indented && indented.length && !indented[indented.length - 1].trim()) {
             indented.trimEnd();
         }
@@ -156,17 +161,18 @@ srcline;
             return this.quoted_literal_block();
         }
         const data = indented.join('\n');
-        const literal_block = new nodes.literal_block(data, data);
+        const literalBlock = new nodes.literal_block(data, data);
             const [source, line] = this.stateMachine.getSourceAndLine(offset + 1);
-        literal_block.source = source;
-         literal_block.line = line;
-        const nodelist = [literal_block];
-        if (!blank_finish) {
+        literalBlock.source = source;
+        literalBlock.line = line;
+        const nodelist = [literalBlock];
+        if (!blankFinish) {
             nodelist.push(this.unindentWarning('Literal block'));
         }
         return nodelist;
     }
 
+    /* eslint-disable-next-line camelcase,no-unused-vars */
     quoted_literal_block(match, context, nextState) {
         const absLineOffset = this.stateMachine.absLineOffset();
         const offset = this.stateMachine.lineOffset;
@@ -187,8 +193,9 @@ srcline;
         return parentNode.children;
     }
 
+    /* eslint-disable-next-line camelcase */
     definition_list_item(termline) {
-        const [indented, indent, line_offset, blank_finish] = this.stateMachine.getIndented({});
+        const [indented, indent, lineOffset, blankFinish] = this.stateMachine.getIndented({});
         const itemnode = new nodes.definition_list_item(
             [...termline, ...indented].join('\b'),
 );
@@ -206,36 +213,36 @@ srcline;
                 { line: lineno + 1 },
 ));
         }
-        this.nestedParse(indented, { inputOffset: line_offset, node: definition });
-        return [itemnode, blank_finish];
+        this.nestedParse(indented, { inputOffset: lineOffset, node: definition });
+        return [itemnode, blankFinish];
     }
 
     term(lines, lineno) {
-        const [text_nodes, messages] = this.inline_text(lines[0], lineno);
-        const term_node = new nodes.term(lines[0]);
-   //     [term_node.source,
-    //     term_node.line] = this.stateMachine.getSourceAndLine(lineno)
-        const node_list = [term_node];
-        text_nodes.forEach((node) => {
+        const [textNodes, messages] = this.inline_text(lines[0], lineno);
+        const termNode = new nodes.term(lines[0]);
+   //     [termNode.source,
+    //     termNode.line] = this.stateMachine.getSourceAndLine(lineno)
+        const nodeList = [termNode];
+        textNodes.forEach((node) => {
             if (node instanceof nodes.Text) {
                 const parts = node.astext().split(RegExps.classifierDelimiterRegexp);
                 if (parts.length === 1) {
-                    node_list[node_list.length - 1].add(node);
+                    nodeList[nodeList.length - 1].add(node);
                 } else {
                     const text = parts[0].trimRight();
                     const textnode = new nodes.Text(unescape(text, true));
-                    node_list[node_list.length - 1].add(textnode);
-                    for (const part of parts.slice(1)) {
-                        node_list.push(
+                    nodeList[nodeList.length - 1].add(textnode);
+                    parts.slice(1).forEach((part) => {
+                        nodeList.push(
                             new nodes.classifier(unescape(part, false), part),
-);
-                    }
+                        );
+                    });
                 }
             } else {
-                node_list[node_list.length - 1].add(node);
+                nodeList[nodeList.length - 1].add(node);
             }
         });
-        return [node_list, messages];
+        return [nodeList, messages];
     }
 }
 Text.stateName = 'Text';

@@ -1,5 +1,6 @@
 import * as nodes from './nodes';
 import { isIterable } from './utils';
+import { UnimplementedError as Unimp, SystemMessage } from './Exceptions';
 
 class Reporter {
     constructor(source, reportLevel, haltLevel, stream, debug, encoding,
@@ -30,7 +31,7 @@ class Reporter {
 
     /* need better system for arguments!! */
     systemMessage(level, message, children, kwargs) {
-        if (children == undefined) {
+        if (typeof children === 'undefined') {
             children = [];
         }
         if (!isIterable(children)) {
@@ -65,7 +66,7 @@ class Reporter {
             this.stream.write(`${msg.astext()}\n`);
         }
         if (this.stream && (level >= this.reportLevel
-                           || (this.debugFlag && level == this.DEBUG_LEVEL)
+                           || (this.debugFlag && level === this.DEBUG_LEVEL)
                            || level >= this.haltLevel)) {
             this.stream.write(`${msg.astext()}\n`);
         }
@@ -91,6 +92,7 @@ class Reporter {
         if (this.debugFlag) {
             return this.systemMessage(this.debugLevel, ...args);
         }
+        return undefined;
     }
 
     info(...args) {

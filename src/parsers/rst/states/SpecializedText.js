@@ -1,4 +1,5 @@
 import Text from './Text';
+import { EOFError } from '../../../Exceptions';
 
 class SpecializedText extends Text {
     _init(args) {
@@ -32,7 +33,6 @@ class SpecializedText extends Text {
 
     /* istanbul ignore next */
     invalidInput() {
-        console.log('invalid input, throwing eoferror');
         throw new EOFError();
     }
 }

@@ -1,7 +1,9 @@
 import { FileInput, FileOutput } from './io';
 import { ApplicationError } from './Exceptions';
-import readers from './Readers';
-import writers from './Writers';
+import OptionParser from './OptParse';
+import * as readers from './Readers';
+import * as writers from './Writers';
+import SettingsSpec from './SettingsSpec';
 
 /**
  ** Port of docutils.core.Publisher
@@ -44,7 +46,12 @@ class Publisher {
 
     setReader(readerName, parser, parserName) {
         const ReaderClass = readers.getReaderClass(readerName);
-        this.reader = new ReaderClass(parser, parserName, { debug: this.debug, debugFn: this.debugFn });
+        this.reader = new ReaderClass(parser,
+                                      parserName,
+                                      {
+ debug: this.debug,
+                                        debugFn: this.debugFn,
+});
         this.parser = this.reader.parser;
     }
 
@@ -123,10 +130,7 @@ settingsOverrides,
     }
 
     setSource({ source, sourcePath }) {
-        console.log(`${source} ${sourcePath}`);
         if (typeof sourcePath === 'undefined') {
-            console.log(`setting sourcePath to ${this.settings._source}`);
-            console.log(this.settings);
             sourcePath = this.settings._source;
         } else {
             this.settings._source = sourcePath;
@@ -151,16 +155,21 @@ encoding:
             this.settings._destination = destinationPath;
         }
         const destinationClass = this.destinationClass;
-        this.destination = new destinationClass({
- destination,
-                                                  destinationPath,
-                                                  encoding: this.settings.outputEncoding,
-                                                  errorHandler: this.settings.outputEncodingErrorHandler,
-});
+        this.destination = new destinationClass(
+            {
+                destination,
+                destinationPath,
+                encoding: this.settings.outputEncoding,
+                errorHandler: this.settings.outputEncodingErrorHandler,
+            },
+);
     }
 
     applyTransforms() {
-        this.document.transformer.populateFromComponents(this.source, this.reader, this.reader.parser, this.writer, this.destination);
+        this.document.transformer.populateFromComponents(
+            this.source, this.reader, this.reader.parser,
+            this.writer, this.destination,
+);
         this.document.transformer.applyTransforms();
     }
 

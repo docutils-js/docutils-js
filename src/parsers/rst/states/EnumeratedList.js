@@ -19,11 +19,11 @@ class EnumeratedList extends SpecializedBody {
         if (sequence === '#') {
             this.auto = 1;
         }
-        const [listitem, blank_finish] = this.list_item(
+        const [listitem, blankFinish] = this.list_item(
             match.result.index + match.result[0].length,
 );
         this.parent.add(listitem);
-        this.blankFinish = blank_finish;
+        this.blankFinish = blankFinish;
         this.lastordinal = ordinal;
         return [[], nextState, []];
     }

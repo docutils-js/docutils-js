@@ -1,7 +1,6 @@
 import BaseWriter from '../Writer';
 import { GenericNodeVisitor } from '../nodes';
 import * as docutils from '../index';
-import * as nodes from '../nodes';
 
 class POJOTranslator extends GenericNodeVisitor {
     constructor(document) {
@@ -12,13 +11,14 @@ class POJOTranslator extends GenericNodeVisitor {
         this.warn = this.document.reporter.warning.bind(this.document.reporter);
         this.error = this.document.reporter.error.bind(this.document.reporter);
 
-        const settings = this.settings = document.settings;
+        this.settings = document.settings;
         this.level = 0;
         this.inSimple = 0;
         this.fixedText = 0;
         this.output = {};
     }
 
+    /* eslint-disable-next-line camelcase */
     default_visit(node) {
         const me = [node.tagname, node.attlist(), []];
         this.ancestors.push(me);
@@ -26,6 +26,7 @@ class POJOTranslator extends GenericNodeVisitor {
 //      console.log(this.level);
     }
 
+    /* eslint-disable-next-line camelcase,no-unused-vars */
     default_departure(node) {
         const me = this.ancestors.pop();
         if (this.level === 1) {
@@ -38,12 +39,14 @@ class POJOTranslator extends GenericNodeVisitor {
         this.level -= 1;
     }
 
+    /* eslint-disable-next-line camelcase */
     visit_Text(node) {
         this.ancestors[this.ancestors.length - 1][2].push(node.astext());
 //      const text = escapeXml(node.astext())
 //      this.output.push(text);
     }
 
+    /* eslint-disable-next-line camelcase,no-unused-vars */
     depart_Text(node) {
     }
 }

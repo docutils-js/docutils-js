@@ -8,12 +8,10 @@ import State from './states/State';
 import StateWS from './states/StateWS';
 import StateCorrection from './StateCorrection';
 import TransitionCorrection from './TransitionCorrection';
-
+import IndentationError from './IndentationError';
 
 import StringList from './StringList';
 
-export class UnexpectedIndentationError extends Error {
-}
 
 function __getClass(object) {
   return Object.prototype.toString.call(object)

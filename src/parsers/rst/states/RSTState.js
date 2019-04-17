@@ -1,7 +1,7 @@
 import StateWS from '../../../states/StateWS';
 import NestedStateMachine from '../NestedStateMachine';
 import * as nodes from '../../../nodes';
-import { EOFError } from '../../../Exceptions';
+import { EOFError, InvalidArgumentsError } from '../../../Exceptions';
 
 class RSTState extends StateWS {
     _init(args = {}) {
@@ -88,7 +88,6 @@ class RSTState extends StateWS {
 //          if(!stateMachineKwargs.document) {
 //              throw new Error("expectinf document")
             //          }
-            const stateFactory = this.stateMachine.stateFactory;
             if (!stateMachineKwargs.stateFactory) {
                 throw new Error('need statefactory');
             }
@@ -175,13 +174,13 @@ matchTitles,
 
     checkSubsection({ source, style, lineno }) {
         const { memo } = this;
-        const title_styles = memo.titleStyles;
+        const titleStyles = memo.titleStyles;
         const mylevel = memo.sectionLevel;
         let level = 0;
-        level = title_styles.indexOf(style) + 1;
+        level = titleStyles.indexOf(style) + 1;
         if (level === 0) {
-            if (title_styles.length === memo.sectionLevel) { // new subsection
-                title_styles.push(style);
+            if (titleStyles.length === memo.sectionLevel) { // new subsection
+                titleStyles.push(style);
                 return 1;
             }
                 this.parent.add(this.title_inconsistent(source, lineno));

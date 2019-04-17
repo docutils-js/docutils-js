@@ -22,11 +22,13 @@ class SpecializedBody extends Body {
     }
 
     /* istanbul ignore next */
+    /* eslint-disable-next-line camelcase,no-unused-vars */
     field_marker() {
         this.invalid_input();
     }
 
     /* istanbul ignore next */
+    /* eslint-disable-next-line camelcase,no-unused-vars */
     option_marker() {
         this.invalid_input();
     }
@@ -37,21 +39,25 @@ class SpecializedBody extends Body {
     }
 
     /* istanbul ignore next */
+    /* eslint-disable-next-line camelcase,no-unused-vars */
     line_block() {
         this.invalid_input();
     }
 
     /* istanbul ignore next */
+    /* eslint-disable-next-line camelcase,no-unused-vars */
     grid_table_top() {
         this.invalid_input();
     }
 
     /* istanbul ignore next */
+    /* eslint-disable-next-line camelcase,no-unused-vars */
     simple_table_top() {
         this.invalid_input();
     }
 
     /* istanbul ignore next */
+    /* eslint-disable-next-line camelcase,no-unused-vars */
     explicit_markup() {
         this.invalid_input();
     }
@@ -72,6 +78,7 @@ class SpecializedBody extends Body {
     }
 
     /* istanbul ignore next */
+    /* eslint-disable-next-line camelcase,no-unused-vars */
     invalid_input(match, context, nextState) {
         this.stateMachine.previousLine();
         throw new EOFError();

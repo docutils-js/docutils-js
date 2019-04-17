@@ -15,5 +15,8 @@ import SpecializedText from './states/SpecializedText';
 import Text from './states/Text';
 
 export {
- Body, BulletList, Definition, DefinitionList, EnumeratedList, Explicit, ExtensionOptions, FieldList, LineBlock, Line, OptionList, QuotedLiteralBlock, SpecializedBody, SpecializedText, Text,
+    Body, BulletList, Definition, DefinitionList,
+    EnumeratedList, Explicit, ExtensionOptions,
+    FieldList, LineBlock, Line, OptionList,
+    QuotedLiteralBlock, SpecializedBody, SpecializedText, Text,
 };
