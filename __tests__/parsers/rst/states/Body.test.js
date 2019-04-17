@@ -1,10 +1,20 @@
 import Body from '../../../../src/parsers/rst/states/Body';
 import { StringList } from '../../../../src/StateMachine';
 import RSTStateMachine from '../../../../src/parsers/rst/RSTStateMachine';
+import StateFactory from '../../../../src/parsers/rst/StateFactory';
 jest.mock('../../../../src/parsers/rst/RSTStateMachine');
+jest.mock('../../../../src/parsers/rst/StateFactory');
 
 beforeEach(() => {
     RSTStateMachine.mockClear();
+    StateFactory.mockClear();
+    RSTStateMachine.mockImplementation(({ indent, untilBlank, stripIndent }) => {
+	return {
+	    absLineNumber: () => 1,
+	    getFirstKnownIndented: (...args) => [new StringList('hello'), indent, 0, true],
+            stateFactory: { withStateClasses: (classes) => new StateFactory() },
+        };
+    });
 });
 
 function createRSTStateMachine() {
@@ -28,12 +38,6 @@ function createBody(optSm) {
 test('Body patterns', () => {
     const body = createBody();
     /* Ensure body state patterns haven't changed. */
-    RSTStateMachine.mockImplementation(({ indent, untilBlank, stripIndent }) => {
-	return {
-	    absLineNumber: () => 1,
-	    getFirstKnownIndented: (...args) => [new StringList('hello'), indent, 0, true],
-	};
-    });
     expect(body.patterns).toMatchSnapshot();
 });
     
