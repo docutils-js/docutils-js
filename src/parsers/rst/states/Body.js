@@ -146,7 +146,7 @@ class Body extends RSTState {
 
     footnote(match) {
         const [src, srcline] = this.stateMachine.getSourceAndLine();
-        const [indented, indent, offset, blank_finish] = this.stateMachine.getFirstKnownIndented(
+        const [indented, indent, offset, blankFinish] = this.stateMachine.getFirstKnownIndented(
             { indent: match.index + match[0].length },
 );
         const label = match[1];
@@ -180,12 +180,12 @@ class Body extends RSTState {
         if (indented && indented.length) {
             this.nestedParse(indented, { inputOffset: offset, node: footnote });
         }
-        return [[footnote], blank_finish];
+        return [[footnote], blankFinish];
     }
 
     citation(match) {
         const [src, srcline] = this.stateMachine.getSourceAndLine();
-        const [indented, indent, offset, blank_finish] = this.stateMachine.getFirstKnownIndented({
+        const [indented, indent, offset, blankFinish] = this.stateMachine.getFirstKnownIndented({
             indent: match.index + match[0].length,
         });
         const label = match[1];
@@ -201,14 +201,14 @@ class Body extends RSTState {
         if (indented && indented.length) {
             this.nestedParse(indented, { inputOffset: offset, node: citation });
         }
-        return [[citation], blank_finish];
+        return [[citation], blankFinish];
     }
 
     /* eslint-disable-next-line camelcase */
     hyperlink_target(match) {
         const pattern = this.explicit.patterns.target;
         const lineno = this.stateMachine.absLineNumber();
-        const [block, indent, offset, blank_finish] = this.stateMachine.getFirstKnownIndented(
+        const [block, indent, offset, blankFinish] = this.stateMachine.getFirstKnownIndented(
                   {
  indent: match.index + match[0].length,
                     untilBlank: true,
@@ -237,7 +237,7 @@ class Body extends RSTState {
         block2[0] = (`${block2[0]} `).substring(targetmatch.index + targetmatch[0].length - escape.length + 1).trim();
         const target = this.make_target(block2, blocktext, lineno,
                                   targetmatch[3]);
-        return [[target], blank_finish];
+        return [[target], blankFinish];
     }
 
     /* eslint-disable-next-line camelcase */
@@ -370,7 +370,7 @@ class Body extends RSTState {
 */
         const lineno = this.stateMachine.absLineNumber();
         const initial_line_offset = this.stateMachine.lineOffset;
-        const [indented, indent, line_offset, blank_finish] = this.stateMachine.getFirstKnownIndented(
+        const [indented, indent, line_offset, blankFinish] = this.stateMachine.getFirstKnownIndented(
             {
  indent: match.result.index + match.result[0].length,
               stripTop: 0,
@@ -389,7 +389,7 @@ class Body extends RSTState {
                 const err = this.reporter.error(`Error in "${type_name}" directive:\n${detail.args.join(' ')}`,
                                                 [new nodes.literal_block(block_text, block_text)],
                                                 { line: lineno });
-                return [[err], blank_finish];
+                return [[err], blankFinish];
             }
         }
         const directive_instance = new directive(
@@ -411,7 +411,7 @@ class Body extends RSTState {
                     % (type_name, i, result[i]))
 */
         return [result,
-                blank_finish || this.stateMachine.isNextLineBlank()];
+                blankFinish || this.stateMachine.isNextLineBlank()];
     }
 
     comment(match) {
@@ -420,12 +420,12 @@ class Body extends RSTState {
            && this.stateMachine.isNextLineBlank()) { // # an empty comment?
             return [[new nodes.comment()], 1]; // "A tiny but practical wart."
         }
-        const [indented, indent, offset, blank_finish] = this.stateMachine.getFirstKnownIndented({ indent: matchEnd });
+        const [indented, indent, offset, blankFinish] = this.stateMachine.getFirstKnownIndented({ indent: matchEnd });
         while (indented && indented.length && !indented[indented.length - 1].trim()) {
             indented.trimEnd();
         }
         const text = indented.join('\n');
-        return [[new nodes.comment(text, text)], blank_finish];
+        return [[new nodes.comment(text, text)], blankFinish];
     }
 
     /* eslint-disable-next-line camelcase */
@@ -436,9 +436,9 @@ class Body extends RSTState {
         if (!isIterable(r)) {
             throw new Error('');
         }
-        const [nodelist, blank_finish] = r;
+        const [nodelist, blankFinish] = r;
         this.parent.add(nodelist);
-        this.explicit_list(blank_finish);
+        this.explicit_list(blankFinish);
         return [[], next_state, []];
     }
 
@@ -469,8 +469,8 @@ class Body extends RSTState {
             }
         }
 
-        const [nodelist, blank_finish] = this.comment(match);
-        return [[...nodelist], [...errors], blank_finish];
+        const [nodelist, blankFinish] = this.comment(match);
+        return [[...nodelist], [...errors], blankFinish];
     }
 
     /* eslint-disable-next-line camelcase */
@@ -498,16 +498,16 @@ initialState: 'Explicit',
 
     anonymous(match, context, next_state) {
         /* """Anonymous hyperlink targets.""" */
-        const [nodelist, blank_finish] = this.anonymous_target(match);
+        const [nodelist, blankFinish] = this.anonymous_target(match);
         this.parent.add(nodelist);
-        this.explicit_list(blank_finish);
+        this.explicit_list(blankFinish);
         return [[], next_state, []];
     }
 
     /* eslint-disable-next-line camelcase */
     anonymous_target(match) {
         const lineno = this.stateMachine.absLineNumber();
-        const [block, indent, offset, blank_finish] = this.stateMachine.getFirstKnownIndented({
+        const [block, indent, offset, blankFinish] = this.stateMachine.getFirstKnownIndented({
  indent: match.result.index + match.result[0].length,
                                                           untilBlank: true,
 });
@@ -517,7 +517,7 @@ initialState: 'Explicit',
         const block2 = new StringList(blockLines);
 
         const target = this.make_target(block2, blocktext, lineno, '');
-        return [[target], blank_finish];
+        return [[target], blankFinish];
     }
 
     indent(match, context, nextState) {
@@ -725,13 +725,13 @@ initialState: 'EnumeratedList',
             throw new Error('Need indent');
         }
 
-        let indented; let line_offset; let blank_finish;
+        let indented; let line_offset; let blankFinish;
         let outIndent;
         if (this.stateMachine.line.length > indent) {
 //          console.log(`get known indentd`);
-            [indented, line_offset, blank_finish] = this.stateMachine.getKnownIndented({ indent });
+            [indented, line_offset, blankFinish] = this.stateMachine.getKnownIndented({ indent });
         } else {
-            [indented, outIndent, line_offset, blank_finish] = (
+            [indented, outIndent, line_offset, blankFinish] = (
                 this.stateMachine.getFirstKnownIndented({ indent }));
         }
         const listitem = new nodes.list_item(indented.join('\n'));
@@ -742,7 +742,7 @@ initialState: 'EnumeratedList',
                                          node: listitem,
 });
         }
-        return [listitem, blank_finish];
+        return [listitem, blankFinish];
     }
 
 /*
@@ -911,7 +911,7 @@ initialState: 'EnumeratedList',
     option_list_item(match) {
         const offset = this.stateMachine.absLineOffset();
         const options = this.parse_option_marker(match);
-        const [indented, indent, line_offset, blank_finish] = this.stateMachine.getFirstKnownIndented({ indent: match.result.index + match.result[0].length });
+        const [indented, indent, line_offset, blankFinish] = this.stateMachine.getFirstKnownIndented({ indent: match.result.index + match.result[0].length });
         if (!indented || !indented.length) { //  not an option list item
             this.gotoLine(offset);
             throw new statemachine.TransitionCorrection('text');
@@ -926,7 +926,7 @@ initialState: 'EnumeratedList',
                                          node: description,
 });
         }
-        return [option_list_item, blank_finish];
+        return [option_list_item, blankFinish];
     }
 
     /* eslint-disable-next-line camelcase */
@@ -1026,7 +1026,7 @@ initialState: 'LineBlock',
     /* eslint-disable-next-line camelcase */
     line_block_line(match, lineno) {
         // """Return one line element of a line_block."""
-        const [indented, indent, line_offset, blank_finish] = this
+        const [indented, indent, line_offset, blankFinish] = this
               .stateMachine.getFirstKnownIndented(
             {
  indent: match.result.index + match.result[0].length,
@@ -1040,7 +1040,7 @@ initialState: 'LineBlock',
             line.indent = match.result[1].length - 1;
         }
 
-        return [line, messages, blank_finish];
+        return [line, messages, blankFinish];
     }
 
     /* eslint-disable-next-line camelcase */
@@ -1109,9 +1109,9 @@ initialState: 'LineBlock',
     /* eslint-disable-next-line camelcase */
     table_top(match, context, next_state, isolate_function, parser_class) {
         // """Top border of a generic table."""
-        const [nodelist, blank_finish] = this.table(isolate_function, parser_class);
+        const [nodelist, blankFinish] = this.table(isolate_function, parser_class);
         this.parent.add(nodelist);
-        if (!blank_finish) {
+        if (!blankFinish) {
             const msg = this.reporter.warning(
                 'Blank line required after table.', [],
                 { line: this.stateMachine.absLineNumber() + 1 },
@@ -1127,7 +1127,7 @@ initialState: 'LineBlock',
         if (!isIterable(r)) {
             throw new Error();
         }
-        const [block, messages, blank_finish] = r;
+        const [block, messages, blankFinish] = r;
         let nodelist;
         if (block && block.length) {
             try {
@@ -1149,14 +1149,14 @@ initialState: 'LineBlock',
         } else {
             nodelist = messages;
         }
-        return [nodelist, blank_finish];
+        return [nodelist, blankFinish];
     }
 
     /* eslint-disable-next-line camelcase */
     isolate_grid_table() {
         const messages = [];
         let block;
-        let blank_finish = 1;
+        let blankFinish = 1;
         try {
             block = this.stateMachine.getTextBlock(0, true);
         } catch (error) {
@@ -1164,7 +1164,7 @@ initialState: 'LineBlock',
                 const [block, src, srcline] = err.args;
                 messages.add(this.reporter.error('Unexpected indentation.', [],
                                                  { source: src, line: srcline }));
-                blank_finish = 0;
+                blankFinish = 0;
             }
         }
 
@@ -1179,14 +1179,14 @@ initialState: 'LineBlock',
         for (let i = 0; i < block.length; i += 1) {
             block[i] = block[i].trim();
             if (block[i][0] !== '+' && block[i][0] !== '|') { // check left edge
-                blank_finish = 0;
+                blankFinish = 0;
                 this.stateMachine.previousLine(block.length - i);
                 block.splice(i, block.length - i);
                 break;
             }
         }
         if (!this.gridTableTopPat.test(block[block.length - 1])) { // find bottom
-            blank_finish = 0;
+            blankFinish = 0;
             // from second-last to third line of table:
             let myBreak = false;
             for (let i = block.length - 2; i >= 1; i -= 1) { // fixme test
@@ -1200,17 +1200,17 @@ initialState: 'LineBlock',
             }
             if (!myBreak) {
                 messages.push(...this.malformed_table(block));
-                return [[], messages, blank_finish];
+                return [[], messages, blankFinish];
             }
         }
 
         for (let i = 0; i < block.length; i += 1) { // check right edge
             if (block[i].length !== width || !/[+|]/.test(block[i][block[i].length - 1])) {
                 messages.push(...this.malformed_table(block));
-                return [[], messages, blank_finish];
+                return [[], messages, blankFinish];
             }
         }
-        return [block, messages, blank_finish];
+        return [block, messages, blankFinish];
     }
 
     /* eslint-disable-next-line camelcase */
