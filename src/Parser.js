@@ -9,7 +9,8 @@ class Parser extends Component {
 	this.debug = args.debug;
 	this.debugFn = args.debugFn;
     }
-    
+
+    /* istanbul ignore function */
     parse(inputstring, document) {
 	throw new UnimplementedException("subclass implement parse");
     }

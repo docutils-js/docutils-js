@@ -2,6 +2,10 @@ import * as utils from '../src/utils';
 import unescape from '../src/utils/unescape';
 import baseSettings from '../src/baseSettings';
 
+function createReporter() {
+    return new utils.Reporter(undefined, 0, 4, undefined, true, 'utf-8');
+}
+			      
 test('1', () => {
     const r = utils.newReporter({}, { ...baseSettings });
 
@@ -20,4 +24,13 @@ test('findCombiningChars', () => {
 });
 test('columnIndicies', () => {
     expect(utils.columnIndicies('A t̆ab̆lĕ')).toEqual([0, 1, 2, 4, 5, 7, 8])
+});
+
+test('isIterable with null or undefined value', () => {
+    expect(utils.isIterable()).toBe(false);
+});
+
+test('Reporter.systemMessage with Error/Exception', () => {
+    const reporter = createReporter();
+    reporter.systemMessage(reporter.WARNING_LEVEL, new Error('my error'), [], {});
 });

@@ -1,6 +1,7 @@
 export class UnimplementedError extends Error {
     constructor(message, ...params) {
 	super(...params);
+	/* instanbul ignore else */
 	if(Error.captureStackTrace) {
 	    Error.captureStackTrace(this, UnimplementedError);
 	}
@@ -12,6 +13,7 @@ export class UnimplementedError extends Error {
 export class EOFError extends Error {
     constructor(...params) {
 	super(...params);
+	/* instanbul ignore else */
 	if(Error.captureStackTrace) {
 	    Error.captureStackTrace(this, EOFError);
 	}
@@ -23,6 +25,7 @@ export class InvalidArgumentsError extends Error {
     constructor(message, ...params) {
 	super(...params);
 	this.message = message;
+	/* instanbul ignore else */
 	if(Error.captureStackTrace) {
 	    Error.captureStackTrace(this, InvalidArgumentsError);
 	}
@@ -38,6 +41,7 @@ export class SystemMessage extends Error {
 	this.message = msg.astext();
 	this.msg = msg;
 	this.level = level;
+	/* instanbul ignore else */
 	if(Error.captureStackTrace) {
 	    Error.captureStackTrace(this, SystemMessage);
 	}
@@ -49,6 +53,7 @@ export class ApplicationError extends Error {
 	super(...params);
 	const [ message, kwargs ] = params;
 	this.error = kwargs ? kwargs.error : undefined;
+	/* instanbul ignore else */
 	if(Error.captureStackTrace) {
 	    Error.captureStackTrace(this, Error);
 	}
@@ -58,6 +63,7 @@ export class ApplicationError extends Error {
 export class DataError extends ApplicationError {
     constructor(...params) {
 	super(...params);
+	/* instanbul ignore else */
 	if(Error.captureStackTrace) {
 	    Error.captureStackTrace(this, DataError);
 	}
@@ -67,6 +73,7 @@ export class DataError extends ApplicationError {
 export class AssertError extends Error {
     constructor(message, ...params) {
         super(...params);
+	/* instanbul ignore else */
         if(Error.captureStackTrace) {
             Error.captureStackTrace(this, AssertError);
         }

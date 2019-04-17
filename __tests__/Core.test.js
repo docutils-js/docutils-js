@@ -266,6 +266,9 @@ footnote 2.
     ['footnote auto-symbol', `Here is a symbolic footnote reference: [*]_.
 
 .. [*] This is the footnote.`],
+    ['escaping 1', '*escape* ``with`` "\\"'],
+    ['escaping 2', '\\*escape* \\``with`` "\\\\"'],
+
          ])('%s', (...inputAry) => {
              const [a, raw, opts] = inputAry;
              const myOpts = opts || {};

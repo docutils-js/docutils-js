@@ -44,18 +44,23 @@ function escapeRegExp(string) {
 }
 
 
+/* istanbul ignore function */
 function _loweralpha_to_int() {
 }
 
+/* istanbul ignore function */
 function _upperalpha_to_int() {
 }
 
+/* istanbul ignore function */
 function _uppseralpha_to_int() {
 }
 
+/* istanbul ignore function */
 function _lowerroman_to_int() {
 }
 
+/* istanbul ignore function */
 function _upperroman_to_int() {
 }
 

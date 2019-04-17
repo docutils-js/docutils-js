@@ -116,7 +116,8 @@ matchTitles,
                      matchTitles,
                      stateMachineClass,
                      stateMachineKwargs,
-}) {
+    }) {
+	/* istanbul ignore next */
         if (extraSettings == null) {
                 extraSettings = {};
         }

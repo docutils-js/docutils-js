@@ -13,14 +13,17 @@ class Input extends TransformSpec {
 	this.successfulEncoding = undefined;
     }
 
+    /* istanbul ignore method */
     async read() {
 	throw new Error("not implemented");
     }
 
+    /* istanbul ignore method */
     decode(data) {
 	return data;
     }
 
+    /* istanbul ignore method */
     toString() {
 	return `Input<${this.constructor.name}>`;
     }

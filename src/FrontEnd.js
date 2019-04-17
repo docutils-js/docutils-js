@@ -1,27 +1,37 @@
 import { OptionParser as OptionParserBase } from './OptParse'
 import SettingsSpec from './SettingsSpec';
 
+/* istanbul ignore function */
 function validate_strip_class() {
 }
 
 
+/* istanbul ignore function */
 function store_multiple() {
 }
 
+/* istanbul ignore function */
 function validate_boolean() {
 }
+/* istanbul ignore function */
 function validate_threshold() {
 }
+/* istanbul ignore function */
 function validate_encoding_and_error_handler() {
 }
+/* istanbul ignore function */
 function validate_encoding_error_handler() {
 }
+/* istanbul ignore function */
 function validate_dependency_file() {
 }
+/* istanbul ignore function */
 function validate_colon_separated_string_list() {
 }
+/* istanbul ignore function */
 function read_config_file() {
 }
+
 const SUPPRESS_HELP = Symbol.for('SUPPRESS_HELP')
 
 export class OptionParser extends OptionParserBase {

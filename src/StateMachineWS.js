@@ -2,7 +2,8 @@ import { StateMachine } from './StateMachine';
 
 class StateMachineWS extends StateMachine {
     getIndented({ untilBlank, stripIndent }) {
-        if (stripIndent === undefined) {
+	/* istanbul ignore if */
+        if (typeof stripIndent === 'undefined') {
             stripIndent = true;
         }
         let offset = this.absLineOffset();
@@ -23,8 +24,9 @@ class StateMachineWS extends StateMachine {
 
     getKnownIndented({ indent, untilBlank, stripIndent }) {
         let indented; let
-blankFinish;
-        if (stripIndent === undefined) {
+	blankFinish;
+	/* istanbul ignore if */
+        if (typeof stripIndent === 'undefined') {
             stripIndent = true;
         }
         let offset = this.absLineOffset();
@@ -44,9 +46,11 @@ blankFinish;
 }) {
         let indented;
         let blankFinish;
+	/* istanbul ignore if */
         if (stripIndent === undefined) {
             stripIndent = true;
         }
+	/* istanbul ignore if */
         if (stripTop === undefined) {
             stripTop = true;
         }

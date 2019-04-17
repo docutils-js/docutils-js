@@ -234,7 +234,7 @@ export class Element extends Node {
             att = att.toLowerCase();
 	    /* This if path never taken... why? FIXME */
             if (att in this.listAttributes) {
-		/* istanbul ignore if */
+		/* istanbul ignore next */
                 if (!isIterable(value)) {
                         throw new Error();
                 }

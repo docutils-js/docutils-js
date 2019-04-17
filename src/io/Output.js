@@ -12,12 +12,16 @@ class Output extends TransformSpec {
 	}
     }
 
+    /* istanbul ignore method */
     write(data) {
     }
 
+    /* istanbul ignore method */
     encode(data) {
+	return data; //fixme?
     }
 
+    /* istanbul ignore method */
     toString() {
 	return `Output<${this.constructor.name}>`;
     }
