@@ -57,7 +57,7 @@ class Publisher {
 	    this.setReader(readerName, this.parser, parserName);
 	}
 	if(!this.parser) {
-	    if(!this.reader.parsser) {
+	    if(!this.reader.parser) {
                 this.reader.setParser(parserName)
 	    }
 	    this.parser = this.reader.parser
