@@ -1,5 +1,6 @@
 import BaseReader from '../Reader'
 import * as frontend from '../FrontEnd';
+import * as references from '../transforms/references';
 
 
 /* Ported from code written by David Goodger <goodger@python.org>
@@ -49,7 +50,13 @@ export default class Reader extends BaseReader {
 	this.configSectionDependencies = ['readers'];
     }
 
-/*    def get_transforms(self):
+    getTransforms() {
+	const r = [references.PropagateTargets];
+	console.log(r);
+	console.log(typeof r[0]);
+	return r;
+    }
+    /*
         return readers.Reader.get_transforms(self) + [
             references.Substitutions,
             references.PropagateTargets,

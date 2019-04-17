@@ -169,7 +169,7 @@ class Inliner {
             refnode += nodes.Text(label);
             this.document.note_citation_ref(refnode);
 	} else {
-            refnode = new nodes.footnote_reference('[%s]_' % label);
+            refnode = new nodes.footnote_reference(`[${label}]_`);
             if (refname[0] === '#') {
 		refname = refname.substring(1);
 		refnode.attributes.auto = 1;
@@ -594,7 +594,7 @@ esn;
                 }
                 let before; let inlines; let
 		sysmessages;
-		console.log(`name is ${mname}`);
+//		console.log(`name is ${mname}`);
 
                 [before, inlines, remaining, sysmessages] = method({ result: match, match, groups: rr }, lineno);
                 unprocessed.push(before);

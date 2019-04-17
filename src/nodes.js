@@ -187,6 +187,22 @@ export class Node {
         }
         return stop;
     }
+
+    traverse(condition, includeSelf=true, descend=true, siblings=false, ascend=false) {
+	const mySiblings = ascend ? true : siblings;
+	if(includeSelf && descend && !mySiblings) {
+	    if(!condition) {
+		return this._allTraverse();
+	    } else if(condition instanceof Node) {
+		return this._fastTraverse(condition);
+	    }
+	}
+	if(condition instanceof Node) {
+	    nodeClass = condition;
+	    myCondition = (node, nodeClass=nodeClass) => node instanceof nodeclass;
+	}
+	return [];
+    }
 }
 
 /* This is designed to be called later, a-nd not with an object. hmm */

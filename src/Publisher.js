@@ -143,6 +143,7 @@ class Publisher {
 
     applyTransforms() {
 	this.document.transformer.populateFromComponents(this.source, this.reader, this.reader.parser, this.writer, this.destination);
+	console.log('applying transforms');
 	this.document.transformer.applyTransforms();
     }
 

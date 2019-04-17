@@ -47,7 +47,7 @@ const argv = process.argv.slice(2);
 console.log(argv);
 const description = 'Generates Docutils-native XML from standalone ' + 'reStructuredText sources.  ' + _Core.defaultDescription;
 (0, _Core.publishCmdLine)({
-    settings: { ...baseSettings, _source: 'in.rst' },
+    settings: { ...baseSettings, _source: argv[0] },
     debugFn: (msg) => {
 	console.log(`here ${msg}`);
     },

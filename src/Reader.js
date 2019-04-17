@@ -5,8 +5,8 @@ import utils from './utils';
 
 export default class Reader extends Component {
     getTransforms() {
-	return [ /*...super.getTransforms()*/ universal.Decorations,
-		 universal.ExportInternals, universal.StripComments ];
+	return [];// /*...super.getTransforms()*/ universal.Decorations,
+//		 universal.ExportInternals, universal.StripComments ];
     }
 
     constructor(parser, parserName, args) {
