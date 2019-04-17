@@ -11,10 +11,10 @@ class LineBlock extends SpecializedBody {
     line_block(match, context, next_state) {
         // """New line of line block."""
         const lineno = this.stateMachine.absLineNumber();
-        const [line, messages, blank_finish] = this.line_block_line(match, lineno);
+        const [line, messages, blankFinish] = this.line_block_line(match, lineno);
         this.parent.add(line);
         this.parent.parent.add(messages);
-        this.blankFinish = blank_finish;
+        this.blankFinish = blankFinish;
         return [[], next_state, []];
     }
 }

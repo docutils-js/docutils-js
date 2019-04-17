@@ -24,7 +24,7 @@ const defaultArgs = {
 
 const defaultSettings = { ...baseSettings };
 
-test('full rst2xml pipeline with specific input', () => {
+test.only('full rst2xml pipeline with specific input', () => {
     const settings = { ...defaultSettings };
     const args = { ...defaultArgs };
 
@@ -36,7 +36,13 @@ test('full rst2xml pipeline with specific input', () => {
 
     const { readerName, parserName, writerName } = args;
     const source = new StringInput({
-	source: '====::\n' });
+	source: `         ====================  ==========  ==========
+         Header row, column 1  Header 2    Header 3
+         ====================  ==========  ==========
+         body row 1, column 1  column 2    column 3
+         body row 2            Cells may span columns
+         ====================  ======================
+` });
         const destination = new StringOutput({});
     const pub = new Publisher({
  source, destination, settings, debug: true, debugFn,

@@ -13,7 +13,7 @@ and produce a well-formed data structure suitable for building a CALS table.
     `update_dict_of_lists()`: Merge two dictionaries containing list values.
 */
 
-import { DataError, ASsertError } from '../../Exceptions';
+import { DataError, AsertError } from '../../Exceptions';
 import { strip_combining_chars } from '../../utils';
 
 class TableMarkupError extends DataError {
@@ -532,7 +532,7 @@ class SimpleTableParser extends TableParser {
         }
         if (this.columns) {
             if (cols[cols.length - 1][1] !== this.border_end) {
-                throw new TableMarkupError(`Column span incomplete in table line ${offset + 1}.`, { offset });
+                throw new TableMarkupError(`[${cols[cols.length - 1][1]} - ${this.border_end}] Column span incomplete in table line ${offset + 1}.`, { offset });
             }
             // Allow for an unbounded rightmost column:
             cols[cols.length - 1] = [cols[cols.length - 1][0], this.columns[this.columns.length - 1][1]];
