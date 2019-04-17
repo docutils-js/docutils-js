@@ -53,7 +53,7 @@ function registerLocalRole(name, roleFn) {
 }
 
 
-function role(roleName, languageModule, lineno, reporter) {
+function roleInterface(roleName, languageModule, lineno, reporter) {
     /* """
     Locate and return a role function from its language-dependent name, along
     with a list of system messages.  If the role is not found in the current
@@ -142,4 +142,4 @@ registerGenericRole('subscript', nodes.subscript);
 registerGenericRole('superscript', nodes.superscript);
 registerGenericRole('title-reference', nodes.title_reference);
 
-export default role;
+export default roleInterface;

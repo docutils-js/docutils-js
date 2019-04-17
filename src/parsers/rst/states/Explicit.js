@@ -8,9 +8,9 @@ class Explicit extends SpecializedBody {
     /* eslint-disable-next-line camelcase */
     explicit_markup(match, context, next_state) {
         // """Footnotes, hyperlink targets, directives, comments."""
-        const [nodelist, blank_finish] = this.explicit_construct(match);
+        const [nodelist, blankFinish] = this.explicit_construct(match);
         this.parent.add(nodelist);
-        this.blankFinish = blank_finish;
+        this.blankFinish = blankFinish;
         return [[], next_state, []];
     }
 
@@ -36,15 +36,15 @@ class Explicit extends SpecializedBody {
                 }
             }
         }
-        const [nodelist, blank_finish] = this.comment(match);
-        return [[...nodelist, ...errors], blank_finish];
+        const [nodelist, blankFinish] = this.comment(match);
+        return [[...nodelist, ...errors], blankFinish];
     }
 
     anonymous(match, context, next_state) {
         // """Anonymous hyperlink targets."""
-        const [nodelist, blank_finish] = this.anonymous_target(match);
+        const [nodelist, blankFinish] = this.anonymous_target(match);
         this.parent.add(nodelist);
-        this.blankFinish = blank_finish;
+        this.blankFinish = blankFinish;
         return [[], next_state, []];
     }
 
