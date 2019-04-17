@@ -1,6 +1,9 @@
 /* Our original class delegates to its array,
    whereas I'm not sure an Array can be implemented without extending it
 */
+
+import { ApplicationError } from './Exceptions';
+
 class ViewList extends Array {
     constructor(initlist, source, items, parent, parentOffset) {
         super(...initlist);
@@ -39,8 +42,6 @@ class ViewList extends Array {
     splice(index, num, ...elems) {
 //        console.log(`enter slice ${index} ${num} [${elems.length}]`);
 //        console.log(`input: ${JSON.stringify(this)}`);
-        const index2 = index;
-        const num2 = num;
         const returnAry = [];
         for (let i = index; i < this.length - num; i += 1) {
             if (i < index + num) {
