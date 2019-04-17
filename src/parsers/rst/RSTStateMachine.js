@@ -43,9 +43,10 @@ class RSTStateMachine extends StateMachineWS {
         const results = super.run({ inputLines, inputOffset, inputSource: document.source });
         /* istanbul ignore if */
         if (results.length !== 0) {
-            throw new Error("should be empty array return from statemachine.run");
+            throw new Error('should be empty array return from statemachine.run');
         }
-        this.node = this.memo = undefined;
+        this.node = undefined;
+        this.memo = undefined;
     }
 }
 

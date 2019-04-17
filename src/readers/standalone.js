@@ -63,8 +63,8 @@ default: 0,
     }
 
     getTransforms() {
-	const r = [references.PropagateTargets];
-	return r;
+        const r = [references.PropagateTargets];
+        return r;
     }
     /*
         return readers.Reader.get_transforms(self) + [

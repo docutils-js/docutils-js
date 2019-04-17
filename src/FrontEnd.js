@@ -1,5 +1,4 @@
-import { OptionParser as OptionParserBase } from './OptParse';
-import SettingsSpec from './SettingsSpec';
+import OptionParserBase from './OptParse';
 
 /* istanbul ignore next */
 function validateStripClass() {
@@ -33,6 +32,7 @@ function readConfigFile() {
 
 const SUPPRESS_HELP = Symbol.for('SUPPRESS_HELP');
 
+// eslint-disable-next-line import/prefer-default-export
 export class OptionParser extends OptionParserBase {
     constructor() {
         super();
@@ -41,12 +41,14 @@ export class OptionParser extends OptionParserBase {
             './docutils.conf', // project-specific
             '~/.docutils']; // user-specific
 
-        const threshold_choices = 'info 1 warning 2 error 3 severe 4 none 5'.split();
+        const thresholdChoices = 'info 1 warning 2 error 3 severe 4 none 5'.split();
         const True = true;
         const False = false;
+        // eslint-disable-next-line no-unused-vars
         const thresholds = {
  info: 1, warning: 2, error: 3, severe: 4, none: 5,
 };
+        // eslint-disable-next-line no-unused-vars
         const booleans = {
  1: True,
 on: True,
@@ -57,11 +59,11 @@ off: False,
 no: False,
 false: False,
 '': False,
-};
-        const default_error_encoding = /* getattr(sys.stderr, 'encoding',
-                                     None) or locale_encoding or */'ascii';
+       };
+        // fixme /* getattr(sys.stderr, 'encoding', None) or locale_encoding or */
+        const defaultErrorEncoding = 'ascii';
 
-        const default_error_encoding_error_handler = 'backslashreplace';
+        const defaultErrorEncodingErrorHandler = 'backslashreplace';
 
         this.settingsSpec = ['General Docutils Options',
                       null,
@@ -170,7 +172,7 @@ validator: validateStripClass,
          ['Report system messages at or higher than <level>: "info" or "1", '
           + '"warning"/"2" [default], "error"/"3", "severe"/"4", "none"/"5"',
           ['--report', '-r'], {
- choices: threshold_choices,
+ choices: thresholdChoices,
 default: 2,
                                dest: 'report_level',
 metavar: '<level>',
@@ -191,7 +193,7 @@ const: 5,
          ['Halt execution at system messages at or above <level>.  '
           + 'Levels as in --report.  Default: 4 [severe].',
           ['--halt'], {
- choices: threshold_choices,
+ choices: thresholdChoices,
 dest: 'halt_level',
                        default: 4,
 metavar: '<level>',
@@ -206,7 +208,7 @@ const: 1,
          ['Enable a non-zero exit status for non-halting system messages at '
           + 'or above <level>.  Default: 5 [disabled].',
           ['--exit-status'], {
- choices: threshold_choices,
+ choices: thresholdChoices,
                               dest: 'exit_status_level',
                               default: 5,
 metavar: '<level>',
@@ -252,18 +254,18 @@ default: 'utf-8',
           { default: 'strict', validator: validateEncodingErrorHandler }],
          ['Specify text encoding and error handler for error output.  '
           + `${'Default: %s:%s.'
-          % [default_error_encoding, default_error_encoding_error_handler]}`,
+          % [defaultErrorEncoding, defaultErrorEncodingErrorHandler]}`,
           ['--error-encoding', '-e'],
           {
  metavar: '<name[:handler]>',
-default: default_error_encoding,
+default: defaultErrorEncoding,
            validator: validateEncodingAndErrorHandler,
 }],
          [`${'Specify the error handler for unencodable characters in '
-          + 'error output.  Default: '}${default_error_encoding_error_handler}.`,
+          + 'error output.  Default: '}${defaultErrorEncodingErrorHandler}.`,
           ['--error-encoding-error-handler'],
           {
-default: default_error_encoding_error_handler,
+default: defaultErrorEncodingErrorHandler,
            validator: validateEncodingErrorHandler,
 }],
          ['Specify the language [as BCP 47 language tag].  Default: en.',
@@ -325,8 +327,10 @@ _disable_config: null,
         components.filter(a => a != null).forEach((component) => {
             const settingsSpec = component.settingsSpec;
             this.relativePathSettings.push(...component.relativePathSettings);
-            for (i = 0; i < settingsSpec.length; i += 3) {
-                const [title, description, option_spec] = settings_spec;
+            for (let i = 0; i < settingsSpec.length; i += 3) {
+                const [title/* , description, option_spec */] = this.settingsSpec;
+                // eslint-disable-next-line no-unused-vars
+                let group;
                 if (title) {
                     // group = optparse.OptionGroup(self, title, description)
                     // self.add_option_group(group)
@@ -361,7 +365,7 @@ destination;
             }
         }
         if (args.length) {
-            destinaton = args.pop(0);
+            destination = args.pop(0);
             if (destination === '-') {
                 destination = null;
             }

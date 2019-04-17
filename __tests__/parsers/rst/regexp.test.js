@@ -1,5 +1,6 @@
 import Inliner from '../../../src/parsers/rst/Inliner';
-import { newDocument, newReporter, isIterable } from '../../../src/utils';
+import { newReporter, isIterable } from '../../../src/utils';
+import newDocument from '../../../src/newDocument';
 import { Element } from '../../../src/nodes';
 import baseSettings from '../../../src/baseSettings';
 

@@ -3,8 +3,8 @@ import * as directives from './directives';
 
 const DEFAULT_INTERPRETED_ROLE = 'title-reference';
 
-const _role_registry = {};
-const _roles = {};
+const roleRegistry = {};
+const roles = {};
 
 
 class GenericRole {
@@ -13,7 +13,7 @@ class GenericRole {
         this.nodeClass = nodeClass;
     }
 
-    invoke(role, rawtext, text, lineno, inliner, options, content) {
+    invoke(myRole, rawtext, text, lineno, inliner, options, content) {
         const myOptions = options || {};
         setClasses(myOptions);
         return [[new this.nodeClass(rawtext, unescape(text), [], myOptions)], []];
@@ -31,8 +31,8 @@ function role(role_name, language_module, lineno, reporter) {
     const messages = [];
     const msg_text = [];
 
-    if (normname in _roles) {
-        return [_roles[normname], messages];
+    if (normname in roles) {
+        return [roles[normname], messages];
     }
 
     let canonicalname;
@@ -73,8 +73,8 @@ function role(role_name, language_module, lineno, reporter) {
     }
 
     // # Look the role up in the registry, and return it.
-    if (canonicalname in _role_registry) {
-        const role_fn = _role_registry[canonicalname];
+    if (canonicalname in roleRegistry) {
+        const role_fn = roleRegistry[canonicalname];
         register_local_role(normname, role_fn);
         return [role_fn, messages];
     }
@@ -90,7 +90,7 @@ function register_local_role(name, role_fn) {
       - `role_fn`: The role function.  See the module docstring.
     """ */
     set_implicit_options(role_fn);
-    _roles[name] = role_fn;
+    roles[name] = role_fn;
 }
 
 
@@ -109,7 +109,7 @@ function register_canonical_role(name, role_fn) {
       - `role_fn`: The role function.  See the module docstring.
     """ */
     set_implicit_options(role_fn);
-    _role_registry[name] = role_fn;
+    roleRegistry[name] = role_fn;
 }
 
 function set_implicit_options(role_fn) {

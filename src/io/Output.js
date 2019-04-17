@@ -13,6 +13,7 @@ class Output extends TransformSpec {
     }
 
     /* istanbul ignore method */
+    /* eslint-disable-next-line no-unused-vars */
     write(data) {
     }
 

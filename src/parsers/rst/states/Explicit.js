@@ -5,6 +5,7 @@ class Explicit extends SpecializedBody {
     /*
     """Second and subsequent explicit markup construct."""
     */
+    /* eslint-disable-next-line camelcase */
     explicit_markup(match, context, next_state) {
         // """Footnotes, hyperlink targets, directives, comments."""
         const [nodelist, blank_finish] = this.explicit_construct(match);
@@ -13,6 +14,7 @@ class Explicit extends SpecializedBody {
         return [[], next_state, []];
     }
 
+    /* eslint-disable-next-line camelcase */
     explicit_construct(match) {
         // """Determine which explicit construct this is, parse & return it."""
         const errors = [];

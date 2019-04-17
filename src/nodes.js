@@ -2,7 +2,15 @@ import xmlescape from 'xml-escape';
 import Transformer from './Transformer';
 import { InvalidArgumentsError } from './Exceptions';
 import unescape from './utils/unescape';
+import { isIterable } from './utils';
 
+function dupname(node, name) {
+    node.attributes.dupnames.push(name);
+    node.attributes.names.splice(node.attributes.names.indexOf(name), 1);
+    // Assume that this method is referenced, even though it isn't; we
+    // don't want to throw unnecessary system_messages.
+    node.referenced = 1;
+}
 function serialEscape(value) {
     // """Escape string values that are elements of a list, for serialization."""
     return value.replace(/\\/g, '\\\\').replace(/ /g, '\\ ');
@@ -151,9 +159,10 @@ export class Node {
 
             const children = this.children;
             try {
+                /* eslint-disable-next-line no-restricted-syntax */
                 for (const child of [...children]) {
-//                  console.log(typeof child);
-//                  console.log(Object.keys(child));
+                    //                  console.log(typeof child);
+                    //                  console.log(Object.keys(child));
                     if (child.walkabout(visitor)) {
                         stop = true;
                         break;
@@ -174,26 +183,27 @@ export class Node {
         if (callDepart) {
             visitor.document.reporter.debug(
                 `docutils.nodes.Node.walkabout calling dispatch_departure for ${this}`,
-);
+            );
             visitor.dispatchDeparture(this);
         }
         return stop;
     }
 
-    traverse(condition, includeSelf=true, descend=true, siblings=false, ascend=false) {
-	const mySiblings = ascend ? true : siblings;
-	if(includeSelf && descend && !mySiblings) {
-	    if(!condition) {
-		return this._allTraverse();
-	    } else if(condition instanceof Node) {
-		return this._fastTraverse(condition);
-	    }
-	}
-	if(condition instanceof Node) {
-	    nodeClass = condition;
-	    myCondition = (node, nodeClass=nodeClass) => node instanceof nodeclass;
-	}
-	return [];
+    traverse(condition, includeSelf = true, descend = true, siblings = false, ascend = false) {
+        const mySiblings = ascend ? true : siblings;
+        if (includeSelf && descend && !mySiblings) {
+            if (!condition) {
+                return this._allTraverse();
+            } if (condition instanceof Node) {
+                return this._fastTraverse(condition);
+            }
+        }
+        if (condition instanceof Node) {
+            const nodeClass = condition;
+            /* eslint-disable-next-line no-unused-vars */
+            const myCondition = (node, nodeClassArg) => node instanceof (nodeClassArg || nodeClass);
+        }
+        return [];
     }
 }
 
@@ -216,10 +226,12 @@ export class GenericNodeVisitor extends NodeVisitor {
         _addNodeClassNames(nodeClassNames, this);
     }
 
+    /* eslint-disable-next-line */
     default_visit(node) {
         throw new Error('not implemented');
     }
 
+    /* eslint-disable-next-line */
     default_departure(node) {
         throw new Error('not implemented');
     }
@@ -244,7 +256,7 @@ export class Element extends Node {
             this.attributes[x] = [];
         });
         if (typeof attributes === 'undefined') {
-                attributes = {};
+            attributes = {};
         }
         Object.entries(attributes).forEach(([att, value]) => {
             att = att.toLowerCase();
@@ -252,7 +264,7 @@ export class Element extends Node {
             if (att in this.listAttributes) {
                 /* istanbul ignore next */
                 if (!isIterable(value)) {
-                        throw new Error();
+                    throw new Error();
                 }
                 this.attributes[att] = [...value];
             } else {
@@ -265,7 +277,7 @@ export class Element extends Node {
         if (this.children.length) {
             return [this.starttag(), ...this.children.map(c => c.toString()), this.endtag()].join('');
         }
-            return this.emptytag();
+        return this.emptytag();
     }
 
     emptytag() {
@@ -336,20 +348,23 @@ export class Element extends Node {
         }
         const parts = [this.tagname];
         const attlist = this.attlist();
-        for (const name of Object.keys(attlist)) {
-            let value = attlist[name];
-            if (value === undefined) {
+        Object.entries(attlist).forEach(([name, value]) => {
+            let myVal = value;
+            let gotPart = false;
+            if (myVal === undefined) {
                 parts.push(`${name}="True"`);
-                continue;
-            } else if (Array.isArray(value)) {
-                const values = value.map(v => serialEscape(v.toString()));
-                value = values.join(' ');
+                gotPart = true;
+            } else if (Array.isArray(myVal)) {
+                const values = myVal.map(v => serialEscape(v.toString()));
+                myVal = values.join(' ');
             } else {
-                value = value.toString();
+                myVal = value.toString();
             }
-            value = quoteattr(value);
-            parts.push(`${name}=${value}`);
-        }
+            if (!gotPart) {
+                myVal = quoteattr(myVal);
+                parts.push(`${name}=${myVal}`);
+            }
+        });
         return `<${parts.join(' ')}>`;
     }
 
@@ -364,33 +379,21 @@ export class Element extends Node {
 
     nonDefaultAttributes() {
         const atts = { };
-        for (const key of Object.keys(this.attributes)) {
-            const value = this.attributes[key];
+        Object.entries(this.attributes).forEach(([key, value]) => {
             if (this.isNotDefault(key)) {
                 atts[key] = value;
             }
-        }
+        });
         return atts;
     }
 
     isNotDefault(key) {
-        if (Array.isArray(this.attributes[key]) && this.attributes[key].length === 0 && this.listAttributes.includes(key)) {
-           return false;
+        if (Array.isArray(this.attributes[key])
+            && this.attributes[key].length === 0
+            && this.listAttributes.includes(key)) {
+            return false;
         }
-            return true;
-    }
-}
-
-export class TextElement extends Element {
-    constructor(rawsource, text, children, attributes) {
-        if (!children) {
-            children = [];
-        }
-        /* istanbul ignore if */
-        if (Array.isArray(text)) {
-            throw new InvalidArgumentsError('text should not be an array');
-        }
-        super(rawsource, (typeof text !== 'undefined' && text !== '') ? [new Text(text), ...children] : children, attributes);
+        return true;
     }
 }
 
@@ -398,7 +401,7 @@ export class Text extends Node {
     constructor(data, rawsource = '') {
         super();
         if (typeof data === 'undefined') {
-                throw new Error('data should not be undefined');
+            throw new Error('data should not be undefined');
         }
 
         this.rawsource = rawsource;
@@ -418,6 +421,42 @@ export class Text extends Node {
         return this.toString();
     }
 }
+
+export class TextElement extends Element {
+    constructor(rawsource, text, children, attributes) {
+        if (!children) {
+            children = [];
+        }
+        /* istanbul ignore if */
+        if (Array.isArray(text)) {
+            throw new InvalidArgumentsError('text should not be an array');
+        }
+        super(rawsource, (typeof text !== 'undefined' && text !== '') ? [new Text(text), ...children] : children, attributes);
+    }
+}
+
+// =====================
+//  Decorative Elements
+// =====================
+export class header extends Element { } // Decorative
+export class footer extends Element { } // Decorative
+
+export class decoration extends Element {
+    getHeader() {
+        if (!this.children.length || !(this.children[0] instanceof header)) {
+            this.insert(0, new header());
+        }
+        return this.children[0];
+    }
+
+    getFooter() {
+        if (!this.children.length || !(this.children[this.children.length - 1] instanceof footer)) {
+            this.add(new footer());
+        }
+        return this.children[this.children.length - 1];
+    }
+}
+
 export class document extends Element {
     constructor(settings, reporter, ...args) {
         super(...args);
@@ -455,17 +494,18 @@ export class document extends Element {
     setId(node, msgnode) {
         let msg;
         let id;
-        for (id of node.attributes.ids) {
-            if (id in this.ids && this.ids[id] !== node) {
-                msg = this.reporter.severe(`Duplicate ID: "${id}".`);
+        node.attributes.ids.forEach((myId) => {
+            if (myId in this.ids && this.ids[myId] !== node) {
+                msg = this.reporter.severe(`Duplicate ID: "${myId}".`);
                 if (msgnode) {
                     msgnode.add(msg);
                 }
             }
-        }
+        });
         if (node.attributes.ids.length === 0) {
             let name;
             let myBreak = false;
+            /* eslint-disable-next-line no-restricted-syntax */
             for (name of node.attributes.names) {
                 id = this.settings.idPrefix + makeId(name);
                 if (id && !(id in this.attributes.ids)) {
@@ -488,36 +528,36 @@ export class document extends Element {
     }
 
     setNameIdMap(node, id, msgnode, explicit) {
-        for (const name of node.attributes.names) {
+        node.attributes.names.forEach((name) => {
             if (name in this.nameIds) {
                 this.set_duplicate_name_id(node, id, name, msgnode, explicit);
             } else {
                 this.nameIds[name] = id;
                 this.nameTypes[name] = explicit;
             }
-        }
+        });
     }
 
     setDuplicateNameId(node, id, name, msgnode, explicit) {
-        const old_id = this.nameIds[name];
-        const old_explicit = this.nameTypes[name];
-        this.nameTypes[name] = old_explicit || explicit;
-        let old_node;
+        const oldId = this.nameIds[name];
+        const oldExplicit = this.nameTypes[name];
+        this.nameTypes[name] = oldExplicit || explicit;
+        let oldNode;
         if (explicit) {
-            if (old_explicit) {
+            if (oldExplicit) {
                 let level = 2;
-                if (old_id != null) {
-                    old_node = this.ids[old_id];
+                if (oldId != null) {
+                    oldNode = this.ids[oldId];
                     if ('refuri' in node.attributes) {
                         const refuri = node.attributes.refuri;
-                        if (old_node.attributes.names.length
-                           && 'refuri' in old_node.attributes
-                           && old_node.attributes.refuri === refuri) {
+                        if (oldNode.attributes.names.length
+                           && 'refuri' in oldNode.attributes
+                           && oldNode.attributes.refuri === refuri) {
                             level = 1; // just inform if refuri's identical
                         }
                     }
                     if (level > 1) {
-                        dupname(old_node, name);
+                        dupname(oldNode, name);
                         this.nameIds[name] = null;
                     }
                 }
@@ -531,20 +571,20 @@ export class document extends Element {
                 dupname(node, name);
             } else {
                 this.nameIds[name] = id;
-                if (old_id != null) {
-                    old_node = this.ids[old_id];
-                    dupname(old_node, name);
+                if (oldId != null) {
+                    oldNode = this.ids[oldId];
+                    dupname(oldNode, name);
                 }
             }
         } else {
-            if (old_id != null && !old_explicit) {
+            if (oldId != null && !oldExplicit) {
                 this.nameIds[name] = null;
-                old_node = this.ids[old_id];
-                dupname(old_node, name);
+                oldNode = this.ids[oldId];
+                dupname(oldNode, name);
             }
             dupname(node, name);
         }
-        if (!explicit || (!old_explicit && old_id != null)) {
+        if (!explicit || (!oldExplicit && oldId != null)) {
             const msg = this.reporter.info(
                 `Duplicate implicit target name: "${name}".`, [],
                 { backrefs: [id], base_node: node },
@@ -652,7 +692,7 @@ export class document extends Element {
                 msgnode.add(msg);
             }
             const oldnode = this.substitutionDefs[name];
-            dupName(oldnode, name);
+            dupname(oldnode, name);
         }
         this.substitutionDefs[name] = subdef;
         this.substitutionNames[fullyNormalizeName(name)] = name;
@@ -709,18 +749,67 @@ export class FixedTextElement extends TextElement {
 }
 
 export class section extends Element {
+/* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
     }
 } // Structural
 
+
+// ================
+//  Title Elements
+// ================
 export class title extends TextElement {
+/* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
     }
 } // Titular, Prebib
 
+export class subtitle extends TextElement {
+/* eslint-disable-next-line no-useless-constructor */
+    constructor(...args) {
+        super(...args);
+    }
+} // Titular, Prebib
+
+export class rubric extends TextElement {
+/* eslint-disable-next-line no-useless-constructor */
+    constructor(...args) {
+        super(...args);
+    }
+} // Titular
+
+
+// ========================
+//  Bibliographic Elements
+// ========================
+
+export class docinfo extends Element { }
+
+export class author extends TextElement { }
+
+export class authors extends Element { }
+
+export class organization extends TextElement { }
+
+export class address extends FixedTextElement { }
+
+export class contact extends TextElement { }
+
+export class version extends TextElement { }
+
+export class revision extends TextElement { }
+
+export class status extends TextElement { }
+
+export class date extends TextElement { }
+
+export class copyright extends TextElement { }
+
+
 export class paragraph extends TextElement {
+/* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
     }
@@ -731,26 +820,33 @@ class bullet_list(Sequential, Element): pass
 class enumerated_list(Sequential, Element): pass
 class list_item(Part, Element): pass */
 export class classifier extends TextElement {
+/* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
     }
 }
+/* eslint-disable-next-line camelcase */
 export class definition_list extends Element {
+/* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
     }
 }
+/* eslint-disable-next-line camelcase */
 export class definition_list_item extends Element {
+/* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
     }
 }
 export class term extends TextElement {
+/* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
     }
 }
 export class definition extends Element {
+/* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
     }
@@ -758,34 +854,45 @@ export class definition extends Element {
 /*
 class classifier(Part, TextElement): pass
 */
+/* eslint-disable-next-line camelcase */
 export class field_list extends Element {
+/* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
     }
 } // (Sequential, Element
 export class field extends Element {
+/* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
     }
 } // (Part
+/* eslint-disable-next-line camelcase */
 export class field_name extends TextElement {
+/* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
     }
 } // (Part
+/* eslint-disable-next-line camelcase */
 export class field_body extends Element {
+/* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
     }
 } // (Part
 
 
+/* eslint-disable-next-line camelcase */
 export class bullet_list extends Element {
+/* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
     }
 } // Sequential
+/* eslint-disable-next-line camelcase */
 export class list_item extends Element {
+/* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
     }
@@ -793,53 +900,67 @@ export class list_item extends Element {
 
 /* Inline elements */
 export class emphasis extends TextElement {
+/* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
     }
 } // Inline
 export class strong extends TextElement {
+/* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
     }
 } // Inline
 export class literal extends TextElement {
+/* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
     }
 } // Inline
 export class reference extends TextElement {
+/* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
     }
 } // General, Inline, Referential
+/* eslint-disable-next-line camelcase */
 export class footnote_reference extends TextElement {
+/* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
     }
 } // General, Inline, Referential
+/* eslint-disable-next-line camelcase */
 export class citation_reference extends TextElement {
+/* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
     }
 } // General, Inline, Referential
+/* eslint-disable-next-line camelcase */
 export class substitution_reference extends TextElement {
+/* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
     }
 } // General, Inline, Referential
+/* eslint-disable-next-line camelcase */
 export class title_reference extends TextElement {
+/* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
     }
 } // General, Inline, Referential
 
 export class problematic extends TextElement {
+/* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
     }
 } // Inline
 
 export class transition extends Element {
+/* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
     }
@@ -850,52 +971,69 @@ export class option extends Element {
     // fixme//child_text_separator = ''
 }
 
+/* eslint-disable-next-line camelcase */
 export class option_argument extends TextElement {
     // fixme
     // def astext(self):
     // return self.get('delimiter', ' ') + TextElement.astext(self)
 }
 
+/* eslint-disable-next-line camelcase */
 export class option_group extends Element {
     // child_text_separator = ', '
 }
 
+/* eslint-disable-next-line camelcase */
 export class option_list extends Element {
+/* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
     }
 } // Sequential
+/* eslint-disable-next-line camelcase */
 export class option_list_item extends Element {
+/* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
     }
 } //    child_text_separator = '
+/* eslint-disable-next-line camelcase */
 export class option_string extends TextElement {
+/* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
     }
 } // (Part
 export class description extends Element {
+/* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
     }
 } // (Part
+/* eslint-disable-next-line camelcase */
 export class literal_block extends FixedTextElement {
+/* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
     }
 }
+/* eslint-disable-next-line camelcase */
 export class doctest_block extends FixedTextElement {
+/* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
     }
 }
+/* eslint-disable-next-line camelcase */
 export class math_block extends FixedTextElement {
+/* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
     }
 }
+/* eslint-disable-next-line camelcase */
 export class line_block extends Element {
+/* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
     }
@@ -906,155 +1044,182 @@ export class line extends TextElement {
         this.indent = undefined;
     }
 } // Part
+/* eslint-disable-next-line camelcase */
 export class block_quote extends Element {
+/* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
     }
 }
 export class attribution extends TextElement {
+/* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
     }
 }
 export class attention extends Element {
+/* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
     }
 }
 export class caution extends Element {
+/* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
     }
 }
 export class danger extends Element {
+/* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
     }
 }
 export class error extends Element {
+/* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
     }
 }
 export class important extends Element {
+/* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
     }
 }
 export class note extends Element {
+/* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
     }
 }
 export class tip extends Element {
+/* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
     }
 }
 export class hint extends Element {
+/* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
     }
 }
 export class warning extends Element {
+/* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
     }
 }
 export class admonition extends Element {
+/* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
     }
 }
 export class comment extends FixedTextElement {
+/* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
     }
 }
+/* eslint-disable-next-line camelcase */
 export class substitution_definition extends TextElement {
+/* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
     }
 }
 export class target extends TextElement {
+/* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
     }
 }
 export class footnote extends Element {
+/* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
     }
 }
 export class citation extends Element {
+/* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
     }
 }
 export class label extends TextElement {
+/* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
     }
 }
 export class figure extends Element {
+/* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
     }
 }
 export class caption extends TextElement {
+/* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
     }
 }
 export class legend extends Element {
+/* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
     }
 }
 export class table extends Element {
+/* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
     }
 }
 export class tgroup extends Element {
+/* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
     }
 }
 export class colspec extends Element {
+/* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
     }
 }
 export class thead extends Element {
+/* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
     }
 }
 export class tbody extends Element {
+/* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
     }
 }
 export class row extends Element {
+/* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
     }
 }
 export class entry extends Element {
+/* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
     }
 }
 
 
+/* eslint-disable-next-line camelcase */
 export class system_message extends Element {
     constructor(message, children, attributes) {
         super(attributes.rawsource || '', message ? [new paragraph('', message), ...children] : children, attributes);
         setupBacklinkable(this);
     }
 }
-
-export default {
-    document,
-};

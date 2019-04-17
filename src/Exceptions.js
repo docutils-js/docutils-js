@@ -51,7 +51,7 @@ export class SystemMessage extends Error {
 export class ApplicationError extends Error {
     constructor(...params) {
         super(...params);
-        const [message, kwargs] = params;
+        const [message, kwargs] = params; // eslint-disable-line no-unused-vars
         this.error = kwargs ? kwargs.error : undefined;
         /* instanbul ignore else */
         if (Error.captureStackTrace) {

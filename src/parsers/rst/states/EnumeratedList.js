@@ -4,6 +4,7 @@ class EnumeratedList extends SpecializedBody {
     /* """Second and subsequent enumerated_list list_items.""" */
     enumerator(match, context, nextState) {
         /* """Enumerated list item.""" */
+        /* eslint-disable-next-line no-unused-vars */
         const [format, sequence, text, ordinal] = this.parse_enumerator(
             match, this.parent.attributes.enumtype,
 );

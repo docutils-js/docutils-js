@@ -2,11 +2,12 @@ import Component from './Component';
 import universal from './transforms/universal';
 import parsers from './parsers';
 import * as utils from './utils';
+import newDocument from './newDocument';
 
 export default class Reader extends Component {
     getTransforms() {
-	return [];// /*...super.getTransforms()*/ universal.Decorations,
-//		 universal.ExportInternals, universal.StripComments ];
+        return [];// /*...super.getTransforms()*/ universal.Decorations,
+//               universal.ExportInternals, universal.StripComments ];
     }
 
     constructor(parser, parserName, args) {
@@ -73,7 +74,7 @@ export default class Reader extends Component {
     }
 
     newDocument() {
-        const document = utils.newDocument({ sourcePath: this.source.sourcePath },
+        const document = newDocument({ sourcePath: this.source.sourcePath },
                                            this.settings);
         return document;
     }

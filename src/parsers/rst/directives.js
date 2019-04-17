@@ -1,3 +1,4 @@
+/* eslint-disable-next-line */
 export function class_option(argument) {
     /* """
     Convert the argument into a list of ID-compatible strings and return it.

@@ -1,9 +1,10 @@
 import * as utils from '../src/utils';
 import unescape from '../src/utils/unescape';
 import baseSettings from '../src/baseSettings';
+import Reporter from '../src/Reporter';
 
 function createReporter() {
-    return new utils.Reporter(undefined, 0, 4, undefined, true, 'utf-8');
+    return new Reporter(undefined, 0, 4, undefined, true, 'utf-8');
 }
 			      
 test('1', () => {

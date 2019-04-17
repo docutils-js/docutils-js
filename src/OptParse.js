@@ -1,4 +1,4 @@
-export class OptionParser {
+export default class OptionParser {
     _getArgs(args) {
         if (args === undefined) {
             args = process.argv.slice(2);
@@ -18,7 +18,7 @@ export class OptionParser {
                 rargs.splice(0);
                 return;
             }
-            if (arg.substr(0, 2) == '--') {
+            if (arg.substr(0, 2) === '--') {
                 this._processLongOpt(rargs, values);
             } else {
                 return;
@@ -35,14 +35,15 @@ export class OptionParser {
             values = this.getDefaultValues();
         }
         this.rargs = rargs;
-        const largs = this.largs = [];
+        this.largs = [];
+        const largs = this.largs;
         this.values = values;
 
-        let stop;
+        let stop; // eslint-disable-line no-unused-vars
         try {
             stop = this._processArgs(largs, rargs, values);
         } catch (error) {
-	    // ?
+            // ?
         }
 
         args = [...largs, ...rargs];

@@ -5,7 +5,7 @@ import Output from "../src/io/Output";
 import Input from "../src/io/Input";
 import baseSettings from "../src/baseSettings";
 import { ApplicationError } from "../src/Exceptions";
-import { newDocument } from "../src/utils";
+import newDocument from "../src/newDocument";
 
 const publishingSettings = baseSettings;
 

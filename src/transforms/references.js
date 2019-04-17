@@ -1,17 +1,18 @@
 import Transform from '../Transform';
-export const __docformat__ = 'reStructuredText'
-import * as nodes from'../nodes';
+import * as nodes from '../nodes';
+
+export const __docformat__ = 'reStructuredText';
 
 export class PropagateTargets extends Transform {
     _init(...args) {
-	super._init(...args);
-	this.defaultPriority = 260;
+        super._init(...args);
+        this.defaultPriority = 260;
     }
 
     apply() {
-	this.document.traverse(nodes.target).forEach(target => {
-	    console.log(nodes);
-	});
+        this.document.traverse(nodes.target).forEach((target) => {
+            console.log(nodes);
+        });
     }
 }
 

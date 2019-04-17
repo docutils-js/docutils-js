@@ -1,5 +1,4 @@
 import BaseParser from '../Parser';
-import * as states from './rst/States';
 import * as statemachine from '../StateMachine';
 import RSTStateMachine from './rst/RSTStateMachine';
 import StateFactory from './rst/StateFactory';
@@ -14,8 +13,10 @@ export class Parser extends BaseParser {
         } else {
             this.initialState = 'Body';
         }
-//	//      console.log(`setting initial state to ${this.initialState}`);
-//	console.log(`stateClasses: ${stateClasses.map(x => x ? (x.constructor ? x.constructor.name : x.toString()) : 'undefined').join(', ')}`);
+//      //      console.log(`setting initial state to ${this.initialState}`);
+        //      console.log(`stateClasses: ${stateClasses
+        // .map(x => x ? (x.constructor ? x.constructor.name : x.toString()) : 'undefined')
+            // .join(', ')}`);
 //        this.stateClasses = stateClasses;
 //        if (!this.stateClasses) {
 //            throw new Error('probably need this');
@@ -37,7 +38,7 @@ export class Parser extends BaseParser {
 //        }
 
         this.stateMachine = new RSTStateMachine({
-	    stateFactory: new StateFactory(),
+            stateFactory: new StateFactory(),
             initialState: this.initialState,
             debugFn: this.debugFn,
             debug: document.reporter.debugFlag,

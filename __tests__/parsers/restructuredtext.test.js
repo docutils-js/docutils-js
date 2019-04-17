@@ -1,5 +1,5 @@
 import { Parser } from '../../src/parsers/restructuredtext';
-import { newDocument } from '../../src/utils';
+import newDocument from '../../src/newDocument';
 import baseSettings from '../../src/baseSettings';
 
 test('1', () => {

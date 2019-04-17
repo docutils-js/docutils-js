@@ -1,5 +1,4 @@
 import { createReadStream } from 'fs';
-import TransformSpec from './TransformSpec';
 import ErrorOutput from './ErrorOutput';
 import Input from './io/Input';
 import Output from './io/Output';
@@ -36,22 +35,26 @@ export class FileInput extends Input {
     /* ew, too much logic for a constructor, with side effects etc! */
     constructor(args) {
         super(args);
-        let {
+        const {
+        /* eslint-disable-next-line no-unused-vars */
  source, sourcePath, encoding, errorHandler, autoClose,
               mode,
-} = args;
+        } = args;
+        let myAutoClose = autoClose;
+        /* eslint-disable-next-line no-unused-vars */
+        let myMode = mode;
         if (typeof source === 'undefined' && typeof sourcePath === 'undefined') {
             throw new ApplicationError('FileInput: Undefined source and sourcePath');
         }
 
-        if (autoClose === undefined) {
-            autoClose = true;
+        if (typeof myAutoClose === 'undefined') {
+            myAutoClose = true;
         }
-        if (mode === undefined) {
-            mode = 'r';
+        if (typeof mode === 'undefined') {
+            myMode = 'r';
         }
 
-        this.autoClose = autoClose;
+        this.autoClose = myAutoClose;
         this._stderr = new ErrorOutput();
         if (!source) {
             if (sourcePath) {

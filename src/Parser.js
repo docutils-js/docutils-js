@@ -1,5 +1,5 @@
 import Component from './Component';
-import { UnimplementedException } from './Exceptions';
+import { UnimplementedError } from './Exceptions';
 
 class Parser extends Component {
     constructor(args) {
@@ -11,10 +11,12 @@ class Parser extends Component {
     }
 
     /* istanbul ignore function */
+    /* eslint-disable-next-line no-unused-vars */
     parse(inputstring, document) {
-        throw new UnimplementedException('subclass implement parse');
+        throw new UnimplementedError('subclass implement parse');
     }
 
+    /* eslint-disable-next-line no-unused-vars */
     setupParse(inputstring, document) {
     }
 

@@ -3,12 +3,13 @@ import SpecializedBody from './SpecializedBody';
 class FieldList extends SpecializedBody {
 /*    """Second and subsequent field_list fields.""" */
 
-    field_marker(match, context, next_state) {
+    /* eslint-disable-next-line camelcase */
+    field_marker(match, context, nextState) {
         /* """Field list field.""" */
-        const [field, blank_finish] = this.field(match);
+        const [field, blankFinish] = this.field(match);
         this.parent.add(field);
-        this.blankFinish = blank_finish;
-        return [[], next_state, []];
+        this.blankFinish = blankFinish;
+        return [[], nextState, []];
     }
 }
 FieldList.stateName = 'FieldList';

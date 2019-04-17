@@ -89,12 +89,12 @@ class RSTState extends StateWS {
 //              throw new Error("expectinf document")
             //          }
             const stateFactory = this.stateMachine.stateFactory;
-            if(!stateMachineKwargs.stateFactory) {
-                throw new Error("need statefactory");
+            if (!stateMachineKwargs.stateFactory) {
+                throw new Error('need statefactory');
             }
 //            console.log(stateMachineKwargs);
             stateMachine = new stateMachineClass({
-                
+
  debug: this.debug,
                                                   ...stateMachineKwargs,
 });

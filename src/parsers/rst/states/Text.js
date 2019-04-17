@@ -2,6 +2,8 @@ import RSTState from './RSTState';
 import { columnWidth, isIterable } from '../../../utils';
 import * as nodes from '../../../nodes';
 import * as RegExps from '../RegExps';
+import TransitionCorrection from '../../../TransitionCorrection';
+
 
 class Text extends RSTState {
     _init(args) {
@@ -76,7 +78,7 @@ blankFinishState: 'Definition',
                         + "Treating it as ordinary text because it's so short.", [], { line: lineno },
 );
                     this.parent.add(msg);
-                    throw new statemachine.TransitionCorrection('text');
+                    throw new TransitionCorrection('text');
                 }
             } else {
                 const blocktext = `${context[0]}\n${this.stateMachine.line}`;
@@ -175,8 +177,8 @@ srcline;
  inputOffset: absLineOffset,
               node: parentNode,
               matchTitles: false,
-		stateMachineKwargs: {
-		    stateFactory: this.stateMachine.stateFactory.withStateClasses(['QuotedLiteralBlock']),
+                stateMachineKwargs: {
+                    stateFactory: this.stateMachine.stateFactory.withStateClasses(['QuotedLiteralBlock']),
                     initialState: 'QuotedLiteralBlock',
 },
 },

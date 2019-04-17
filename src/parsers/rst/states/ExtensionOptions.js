@@ -1,4 +1,5 @@
 import FieldList from './FieldList';
+import * as nodes from '../../../nodes';
 
 class ExtensionOptions extends FieldList {
     /* Parse field_list fields for extension options. */

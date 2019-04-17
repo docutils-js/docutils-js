@@ -5,22 +5,17 @@ import * as roles from './Roles';
 import { ApplicationError } from '../../Exceptions';
 
 
-const normalize_name = nodes.fullyNormalizeName;
-
-const simplename = '\\w+';
-
 const uric = '[-_.!~*\'()[\\];/:@&=+$,%a-zA-Z0-9\\x00]';
 // # Delimiter indicating the end of a URI (not part of the URI):
-const uri_end_delim = '[>]';
+const uriEndDelim = '[>]';
 const urilast = '[_~*/=+a-zA-Z0-9]';
-const uri_end = `(?:${urilast}|${uric}(?=${uri_end_delim}))`;
+const uriEnd = `(?:${urilast}|${uric}(?=${uriEndDelim}))`;
 const emailc = '[-_!~*\'{|}/#?^`&=+$%a-zA-Z0-9\\x00]';
-const emailPattern = `${emailc}+(?:\.${emailc}+)*(?<!\x00)@${emailc}+(?:\.${emailc}*)*%(uri_end)s`;
+const emailPattern = `${emailc}+(?:\\.${emailc}+)*(?<!\x00)@${emailc}+(?:\\.${emailc}*)*%(uriEnd)s`;
 // email=re.compile(self.email_pattern % args + '$',
 //                 re.VERBOSE | re.UNICODE),
 
 function buildRegexp(definition, compile = true) {
-    const di = (isIterable(definition));
     let [fakeTuple, name, prefix, suffix, parts] = definition;
     prefix = prefix.slice();
     suffix = suffix.slice();
@@ -48,7 +43,6 @@ function buildRegexp(definition, compile = true) {
     if (!fakeTuple) {
         throw new Error();
     }
-    const pi = isIterable(parts);
 //    console.log(`buildRegexp(${name} - ${pi})`);
     const partStrings = [];
 //    console.log(parts);
@@ -58,7 +52,7 @@ function buildRegexp(definition, compile = true) {
     }
     const fakeTuple2 = parts.shift();
     const groupNames = [];
-    for (const part of parts) {
+    parts.forEach((part) => {
         const fakeTuple3 = Array.isArray(part) ? part[0] : undefined;
         if (fakeTuple3 === 1) {
             const [regexp, subGroupNames] = buildRegexp(part, null);
@@ -74,7 +68,7 @@ function buildRegexp(definition, compile = true) {
             partStrings.push(part);
             groupNames.push(null);
         }
-    }
+    });
     const orGroup = partStrings.map(x => `(${x})`).join('|');
     const regexp = `${prefix}(${orGroup})${suffix}`;
 //    console.log(new RegExp(regexp))
@@ -115,18 +109,24 @@ class Inliner {
         this.nonUnescapedWhitespaceEscapeBefore = '(?<!(?<!\\x00)[\\s\\x00])';
     }
 
+    /* eslint-disable-next-line camelcase */
     inline_internal_target(match, lineno) {
-        const [before, inlines, remaining, sysmessages, endstring] = this.inline_obj(match, lineno, this.patterns.target, nodes.target);
+        const [before, inlines, remaining,
+               sysmessages, endstring] = this.inline_obj(match,
+                                                         lineno,
+                                                         this.patterns.target,
+                                                         nodes.target);
         if (inlines && inlines.length && inlines[0] instanceof nodes.target) {
             // assert len(inlines) == 1
             const target = inlines[0];
-            const name = normalize_name(target.astext());
+            const name = nodes.fullyNormalizeName(target.astext());
             target.attributes.names.push(name);
             this.document.noteExplicitTarget(target, this.parent);
         }
         return [before, inlines, remaining, sysmessages];
     }
 
+    /* eslint-disable-next-line camelcase */
     substitution_reference(match, lineno) {
         const [before, inlines, remaining, sysmessages, endstring] = this.inline_obj(
               match, lineno, this.patterns.substitution_ref,
@@ -144,7 +144,7 @@ class Inliner {
                     if (endstring.endsWith('__')) {
                         referenceNode.attributes.anonymous = 1;
                     } else {
-                        referenceNode.attributes.refname = normalize_name(subrefText);
+                        referenceNode.attributes.refname = nodes.fullyNormalizeName(subrefText);
                         this.document.note_refname(referenceNode);
                     }
                     referenceNode.add(subrefNode);
@@ -155,10 +155,11 @@ class Inliner {
         return [before, inlines, remaining, sysmessages];
     }
 
+    /* eslint-disable-next-line camelcase */
     footnote_reference(match, lineno) {
 //        console.log(`in footnote_reference : ${match.result}`);
         const label = match.groups.footnotelabel;
-        let refname = normalize_name(label);
+        let refname = nodes.fullyNormalizeName(label);
         const string = match.result.input;
         let before = string.substring(0, match.result.index);
         const remaining = string.substring(match.result.index + match.result[0].length);
@@ -168,7 +169,7 @@ class Inliner {
                                                    { refname });
             refnode += nodes.Text(label);
             this.document.note_citation_ref(refnode);
-	} else {
+        } else {
             refnode = new nodes.footnote_reference(`[${label}]_`);
             if (refname[0] === '#') {
                 refname = refname.substring(1);
@@ -196,7 +197,7 @@ class Inliner {
 
     reference(match, lineno, anonymous = false) {
         const referencename = match.groups.refname;
-        const refname = normalize_name(referencename);
+        const refname = nodes.fullyNormalizeName(referencename);
         const referencenode = new nodes.reference(
             referencename + match.groups.refend, referencename,
             [],
@@ -215,6 +216,7 @@ class Inliner {
         return [string.substring(0, matchstart), [referencenode], string.substring(matchend), []];
     }
 
+    /* eslint-disable-next-line camelcase */
     anonymous_reference(match, lineno) {
         return this.reference(match, lineno, true);
     }
@@ -228,17 +230,25 @@ class Inliner {
     }
 
     emphasis(match, lineno) {
-        const [before, inlines, remaining, sysmessages, endstring] = this.inline_obj(match, lineno, this.patterns.emphasis, nodes.emphasis);
+        const [before, inlines, remaining,
+               sysmessages, endstring] = this.inline_obj(
+                   match, lineno, this.patterns.emphasis, nodes.emphasis,
+);
         return [before, inlines, remaining, sysmessages];
    }
 
     strong(match, lineno) {
-        const [before, inlines, remaining, sysmessages, endstring] = this.inline_obj(match, lineno, this.patterns.strong, nodes.strong);
+        const [before, inlines, remaining,
+               sysmessages, endstring] = this.inline_obj(match,
+                                                         lineno,
+                                                         this.patterns.strong,
+                                                         nodes.strong);
         return [before, inlines, remaining, sysmessages];
     }
 
+    /* eslint-disable-next-line camelcase */
     interpreted_or_phrase_ref(match, lineno) {
-        const end_pattern = this.patterns.interpreted_or_phrase_ref;
+        const endPattern = this.patterns.interpreted_or_phrase_ref;
         const string = match.match.input;
         // console.log(match.groups);
         const matchstart = match.match.index;
@@ -252,7 +262,7 @@ class Inliner {
         } else if (this.quoted_start(match)) {
             return [string.substring(0, matchend), [], string.substring(matchend), []];
         }
-        const endmatch = end_pattern.exec(string.substring(matchend));
+        const endmatch = endPattern.exec(string.substring(matchend));
         if (endmatch && endmatch[1].length) {
             const textend = matchend + endmatch.index + endmatch[0].length;
             if (endmatch[3]) {
@@ -264,7 +274,8 @@ class Inliner {
 );
                     const text = unescape(string.substring(rolestart, textend), true);
                     const prb = this.problematic(text, text, msg);
-                    return [string.substring(0, rolestart), [prb], string.substring(textend), [msg]];
+                    return [string.substring(0, rolestart), [prb],
+                            string.substring(textend), [msg]];
                 }
                 role = endmatch[3];
                 role = role.substring(1, role.length - 1);
@@ -280,12 +291,17 @@ class Inliner {
 );
                     const text = unescape(string.substring(rolestart, textend), true);
                     const prb = this.problematic(text, text, msg);
-                    return [string.substring(0, rolestart), [prb], string.substring(textend), [msg]];
+                    return [string.substring(0, rolestart), [prb],
+                            string.substring(textend), [msg]];
                 }
-                return this.phrase_ref(string.substring(0, matchstart), string.substring(textend), rawsource, escaped, unescape(escaped));
+                return this.phrase_ref(string.substring(0, matchstart),
+                                       string.substring(textend), rawsource,
+                                       escaped, unescape(escaped));
             }
                 rawsource = unescape(string.substring(rolestart, textend), true);
-                const [nodelist, messages] = this.interpreted(rawsource, escaped, role, lineno);
+            const [nodelist, messages] = this.interpreted(rawsource,
+                                                          escaped, role,
+                                                          lineno);
                 return [string.substring(0, rolestart), nodelist,
                         string.substring(textend), messages];
         }
@@ -298,6 +314,7 @@ class Inliner {
         return [string.substring(0, match.match.index), [prb], string.substring(matchend), [msg]];
     }
 
+    /* eslint-disable-next-line camelcase */
     phrase_ref(before, after, rawsource, escaped, text) {
         const match = this.patterns.embedded_link.exec(escaped);
         let aliastype;
@@ -306,7 +323,7 @@ class Inliner {
         let rawtext;
         let alias;
         let target;
-        let alias_parts;
+        let aliasParts;
 if (!rawsource) {
     rawsource = '';
 }
@@ -315,20 +332,20 @@ if (!rawsource) {
             rawtext = unescape(escaped.substring(0, match.index), true);
             aliastext = unescape(match[2]);
             rawaliastext = unescape(match[2], true);
-            const underscore_escaped = rawaliastext.endsWith('\\_');
-            if (aliastext.endsWith('_') && !(underscore_escaped
+            const underscoreEscaped = rawaliastext.endsWith('\\_');
+            if (aliastext.endsWith('_') && !(underscoreEscaped
                                              || this.patterns.uri.exec(aliastext))) {
                 aliastype = 'name';
-                alias = normalize_name(aliastext.substring(0, aliastext.length - 1));
+                alias = nodes.fullyNormalizeName(aliastext.substring(0, aliastext.length - 1));
                 target = new nodes.target(match[1], '', [], { refname: alias });
                 target.indirectReferenceName = aliastext.substring(0, aliastext.length - 1);
             } else {
                 aliastype = 'uri';
-                alias_parts = splitEscapedWhitespace(match[2]);
+                aliasParts = splitEscapedWhitespace(match[2]);
                 /* this behaves differently from python's split with no args */
-                alias = alias_parts.map(part => unescape(part).split(/\s+/).join('')).join(' ');
+                alias = aliasParts.map(part => unescape(part).split(/\s+/).join('')).join(' ');
 //                console.log(`alias is ${alias}`);
-                alias = this.adjust_uri(alias);
+                alias = this.adjustUri(alias);
                 if (alias.endsWith('\\_')) {
                     alias = `${alias.substring(0, alias.length - 2)}_`;
                 }
@@ -347,11 +364,11 @@ if (!rawsource) {
             rawtext = unescape(escaped, true);
         }
 
-        const refname = normalize_name(text);
+        const refname = nodes.fullyNormalizeName(text);
         const reference = new nodes.reference(rawsource, text, [],
                                         { name: nodes.whitespaceNormalizeName(text) });
         reference.children[0].rawsource = rawtext;
-        const node_list = [reference];
+        const nodeList = [reference];
 
         if (rawsource.endsWith('__')) {
             if (target && (aliastype === 'name')) {
@@ -376,14 +393,15 @@ if (!rawsource) {
                     // original source commented out
                     // # target.note_referenced_by(name=refname)
                 }
-                node_list.push(target);
+                nodeList.push(target);
             } else {
                 reference.attributes.refname = refname;
                 this.document.noteRefname(reference);
             }
-        return [before, node_list, after, []];
+        return [before, nodeList, after, []];
     }
 
+    /* eslint-disable-next-line camelcase */
     quoted_start(match) {
         /* """Test if inline markup start-string is 'quoted'.
 
@@ -407,7 +425,8 @@ if (!rawsource) {
         return matchChars(prestart, poststart);
     }
 
-    inline_obj(match, lineno, end_pattern, nodeclass,
+    /* eslint-disable-next-line camelcase */
+    inline_obj(match, lineno, endPattern, nodeclass,
                 restore_backslashes = false) {
                 /* istanbul ignore if */
         if (typeof nodeclass !== 'function') {
@@ -415,7 +434,7 @@ if (!rawsource) {
         }
 
                 /* istanbul ignore if */
-        if (!(end_pattern instanceof RegExp)) {
+        if (!(endPattern instanceof RegExp)) {
             throw new Error('');
         }
 
@@ -432,8 +451,8 @@ if (!rawsource) {
         if (this.quoted_start(match)) {
             return [string.substring(0, matchend), [], string.substring(matchend), [], ''];
         }
-//      console.log(end_pattern);
-        const endmatch = end_pattern.exec(string.substring(matchend));
+//      console.log(endPattern);
+        const endmatch = endPattern.exec(string.substring(matchend));
         let text; let
 rawsource;
         if (endmatch && endmatch.index) { // 1 or more chars
@@ -441,7 +460,8 @@ rawsource;
             text = _text;// unescape(_text, restore_backslashes)
             // this may not work for all situations
             const textend = matchend + endmatch.index + endmatch[0].length;
-            rawsource = string.substring(matchstart, textend);// //unescape(string[matchstart:textend], True)
+            rawsource = string.substring(matchstart, textend); // fixmegot
+            // //unescape(string[matchstart:textend], True)
             const node = new nodeclass(rawsource, text);
             node.children[0].rawsource = _text;// fixme unescape(_text, true)
             return [string.substr(0, matchstart), [node],
@@ -541,7 +561,7 @@ esn;
                                           endStringSuffix}`),
             email: new RegExp(emailPattern), // fixme % args + '$',
             // re.VERBOSE | re.UNICODE),
-            uri: new RegExp(`${startStringPrefix}((([a-zA-Z][a-zA-Z0-9.+-]*):(((//?)?${uric}*${uri_end})(\\?${uric}*${uri_end})?(\\#${uri_end})?))|(${emailPattern}))${endStringSuffix}`),
+            uri: new RegExp(`${startStringPrefix}((([a-zA-Z][a-zA-Z0-9.+-]*):(((//?)?${uric}*${uriEnd})(\\?${uric}*${uriEnd})?(\\#${uriEnd})?))|(${emailPattern}))${endStringSuffix}`),
 /*          pep=re.compile(
                 r"""
                 %(start_string_prefix)s
@@ -593,10 +613,12 @@ esn;
                     throw new Error(`Invalid dispatch ${mname}`);
                 }
                 let before; let inlines; let
-		sysmessages;
-//		console.log(`name is ${mname}`);
+                sysmessages;
+//              console.log(`name is ${mname}`);
 
-                [before, inlines, remaining, sysmessages] = method({ result: match, match, groups: rr }, lineno);
+                [before, inlines, remaining, sysmessages] = method(
+                    { result: match, match, groups: rr }, lineno,
+);
                 unprocessed.push(before);
                 /* istanbul ignore if */
                 if (!isIterable(sysmessages)) {
@@ -620,6 +642,7 @@ esn;
         return [processed, messages];
     }
 
+    /* eslint-disable-next-line camelcase */
     implicit_inline(text, lineno) {
         /*
         Check each of the patterns in `self.implicit_dispatch` for a match,
@@ -646,8 +669,8 @@ esn;
         return [new nodes.Text(unescape(text), unescape(text, true))];
     }
 
-    adjust_uri(uri) {
-        return uri;
+    adjustUri(uri) {
+        return uri; // fixme
     }
     /*
         console.log(uri);
@@ -660,9 +683,9 @@ esn;
     } */
 
     interpreted(rawsource, text, role, lineno) {
-        const [role_fn, messages] = roles.role(role, this.language, lineno, this.reporter);
-        if (role_fn) {
-            const [theNodes, messages2] = role_fn.invoke(role, rawsource, text, lineno, this);
+        const [roleFn, messages] = roles.role(role, this.language, lineno, this.reporter);
+        if (roleFn) {
+            const [theNodes, messages2] = roleFn.invoke(role, rawsource, text, lineno, this);
             try {
                 theNodes[0].children[0].rawsource = unescape(text, true);
             } catch (error) {
@@ -682,6 +705,7 @@ esn;
     }
 
     literal(match, lineno) {
+        /* eslint-disable-next-line no-unused-vars */
         const [before, inlines, remaining, sysmessages, endstring] = this.inline_obj(
             match, lineno, this.patterns.literal, nodes.literal, true,
 );

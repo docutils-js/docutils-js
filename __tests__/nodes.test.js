@@ -1,5 +1,5 @@
 import * as nodes from '../src/nodes';
-import { newDocument } from '../src/utils';
+import newDocument from "../src/newDocument";
 
 import baseSettings from '../src/baseSettings'
 

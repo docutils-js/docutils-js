@@ -7,16 +7,11 @@ import {
 import State from './states/State';
 import StateWS from './states/StateWS';
 import StateCorrection from './StateCorrection';
+import TransitionCorrection from './TransitionCorrection';
 
-export class TransitionCorrection extends Error {
-    constructor(...args) {
-        super(...args);
-        this.args = args;
-        if (Error.captureStackTrace) {
-            Error.captureStackTrace(this, TransitionCorrection);
-        }
-    }
-}
+
+import StringList from './StringList';
+
 export class UnexpectedIndentationError extends Error {
 }
 
@@ -24,9 +19,6 @@ function __getClass(object) {
   return Object.prototype.toString.call(object)
     .match(/^\[object\s(.*)\]$/)[1];
 }
-
-
-import StringList from './StringList';
 
 export class StateMachine {
     /*
@@ -40,7 +32,7 @@ export class StateMachine {
         */
 
     constructor({
-	stateFactory, initialState, debug, debugFn,
+        stateFactory, initialState, debug, debugFn,
 }) {
         /* Perform some sanity checking on arguments */
 //        /* istanbul ignore if */
@@ -57,7 +49,7 @@ export class StateMachine {
             // throw new Error("unexpected lack of debug function");
             debugFn = console.log;
         }
-	this.stateFactory = stateFactory;
+        this.stateFactory = stateFactory;
         this.debugFn = debugFn;
         this.inputLines = undefined;
         this.inputOffset = 0;
@@ -67,16 +59,16 @@ export class StateMachine {
         this.initialState = initialState;
         this.currentState = initialState;
         this.states = {};
-	if(!stateFactory) {
-	    throw new Error("need statefactory");
-	}
-	    
-	const stateClasses = stateFactory.getStateClasses();
-//	console.log(typeof stateClasses);
-	if(!isIterable(stateClasses)) {
-	    throw new Error(`expecting iterable, got ${stateClasses}`);
-	}
-//	console.log(stateClasses);
+        if (!stateFactory) {
+            throw new Error('need statefactory');
+        }
+
+        const stateClasses = stateFactory.getStateClasses();
+//      console.log(typeof stateClasses);
+        if (!isIterable(stateClasses)) {
+            throw new Error(`expecting iterable, got ${stateClasses}`);
+        }
+//      console.log(stateClasses);
         this.addStates(stateClasses);
         this.observers = [];
         this._stderr = new ErrorOutput();
@@ -460,25 +452,25 @@ src;
     }
 
     addState(stateClass) {
-	if(typeof stateClass === 'undefined') {
-	    //throw new InvalidArgumentsError('stateClass should be a class');
-	    return;
-	}
-	let stateName;
-	if(typeof stateClass === 'string') {
-	    stateName = stateClass;
-	}else {
-	    stateName = stateClass.stateName;
-	}
-	//console.log(`adding state ${stateName}`);
+        if (typeof stateClass === 'undefined') {
+            // throw new InvalidArgumentsError('stateClass should be a class');
+            return;
+        }
+        let stateName;
+        if (typeof stateClass === 'string') {
+            stateName = stateClass;
+        } else {
+            stateName = stateClass.stateName;
+        }
+        // console.log(`adding state ${stateName}`);
 
         if (Object.hasOwnProperty(this.states, stateName)) {
             throw new DuplicateStateError(stateName);
         }
-	if(!stateName) {
-	    throw new Error(`need statename for ${stateClass}`);
-	}
-	
+        if (!stateName) {
+            throw new Error(`need statename for ${stateClass}`);
+        }
+
         const r = this.stateFactory.createState(stateName, this);
         this.states[stateName] = r;
     }

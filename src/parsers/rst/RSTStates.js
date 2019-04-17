@@ -1,6 +1,6 @@
 import Body from './states/Body';
 import BulletList from './states/BulletList';
-import Definition from './states/Definition'
+import Definition from './states/Definition';
 import DefinitionList from './states/DefinitionList';
 import EnumeratedList from './states/EnumeratedList';
 import Explicit from './states/Explicit';
@@ -14,4 +14,6 @@ import SpecializedBody from './states/SpecializedBody';
 import SpecializedText from './states/SpecializedText';
 import Text from './states/Text';
 
-export { Body, BulletList, Definition, DefinitionList, EnumeratedList, Explicit, ExtensionOptions, FieldList, LineBlock, Line, OptionList, QuotedLiteralBlock, SpecializedBody, SpecializedText, Text };
+export {
+ Body, BulletList, Definition, DefinitionList, EnumeratedList, Explicit, ExtensionOptions, FieldList, LineBlock, Line, OptionList, QuotedLiteralBlock, SpecializedBody, SpecializedText, Text,
+};

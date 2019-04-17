@@ -1,20 +1,8 @@
 import * as statemachine from '../../StateMachine';
 import * as nodes from '../../nodes';
-import * as directives from './directives';
-import * as tableparser from './tableparser';
-import RSTState from './states/RSTState';
-import {
-  columnWidth, isIterable, escape2null, splitEscapedWhitespace,
-} from '../../utils';
-import unescape from '../../utils/unescape';
-
 
 /* import RSTStateMachine from './RSTStateMachine';
 import Inliner from './Inliner'; */
-
-import {
- ApplicationError, DataError, EOFError, InvalidArgumentsError, UnimplementedError as Unimp,
-} from '../../Exceptions';
 
 const nonWhitespaceBefore = '(?<!\\s)';
 const nonWhitespaceEscapeBefore = '(?<![\\s\\x00])';
@@ -23,7 +11,7 @@ const nonWhitespaceAfter = '(?!\\s)';
 const classifierDelimiterRegexp = new RegExp(' +: +');
 const simpleTableBorderPat = /=+[ =]*$/;
 const gridTableTopPat = /\+-[-+]+-\+ *$/;
-const emailPattern = '%(emailc)s+(?:\.%(emailc)s+)*(?<!\x00)@%(emailc)s+(?:\.%(emailc)s*)*%(uri_end)s';
+const emailPattern = '%(emailc)s+(?:\\.%(emailc)s+)*(?<!\x00)@%(emailc)s+(?:\\.%(emailc)s*)*%(uri_end)s';
 // email=re.compile(self.email_pattern % args + '$',
 //                 re.VERBOSE | re.UNICODE),
 
@@ -36,11 +24,6 @@ const normalizeName = nodes.fullyNormalizeName;
 
 const { StateMachineWS } = statemachine;
 const { StateWS } = statemachine;
-
-
-
-
-
 
 
 // SubstitutionDef];

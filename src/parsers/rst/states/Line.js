@@ -1,5 +1,4 @@
 import SpecializedText from './SpecializedText';
-;
 import { columnWidth } from '../../../utils';
 import { EOFError } from '../../../Exceptions';
 import * as nodes from '../../../nodes';
@@ -33,6 +32,7 @@ class Line extends SpecializedText {
         return [];
     }
 
+    /* eslint-disable-next-line no-unused-vars */
     blank(match, context, nextState) {
         /* """Transition marker.""" */
         const [src, srcline] = this.stateMachine.getSourceAndLine();
@@ -47,6 +47,7 @@ class Line extends SpecializedText {
         return [[], 'Body', []];
     }
 
+    /* eslint-disable-next-line no-unused-vars */
     text(match, context, nextState) {
         /* """Potential over- & underlined title.""" */
         const lineno = this.stateMachine.absLineNumber() - 1;
@@ -127,6 +128,7 @@ class Line extends SpecializedText {
         return [[], 'Body', []];
     }
 
+    /* eslint-disable-next-line no-unused-vars */
     underline(match, context, nextState) {
         const overline = context[0];
         const blocktext = `${overline}\n${this.stateMachine.line}`;

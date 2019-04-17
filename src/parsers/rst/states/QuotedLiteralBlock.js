@@ -23,11 +23,12 @@ class QuotedLiteralBlock extends RSTState {
         this.initial_lineno = null;
     }
 
-    blank(match, context, next_state) {
+    /* eslint-disable-next-line no-unused-vars */
+    blank(match, context, nextState) {
         if (context.length) {
             throw new EOFError();
         } else {
-            return [context, next_state, []];
+            return [context, nextState, []];
         }
     }
 
@@ -64,7 +65,8 @@ class QuotedLiteralBlock extends RSTState {
         throw new EOFError();
     }
 
-    initial_quoted(match, context, next_state) {
+    /* eslint-disable-next-line camelcase */
+    initial_quoted(match, context, nextState) {
         // """Match arbitrary quote character on the first line only."""
         this.removeTransition('initial_quoted');
         const quote = match.result.input[0];
@@ -74,16 +76,17 @@ class QuotedLiteralBlock extends RSTState {
                            [pattern, this.quoted.bind(this),
                             this.constructor.name]);
         this.initial_lineno = this.stateMachine.absLineNumber();
-        return [[match.result.input], next_state, []];
+        return [[match.result.input], nextState, []];
     }
 
-    quoted(match, context, next_state) {
+    quoted(match, context, nextState) {
         // """Match consistent quotes on subsequent lines."""
         context.push(match.result.input);
-        return [context, next_state, []];
+        return [context, nextState, []];
     }
 
-    text(match, context, next_state) {
+    /* eslint-disable-next-line no-unused-vars */
+    text(match, context, nextState) {
         if (context.length) {
             this.messages.push(
                 this.reporter.error('Inconsistent literal block quoting.',
