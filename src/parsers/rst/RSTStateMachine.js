@@ -24,9 +24,9 @@ class RSTStateMachine extends StateMachineWS {
         }
         inliner.initCustomizations(document.settings);
         this.memo = {
-	    document,
-	    reporter: document.reporter,
-	    language: this.language,
+            document,
+            reporter: document.reporter,
+            language: this.language,
             titleStyles: [],
                       sectionLevel: 0,
                       sectionBubbleUpKludge: false,

@@ -35,7 +35,7 @@ class TableParser {
     Abstract superclass for the common parts of the syntax-specific parsers.
     """ */
     constructor(...args) {
-	this._init(...args);
+        this._init(...args);
     }
 
     _init(...args) {
@@ -67,7 +67,7 @@ class TableParser {
         /*
         """Look for a head/body row separator line; store the line index."""
         */
-	let i;
+        let i;
         for (i = 0; i < this.block.length; i += 1) {
             const line = this.block[i];
             if (!this.headBodySeparatorPat) {
@@ -193,24 +193,24 @@ class GridTableParser extends TableParser {
             cellblock.replace(this.doubleWidthPadChar, '');
             this.cells.push([top, left, bottom, right, cellblock]);
             corners.push(...[[top, right], [bottom, left]]);
-//	    console.log(corners.toString());
-	    corners.sort((a, b) => {
-		const [rowA, colA] = a;
-		const [rowB, colB] = b;
-		if (rowA < rowB) {
-		    return -1;
-		}
-		if (rowB < rowA) {
-		    return 1;
-		}
-		if (colA < colB) {
-		    return -1;
-		}
-		if (colB < colA) {
-		    return 1;
-		}
-		return 0;
-	    });
+//          console.log(corners.toString());
+            corners.sort((a, b) => {
+                const [rowA, colA] = a;
+                const [rowB, colB] = b;
+                if (rowA < rowB) {
+                    return -1;
+                }
+                if (rowB < rowA) {
+                    return 1;
+                }
+                if (colA < colB) {
+                    return -1;
+                }
+                if (colB < colA) {
+                    return 1;
+                }
+                return 0;
+            });
         }
         if (!this.check_parse_complete()) {
             throw new TableMarkupError('Malformed table; parse incomplete.');
@@ -381,12 +381,12 @@ if (typeof right === 'undefined') {
             const morecols = colindex[right] - colnum - 1;
             remaining -= (morerows + 1) * (morecols + 1);
             // write the cell into the table
-//	    console.log(`rows[${rownum}][${colnum}] = [${morerows}, ${morecols}, ${top + 1}, ${block}]`);
+//          console.log(`rows[${rownum}][${colnum}] = [${morerows}, ${morecols}, ${top + 1}, ${block}]`);
             rows[rownum][colnum] = [morerows, morecols, top + 1, block];
         }
-	if (remaining !== 0) {
-	    throw new Error('Unused cells remaining.');
-	}
+        if (remaining !== 0) {
+            throw new Error('Unused cells remaining.');
+        }
         let numheadrows;
         let bodyrows;
         let headrows;

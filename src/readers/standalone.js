@@ -13,15 +13,15 @@ import * as frontend from '../FrontEnd';
 export const __docformat__ = 'reStructuredText';
 export default class Reader extends BaseReader {
     constructor(...args) {
-	super(...args);
+        super(...args);
 
-	// """Contexts this reader supports."""
-	this.supported = ['standalone'];
+        // """Contexts this reader supports."""
+        this.supported = ['standalone'];
 
-	// """A single document tree."""
-	this.document = undefined;
+        // """A single document tree."""
+        this.document = undefined;
 
-	this.settingsSpec = [
+        this.settingsSpec = [
         'Standalone Reader',
         null,
         [['Disable the promotion of a lone top-level section title to '
@@ -57,8 +57,8 @@ default: 0,
           { dest: 'sectsubtitle_xform', action: 'store_false' }],
         ]];
 
-	this.configSection = 'standalone reader';
-	this.configSectionDependencies = ['readers'];
+        this.configSection = 'standalone reader';
+        this.configSectionDependencies = ['readers'];
     }
 
 /*    def get_transforms(self):

@@ -1,14 +1,14 @@
 class TransformSpec {
     constructor(args) {
-	this.unknownReferenceResolvers = [];
+        this.unknownReferenceResolvers = [];
     }
 
     getTransforms() {
-	return [];
+        return [];
     }
 
     toString() {
-	return `TransformSpec<${this.constructor.name}>`;
+        return `TransformSpec<${this.constructor.name}>`;
     }
 }
 export default TransformSpec;

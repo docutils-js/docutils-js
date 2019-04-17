@@ -13,3 +13,4 @@ function createFileInput(args) {
 test('FileInput.constructor no-args', () => {
     expect(() => createFileInput()).toThrow();
 });
+

@@ -9,14 +9,14 @@ const _roles = {};
 
 class GenericRole {
     constructor(roleName, nodeClass) {
-	this.name = roleName;
-	this.nodeClass = nodeClass;
+        this.name = roleName;
+        this.nodeClass = nodeClass;
     }
 
     invoke(role, rawtext, text, lineno, inliner, options, content) {
-	const myOptions = options || {};
-	setClasses(myOptions);
-	return [[new this.nodeClass(rawtext, unescape(text), [], myOptions)], []];
+        const myOptions = options || {};
+        setClasses(myOptions);
+        return [[new this.nodeClass(rawtext, unescape(text), [], myOptions)], []];
     }
 }
 
@@ -39,7 +39,7 @@ function role(role_name, language_module, lineno, reporter) {
     if (role_name) {
         try {
             canonicalname = language_module.roles[normname];
-	} catch (error) {
+        } catch (error) {
 /*
 
         except AttributeError, error:
@@ -50,13 +50,13 @@ function role(role_name, language_module, lineno, reporter) {
                             % (role_name, language_module.__name__))
 */
             canonicalname = DEFAULT_INTERPRETED_ROLE;
-	}
+        }
     }
 
     // # If we didn't find it, try English as a fallback.
     /*
     if(! canonicalname) {
-	try {
+        try {
             canonicalname = _fallback_language_module.roles[normname]
             msg_text.append('Using English fallback for role "%s".'
                             % role_name)
@@ -96,8 +96,8 @@ function register_local_role(name, role_fn) {
 
 function setClasses(options) {
     if ('class' in options) {
-	options.classes = options.class;
-	delete options.class;
+        options.classes = options.class;
+        delete options.class;
     }
 }
 function register_canonical_role(name, role_fn) {

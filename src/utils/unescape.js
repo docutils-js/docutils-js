@@ -14,5 +14,5 @@ export default function unescape(text, restoreBackslashes = false, respectWhites
     if (restoreBackslashes) {
         return text.replace(/\x00/g, '\\');
     }
-	return ['\x00 ', '\x00\n', '\x00'].reduce((a, v) => a.split(v).join(''), text || '');
+        return ['\x00 ', '\x00\n', '\x00'].reduce((a, v) => a.split(v).join(''), text || '');
 }

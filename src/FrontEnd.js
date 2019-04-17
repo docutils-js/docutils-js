@@ -35,35 +35,35 @@ const SUPPRESS_HELP = Symbol.for('SUPPRESS_HELP');
 
 export class OptionParser extends OptionParserBase {
     constructor() {
-	super();
-	this.standardConfigFiles = [
+        super();
+        this.standardConfigFiles = [
             '/etc/docutils.conf', // system-wide
             './docutils.conf', // project-specific
             '~/.docutils']; // user-specific
 
-	const threshold_choices = 'info 1 warning 2 error 3 severe 4 none 5'.split();
-	const True = true;
-	const False = false;
-	const thresholds = {
+        const threshold_choices = 'info 1 warning 2 error 3 severe 4 none 5'.split();
+        const True = true;
+        const False = false;
+        const thresholds = {
  info: 1, warning: 2, error: 3, severe: 4, none: 5,
 };
-	const booleans = {
+        const booleans = {
  1: True,
 on: True,
 yes: True,
 true: True,
-			    0: False,
+                            0: False,
 off: False,
 no: False,
 false: False,
 '': False,
 };
-	const default_error_encoding = /* getattr(sys.stderr, 'encoding',
+        const default_error_encoding = /* getattr(sys.stderr, 'encoding',
                                      None) or locale_encoding or */'ascii';
 
-	const default_error_encoding_error_handler = 'backslashreplace';
+        const default_error_encoding_error_handler = 'backslashreplace';
 
-	this.settingsSpec = ['General Docutils Options',
+        this.settingsSpec = ['General Docutils Options',
                       null,
                       [['Specify the document title as metadata.',
                          ['--title'], {}],
@@ -305,13 +305,13 @@ dest: 'expose_internals',
            validator: validateColonSeparatedStringList,
 }],
          [SUPPRESS_HELP, ['--strict-visitor'], { action: 'store_true' }],
-		      ]];
+                      ]];
 
-	this.settingsDefaults = {
+        this.settingsDefaults = {
 _disable_config: null,
-				 _source: null,
-				 _destination: null,
-				 _config_files: null,
+                                 _source: null,
+                                 _destination: null,
+                                 _config_files: null,
 };
     }
 
@@ -322,59 +322,59 @@ _disable_config: null,
      * each component's `SettingsSpec.settings_default_overrides` dictionary.
      */
     populateFromComponents(components) {
-	components.filter(a => a != null).forEach((component) => {
+        components.filter(a => a != null).forEach((component) => {
             const settingsSpec = component.settingsSpec;
             this.relativePathSettings.push(...component.relativePathSettings);
-	    for (i = 0; i < settingsSpec.length; i += 3) {
+            for (i = 0; i < settingsSpec.length; i += 3) {
                 const [title, description, option_spec] = settings_spec;
                 if (title) {
                     // group = optparse.OptionGroup(self, title, description)
                     // self.add_option_group(group)
-		} else {
+                } else {
                     group = this; // single options
-		}
-		/*
+                }
+                /*
                 for (help_text, option_strings, kwargs) in option_spec:
                     option = group.add_option(help=help_text, *option_strings,
                                               **kwargs)
                     if kwargs.get('action') == 'append':
                         self.lists[option.dest] = 1
-		*/
+                */
                 if (component.settingsDefaults) {
                     // this.defaults.update(component.settings_defaults)
-		}
-	    }
-	});
-	/* for component in components:
+                }
+            }
+        });
+        /* for component in components:
             if component and component.settings_default_overrides:
                 self.defaults.update(component.settings_default_overrides)
-	*/
+        */
     }
 
     checkArgs(args) {
-	let source; let
+        let source; let
 destination;
-	if (args.length) {
-	    source = args.pop(0);
-	    if (source === '-') {
-		source = null;
-	    }
-	}
-	if (args.length) {
-	    destinaton = args.pop(0);
-	    if (destination === '-') {
-		destination = null;
-	    }
-	}
-	return [source, destination];
+        if (args.length) {
+            source = args.pop(0);
+            if (source === '-') {
+                source = null;
+            }
+        }
+        if (args.length) {
+            destinaton = args.pop(0);
+            if (destination === '-') {
+                destination = null;
+            }
+        }
+        return [source, destination];
     }
 
     checkValues(values, args) {
-	const [_source, _destination] = this.checkArgs(args);
-	//	b//makePathsAbsolute(//
-	values._configFiles = this.configFiles;
-	values._source = _source;
-	values._destination = _destination;
-	return values;
+        const [_source, _destination] = this.checkArgs(args);
+        //      b//makePathsAbsolute(//
+        values._configFiles = this.configFiles;
+        values._source = _source;
+        values._destination = _destination;
+        return values;
     }
 }

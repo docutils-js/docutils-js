@@ -5,9 +5,9 @@ import * as pojo from './writers/pojo';
 
 export function getWriterClass(readerName) {
     if (readerName === 'xml') {
-	return xml.default;
+        return xml.default;
     } if (readerName === 'pojo') {
-	return pojo.default;
+        return pojo.default;
     }
 
     throw new Error('');

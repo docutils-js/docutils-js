@@ -244,11 +244,11 @@ export class Body extends RSTState {
         const pattern = this.explicit.patterns.target;
         const lineno = this.stateMachine.absLineNumber();
         const [block, indent, offset, blank_finish] = this.stateMachine.getFirstKnownIndented(
-		  {
+                  {
  indent: match.index + match[0].length,
-		    untilBlank: true,
-		    stripIndent: false,
-		  },
+                    untilBlank: true,
+                    stripIndent: false,
+                  },
 );
         const blocktext = match.input.substring(0, match.index + match[0].length) + block.join('\n');
         const block2 = [];
@@ -399,38 +399,38 @@ export class Body extends RSTState {
         const lineno = this.stateMachine.absLineNumber();
         const initial_line_offset = this.stateMachine.lineOffset;
         const [indented, indent, line_offset, blank_finish] = this.stateMachine.getFirstKnownIndented(
-	    {
+            {
  indent: match.result.index + match.result[0].length,
-	      stripTop: 0,
+              stripTop: 0,
 },
 );
         const block_text = this.stateMachine.inputLines.slice(initial_line_offset, this.stateMachine.lineOffset + 1);
         try {
             const [args, options, content, content_offset] = this.parse_directive_block(
-		indented,
-		line_offset,
-		directive,
-		option_presets,
-	    );
-	} catch (error) {
-	    if (error instanceof MarkupError) {
-		const err = this.reporter.error(`Error in "${type_name}" directive:\n${detail.args.join(' ')}`,
-						[new nodes.literal_block(block_text, block_text)],
-						{ line: lineno });
-		return [[err], blank_finish];
-	    }
-	}
+                indented,
+                line_offset,
+                directive,
+                option_presets,
+            );
+        } catch (error) {
+            if (error instanceof MarkupError) {
+                const err = this.reporter.error(`Error in "${type_name}" directive:\n${detail.args.join(' ')}`,
+                                                [new nodes.literal_block(block_text, block_text)],
+                                                { line: lineno });
+                return [[err], blank_finish];
+            }
+        }
         const directive_instance = new directive(
             type_name, args, options, content, lineno,
             content_offset, block_text, this, this.stateMachine,
 );
         try {
             result = directive_instance.run();
-	} catch (error) {
+        } catch (error) {
             const msg_node = this.reporter.system_message(error.level, error.msg, [], { line: lineno });
             msg_node.add(new nodes.literal_block(block_text, block_text));
             result = [msg_node];
-	}
+        }
 /*        assert isinstance(result, list), \
                'Directive "%s" must return a list of nodes.' % type_name
         for i in range(len(result)):
@@ -1035,7 +1035,7 @@ initialState: 'LineBlock',
     line_block_line(match, lineno) {
         // """Return one line element of a line_block."""
         const [indented, indent, line_offset, blank_finish] = this
-	      .stateMachine.getFirstKnownIndented(
+              .stateMachine.getFirstKnownIndented(
             {
  indent: match.result.index + match.result[0].length,
               untilBlank: true,
@@ -2087,19 +2087,19 @@ class Explicit extends SpecializedBody {
             if (expmatch) {
                 try {
                     const r = method(expmatch);
-//		    console.log(r);
-		    return r;
-		} catch (error) {
-		    if (error instanceof MarkupError) {
-			const lineno = this.stateMachine.absLineNumber();
-			const message = ' '.join(error.args);
-			errors.push(this.reporter.warning(message, [], { line: lineno }));
-			break;
-		    }
-		    throw error;
-		}
-	    }
-	}
+//                  console.log(r);
+                    return r;
+                } catch (error) {
+                    if (error instanceof MarkupError) {
+                        const lineno = this.stateMachine.absLineNumber();
+                        const message = ' '.join(error.args);
+                        errors.push(this.reporter.warning(message, [], { line: lineno }));
+                        break;
+                    }
+                    throw error;
+                }
+            }
+        }
         const [nodelist, blank_finish] = this.comment(match);
         return [[...nodelist, ...errors], blank_finish];
     }

@@ -41,7 +41,7 @@ export function matchChars(c1, c2) {
     so we test for additional matches stored in `quote_pairs`.
     """ */
     if (!openers.includes(c1)) {
-	return false;
+        return false;
     }
     const i = openers.indexOf(c1);
     return c2 === closers[i] || (quotePairs[c1] || '').includes(c2);
