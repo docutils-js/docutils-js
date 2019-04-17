@@ -5,4 +5,6 @@ class DefinitionList extends SpecializedBody {
         return [[match.result.input], 'Definition', []];
     }
 }
+DefinitionList.stateName = 'DefinitionList';
+DefinitionList.constructor.stateName = 'DefinitionList';
 export default DefinitionList;

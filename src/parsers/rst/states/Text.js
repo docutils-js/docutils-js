@@ -236,4 +236,6 @@ srcline;
         return [node_list, messages];
     }
 }
+Text.stateName = 'Text';
+Text.constructor.stateName = 'Text';
 export default Text;

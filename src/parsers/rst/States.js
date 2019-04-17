@@ -37,9 +37,6 @@ const normalizeName = nodes.fullyNormalizeName;
 const { StateMachineWS } = statemachine;
 const { StateWS } = statemachine;
 
-function escapeRegExp(string) {
-  return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
-}
 
 
 

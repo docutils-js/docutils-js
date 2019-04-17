@@ -22,4 +22,6 @@ class OptionList extends SpecializedBody {
     }
 }
 
+OptionList.stateName = 'OptionList';
+OptionList.constructor.stateName = 'OptionList';
 export default OptionList;

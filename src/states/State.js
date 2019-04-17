@@ -1,7 +1,9 @@
 class State {
-    constructor(...args) {
-        const [ stateMachine, debug ] = args;
-        this._init(...args);
+    constructor(args = {}) {
+        const { stateMachine, debug } = args;
+        this.stateMachine = stateMachine;
+        this.debug = debug;
+        this._init(args);
         this.transitionOrder = [];
         this.transitions = {};
         // this.patterns = {}
@@ -14,8 +16,6 @@ class State {
             throw new Error('Need statemachine');
         }
 
-        this.stateMachine = stateMachine;
-        this.debug = debug;
 
         if (!this.nestedSm) {
             this.nestedSm = this.stateMachine.constructor;

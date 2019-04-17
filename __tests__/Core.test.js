@@ -36,14 +36,7 @@ test('full rst2xml pipeline with specific input', () => {
 
     const { readerName, parserName, writerName } = args;
     const source = new StringInput({
-	source: `[#]_ is a reference to footnote 1, and [#]_ is a reference to
-footnote 2.
-
-.. [#] This is footnote 1.
-.. [#] This is footnote 2.
-.. [#] This is footnote 3.
-
-[#]_ is a reference to footnote 3.` });
+	source: '====::\n' });
         const destination = new StringOutput({});
     const pub = new Publisher({
  source, destination, settings, debug: true, debugFn,

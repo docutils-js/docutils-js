@@ -27,4 +27,6 @@ class EnumeratedList extends SpecializedBody {
         return [[], nextState, []];
     }
 }
+EnumeratedList.stateName = 'EnumeratedList';
+EnumeratedList.constructor.stateName = 'EnumeratedList';
 export default EnumeratedList;

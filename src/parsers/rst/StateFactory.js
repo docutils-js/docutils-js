@@ -75,6 +75,10 @@ class StateFactory {
     }
 
     createState(stateName, stateMachine) {
+	if(typeof stateName === 'undefined') {
+	    throw new Error("Need argument stateName");
+	}
+	
 	if(typeof stateMachine === 'undefined') {
 	    throw new Error("Need argument stateMAchine");
 	}
@@ -83,7 +87,7 @@ class StateFactory {
 	    throw new Error(`Unknown state ${stateName}`);
 	}
 	const StateClass = RSTStates[stateName];
-	return new StateClass(stateMachine);
+	return new StateClass({stateMachine});
     }
 
     getStateClasses() {

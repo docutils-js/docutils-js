@@ -159,4 +159,6 @@ class Line extends SpecializedText {
         throw new StateCorrection('Body', 'text');
     }
 }
+Line.stateName = 'Line';
+Line.constructor.stateName = 'Line';
 export default Line;

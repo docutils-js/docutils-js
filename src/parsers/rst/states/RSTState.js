@@ -4,18 +4,20 @@ import * as nodes from '../../../nodes';
 import { EOFError } from '../../../Exceptions';
 
 class RSTState extends StateWS {
-    _init(args) {
+    _init(args = {}) {
         super._init(args);
         this.nestedSm = NestedStateMachine;
         this.nestedSmCache = [];
         this.stateClasses = args.stateClasses;
 
         this.nestedSmKwargs = {
-            stateClasses: this.stateClasses,
+//            stateClasses: this.stateClasses,
+            stateFactory: this.stateMachine.stateFactory.withStateClasses(this.stateClasses),
             initialState: 'Body',
             debug: args && args.stateMachine ? args.stateMachine.debug : false,
             debugFn: args && args.stateMachine ? args.stateMachine.debugFn : console.log,
         };
+//      console.log(this.nestedSmKwargs);
     }
 
     runtimeInit() {
@@ -78,17 +80,21 @@ class RSTState extends StateWS {
         }
 
         if (!stateMachine) {
-	    // check things ?
+            // check things ?
         /* istanbul ignore if */
 //            if (!stateMachineKwargs.stateClasses) {
 //                throw new InvalidArgumentsError('stateClasses');
 //            }
 //          if(!stateMachineKwargs.document) {
 //              throw new Error("expectinf document")
-//          }
+            //          }
+            const stateFactory = this.stateMachine.stateFactory;
+            if(!stateMachineKwargs.stateFactory) {
+                throw new Error("need statefactory");
+            }
+//            console.log(stateMachineKwargs);
             stateMachine = new stateMachineClass({
-		stateFactory: this.stateMachine.stateFactory,
-		
+                
  debug: this.debug,
                                                   ...stateMachineKwargs,
 });
@@ -131,7 +137,7 @@ matchTitles,
         }
         stateMachineKwargs.initialState = initialState;
         const stateMachine = new stateMachineClass({
-	    stateFactory: this.stateMachine.stateFactory,
+            stateFactory: this.stateMachine.stateFactory,
  debug: this.debug,
                                                     ...stateMachineKwargs,
 });

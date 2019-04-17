@@ -31,4 +31,6 @@ class SpecializedText extends Text {
     }
 }
 
+SpecializedText.stateName = 'SpecializedText';
+SpecializedText.constructor.stateName = 'SpecializedText';
 export default SpecializedText;

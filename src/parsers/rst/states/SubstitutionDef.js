@@ -32,4 +32,6 @@ class SubstitutionDef extends Body {
         throw new EOFError();
     }
 }
+SubstitutionDef.stateName = 'SubstitutionDef';
+SubstitutionDef.constructor.stateName = 'SubstitutionDef';
 export default SubstitutionDef;

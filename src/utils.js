@@ -297,6 +297,10 @@ export function findCombiningChars(text) {
     }).filter(([r, i]) => r).map(([r, i]) => i);
 }
 
-export default {
-    newDocument,
-};
+export function escapeRegExp(string) {
+  return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
+}
+
+//export default {
+//    newDocument,
+//};

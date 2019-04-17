@@ -1,8 +1,8 @@
 import State from './State';
 
 class StateWS extends State {
-    constructor(...args) {
-        super(...args);
+    constructor(args) {
+        super(args);
         if (!this.indentSm) {
             this.indentSm = this.nestedSm;
         }

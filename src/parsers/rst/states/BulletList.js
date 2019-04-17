@@ -13,4 +13,6 @@ class BulletList extends SpecializedBody {
     }
 }
 
+BulletList.stateName = 'BulletList';
+BulletList.constructor.stateName = 'BulletList';
 export default BulletList;

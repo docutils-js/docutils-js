@@ -64,8 +64,6 @@ default: 0,
 
     getTransforms() {
 	const r = [references.PropagateTargets];
-	console.log(r);
-	console.log(typeof r[0]);
 	return r;
     }
     /*

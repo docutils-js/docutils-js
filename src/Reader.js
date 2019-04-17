@@ -1,7 +1,7 @@
 import Component from './Component';
 import universal from './transforms/universal';
 import parsers from './parsers';
-import utils from './utils';
+import * as utils from './utils';
 
 export default class Reader extends Component {
     getTransforms() {

@@ -17,4 +17,6 @@ class LineBlock extends SpecializedBody {
         return [[], next_state, []];
     }
 }
+LineBlock.stateName = 'LineBlock';
+LineBlock.constructor.stateName = 'LineBlock';
 export default LineBlock;

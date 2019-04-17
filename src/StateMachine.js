@@ -67,6 +67,10 @@ export class StateMachine {
         this.initialState = initialState;
         this.currentState = initialState;
         this.states = {};
+	if(!stateFactory) {
+	    throw new Error("need statefactory");
+	}
+	    
 	const stateClasses = stateFactory.getStateClasses();
 //	console.log(typeof stateClasses);
 	if(!isIterable(stateClasses)) {
@@ -460,12 +464,21 @@ src;
 	    //throw new InvalidArgumentsError('stateClass should be a class');
 	    return;
 	}
-        const stateName = stateClass.name;
+	let stateName;
+	if(typeof stateClass === 'string') {
+	    stateName = stateClass;
+	}else {
+	    stateName = stateClass.stateName;
+	}
 	//console.log(`adding state ${stateName}`);
 
         if (Object.hasOwnProperty(this.states, stateName)) {
             throw new DuplicateStateError(stateName);
         }
+	if(!stateName) {
+	    throw new Error(`need statename for ${stateClass}`);
+	}
+	
         const r = this.stateFactory.createState(stateName, this);
         this.states[stateName] = r;
     }

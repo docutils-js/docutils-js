@@ -1,6 +1,10 @@
 import RSTState from './RSTState';
+import * as RegExps from '../RegExps';
+import { escapeRegExp } from '../../../utils';
+import * as nodes from '../../../nodes';
+import { EOFError } from '../../../Exceptions';
 
- class QuotedLiteralBlock extends RSTState {
+class QuotedLiteralBlock extends RSTState {
 /*
     """
     Nested parse handler for quoted (unindented) literal blocks.
@@ -11,7 +15,7 @@ import RSTState from './RSTState';
     _init() {
         super._init();
         this.patterns = {
- initial_quoted: `(${nonalphanum7bit})`,
+ initial_quoted: `(${RegExps.nonalphanum7bit})`,
                 text: '',
 };
         this.initialTransitions = ['initial_quoted', 'text'];
@@ -90,4 +94,6 @@ import RSTState from './RSTState';
         throw new EOFError();
     }
 }
+QuotedLiteralBlock.stateName = 'QuotedLiteralBlock';
+QuotedLiteralBlock.constructor.stateName = 'QuotedLiteralBlock';
 export default QuotedLiteralBlock;

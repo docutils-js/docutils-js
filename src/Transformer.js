@@ -1,3 +1,5 @@
+import leftPad from 'left-pad';
+
 export default class Transformer {
     constructor(document) {
         this.transforms = [];
@@ -14,49 +16,49 @@ export default class Transformer {
 	    if(!component) {
 		continue;
 	    }
-	    console.log(`processing ${component.toString()} ${component.componentType}`);
-	    const transforms = component.getTransforms() || [];
-	    if(transforms.filter(x => typeof x === 'undefined').length !== 0){
-		throw new Error(`got invalid transform from ${component}`);
-	    }
-	    
-	    this.addTransforms(transforms);
-	    this.components[component.componentType] = component
-	}
-	this.sorted = 0
-	const urr = []
-	for( let i of components ) {
-	    if(typeof i !== 'undefined'){
-//		console.log(`collecting unknownReferenceResolver from component ${i}`);
-		if(i.unknownReferenceResolvers) {
-		    urr.push(i.unknownReferenceResolvers);
-		}
-	    } else {
-//		console.log('component is undefined. fixme');
-	    }
-	}
-//	console.log('urr is ')
-	//	console.log(urr);
-	for (const f of urr) {
-	    if(typeof f === 'undefined') {
-		throw new ApplicationError('Unexpected undefined value in ist of unknown reference resolvers');
-	    }
-	}
-	const decoratedList = urr.map(f => [f.priority, f]);
-	decoratedList.sort()
-	this.unknownReferenceResolvers.push(...decoratedList.map(f => f[1]));
+//          console.log(`processing ${component.toString()} ${component.componentType}`);
+            const transforms = component.getTransforms() || [];
+            if(transforms.filter(x => typeof x === 'undefined').length !== 0){
+                throw new Error(`got invalid transform from ${component}`);
+            }
+            
+            this.addTransforms(transforms);
+            this.components[component.componentType] = component
+        }
+        this.sorted = 0
+        const urr = []
+        for( let i of components ) {
+            if(typeof i !== 'undefined'){
+//              console.log(`collecting unknownReferenceResolver from component ${i}`);
+                if(i.unknownReferenceResolvers) {
+                    urr.push(i.unknownReferenceResolvers);
+                }
+            } else {
+//              console.log('component is undefined. fixme');
+            }
+        }
+//      console.log('urr is ')
+        //      console.log(urr);
+        for (const f of urr) {
+            if(typeof f === 'undefined') {
+                throw new ApplicationError('Unexpected undefined value in ist of unknown reference resolvers');
+            }
+        }
+        const decoratedList = urr.map(f => [f.priority, f]);
+        decoratedList.sort()
+        this.unknownReferenceResolvers.push(...decoratedList.map(f => f[1]));
     }
 
     applyTransforms() {
-	this.document.reporter.attachObserver(this.document.noteTransformMessage.bind(this.document));
-	while(this.transforms.length) {
-	    if(!this.sorted) {
-		this.transforms.sort();
-		this.transforms.reverse();
-		this.sorted = 1;
-	    }
-	    const t = this.transforms.pop();
-	    console.log(t);
+        this.document.reporter.attachObserver(this.document.noteTransformMessage.bind(this.document));
+        while(this.transforms.length) {
+            if(!this.sorted) {
+                this.transforms.sort();
+                this.transforms.reverse();
+                this.sorted = 1;
+            }
+            const t = this.transforms.pop();
+//	    console.log(t);
 	    const [ priority, TransformClass, pending, kwargs ] = t;
 	    try {
 		const transform = new TransformClass(this.document, { startnode: pending });
@@ -76,8 +78,8 @@ export default class Transformer {
 	    }
             const priority_string = this.get_priority_string(
                 transform_class, 'defaultPriority')
-	    console.log(`priority string is ${priority_string}`);
-	    console.log(`I have ${transform_class}`);
+//	    console.log(`priority string is ${priority_string}`);
+//	    console.log(`I have ${transform_class}`);
             this.transforms.push(
                 [priority_string, transform_class, null, {}])
             this.sorted = 0
@@ -96,6 +98,6 @@ export default class Transformer {
 	
         this.serialno += 1
 	const p = class_[priority];
-        return `${p}-${this.serialno}`;//fixme %03d-%03d' % (priority, self.serialno)
+        return `${leftPad(p, 3, '0')}-${leftPad(this.serialno, 3, '0')}`;
     }
 }

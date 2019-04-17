@@ -13,4 +13,6 @@ class Definition extends SpecializedText {
         return [[], 'DefinitionList', []];
     }
 }
+Definition.stateName = 'Definition';
+Definition.constructor.stateName = 'Definition';
 export default Definition;

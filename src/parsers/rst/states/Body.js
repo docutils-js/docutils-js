@@ -31,8 +31,8 @@ function _upperroman_to_int() {
 }
 
 class Body extends RSTState {
-    constructor(...args) {
-        super(...args);
+    constructor(args) {
+        super(args);
         const pats = { };
         const _enum = { };
 
@@ -1349,4 +1349,6 @@ initialState: 'LineBlock',
         return [[match.input], 'Text', []];
     }
 }
+Body.stateName = 'Body';
+Body.constructor.stateName = 'Body';
 export default Body;
