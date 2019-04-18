@@ -9,10 +9,10 @@ import TransitionCorrection from './TransitionCorrection';
 
 import StringList from './StringList';
 
-/*function __getClass(object) {
+/* function __getClass(object) {
   return Object.prototype.toString.call(object)
     .match(/^\[object\s(.*)\]$/)[1];
-}*/
+} */
 
 export class StateMachine {
     /*

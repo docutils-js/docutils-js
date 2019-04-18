@@ -134,7 +134,9 @@ srcline;
         const lines = [context, ...(block || [])];
         const [pelems, literalnext] = this.paragraph(lines, startline);
         this.parent.add(pelems);
-        this.parent.add(msg);
+        if(msg) {
+            this.parent.add(msg);
+        }
         if (literalnext) {
             try {
                 this.stateMachine.nextLine();
