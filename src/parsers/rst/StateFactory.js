@@ -106,7 +106,7 @@ class StateFactory {
             throw new Error('Need argument stateMAchine');
         }
 
-        if (!RSTStates.hasOwnProperty(stateName)) {
+        if (!Object.prototype.hasOwnProperty.call(RSTStates, stateName)) {
             throw new Error(`Unknown state ${stateName}`);
         }
         const StateClass = RSTStates[stateName];

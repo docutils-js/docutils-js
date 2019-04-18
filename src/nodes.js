@@ -397,7 +397,7 @@ export class Element extends Node {
     }
 
     firstChildNotMatchingClass(childClass, start = 0,
-                               end = 2 ** 31 - 1) {
+                               end = (2 ** 31) - 1) {
         /* """
         Return the index of the first child whose class does *not* match.
 

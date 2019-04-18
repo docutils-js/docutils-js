@@ -31,7 +31,7 @@ class Text extends RSTState {
     }
 
     eof(context) {
-        if (context != null && !isIterable(context) || context.length > 0) {
+        if ((context != null && !isIterable(context)) || context.length > 0) {
             this.blank(null, context, null);
         }
         return [];

@@ -3,7 +3,6 @@ import {
 } from './Exceptions';
 // export { SystemMessge };
 import { combining } from './utils/combining';
-import Reporter from './Reporter';
 
 export function getTrimFootnoteRefSpace(settings) {
     /*    """
@@ -88,21 +87,6 @@ function _getCallerFile() {
     Error.prepareStackTrace = originalFunc;
 
     return [callerfile, callerlineno];
-}
-
-export function newReporter({ sourcePath }, settings) {
-    const keys = ['reportLevel', 'haltLevel', 'warningStream', 'debug',
-                  'errorEncoding', 'errorEncodingErrorHandler'];
-    const missingKeys = keys.filter(key => !settings.hasOwnProperty(key));
-    if (missingKeys.length) {
-        throw new ApplicationError(`Missing required keys from settings object to instantiate reporter. Missing keys ${missingKeys.map(key => `"${key}"`).join(', ')}.`);
-    }
-
-    return new Reporter(sourcePath, settings.reportLevel,
-                        settings.haltLevel,
-                        settings.warningStream, settings.debug,
-                        settings.errorEncoding,
-                        settings.errorEncodingErrorHandler);
 }
 
 export function escape2null(text) {

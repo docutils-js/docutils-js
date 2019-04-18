@@ -203,6 +203,7 @@ matchTitles,
             return undefined;
     }
 
+    /* eslint-disable-next-line camelcase */
     title_inconsistent(sourcetext, lineno) {
         const error = this.reporter.severe(
             'Title level inconsistent:', [new nodes.literal_block('', sourcetext)], { line: lineno },
@@ -215,16 +216,16 @@ matchTitles,
         const { memo } = this;
         const mylevel = memo.sectionLevel;
         memo.sectionLevel += 1;
-        const section_node = new nodes.section();
-        this.parent.add(section_node);
-        const [textnodes, title_messages] = this.inline_text(title, lineno);
-        const titlenode = new nodes.title(title, '', textnodes);
-        const name = nodes.fullyNormalizeName(titlenode.astext());
-        section_node.attributes.names.push(name);
-        section_node.add(titlenode);
-        section_node.add(messages);
-        section_node.add(title_messages);
-        this.document.noteImplicitTarget(section_node, section_node);
+        const sectionNode = new nodes.section();
+        this.parent.add(sectionNode);
+        const [textNodes, titleMessages] = this.inline_text(title, lineno);
+        const titleNode = new nodes.title(title, '', textNodes);
+        const name = nodes.fullyNormalizeName(titleNode.astext());
+        sectionNode.attributes.names.push(name);
+        sectionNode.add(titleNode);
+        sectionNode.add(messages);
+        sectionNode.add(titleMessages);
+        this.document.noteImplicitTarget(sectionNode, sectionNode);
         const offset = this.stateMachine.lineOffset + 1;
         const absoffset = this.stateMachine.absLineOffset() + 1;
         const newabsoffset = this.nestedParse(
@@ -273,6 +274,7 @@ matchTitles: true,
         return [[p, ...messages], literalnext];
     }
 
+    /* eslint-disable-next-line camelcase */
     inline_text(text, lineno) {
         const r = this.inliner.parse(text, { lineno, memo: this.memo, parent: this.parent });
 //      console.log(r);

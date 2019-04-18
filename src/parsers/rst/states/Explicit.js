@@ -6,12 +6,12 @@ class Explicit extends SpecializedBody {
     """Second and subsequent explicit markup construct."""
     */
     /* eslint-disable-next-line camelcase */
-    explicit_markup(match, context, next_state) {
+    explicit_markup(match, context, nextState) {
         // """Footnotes, hyperlink targets, directives, comments."""
         const [nodelist, blankFinish] = this.explicit_construct(match);
         this.parent.add(nodelist);
         this.blankFinish = blankFinish;
-        return [[], next_state, []];
+        return [[], nextState, []];
     }
 
     /* eslint-disable-next-line camelcase */
@@ -40,12 +40,12 @@ class Explicit extends SpecializedBody {
         return [[...nodelist, ...errors], blankFinish];
     }
 
-    anonymous(match, context, next_state) {
+    anonymous(match, context, nextState) {
         // """Anonymous hyperlink targets."""
         const [nodelist, blankFinish] = this.anonymous_target(match);
         this.parent.add(nodelist);
         this.blankFinish = blankFinish;
-        return [[], next_state, []];
+        return [[], nextState, []];
     }
 
     blank() {

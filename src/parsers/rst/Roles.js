@@ -32,7 +32,7 @@ function setImplicitOptions(roleFn) {
     Add customization options to role functions, unless explicitly set or
     disabled.
     """ */
-    if (!roleFn.hasOwnProperty('options') || roleFn.options == null) {
+    if (!Object.prototype.hasOwnProperty.call(roleFn, 'options') || roleFn.options == null) {
         roleFn.options = { class: directives.class_option };
     } else if (!('class' in roleFn.options)) {
         roleFn.options.class = directives.class_option;

@@ -13,7 +13,7 @@ and produce a well-formed data structure suitable for building a CALS table.
     `update_dict_of_lists()`: Merge two dictionaries containing list values.
 */
 
-import { DataError, AsertError } from '../../Exceptions';
+import { DataError, AssertError } from '../../Exceptions';
 import { stripCombiningChars } from '../../utils';
 
 class TableMarkupError extends DataError {
@@ -63,6 +63,7 @@ class TableParser {
         return structure;
     }
 
+    /* eslint-disable-next-line camelcase */
     find_head_body_sep() {
         /*
         """Look for a head/body row separator line; store the line index."""
@@ -85,6 +86,17 @@ class TableParser {
             throw new TableMarkupError('The head/body row separator may not be the first or last line of the table.', i);
         }
     }
+}
+
+/* eslint-disable-next-line camelcase */
+function update_dict_of_lists(master, newdata) {
+    Object.entries(newdata).forEach(([key, values]) => {
+        if (master[key]) {
+            master[key].push(...values);
+        } else {
+            master[key] = [...values];
+        }
+    });
 }
 
 class GridTableParser extends TableParser {
@@ -220,7 +232,7 @@ class GridTableParser extends TableParser {
         // """For keepoing track of how much of each text column has been seen."""
         const before = top - 1;
         const after = bottom - 1;
-        for (let col = left; col < right; col++) {
+        for (let col = left; col < right; col += 1) {
             // assert this.done[col] == before
             this.done[col] = after;
         }
@@ -500,7 +512,7 @@ class SimpleTableParser extends TableParser {
         const [firststart, firstend] = this.columns[0];
         let offset = 1; // skip top border
         let start = 1;
-        let text_found;
+        let textFound;
         while (offset < this.block.length) {
             const line = this.block[offset];
             if (this.spanPat.test(line)) {
@@ -508,15 +520,15 @@ class SimpleTableParser extends TableParser {
                 this.parse_row(this.block.slice(start, offset), start,
                                [line.trimEnd(), offset]);
                 start = offset + 1;
-                text_found = null;
+                textFound = null;
             } else if (line.substring(firststart, firstend).trim()) {
                 // First column not blank, therefore it's a new row.
-                if (text_found && offset !== start) {
+                if (textFound && offset !== start) {
                     this.parse_row(this.block.slice(start, offset), start);
                 }
                 start = offset;
-                text_found = 1;
-            } else if (!text_found) {
+                textFound = 1;
+            } else if (!textFound) {
                 start = offset + 1;
             }
             offset += 1;
@@ -606,13 +618,13 @@ class SimpleTableParser extends TableParser {
             return;
         }
         let columns;
-        let span_offset;
+        let spanOffset;
         if (spanline) {
             columns = this.parse_columns(...spanline);
-            span_offset = spanline[1];
+            spanOffset = spanline[1];
         } else {
             columns = this.columns.slice();
-            span_offset = start;
+            spanOffset = start;
         }
         this.check_columns(lines, start, columns);
         const row = this.init_row(columns, start);
@@ -685,16 +697,6 @@ class SimpleTableParser extends TableParser {
     }
 }
 
-    /* eslint-disable-next-line camelcase */
-function update_dict_of_lists(master, newdata) {
-    Object.entries(newdata).forEach(([key, values]) => {
-        if (master[key]) {
-            master[key].push(...values);
-        } else {
-            master[key] = [...values];
-        }
-    });
-}
 /*    Extend the list values of `master` with those from `newdata`.
 
     Both parameters must be dictionaries containing list values.

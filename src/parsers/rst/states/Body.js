@@ -145,7 +145,7 @@ class Body extends RSTState {
 
     footnote(match) {
         const [src, srcline] = this.stateMachine.getSourceAndLine();
-	/* eslint-disable-next-line no-unused-vars */
+        /* eslint-disable-next-line no-unused-vars */
         const [indented, indent, offset, blankFinish] = this.stateMachine.getFirstKnownIndented(
             { indent: match.index + match[0].length },
 );
@@ -185,7 +185,7 @@ class Body extends RSTState {
 
     citation(match) {
         const [src, srcline] = this.stateMachine.getSourceAndLine();
-	/* eslint-disable-next-line no-unused-vars */
+        /* eslint-disable-next-line no-unused-vars */
         const [indented, indent, offset, blankFinish] = this.stateMachine.getFirstKnownIndented({
             indent: match.index + match[0].length,
         });
@@ -209,7 +209,7 @@ class Body extends RSTState {
     hyperlink_target(match) {
         const pattern = this.explicit.patterns.target;
         const lineno = this.stateMachine.absLineNumber();
-	/* eslint-disable-next-line no-unused-vars */
+        /* eslint-disable-next-line no-unused-vars */
         const [block, indent, offset, blankFinish] = this.stateMachine.getFirstKnownIndented(
                   {
  indent: match.index + match[0].length,
@@ -325,38 +325,37 @@ class Body extends RSTState {
 
     /* eslint-disable-next-line camelcase */
     substitution_def(match) {
-        const pattern = this.explicit.patterns.substitution
-        const [ src, srcline ] = this.stateMachine.getSourceAndLine()
-	const matchEnd = match.index + match[0].lengtd
-        const [ block, indent, offset, blank_finish ] = this.stateMachine.getFirstKnownIndented({
-	    indent: matchEnd, stripIndent: false });
-	
+        const pattern = this.explicit.patterns.substitution;
+        const [src, srcline] = this.stateMachine.getSourceAndLine();
+        const matchEnd = match.index + match[0].lengtd;
+        const [block, indent, offset, blank_finish] = this.stateMachine.getFirstKnownIndented({ indent: matchEnd, stripIndent: false });
+
         const blockText = (match.input.substring(0, matchEnd) + block.join('\n'));
-        block.disconnect()
-        let escaped = escape2null(block[0].trimEnd())
-        let blockindex = 0
-        while( true ) {
-            const subDefMatch = pattern.exec(escaped)
-            if(subDefMatch) {
+        block.disconnect();
+        let escaped = escape2null(block[0].trimEnd());
+        let blockindex = 0;
+        while (true) {
+            const subDefMatch = pattern.exec(escaped);
+            if (subDefMatch) {
                 break;
             }
             blockindex += 1;
             try {
-                escaped = escaped + ' ' + escape2null(block[blockindex].trim());
-            } catch(error) {
+                escaped = `${escaped} ${escape2null(block[blockindex].trim())}`;
+            } catch (error) {
                 throw new MarkupError('malformed substitution definition.');
             }
         }
 
         const subDefMatchEnd = subDefMatch.index + subDefMatch[0].length;
         block.splice(0, blockIndex);// strip out the substitution marker
-        const tmpLine = block[0].trim() + ' ';
-        block[0] = tmpLine.substring(subDefMatchEnd-escaped.length-1, tmpLine.length - 1);
-        if(!block[0]) {
+        const tmpLine = `${block[0].trim()} `;
+        block[0] = tmpLine.substring(subDefMatchEnd - escaped.length - 1, tmpLine.length - 1);
+        if (!block[0]) {
             block.splice(0, 1);
             offset += 1;
         }
-        while(block.length && !block[block.length - 1].trim()) {
+        while (block.length && !block[block.length - 1].trim()) {
             block.pop();
         }
         /*

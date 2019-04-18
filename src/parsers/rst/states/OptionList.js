@@ -1,4 +1,5 @@
 import SpecializedBody from './SpecializedBody';
+import MarkupError from '../MarkupError';
 
 class OptionList extends SpecializedBody {
 /*

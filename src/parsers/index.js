@@ -1,4 +1,4 @@
-import { Parser } from '../Parser';
+import Parser from '../Parser';
 import * as rst from './restructuredtext';
 
 function getParserClass(parserName) {

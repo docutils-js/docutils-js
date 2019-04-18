@@ -24,5 +24,9 @@ test('unescape with null', () => {
     expect(unescape('\x00foo')).toBe('foo');
 });
 
+test('unescape with null', () => {
+    expect(unescape('\x00foo')).toBe('foo');
+});
+
     
           

@@ -38,10 +38,10 @@ class QuotedLiteralBlock extends RSTState {
                 this.initial_lineno,
 );
             const text = context.join('\n');
-            const literal_block = new nodes.literal_block(text, text);
-            literal_block.source = src;
-            literal_block.line = srcline;
-            this.parent.add(literal_block);
+            const literalBlock = new nodes.literal_block(text, text);
+            literalBlock.source = src;
+            literalBlock.line = srcline;
+            this.parent.add(literalBlock);
         } else {
             this.parent.add(this.reporter.warning(
                 'Literal block expected; none found.', [],
