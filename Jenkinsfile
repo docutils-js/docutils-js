@@ -5,13 +5,31 @@ pipeline {
     args '-v /.cache/yarn'
  } }
     stages {
+        stage('Install NPM/Yarn dependencies') {
+	  steps {
+	  sh 'yarn install'
+	  }
+        }
         stage('build') {
             steps {
-	        sh 'yarn'
 		sh 'rm -rf lib'
-		sh 'yarn jest --coverage'
-		sh 'yarn eslint -f checkstyle -o eslint.xml src && /bin/true'
 		sh 'yarn grunt'
+		}
+		}
+
+       stage('tests with coverage') {
+       steps {
+         	sh 'yarn jest --coverage'
+		}
+		}
+       stage('eslint') {
+       steps {
+		sh 'yarn eslint -f checkstyle -o eslint.xml src && /bin/true'
+		}
+		}
+
+stage('build distribution') {
+steps {
 		sh 'mkdir -p build'
 		sh 'tar --exclude core --exclude node_modules --exclude build --exclude-vcs -zcv . -f build/docutils-js.tar.gz'
             }
