@@ -62,6 +62,6 @@ const description = 'Generates Docutils-native XML from standalone ' + 'reStruct
 	    throw error;
 	}
     }
-    console.log(...args);
+    console.log(`args is ${args}`);
 });
 

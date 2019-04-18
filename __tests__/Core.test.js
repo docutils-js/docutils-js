@@ -158,6 +158,7 @@ test.each([
       (cut and pasted from interactive Python sessions)
 `],
     ['substitution definition with image', '.. |symbol here| image:: symbol.png\n'],
+    ['incomplete substitution definition with image', '.. |beep'],
     ['definition list', `what
     Definition lists associate a term with a definition.
 
@@ -219,6 +220,25 @@ This is a test.
 +------------------------+------------+----------+
 | body row 2             | Cells may span        |
 +------------------------+-----------------------+
+`],
+    ['simple table from policies.txt', `    =============  =======  ============================================
+    Release Level  Label    Description
+    =============  =======  ============================================
+    alpha          \`\`a\`\`    Reserved for use after major experimental
+                            changes, to indicate an unstable codebase.
+
+    beta           \`\`b\`\`    Indicates active development, between releases.
+                            Used with serial = 0.
+
+    candidate      \`\`rcN\`\`  Release candidate: indicates that the
+                            codebase is ready to release unless
+                            significant bugs emerge.
+                            Serial N starts at 1.
+
+    final                   Indicates an official project release.
+                            There is no pre-release segment for final
+                            releases (no label).
+    =============  =======  ============================================
 `],
            ['simple table', `         ====================  ==========  ==========
          Header row, column 1  Header 2    Header 3

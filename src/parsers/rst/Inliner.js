@@ -137,7 +137,7 @@ class Inliner {
             const subrefNode = inlines[0];
             if (subrefNode instanceof nodes.substitution_reference) {
                 const subrefText = subrefNode.astext();
-                this.document.note_substitution_ref(subrefNode, subrefText);
+                this.document.noteSubstitutionRef(subrefNode, subrefText);
                 if (endstring[endstring.length - 1] === '_') {
                     const referenceNode = new nodes.reference(
                         `|${subrefText}${endstring}`, '',

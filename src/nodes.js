@@ -561,7 +561,7 @@ export class document extends Element {
     setNameIdMap(node, id, msgnode, explicit) {
         node.attributes.names.forEach((name) => {
             if (name in this.nameIds) {
-                this.set_duplicate_name_id(node, id, name, msgnode, explicit);
+                this.setDuplicateNameId(node, id, name, msgnode, explicit);
             } else {
                 this.nameIds[name] = id;
                 this.nameTypes[name] = explicit;

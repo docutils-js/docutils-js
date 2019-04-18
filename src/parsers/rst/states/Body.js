@@ -203,6 +203,7 @@ class Body extends RSTState {
         citation.attributes.names.push(name);
         this.document.noteCitation(citation);
         this.document.noteExplicitTarget(citation, citation);
+        /* istanbul ignore else */
         if (indented && indented.length) {
             this.nestedParse(indented, { inputOffset: offset, node: citation });
         }
@@ -352,6 +353,7 @@ class Body extends RSTState {
         let subDefMatch;
         let done = false;
         while (!done) {
+            console.log(`escaped is ${escaped}`);
             subDefMatch = pattern.exec(escaped);
             if (subDefMatch) {
                 done = true;
@@ -537,6 +539,20 @@ contentOffset;
 */
         return [result,
                 blankFinish || this.stateMachine.isNextLineBlank()];
+    }
+
+    unknown_directive(typeName) {
+        const lineno = this.stateMachine.absLineNumber();
+        const [indented,
+                indent,
+                offset,
+                blankFinish] = this.stateMachine.getFirstKnownIndented({ indent: 0, stripIndent: false });
+        const text = indented.join('\n');
+        const error = this.reporter.error(
+            `Unknown directive type "${typeName}".`,
+            [new nodes.literal_block(text, text)], { line: lineno },
+);
+        return [[error], blankFinish];
     }
 
     comment(match) {

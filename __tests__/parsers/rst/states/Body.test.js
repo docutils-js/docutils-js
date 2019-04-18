@@ -66,7 +66,7 @@ test('explicit hyperlink_target, with arg (malformed)', () => {
 
 
 
-test.skip('explicit citation', () => {
+test('explicit citation', () => {
     const hyperlinkSource = '.. [myCitation]';
     const rgxp = new RegExp(`\\.\\.[ ]+\\[(\w+)\\]([ ]+|$)`);
     const body = createBody();

@@ -23,7 +23,7 @@ class State {
         // fix me - this needs revision
         /* istanbul ignore if */
         if (!this.nestedSmKwargs) {
-            console.log('I am bogus');
+            // console.log('I am bogus');
             throw new Error();
             this.nestedSmKwargs = {
                 stateClasses: [this.constructor],
@@ -111,7 +111,7 @@ class State {
         const transitions = {};
         /* istanbul ignore if */
         if (!Array.isArray(nameList)) {
-            console.log('warning, not an array');
+            // console.log('warning, not an array');
             throw new Error('not array');
         }
 

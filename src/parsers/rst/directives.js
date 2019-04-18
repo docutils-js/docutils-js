@@ -1,7 +1,8 @@
 import * as _fallbackLanguageModule from './languages/en';
 import * as images from './directives/images';
+import * as parts from './directives/parts';
 
-const dirMap = { images };
+const dirMap = { images, parts };
 
 const directiveRegistry = {
       attention: ['admonitions', 'Attention'],
@@ -81,7 +82,7 @@ export function directive(directiveName, languageModule, document) {
         return [undefined, messages];
     }
     const [modulename, classname] = directiveRegistry[canonicalName];
-    const DirectiveClass = dirMap[modulename][classname];
+    const DirectiveClass = dirMap[modulename] ? dirMap[modulename][classname] : undefined;
     _directives[normName] = DirectiveClass;
     return [DirectiveClass, messages];
 }

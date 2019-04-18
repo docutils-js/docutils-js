@@ -2,6 +2,21 @@ import * as nodes from './nodes';
 import { isIterable } from './utils';
 import { UnimplementedError as Unimp, SystemMessage } from './Exceptions';
 
+export function getSourceLine(node) {
+    /* """
+    Return the "source" and "line" attributes from the `node` given or from
+    its closest ancestor.
+    """ */
+    let myNode = node;
+    while (myNode) {
+        if (myNode.source || myNode.line) {
+            return [myNode.source, myNode.line];
+        }
+        myNode = myNode.parent;
+    }
+    return [undefined, undefined];
+}
+
 class Reporter {
     constructor(source, reportLevel, haltLevel, stream, debug, encoding,
                 errorHandler = 'backslashreplace') {
