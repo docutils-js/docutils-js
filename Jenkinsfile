@@ -24,7 +24,7 @@ pipeline {
 		}
        stage('eslint') {
        steps {
-		sh 'yarn eslint -f checkstyle -o eslint.xml src && /bin/true'
+		sh '-yarn eslint -f checkstyle -o eslint.xml src || true'
 		}
 		}
 
