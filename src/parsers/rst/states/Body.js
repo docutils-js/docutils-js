@@ -127,7 +127,7 @@ class Body extends RSTState {
         this.explicit.patterns = {
             target: new RegExp(`^(_|(?!_)(\`?)(?![ \`])(.+?)${nonWhitespaceEscapeBefore})(?<!(?<!\\x00):)${nonWhitespaceEscapeBefore}[ ]?:([ ]+|$)`),
             reference: new RegExp(`^((${simplename})_|\`(?![ ])(.+?)${nonWhitespaceEscapeBefore}\`_)$`), // ((?P<simple>%(simplename)s)_|`(?![ ])(?P<phrase>.+?)%(non_whitespace_escape_before)s`_)$'),
-            substitution: new RegExp('zzzz'), // ((?![ ])(?P<name>.+?)%(non_whitespace_escape_before)s\\|)([ ]+|$)'),
+            substitution: new RegExp(`((?![ ])(.+?)${nonWhitespaceEscapeBefore}\\|)([ ]+|$)`),
         };
 
         this.explicit.constructs = [
@@ -333,25 +333,34 @@ class Body extends RSTState {
 	
         const blockText = (match.input.substring(0, matchEnd) + block.join('\n'));
         block.disconnect()
-        escaped = escape2null(block[0].rstrip())
-        blockindex = 0
-        while True:
-            subdefmatch = pattern.match(escaped)
-            if subdefmatch:
-                break
-            blockindex += 1
-            try:
-                escaped = escaped + ' ' + escape2null(block[blockindex].strip())
-            except IndexError:
-                raise MarkupError('malformed substitution definition.')
-        del block[:blockindex]          # strip out the substitution marker
-        block[0] = (block[0].strip() + ' ')[subdefmatch.end()-len(escaped)-1:-1]
-        if not block[0]:
-            del block[0]
-            offset += 1
-        while block and not block[-1].strip():
-            block.pop()
-        subname = subdefmatch.group('name')
+        let escaped = escape2null(block[0].trimEnd())
+        let blockindex = 0
+        while( true ) {
+            const subDefMatch = pattern.exec(escaped)
+            if(subDefMatch) {
+                break;
+            }
+            blockindex += 1;
+            try {
+                escaped = escaped + ' ' + escape2null(block[blockindex].trim());
+            } catch(error) {
+                throw new MarkupError('malformed substitution definition.');
+            }
+        }
+
+        const subDefMatchEnd = subDefMatch.index + subDefMatch[0].length;
+        block.splice(0, blockIndex);// strip out the substitution marker
+        const tmpLine = block[0].trim() + ' ';
+        block[0] = tmpLine.substring(subDefMatchEnd-escaped.length-1, tmpLine.length - 1);
+        if(!block[0]) {
+            block.splice(0, 1);
+            offset += 1;
+        }
+        while(block.length && !block[block.length - 1].trim()) {
+            block.pop();
+        }
+        /*
+        const subname = subDefMatch.group('name')
         substitution_node = nodes.substitution_definition(blocktext)
         substitution_node.source = src
         substitution_node.line = srcline
@@ -393,7 +402,7 @@ class Body extends RSTState {
         this.document.note_substitution_def(
             substitution_node, subname, this.parent)
         return [substitution_node], blank_finish
-
+*/
     }
 
     directive(match, optionPresets) {
