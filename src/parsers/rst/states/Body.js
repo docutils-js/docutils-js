@@ -151,7 +151,6 @@ class Body extends RSTState {
             { indent: match.index + match[0].length },
 
         );
-        console.log(`indented is ${indented}`);
         const label = match[1];
         let name = fullyNormalizeName(label);
         const footnote = new nodes.footnote(indented.join('\n'));
@@ -353,7 +352,6 @@ class Body extends RSTState {
         let subDefMatch;
         let done = false;
         while (!done) {
-            console.log(`escaped is ${escaped}`);
             subDefMatch = pattern.exec(escaped);
             if (subDefMatch) {
                 done = true;
@@ -447,7 +445,6 @@ node: substitutionNode,
             throw new Error('need typename');
         }
 
-        console.log(`typeName = ${typeName};  lang = ${this.memo.language};`);
         const [directiveClass, messages] = directives.directive(
             typeName, this.memo.language, this.document,
 );

@@ -17,7 +17,6 @@ class RSTState extends StateWS {
             debug: args && args.stateMachine ? args.stateMachine.debug : false,
             debugFn: args && args.stateMachine ? args.stateMachine.debugFn : console.log,
         };
-//      console.log(this.nestedSmKwargs);
     }
 
     runtimeInit() {
@@ -91,7 +90,6 @@ class RSTState extends StateWS {
             if (!stateMachineKwargs.stateFactory) {
                 throw new Error('need statefactory');
             }
-//            console.log(stateMachineKwargs);
             stateMachine = new stateMachineClass({
 
  debug: this.debug,
@@ -145,8 +143,6 @@ matchTitles,
         }
         /* istanbul ignore if */
         if (!(blankFinishState in stateMachine.states)) {
-            console.log(Object.keys(stateMachine.states));
-                // .map((state) => state.stateName));
             throw new InvalidArgumentsError(`invalid state ${blankFinishState}`);
         }
 
@@ -177,6 +173,7 @@ matchTitles,
     checkSubsection({ source, style, lineno }) {
         const { memo } = this;
         const titleStyles = memo.titleStyles;
+//        console.log(titleStyles);
         const mylevel = memo.sectionLevel;
         let level = 0;
         level = titleStyles.indexOf(style) + 1;
@@ -254,7 +251,6 @@ matchTitles: true,
         const data = lines.join('\n').trimEnd();
         let text;
         let literalnext;
-//      console.log(data);
         if (/(?<!\\)(\\\\)*::$/.test(data)) {
             if (data.length === 2) {
                 return [[], 1];
@@ -279,7 +275,6 @@ matchTitles: true,
     /* eslint-disable-next-line camelcase */
     inline_text(text, lineno) {
         const r = this.inliner.parse(text, { lineno, memo: this.memo, parent: this.parent });
-//      console.log(r);
         return r;
     }
 }

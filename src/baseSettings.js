@@ -7,7 +7,7 @@ export default {
     reportLevel: 2,
     haltLevel: 4,
     exitStatusLevel: 5,
-    debug: true,
+    debug: false,
     traceback: null,
     inputEncodingErrorHandler: 'strict',
     outputEncoding: 'utf-8',
