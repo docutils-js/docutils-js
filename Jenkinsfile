@@ -10,7 +10,7 @@ pipeline {
 	        sh 'yarn'
 		sh 'rm -rf lib'
 		sh 'yarn jest --coverage'
-		sh 'yarn eslint -f checkstyle src > eslint.xml && /bin/true'
+		sh 'yarn eslint -f checkstyle -o eslint.xml src && /bin/true'
 		sh 'yarn grunt'
 		sh 'mkdir -p build'
 		sh 'tar --exclude core --exclude node_modules --exclude build --exclude-vcs -zcv . -f build/docutils-js.tar.gz'
