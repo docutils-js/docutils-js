@@ -336,20 +336,21 @@ class Body extends RSTState {
                    { indent: matchEnd, stripIndent: false },
 );
 
+        let myOffset = offset;
         // unuseD? fixme
         const blockText = (match.input.substring(0, matchEnd) + block.join('\n'));
         block.disconnect();
         let escaped = escape2null(block[0].trimEnd());
-        let blockindex = 0;
+        let blockIndex = 0;
         let subDefMatch;
         while (true) {
             subDefMatch = pattern.exec(escaped);
             if (subDefMatch) {
                 break;
             }
-            blockindex += 1;
+            blockIndex += 1;
             try {
-                escaped = `${escaped} ${escape2null(block[blockindex].trim())}`;
+                escaped = `${escaped} ${escape2null(block[blockIndex].trim())}`;
             } catch (error) {
                 throw new MarkupError('malformed substitution definition.');
             }
@@ -361,13 +362,13 @@ class Body extends RSTState {
         block[0] = tmpLine.substring(subDefMatchEnd - escaped.length - 1, tmpLine.length - 1);
         if (!block[0]) {
             block.splice(0, 1);
-            offset += 1;
+            myOffset += 1;
         }
         while (block.length && !block[block.length - 1].trim()) {
             block.pop();
         }
         const subname = subDefMatch[2];
-        const substitutionNode = nodes.substitution_definition(blocktext);
+        const substitutionNode = nodes.substitution_definition(blockText);
         substitutionNode.source = src;
         substitutionNode.line = srcline;
         if (!block.length) {
@@ -384,7 +385,7 @@ class Body extends RSTState {
 );
         const [newAbsOffset, blankFinish2] = this.nested_list_parse(
             block, {
- inputOffset: offset,
+ inputOffset: myOffset,
 node: substitutionNode,
                      initialState: 'SubstitutionDef',
 blankFinish,
@@ -496,7 +497,9 @@ blankFinish,
         try {
             result = directiveInstance.run();
         } catch (error) {
-            const msgNode = this.reporter.system_message(error.level, error.msg, [], { line: lineno });
+            const msgNode = this.reporter.system_message(
+                error.level, error.msg, [], { line: lineno },
+);
             msgNode.add(new nodes.literal_block(blockText, blockText));
             result = [msgNode];
         }
@@ -517,7 +520,10 @@ blankFinish,
            && this.stateMachine.isNextLineBlank()) { // # an empty comment?
             return [[new nodes.comment()], 1]; // "A tiny but practical wart."
         }
-        const [indented, indent, offset, blankFinish] = this.stateMachine.getFirstKnownIndented({ indent: matchEnd });
+        const [indented, indent,
+               offset, blankFinish] = this.stateMachine.getFirstKnownIndented(
+                   { indent: matchEnd },
+);
         while (indented && indented.length && !indented[indented.length - 1].trim()) {
             indented.trimEnd();
         }

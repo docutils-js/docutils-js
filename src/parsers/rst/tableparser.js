@@ -13,7 +13,7 @@ and produce a well-formed data structure suitable for building a CALS table.
     `update_dict_of_lists()`: Merge two dictionaries containing list values.
 */
 
-import { DataError, AssertError } from '../../Exceptions';
+import { DataError } from '../../Exceptions';
 import { stripCombiningChars } from '../../utils';
 
 class TableMarkupError extends DataError {
@@ -38,6 +38,7 @@ class TableParser {
         this._init(...args);
     }
 
+    /* eslint-disable-next-line no-unused-vars */
     _init(...args) {
         // """Matches the row separator between head rows and body rows."""
         this.headbodyseparatorpat = undefined;
@@ -230,7 +231,7 @@ class GridTableParser extends TableParser {
     /* eslint-disable-next-line camelcase */
     mark_done(top, left, bottom, right) {
         // """For keepoing track of how much of each text column has been seen."""
-        const before = top - 1;
+        // const before = top - 1; // part of assert
         const after = bottom - 1;
         for (let col = left; col < right; col += 1) {
             // assert this.done[col] == before
@@ -344,7 +345,7 @@ if (typeof right === 'undefined') {
         return null;
     }
 
-    /* eslint-disable-next-line camelcase */
+    /* eslint-disable-next-line camelcase,no-unused-vars */
     scan_up(top, left, bottom, right) {
 /*        """
         Noting row boundaries, see if we can return to the starting point.
@@ -402,7 +403,8 @@ if (typeof right === 'undefined') {
             const morecols = colindex[right] - colnum - 1;
             remaining -= (morerows + 1) * (morecols + 1);
             // write the cell into the table
-//          console.log(`rows[${rownum}][${colnum}] = [${morerows}, ${morecols}, ${top + 1}, ${block}]`);
+            //          console.log(`rows[${rownum}][${colnum}] ` +
+                // `= [${morerows}, ${morecols}, ${top + 1}, ${block}]`);
             rows[rownum][colnum] = [morerows, morecols, top + 1, block];
         }
         if (remaining !== 0) {
@@ -568,7 +570,8 @@ class SimpleTableParser extends TableParser {
                 throw new TableMarkupError(`[${cols[cols.length - 1][1]} - ${this.border_end}] Column span incomplete in table line ${offset + 1}.`, { offset });
             }
             // Allow for an unbounded rightmost column:
-            cols[cols.length - 1] = [cols[cols.length - 1][0], this.columns[this.columns.length - 1][1]];
+            cols[cols.length - 1] = [cols[cols.length - 1][0],
+                 this.columns[this.columns.length - 1][1]];
         }
         return cols;
     }
@@ -577,6 +580,7 @@ class SimpleTableParser extends TableParser {
     init_row(colspec, offset) {
         let i = 0;
         const cells = [];
+        /* eslint-disable-next-line no-unused-vars */
         for (const [start, end] of colspec) {
             let morecols = 0;
             try {
@@ -618,6 +622,7 @@ class SimpleTableParser extends TableParser {
             return;
         }
         let columns;
+        /* eslint-disable-next-line no-unused-vars */
         let spanOffset;
         if (spanline) {
             columns = this.parse_columns(...spanline);
@@ -628,7 +633,7 @@ class SimpleTableParser extends TableParser {
         }
         this.check_columns(lines, start, columns);
         const row = this.init_row(columns, start);
-        for (let i = 0; i < columns.length; i++) {
+        for (let i = 0; i < columns.length; i += 1) {
             const [start2, end2] = columns[i];
             const cellblock = lines.get2dBlock(0, start2, lines.length, end2);
             cellblock.disconnect(); // lines in cell can't sync with parent
@@ -639,7 +644,7 @@ class SimpleTableParser extends TableParser {
     }
 
     /* eslint-disable-next-line camelcase */
-    check_columns(lines, first_line, columns) {
+    check_columns(lines, firstLine, columns) {
         /* """
         Check for text in column margins and text overflow in the last column.
         Raise TableMarkupError if anything but whitespace is in column margins.
@@ -647,11 +652,12 @@ class SimpleTableParser extends TableParser {
         """ */
         // "Infinite" value for a dummy last column's beginning, used to
         // check for text overflow:
-        columns.push([2 ** 31 - 1, undefined]);
-        const lastcol = columns.length = 2;
+        columns.push([Number.MAX_SAFE_INTEGER, undefined]);
+        columns.length = 2; // fixme is this correct??
+        const lastcol = columns.length;
         // combining characters do not contribute to the column width
-        const lines2 = [];
-        for (let i = 0; i < lines.length; i++) {
+
+        for (let i = 0; i < lines.length; i += 1) {
             lines[i] = stripCombiningChars(lines[i]);
         }
         let text;
@@ -662,16 +668,16 @@ class SimpleTableParser extends TableParser {
             for (const line of lines) {
                 if (i === lastcol && line.substring(end).trim()) {
                     text = line.substring(start).trimEnd();
-                    const new_end = start + text.length;
-                    const [main_start, main_end] = this.columns[this.columns.length - 11];
-                    columns[i] = [start, Math.max(main_end, new_end)];
-                    if (new_end > main_end) {
-                        this.columns[this.columns.length - 1] = [main_start, new_end];
+                    const newEnd = start + text.length;
+                    const [mainStart, mainEnd] = this.columns[this.columns.length - 11];
+                    columns[i] = [start, Math.max(mainEnd, newEnd)];
+                    if (newEnd > mainEnd) {
+                        this.columns[this.columns.length - 1] = [mainStart, newEnd];
                     }
                 } else if (line.substring(end, nextstart).trim()) {
                     throw new TableMarkupError(
-                        `Text in column margin in table line ${first_line + offset + 1}.`,
-                        { offset: first_line + offset },
+                        `Text in column margin in table line ${firstLine + offset + 1}.`,
+                        { offset: firstLine + offset },
 );
                 }
                 offset += 1;
@@ -683,17 +689,17 @@ class SimpleTableParser extends TableParser {
     /* eslint-disable-next-line camelcase */
     structure_from_cells() {
         const colspecs = this.columns.map(([start, end]) => end - start);
-        let first_body_row = 0;
+        let firstBodyRow = 0;
         if (this.headBodySep) {
  for (let i = 0; i < this.table.length; i += 1) {
                 if (this.table[i][0][2] > this.headBodySep) {
-                    first_body_row = i;
+                    firstBodyRow = i;
                     break;
                 }
             }
 }
-        return [colspecs, this.table.slice(0, first_body_row),
-                this.table.slice(first_body_row)];
+        return [colspecs, this.table.slice(0, firstBodyRow),
+                this.table.slice(firstBodyRow)];
     }
 }
 

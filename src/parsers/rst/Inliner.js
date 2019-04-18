@@ -3,7 +3,7 @@ import { isIterable, getTrimFootnoteRefSpace, splitEscapedWhitespace } from '../
 import { matchChars } from '../../utils/punctuationChars';
 import roleInterface from './Roles';
 import { ApplicationError } from '../../Exceptions';
-
+import unescape from '../../utils/unescape';
 
 const uric = '[-_.!~*\'()[\\];/:@&=+$,%a-zA-Z0-9\\x00]';
 // # Delimiter indicating the end of a URI (not part of the URI):
@@ -431,12 +431,12 @@ if (!rawsource) {
     /* eslint-disable-next-line camelcase */
     inline_obj(match, lineno, endPattern, nodeclass,
                 restore_backslashes = false) {
-                /* istanbul ignore if */
+        /* istanbul ignore if */
         if (typeof nodeclass !== 'function') {
             throw new Error();
         }
 
-                /* istanbul ignore if */
+        /* istanbul ignore if */
         if (!(endPattern instanceof RegExp)) {
             throw new Error('');
         }
@@ -444,7 +444,7 @@ if (!rawsource) {
 //      console.log(match);
         const string = match.match.input;
         const matchstart = string.indexOf(match.groups.start);
-                /* istanbul ignore if */
+        /* istanbul ignore if */
         if (matchstart === -1) {
             throw new Error('');
         }
@@ -460,13 +460,12 @@ if (!rawsource) {
 rawsource;
         if (endmatch && endmatch.index) { // 1 or more chars
             const _text = endmatch.input.substring(0, endmatch.index);
-            text = _text;// unescape(_text, restore_backslashes)
+            text = unescape(_text, restore_backslashes);
             // this may not work for all situations
             const textend = matchend + endmatch.index + endmatch[0].length;
-            rawsource = string.substring(matchstart, textend); // fixmegot
-            // //unescape(string[matchstart:textend], True)
+            rawsource = unescape(string.substring(matchstart, textend), true);
             const node = new nodeclass(rawsource, text);
-            node.children[0].rawsource = _text;// fixme unescape(_text, true)
+            node.children[0].rawsource = unescape(_text, true);
             return [string.substr(0, matchstart), [node],
                     string.substr(textend), [], endmatch[1]];
         }
@@ -481,8 +480,10 @@ rawsource;
 
     initCustomizations(settings) {
         let startStringPrefix; let
-endStringSuffix;
+        endStringSuffix;
+        /* eslint-disable-next-line no-unused-vars */
         let ssn; let
+        /* eslint-disable-next-line no-unused-vars */
 esn;
         if (settings.characterLevelInlineMarkup) {
             startStringPrefix = '(^|(?<!\\x00))';

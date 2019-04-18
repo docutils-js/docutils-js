@@ -117,6 +117,7 @@ blankFinishState: 'Definition',
     text(match, context, nextState) {
         const startline = this.stateMachine.absLineNumber() - 1;
         let block;
+        let msg;
         try {
             block = this.stateMachine.getTextBlock(undefined, true);
         } catch (error) {
@@ -133,7 +134,7 @@ srcline;
         const lines = [context, ...(block || [])];
         const [pelems, literalnext] = this.paragraph(lines, startline);
         this.parent.add(pelems);
-        // fixme this.parent.add(msg)
+        this.parent.add(msg);
         if (literalnext) {
             try {
                 this.stateMachine.nextLine();

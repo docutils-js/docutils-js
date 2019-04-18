@@ -1,22 +1,18 @@
 import UnknownStateError from './UnknownStateError';
 import ErrorOutput from './ErrorOutput';
-import { isIterable, columnIndicies } from './utils';
+import { isIterable } from './utils';
 import {
  ApplicationError, EOFError, InvalidArgumentsError, UnimplementedError as Unimp,
 } from './Exceptions';
-import State from './states/State';
-import StateWS from './states/StateWS';
 import StateCorrection from './StateCorrection';
 import TransitionCorrection from './TransitionCorrection';
-import IndentationError from './IndentationError';
 
 import StringList from './StringList';
 
-
-function __getClass(object) {
+/*function __getClass(object) {
   return Object.prototype.toString.call(object)
     .match(/^\[object\s(.*)\]$/)[1];
-}
+}*/
 
 export class StateMachine {
     /*
@@ -333,60 +329,6 @@ src;
         return [src, srcline];
     }
 
-    atEof() {
-        return this.lineOffset >= this.inputLines.length - 1;
-    }
-
-    atBof() {
-        return this.lineOffset <= 0;
-    }
-
-    previousLine(n = 1) {
-        this.lineOffset -= n;
-        if (this.lineOffset < 0) {
-            this.line = null;
-        } else {
-            this.line = this.inputLines[this.lineOffset];
-        }
-        this.notifyObservers();
-        return this.line;
-    }
-
-    gotoLine(lineOffset) {
-        this.lineOffset = lineOffset - this.inputOffset;
-        this.line = this.inputLines[this.lineOffset];
-        this.notifyObservers();
-        return this.line;
-    }
-
-    getSource(lineOffset) {
-        return this.inputLines.source(lineOffset - this.inputOffset);
-    }
-
-    absLineOffset() {
-        return this.lineOffset + this.inputOffset;
-    }
-
-    absLineNumber() {
-        return this.lineOffset + this.inputOffset + 1;
-    }
-
-    getSourceAndLine(lineno) {
-        let offset; let srcoffset; let srcline; let
-src;
-        if (lineno === undefined) {
-            offset = this.lineOffet;
-        } else {
-            offset = lineno - this.inputOffset - 1;
-        }
-        try {
-            [src, srcoffset] = this.inputLines.info(offset);
-            srcline = srcoffset + 1;
-        } catch (error) {
-            // ??
-        }
-        return [src, srcline];
-    }
 
     insertInput(inputLines, source) {
         throw new Unimp();
