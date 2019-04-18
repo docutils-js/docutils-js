@@ -396,9 +396,9 @@ export class Element extends Node {
         return true;
     }
 
-    firstChildNotMatchingClass(childClass, start=0,
-                               end=2 ** 31 - 1) {
-        /*"""
+    firstChildNotMatchingClass(childClass, start = 0,
+                               end = 2 ** 31 - 1) {
+        /* """
         Return the index of the first child whose class does *not* match.
 
         Parameters:
@@ -407,18 +407,18 @@ export class Element extends Node {
           classes. If a tuple, none of the classes may match.
         - `start`: Initial index to check.
         - `end`: Initial index to *not* check.
-        """*/
-        let myChildClass = Array.isArray(childClass) ? childClass : [childClass];
-        for(let index = start; index <= Math.min(this.length, end); index += 1) {
+        """ */
+        const myChildClass = Array.isArray(childClass) ? childClass : [childClass];
+        for (let index = start; index <= Math.min(this.length, end); index += 1) {
             let gotIt;
-            for(let ci = 0; ci < childClass.length; ci += 1) {
-                const c = childClass[ci];
-                if(this.children[index] instanceof c) {
+            for (let ci = 0; ci < myChildClass.length; ci += 1) {
+                const c = myChildClass[ci];
+                if (this.children[index] instanceof c) {
                     gotIt = true;
                     break;
                 }
             }
-            if(!gotIt) {
+            if (!gotIt) {
                 return index;
             }
         }

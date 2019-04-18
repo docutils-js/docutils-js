@@ -537,10 +537,10 @@ class SimpleTableParser extends TableParser {
 
 //        console.log(`checking this.columns : ${this.columns}`);
         if (this.columns.length) {
-            if(this.border_end == null) {
-                throw new Error("no border_end value");
+            if (this.border_end == null) {
+                throw new Error('no border_end value');
             }
-            
+
             if (cols[cols.length - 1][1] !== this.border_end) {
                 throw new TableMarkupError(`[${cols[cols.length - 1][1]} - ${this.border_end}] Column span incomplete in table line ${offset + 1}.`, { offset });
             }

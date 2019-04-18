@@ -33,7 +33,6 @@ class Body extends RSTState {
     constructor(args) {
         super(args);
         const pats = { };
-        const _enum = { };
 
         pats.nonalphanum7bit = '[!-/:-@[-`{-~]';
         pats.alpha = '[a-zA-Z]';
@@ -146,6 +145,7 @@ class Body extends RSTState {
 
     footnote(match) {
         const [src, srcline] = this.stateMachine.getSourceAndLine();
+	/* eslint-disable-next-line no-unused-vars */
         const [indented, indent, offset, blankFinish] = this.stateMachine.getFirstKnownIndented(
             { indent: match.index + match[0].length },
 );
@@ -185,6 +185,7 @@ class Body extends RSTState {
 
     citation(match) {
         const [src, srcline] = this.stateMachine.getSourceAndLine();
+	/* eslint-disable-next-line no-unused-vars */
         const [indented, indent, offset, blankFinish] = this.stateMachine.getFirstKnownIndented({
             indent: match.index + match[0].length,
         });
@@ -208,6 +209,7 @@ class Body extends RSTState {
     hyperlink_target(match) {
         const pattern = this.explicit.patterns.target;
         const lineno = this.stateMachine.absLineNumber();
+	/* eslint-disable-next-line no-unused-vars */
         const [block, indent, offset, blankFinish] = this.stateMachine.getFirstKnownIndented(
                   {
  indent: match.index + match[0].length,
@@ -259,8 +261,8 @@ class Body extends RSTState {
     }
 
     /* eslint-disable-next-line camelcase */
-    parse_target(block, block_text, lineno) {
-//        console.log(`parse_target(${block}, ${block_text}, ${lineno})`);
+    parse_target(block, blockText, lineno) {
+//        console.log(`parse_target(${block}, ${blockText}, ${lineno})`);
         /* """
         Determine the type of reference of a target.
 
@@ -323,7 +325,75 @@ class Body extends RSTState {
 
     /* eslint-disable-next-line camelcase */
     substitution_def(match) {
-        throw new Unimp('substitution_def');
+        const pattern = this.explicit.patterns.substitution
+        const [ src, srcline ] = this.stateMachine.getSourceAndLine()
+	const matchEnd = match.index + match[0].lengtd
+        const [ block, indent, offset, blank_finish ] = this.stateMachine.getFirstKnownIndented({
+	    indent: matchEnd, stripIndent: false });
+	
+        const blockText = (match.input.substring(0, matchEnd) + block.join('\n'));
+        block.disconnect()
+        escaped = escape2null(block[0].rstrip())
+        blockindex = 0
+        while True:
+            subdefmatch = pattern.match(escaped)
+            if subdefmatch:
+                break
+            blockindex += 1
+            try:
+                escaped = escaped + ' ' + escape2null(block[blockindex].strip())
+            except IndexError:
+                raise MarkupError('malformed substitution definition.')
+        del block[:blockindex]          # strip out the substitution marker
+        block[0] = (block[0].strip() + ' ')[subdefmatch.end()-len(escaped)-1:-1]
+        if not block[0]:
+            del block[0]
+            offset += 1
+        while block and not block[-1].strip():
+            block.pop()
+        subname = subdefmatch.group('name')
+        substitution_node = nodes.substitution_definition(blocktext)
+        substitution_node.source = src
+        substitution_node.line = srcline
+        if not block:
+            msg = this.reporter.warning(
+                'Substitution definition "%s" missing contents.' % subname,
+                nodes.literal_block(blocktext, blocktext),
+                source=src, line=srcline)
+            return [msg], blank_finish
+        block[0] = block[0].strip()
+        substitution_node['names'].append(
+            nodes.whitespace_normalize_name(subname))
+        new_abs_offset, blank_finish = this.nested_list_parse(
+              block, input_offset=offset, node=substitution_node,
+              initial_state='SubstitutionDef', blank_finish=blank_finish)
+        i = 0
+        for node in substitution_node[:]:
+            if not (isinstance(node, nodes.Inline) or
+                    isinstance(node, nodes.Text)):
+                this.parent += substitution_node[i]
+                del substitution_node[i]
+            else:
+                i += 1
+        for node in substitution_node.traverse(nodes.Element):
+            if this.disallowed_inside_substitution_definitions(node):
+                pformat = nodes.literal_block('', node.pformat().rstrip())
+                msg = this.reporter.error(
+                    'Substitution definition contains illegal element <%s>:'
+                    % node.tagname,
+                    pformat, nodes.literal_block(blocktext, blocktext),
+                    source=src, line=srcline)
+                return [msg], blank_finish
+        if len(substitution_node) == 0:
+            msg = this.reporter.warning(
+                  'Substitution definition "%s" empty or invalid.' % subname,
+                  nodes.literal_block(blocktext, blocktext),
+                  source=src, line=srcline)
+            return [msg], blank_finish
+        this.document.note_substitution_def(
+            substitution_node, subname, this.parent)
+        return [substitution_node], blank_finish
+
     }
 
     directive(match, optionPresets) {

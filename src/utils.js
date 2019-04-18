@@ -185,6 +185,6 @@ export function escapeRegExp(string) {
 //    newDocument,
 // };
 export function stripCombiningChars(text) {
-    return text;//fixme
-    //return u''.join([c for c in text if not unicodedata.combining(c)])
-};
+    return text;// fixme
+    // return u''.join([c for c in text if not unicodedata.combining(c)])
+}
