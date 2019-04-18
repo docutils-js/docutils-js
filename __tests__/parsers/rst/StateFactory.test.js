@@ -16,6 +16,7 @@ test("StateFactory.getStateClasses", () => {
       [Function],
       [Function],
       [Function],
+      [Function],
     ]
   `);
 });

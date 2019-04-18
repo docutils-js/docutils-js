@@ -12,6 +12,7 @@ import OptionList from './states/OptionList';
 import QuotedLiteralBlock from './states/QuotedLiteralBlock';
 import SpecializedBody from './states/SpecializedBody';
 import SpecializedText from './states/SpecializedText';
+import SubstitutionDef from './states/SubstitutionDef';
 import Text from './states/Text';
 
 export {
@@ -19,4 +20,5 @@ export {
     EnumeratedList, Explicit, ExtensionOptions,
     FieldList, LineBlock, Line, OptionList,
     QuotedLiteralBlock, SpecializedBody, SpecializedText, Text,
+    SubstitutionDef
 };

@@ -145,6 +145,8 @@ matchTitles,
         }
         /* istanbul ignore if */
         if (!(blankFinishState in stateMachine.states)) {
+            console.log(Object.keys(stateMachine.states));
+                //.map((state) => state.stateName));
             throw new InvalidArgumentsError(`invalid state ${blankFinishState}`);
         }
 

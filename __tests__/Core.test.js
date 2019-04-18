@@ -157,8 +157,8 @@ test.each([
       >>> print '(cut and pasted from interactive Python sessions)'
       (cut and pasted from interactive Python sessions)
 `],
-           ['substitution definition', '.. |symbol here| image:: symbol.png\n'],
-           ['definition list', `what
+    ['substitution definition with image', '.. |symbol here| image:: symbol.png\n'],
+    ['definition list', `what
     Definition lists associate a term with a definition.
 
 how
@@ -174,6 +174,8 @@ how
     or more paragraphs or body elements, indented relative to
     the term.
 `],
+           ['Footnote', `.. [1] A footnote contains body elements, consistently
+   indented by at least 3 spaces.`],
            ['Footnote', `.. [1] A footnote contains body elements, consistently
    indented by at least 3 spaces.`],
            ['Image Directive', '.. image:: mylogo.png\n'],

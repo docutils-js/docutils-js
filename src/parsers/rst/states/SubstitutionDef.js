@@ -65,7 +65,7 @@ class SubstitutionDef extends Body {
     /* eslint-disable-next-line camelcase,no-unused-vars */
     embedded_directive(match, context, nextState) {
         const [nodelist, blankFinish] = this.directive(
-            match,
+            match.result,
             { alt: this.parent.attributes.names[0] },
 );
         this.parent.add(nodelist);

@@ -121,6 +121,8 @@ export class Node {
     _init() {
     }
 
+    isInline() { return false; }
+
     asdom() {
     }
 
@@ -933,24 +935,28 @@ export class emphasis extends TextElement {
     constructor(...args) {
         super(...args);
     }
+    isInline() { return true; }
 } // Inline
 export class strong extends TextElement {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
     }
+    isInline() { return true; }
 } // Inline
 export class literal extends TextElement {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
     }
+    isInline() { return true; }
 } // Inline
 export class reference extends TextElement {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
     }
+    isInline() { return true; }
 } // General, Inline, Referential
 /* eslint-disable-next-line camelcase */
 export class footnote_reference extends TextElement {
@@ -958,6 +964,7 @@ export class footnote_reference extends TextElement {
     constructor(...args) {
         super(...args);
     }
+    isInline() { return true; }
 } // General, Inline, Referential
 /* eslint-disable-next-line camelcase */
 export class citation_reference extends TextElement {
@@ -965,6 +972,7 @@ export class citation_reference extends TextElement {
     constructor(...args) {
         super(...args);
     }
+    isInline() { return true; }
 } // General, Inline, Referential
 /* eslint-disable-next-line camelcase */
 export class substitution_reference extends TextElement {
@@ -972,6 +980,7 @@ export class substitution_reference extends TextElement {
     constructor(...args) {
         super(...args);
     }
+    isInline() { return true; }
 } // General, Inline, Referential
 /* eslint-disable-next-line camelcase */
 export class title_reference extends TextElement {
@@ -979,6 +988,7 @@ export class title_reference extends TextElement {
     constructor(...args) {
         super(...args);
     }
+    isInline() { return true; }
 } // General, Inline, Referential
 
 export class problematic extends TextElement {
@@ -986,6 +996,7 @@ export class problematic extends TextElement {
     constructor(...args) {
         super(...args);
     }
+    isInline() { return true; }
 } // Inline
 
 export class transition extends Element {

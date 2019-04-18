@@ -121,7 +121,7 @@ export class StateMachine {
         this.lineOffset = -1;
         this.currentState = initialState || this.initialState;
         if (!this.currentState) {
-            console.log('No current state');
+            //console.log('No current state');
         }
         if (this.debug) {
             this.debugFn(`\nStateMachine.run: input_lines (line_offset=${this.lineOffset}):\n| ${this.inputLines.join('\n| ')}`);

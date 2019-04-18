@@ -17,7 +17,8 @@ class StateFactory {
  RSTStates.Explicit,
  RSTStates.Text,
  RSTStates.Definition,
- RSTStates.Line];
+                                 RSTStates.Line,
+                                RSTStates.SubstitutionDef];
         }
     }
 

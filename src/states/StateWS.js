@@ -48,11 +48,11 @@ class StateWS extends State {
     indent(match, context, nextState) {
         const [indented, indent, lineOffset, blankFinish] = this.stateMachine.getIndented({});
         const IndentSm = this.indentSm;
-        console.log('instantiating indentsm');
-        console.log(this.indentSmKwargs);
+        //console.log('instantiating indentsm');
+        //console.log(this.indentSmKwargs);
         const sm = new IndentSm({ debug: this.debug, ...this.indentSmKwargs });
         if (!sm.run) {
-            console.log(Object.keys(sm));
+            //console.log(Object.keys(sm));
             throw Error(`no sm run ${this} ${IndentSm.constructor.name}`);
         }
 

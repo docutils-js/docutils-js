@@ -7,6 +7,7 @@ import StringList from '../../../StringList';
 import * as tableparser from '../tableparser';
 import { ApplicationError, UnimplementedError as Unimp } from '../../../Exceptions';
 import TransitionCorrection from '../../../TransitionCorrection';
+import * as directives from '../directives';
 
 const fullyNormalizeName = nodes.fullyNormalizeName;
 
@@ -148,7 +149,9 @@ class Body extends RSTState {
         /* eslint-disable-next-line no-unused-vars */
         const [indented, indent, offset, blankFinish] = this.stateMachine.getFirstKnownIndented(
             { indent: match.index + match[0].length },
-);
+            
+        );
+        console.log(`indented is ${indented}`);
         const label = match[1];
         let name = fullyNormalizeName(label);
         const footnote = new nodes.footnote(indented.join('\n'));
@@ -177,6 +180,7 @@ class Body extends RSTState {
             this.document.setId(footnote, footnote);
         }
 
+        /* istanbul ignore else */
         if (indented && indented.length) {
             this.nestedParse(indented, { inputOffset: offset, node: footnote });
         }
@@ -315,6 +319,7 @@ class Body extends RSTState {
             this.document.noteExplicitTarget(target, this.parent);
         } else {
             // # anonymous target
+            // istanbul ignore else
             if (refuri) {
                 target.attributes.refuri = refuri;
             }
@@ -329,6 +334,7 @@ class Body extends RSTState {
         /* eslint-disable-next-line no-unused-vars */
         const [src, srcline] = this.stateMachine.getSourceAndLine();
         const matchEnd = match.index + match[0].length;
+        let myBlankFinish;
         /* eslint-disable-next-line no-unused-vars */
         const [block, indent,
         /* eslint-disable-next-line no-unused-vars */
@@ -336,6 +342,7 @@ class Body extends RSTState {
                    { indent: matchEnd, stripIndent: false },
 );
 
+        myBlankFinish = blankFinish;
         let myOffset = offset;
         // unuseD? fixme
         const blockText = (match.input.substring(0, matchEnd) + block.join('\n'));
@@ -343,16 +350,18 @@ class Body extends RSTState {
         let escaped = escape2null(block[0].trimEnd());
         let blockIndex = 0;
         let subDefMatch;
-        while (true) {
+        let done = false;
+        while (!done) {
             subDefMatch = pattern.exec(escaped);
             if (subDefMatch) {
-                break;
-            }
-            blockIndex += 1;
-            try {
-                escaped = `${escaped} ${escape2null(block[blockIndex].trim())}`;
-            } catch (error) {
-                throw new MarkupError('malformed substitution definition.');
+                done = true;
+            } else {
+                blockIndex += 1;
+                try {
+                    escaped = `${escaped} ${escape2null(block[blockIndex].trim())}`;
+                } catch (error) {
+                    throw new MarkupError('malformed substitution definition.');
+                }
             }
         }
 
@@ -368,7 +377,7 @@ class Body extends RSTState {
             block.pop();
         }
         const subname = subDefMatch[2];
-        const substitutionNode = nodes.substitution_definition(blockText);
+        const substitutionNode = new nodes.substitution_definition(blockText);
         substitutionNode.source = src;
         substitutionNode.line = srcline;
         if (!block.length) {
@@ -377,54 +386,67 @@ class Body extends RSTState {
                 nodes.literal_block(blockText, blockText),
                 { source: src, line: srcline },
 );
-            return [[msg], blankFinish];
+            return [[msg], myBlankFinish];
         }
         block[0] = block[0].trim();
-        substitutionNode.attributes.named.push(
+        substitutionNode.attributes.names.push(
             nodes.whitespaceNormalizeName(subname),
 );
-        const [newAbsOffset, blankFinish2] = this.nested_list_parse(
+        /* eslint-disable-next-line no-unused-vars */
+        const [newAbsOffset, blankFinish2] = this.nestedListParse(
             block, {
  inputOffset: myOffset,
 node: substitutionNode,
                      initialState: 'SubstitutionDef',
-blankFinish,
+                blankFinish: myBlankFinish,
 },
 );
-        const i = 0;
-        /*
-        for node in substitution_node[:]:
-            if not (isinstance(node, nodes.Inline) or
-                    isinstance(node, nodes.Text)):
-                this.parent += substitution_node[i]
-                del substitution_node[i]
-            else:
-                i += 1
-        for node in substitution_node.traverse(nodes.Element):
-            if this.disallowed_inside_substitution_definitions(node):
-                pformat = nodes.literal_block('', node.pformat().rstrip())
-                msg = this.reporter.error(
-                    'Substitution definition contains illegal element <%s>:'
-                    % node.tagname,
-                    pformat, nodes.literal_block(blocktext, blocktext),
-                    source=src, line=srcline)
-                return [msg], blankFinish
-        if len(substitution_node) == 0:
-            msg = this.reporter.warning(
-                  'Substitution definition "%s" empty or invalid.' % subname,
-                  nodes.literal_block(blocktext, blocktext),
-                  source=src, line=srcline)
-            return [msg], blankFinish
-        this.document.note_substitution_def(
-            substitution_node, subname, this.parent)
-        return [substitution_node], blankFinish
-*/
+        myBlankFinish = blankFinish2;
+        let i = 0;
+        substitutionNode.children.slice().forEach((node) => {
+            // this is a mixin check!!
+            if (!(node.isInline()
+                 || node instanceof nodes.Text)) {
+                this.parent.add(substitutionNode.children[i]);
+                substitutionNode.children.splice(i, 1);
+            } else {
+                i += 1;
+            }
+        });
+        for (const node of substitutionNode.traverse(nodes.Element)) {
+            if (this.disallowedInsideSubstitutionDefinitions(node)) {
+                const pformat = new nodes.literal_block('', node.pformat().trimEnd());
+                const msg = this.reporter.error(
+                    `Substitution definition contains illegal element <${node.tagname}>:`,
+                    [pformat, new nodes.literal_block(blockText, blockText)],
+                    { source: src, line: srcline },
+);
+                return [[msg], blankFinish];
+            }
+        }
+        if (substitutionNode.children.length === 0) {
+            const msg = this.reporter.warning(
+                `Substitution definition "${subname}" empty or invalid.`,
+                [new nodes.literal_block(blockText, blockText)],
+                { source: src, line: srcline },
+);
+            return [[msg], blankFinish];
+        }
+        this.document.noteSubstitutionDef(
+            substitutionNode, subname, this.parent,
+);
+        return [[substitutionNode], blankFinish];
     }
 
     directive(match, optionPresets) {
         // """Returns a 2-tuple: list of nodes, and a "blank finish" boolean."""
-        const typeName = match.result[1];
-        const [directiveClass, messages] = new directives.directive(
+        const typeName = match[1];
+        if(typeof typeName === 'undefined') {
+            throw new Error("need typename");
+        }
+        
+        console.log(`typeName = ${typeName};  lang = ${this.memo.language};`);
+        const [directiveClass, messages] = directives.directive(
             typeName, this.memo.language, this.document,
 );
         this.parent.add(messages);
@@ -465,17 +487,20 @@ blankFinish,
 */
         const lineno = this.stateMachine.absLineNumber();
         const initialLineOffset = this.stateMachine.lineOffset;
+        /* eslint-disable-next-line no-unused-vars */
         const [indented, indent, lineOffset, blankFinish] = this.stateMachine.getFirstKnownIndented(
             {
- indent: match.result.index + match.result[0].length,
+ indent: match.index + match[0].length,
               stripTop: 0,
 },
 );
         const blockText = this.stateMachine.inputLines.slice(
             initialLineOffset, this.stateMachine.lineOffset + 1,
-);
+        );
+        let args; let options; let content; let
+contentOffset;
         try {
-            const [args, options, content, contentOffset] = this.parse_directive_block(
+            [args, options, content, contentOffset] = this.parse_directive_block(
                 indented,
                 lineOffset,
                 directive,
@@ -520,8 +545,10 @@ blankFinish,
            && this.stateMachine.isNextLineBlank()) { // # an empty comment?
             return [[new nodes.comment()], 1]; // "A tiny but practical wart."
         }
-        const [indented, indent,
-               offset, blankFinish] = this.stateMachine.getFirstKnownIndented(
+        const [indented,
+            /* eslint-disable-next-line no-unused-vars */
+               indent, offset,
+               blankFinish] = this.stateMachine.getFirstKnownIndented(
                    { indent: matchEnd },
 );
         while (indented && indented.length && !indented[indented.length - 1].trim()) {
@@ -567,6 +594,8 @@ blankFinish,
                         const message = error.args ? error.args.join(' ') : '';
                         errors.push(this.reporter.warning(message, [], { line: lineno }));
                         break;
+                    } else {
+                        throw error;
                     }
                 }
             }
@@ -610,6 +639,7 @@ initialState: 'Explicit',
     /* eslint-disable-next-line camelcase */
     anonymous_target(match) {
         const lineno = this.stateMachine.absLineNumber();
+        /* eslint-disable-next-line no-unused-vars */
         const [block, indent, offset, blankFinish] = this.stateMachine.getFirstKnownIndented({
  indent: match.result.index + match.result[0].length,
                                                           untilBlank: true,
@@ -624,6 +654,7 @@ initialState: 'Explicit',
     }
 
     indent(match, context, nextState) {
+        /* eslint-disable-next-line no-unused-vars */
         const [indented, indent, lineOffset, blankFinish] = this.stateMachine.getIndented({});
         /* istanbul ignore if */
         if (indented === undefined) {
@@ -829,6 +860,7 @@ initialState: 'EnumeratedList',
         }
 
         let indented; let lineOffset; let blankFinish;
+        /* eslint-disable-next-line no-unused-vars */
         let outIndent;
         if (this.stateMachine.line.length > indent) {
 //          console.log(`get known indentd`);
@@ -897,8 +929,9 @@ initialState: 'EnumeratedList',
         return [[], nextState, []];
     }
 */
-    /* eslint-disable-next-line camelcase */
-    parse_enumerator(match, expected_sequence) {
+    // fixme
+    /* eslint-disable-next-line camelcase,no-unused-vars */
+    parse_enumerator(match, expectedSequence) {
         throw new Unimp('parse_enumerator');
     }
 
@@ -931,6 +964,7 @@ initialState: 'EnumeratedList',
         const name = this.parse_field_marker(match);
         const [src, srcline] = this.stateMachine.getSourceAndLine();
         const lineno = this.stateMachine.absLineNumber();
+        /* eslint-disable-next-line no-unused-vars */
         const [indented, indent, lineOffset, blankFinish] = this.stateMachine.getFirstKnownIndented(
                   { indent: match.result.index + match.result[0].length },
 );
@@ -967,6 +1001,7 @@ initialState: 'EnumeratedList',
     option_marker(match, context, nextState) {
         // """Option list item."""
         const optionlist = new nodes.option_list();
+        /* eslint-disable-next-line no-unused-vars */// fixme
         const [source, line] = this.stateMachine.getSourceAndLine();
         let listitem;
         let blankFinish;
@@ -977,7 +1012,10 @@ initialState: 'EnumeratedList',
                 // This shouldn't happen; pattern won't match.
                 const msg = this.reporter.error(`Invalid option list marker: ${error}`);
                 this.parent.add(msg);
-                const [indented, indent, lineOffset, blankFinish2] = this.stateMachine.getFirstKnownIndented(
+                const [indented,
+                       /* eslint-disable-next-line no-unused-vars */
+                       indent,
+                       lineOffset, blankFinish2] = this.stateMachine.getFirstKnownIndented(
                           { indent: match.result.index + match.result[0].length },
 );
                 blankFinish = blankFinish2;
@@ -1014,7 +1052,13 @@ initialState: 'EnumeratedList',
     option_list_item(match) {
         const offset = this.stateMachine.absLineOffset();
         const options = this.parse_option_marker(match);
-        const [indented, indent, lineOffset, blankFinish] = this.stateMachine.getFirstKnownIndented({ indent: match.result.index + match.result[0].length });
+        const [indented,
+               /* eslint-disable-next-line no-unused-vars */
+               indent,
+               lineOffset,
+               blankFinish] = this.stateMachine.getFirstKnownIndented(
+                   { indent: match.result.index + match.result[0].length },
+);
         if (!indented || !indented.length) { //  not an option list item
             this.gotoLine(offset);
             throw new TransitionCorrection('text');
@@ -1042,7 +1086,7 @@ initialState: 'EnumeratedList',
         """ */
         const optlist = [];
         const optionstrings = match.result[0].trimEnd().split(', ');
-        for (const optionstring of optionstrings) {
+        optionstrings.forEach((optionstring) => {
             const tokens = optionstring.split(/s+/);
             let delimiter = ' ';
             const firstopt = tokens[0].split('=', 2);
@@ -1058,12 +1102,12 @@ initialState: 'EnumeratedList',
                 tokens.splice(0, 1, tokens[0].substring(0, 2), tokens[0].substring(2));
                 delimiter = '';
             }
-            if (tokens.length > 1 && (tokens[1].startsWith('<')
+            if ((tokens.length > 1) && (tokens[1].startsWith('<')
                                      && tokens[-1].endsWith('>'))) {
                 // "-o <value1 value2>" form; join all values into one token
                 tokens.splice(1, tokens.length, tokens.slice(1).join(''));
             }
-            if (tokens.length > 0 <= 2) {
+            if ((tokens.length > 0) && (tokens.length <= 2)) {
                 const option = new nodes.option(optionstring);
                 option.add(new nodes.option_string(tokens[0], tokens[0]));
                 if (tokens.length > 1) {
@@ -1074,7 +1118,7 @@ initialState: 'EnumeratedList',
             } else {
                 throw new MarkupError(`wrong number of option tokens (=${tokens.length}), should be 1 or 2: "${optionstring}"`);
             }
-        }
+        });
         return optlist;
     }
 
@@ -1129,6 +1173,7 @@ initialState: 'LineBlock',
     /* eslint-disable-next-line camelcase */
     line_block_line(match, lineno) {
         // """Return one line element of a line_block."""
+        /* eslint-disable-next-line no-unused-vars */
         const [indented, indent, lineOffset, blankFinish] = this
               .stateMachine.getFirstKnownIndented(
             {
@@ -1241,8 +1286,6 @@ initialState: 'LineBlock',
                 nodelist = [table, ...messages];
             } catch (error) {
                 if (error instanceof tableparser.TableMarkupError) {
-//                    console.log(error);
-                    throw error; // fixme
                     nodelist = [...this.malformed_table(block, error.args ? error.args.join(' ') : '',
                                                         error.offset), ...messages];
                 } else {
@@ -1380,7 +1423,7 @@ initialState: 'LineBlock',
         throw new Error(detail);
         block.replace(this.doubleWidthPadChar, '');
         const data = block.join('\n');
-        const message = 'Malformed table.';
+        let message = 'Malformed table.';
         const startline = this.stateMachine.absLineNumber() - block.length + 1;
         if (detail) {
             message += `\n${detail}`;
@@ -1404,14 +1447,14 @@ initialState: 'LineBlock',
         }
         const tgroup = new nodes.tgroup('', [], { cols: colwidths.length });
         table.add(tgroup);
-        for (const colwidth of colwidths) {
+        colwidths.forEach((colwidth) => {
             const colspec = new nodes.colspec('', [], { colwidth });
             if (stubColumns) {
                 colspec.attributes.stub = 1;
                 stubColumns -= 1;
             }
             tgroup.add(colspec);
-        }
+        });
         if (headrows) {
             const thead = new nodes.thead('', '', [], {});
             tgroup.add(thead);
@@ -1481,6 +1524,7 @@ initialState: 'LineBlock',
     }
 
 
+        /* eslint-disable-next-line no-unused-vars */
     text(match, context, nextState) {
         /* istanbul ignore if */
         if (match.input === undefined) {
