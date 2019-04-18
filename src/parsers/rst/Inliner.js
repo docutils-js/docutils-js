@@ -111,8 +111,8 @@ class Inliner {
 
     /* eslint-disable-next-line camelcase */
     inline_internal_target(match, lineno) {
-        /* eslint-disable-next-line no-unused-vars */
         const [before, inlines, remaining,
+               /* eslint-disable-next-line no-unused-vars */
                sysmessages, endstring] = this.inline_obj(match,
                                                          lineno,
                                                          this.patterns.target,
@@ -231,8 +231,8 @@ class Inliner {
     }
 
     emphasis(match, lineno) {
-        /* eslint-disable-next-line no-unused-vars */
         const [before, inlines, remaining,
+        /* eslint-disable-next-line no-unused-vars */
                sysmessages, endstring] = this.inline_obj(
                    match, lineno, this.patterns.emphasis, nodes.emphasis,
 );
@@ -240,8 +240,8 @@ class Inliner {
    }
 
     strong(match, lineno) {
-        /* eslint-disable-next-line no-unused-vars */
         const [before, inlines, remaining,
+               /* eslint-disable-next-line no-unused-vars */
                sysmessages, endstring] = this.inline_obj(match,
                                                          lineno,
                                                          this.patterns.strong,

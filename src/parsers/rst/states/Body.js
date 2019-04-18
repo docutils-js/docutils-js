@@ -260,7 +260,7 @@ class Body extends RSTState {
             return data;
     }
 
-    /* eslint-disable-next-line camelcase */
+    /* eslint-disable-next-line camelcase,no-unused-vars */
     parse_target(block, blockText, lineno) {
 //        console.log(`parse_target(${block}, ${blockText}, ${lineno})`);
         /* """
@@ -326,16 +326,24 @@ class Body extends RSTState {
     /* eslint-disable-next-line camelcase */
     substitution_def(match) {
         const pattern = this.explicit.patterns.substitution;
+        /* eslint-disable-next-line no-unused-vars */
         const [src, srcline] = this.stateMachine.getSourceAndLine();
-        const matchEnd = match.index + match[0].lengtd;
-        const [block, indent, offset, blank_finish] = this.stateMachine.getFirstKnownIndented({ indent: matchEnd, stripIndent: false });
+        const matchEnd = match.index + match[0].length;
+        /* eslint-disable-next-line no-unused-vars */
+        const [block, indent,
+        /* eslint-disable-next-line no-unused-vars */
+               offset, blankFinish] = this.stateMachine.getFirstKnownIndented(
+                   { indent: matchEnd, stripIndent: false },
+);
 
+        // unuseD? fixme
         const blockText = (match.input.substring(0, matchEnd) + block.join('\n'));
         block.disconnect();
         let escaped = escape2null(block[0].trimEnd());
         let blockindex = 0;
+        let subDefMatch;
         while (true) {
-            const subDefMatch = pattern.exec(escaped);
+            subDefMatch = pattern.exec(escaped);
             if (subDefMatch) {
                 break;
             }
@@ -358,24 +366,32 @@ class Body extends RSTState {
         while (block.length && !block[block.length - 1].trim()) {
             block.pop();
         }
+        const subname = subDefMatch[2];
+        const substitutionNode = nodes.substitution_definition(blocktext);
+        substitutionNode.source = src;
+        substitutionNode.line = srcline;
+        if (!block.length) {
+            const msg = this.reporter.warning(
+                `Substitution definition "${subname}" missing contents.`,
+                nodes.literal_block(blockText, blockText),
+                { source: src, line: srcline },
+);
+            return [[msg], blankFinish];
+        }
+        block[0] = block[0].trim();
+        substitutionNode.attributes.named.push(
+            nodes.whitespaceNormalizeName(subname),
+);
+        const [newAbsOffset, blankFinish2] = this.nested_list_parse(
+            block, {
+ inputOffset: offset,
+node: substitutionNode,
+                     initialState: 'SubstitutionDef',
+blankFinish,
+},
+);
+        const i = 0;
         /*
-        const subname = subDefMatch.group('name')
-        substitution_node = nodes.substitution_definition(blocktext)
-        substitution_node.source = src
-        substitution_node.line = srcline
-        if not block:
-            msg = this.reporter.warning(
-                'Substitution definition "%s" missing contents.' % subname,
-                nodes.literal_block(blocktext, blocktext),
-                source=src, line=srcline)
-            return [msg], blank_finish
-        block[0] = block[0].strip()
-        substitution_node['names'].append(
-            nodes.whitespace_normalize_name(subname))
-        new_abs_offset, blank_finish = this.nested_list_parse(
-              block, input_offset=offset, node=substitution_node,
-              initial_state='SubstitutionDef', blank_finish=blank_finish)
-        i = 0
         for node in substitution_node[:]:
             if not (isinstance(node, nodes.Inline) or
                     isinstance(node, nodes.Text)):
@@ -391,16 +407,16 @@ class Body extends RSTState {
                     % node.tagname,
                     pformat, nodes.literal_block(blocktext, blocktext),
                     source=src, line=srcline)
-                return [msg], blank_finish
+                return [msg], blankFinish
         if len(substitution_node) == 0:
             msg = this.reporter.warning(
                   'Substitution definition "%s" empty or invalid.' % subname,
                   nodes.literal_block(blocktext, blocktext),
                   source=src, line=srcline)
-            return [msg], blank_finish
+            return [msg], blankFinish
         this.document.note_substitution_def(
             substitution_node, subname, this.parent)
-        return [substitution_node], blank_finish
+        return [substitution_node], blankFinish
 */
     }
 

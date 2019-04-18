@@ -1,6 +1,7 @@
 import Body from './Body';
 import { EOFError } from '../../../Exceptions';
 import * as nodes from '../../../nodes';
+import * as RegExps from '../RegExps';
 
 
 class SubstitutionDef extends Body {
@@ -10,7 +11,7 @@ class SubstitutionDef extends Body {
     _init() {
         super._init();
         this.patterns = {
-            embedded_directive: new RegExp(`(${simplename})::( +|$)`),
+            embedded_directive: new RegExp(`(${RegExps.simplename})::( +|$)`),
             text: '',
 };
         this.initialTransitions = ['embedded_directive', 'text'];
@@ -20,6 +21,7 @@ class SubstitutionDef extends Body {
     /* eslint-disable-next-line camelcase,no-unused-vars */
     literal_block(match, context, nextState) {
         // """Return a list of nodes."""
+        /* eslint-disable-next-line no-unused-vars */
         const [indented, indent, offset, blankFinish] = this.stateMachine.getIndented({});
         while (indented && indented.length && !indented[indented.length - 1].trim()) {
             indented.trimEnd();

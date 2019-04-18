@@ -7,7 +7,7 @@ class LineBlock extends SpecializedBody {
         this.invalid_input();
     }
 
-    /* eslint-disable-next-line camelcase,no-unused-vars*/
+    /* eslint-disable-next-line camelcase,no-unused-vars */
     line_block(match, context, nextState) {
         // """New line of line block."""
         const lineno = this.stateMachine.absLineNumber();

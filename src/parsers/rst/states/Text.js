@@ -116,7 +116,6 @@ blankFinishState: 'Definition',
 
     text(match, context, nextState) {
         const startline = this.stateMachine.absLineNumber() - 1;
-        let msg;
         let block;
         try {
             block = this.stateMachine.getTextBlock(undefined, true);
@@ -150,9 +149,10 @@ srcline;
         return [[], nextState, []];
     }
 
-    /* eslint-disable-next-line camelcase */
+    /* eslint-disable-next-line camelcase,no-unused-vars */
     literal_block(match, context, nextState) {
         // """Return a list of nodes."""
+        /* eslint-disable-next-line no-unused-vars */
         const [indented, indent, offset, blankFinish] = this.stateMachine.getIndented({});
         while (indented && indented.length && !indented[indented.length - 1].trim()) {
             indented.trimEnd();
@@ -195,6 +195,7 @@ srcline;
 
     /* eslint-disable-next-line camelcase */
     definition_list_item(termline) {
+        /* eslint-disable-next-line no-unused-vars */
         const [indented, indent, lineOffset, blankFinish] = this.stateMachine.getIndented({});
         const itemnode = new nodes.definition_list_item(
             [...termline, ...indented].join('\b'),

@@ -1,6 +1,4 @@
 // import languages from './languages';
-import Component from './Component';
-import { __version__ } from './index';
 import * as xml from './writers/xml';
 import * as pojo from './writers/pojo';
 

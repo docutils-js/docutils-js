@@ -861,4 +861,5 @@ combining[0x1E947] = 230;
 combining[0x1E948] = 230;
 combining[0x1E949] = 230;
 combining[0x1E94A] = 7;
+/* eslint-disable-next-line import/prefer-default-export */
 export { combining };

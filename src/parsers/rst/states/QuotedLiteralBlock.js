@@ -54,7 +54,8 @@ class QuotedLiteralBlock extends RSTState {
         return [];
     }
 
-    indent(match, context, next_state) {
+    /* eslint-disable-next-line no-unused-vars */
+    indent(match, context, nextState) {
 //        assert context, ('QuotedLiteralBlock.indent: context should not '
 //                         'be empty!')
         this.messages.push(
