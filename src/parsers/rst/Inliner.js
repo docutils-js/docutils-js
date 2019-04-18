@@ -16,27 +16,27 @@ const emailPattern = `${emailc}+(?:\\.${emailc}+)*(?<!\x00)@${emailc}+(?:\\.${em
 //                 re.VERBOSE | re.UNICODE),
 
 function buildRegexp(definition, compile = true) {
-    let [fakeTuple, name, prefix, suffix, parts] = definition;
-    prefix = prefix.slice();
-    suffix = suffix.slice();
-    parts = parts.slice();
+    const [fakeTuple, name, prefix, suffix, parts] = definition;
+    let myPrefix = prefix.slice();
+    let mySuffix = suffix.slice();
+    const myParts = parts.slice();
     let prefixNames = [];
-    if (Array.isArray(prefix)) {
-        prefix.shift();
-        const pr = prefix.shift();
-        prefixNames = [...prefix];
-        prefix = pr;
+    if (Array.isArray(myPrefix)) {
+        myPrefix.shift();
+        const pr = myPrefix.shift();
+        prefixNames = [...myPrefix];
+        myPrefix = pr;
     }
     /* istanbul ignore if */
-    if (suffix === undefined) {
+    if (mySuffix === undefined) {
         throw new Error();
     }
     let suffixNames = [];
-    if (Array.isArray(suffix)) {
-        suffix.shift();
-        const sr = suffix.shift();
-        suffixNames = [...suffix];
-        suffix = sr;
+    if (Array.isArray(mySuffix)) {
+        mySuffix.shift();
+        const sr = mySuffix.shift();
+        suffixNames = [...mySuffix];
+        mySuffix = sr;
     }
 
     /* istanbul ignore if */
@@ -47,12 +47,12 @@ function buildRegexp(definition, compile = true) {
     const partStrings = [];
 //    console.log(parts);
     /* istanbul ignore if */
-    if (parts === undefined) {
+    if (myParts === undefined) {
         throw new Error();
     }
-    const fakeTuple2 = parts.shift();
+    myParts.shift(); /* Remove 'faketuple' */
     const groupNames = [];
-    parts.forEach((part) => {
+    myParts.forEach((part) => {
         const fakeTuple3 = Array.isArray(part) ? part[0] : undefined;
         if (fakeTuple3 === 1) {
             const [regexp, subGroupNames] = buildRegexp(part, null);
@@ -70,7 +70,7 @@ function buildRegexp(definition, compile = true) {
         }
     });
     const orGroup = partStrings.map(x => `(${x})`).join('|');
-    const regexp = `${prefix}(${orGroup})${suffix}`;
+    const regexp = `${myPrefix}(${orGroup})${mySuffix}`;
 //    console.log(new RegExp(regexp))
     groupNames.splice(0, 0, ...prefixNames, name);
 
@@ -111,6 +111,7 @@ class Inliner {
 
     /* eslint-disable-next-line camelcase */
     inline_internal_target(match, lineno) {
+        /* eslint-disable-next-line no-unused-vars */
         const [before, inlines, remaining,
                sysmessages, endstring] = this.inline_obj(match,
                                                          lineno,
@@ -155,7 +156,7 @@ class Inliner {
         return [before, inlines, remaining, sysmessages];
     }
 
-    /* eslint-disable-next-line camelcase */
+    /* eslint-disable-next-line camelcase,no-unused-vars */
     footnote_reference(match, lineno) {
 //        console.log(`in footnote_reference : ${match.result}`);
         const label = match.groups.footnotelabel;
@@ -230,6 +231,7 @@ class Inliner {
     }
 
     emphasis(match, lineno) {
+        /* eslint-disable-next-line no-unused-vars */
         const [before, inlines, remaining,
                sysmessages, endstring] = this.inline_obj(
                    match, lineno, this.patterns.emphasis, nodes.emphasis,
@@ -238,6 +240,7 @@ class Inliner {
    }
 
     strong(match, lineno) {
+        /* eslint-disable-next-line no-unused-vars */
         const [before, inlines, remaining,
                sysmessages, endstring] = this.inline_obj(match,
                                                          lineno,
@@ -499,11 +502,11 @@ esn;
                 ']))' */
             esn = [];
         }
-//      this.simplename = '(?:(?!_)\\w)+(?:[-._+:](?:(?!_)\\w)+)*'
+//      this.simplename = '(?:(?!_)\\w)+(?:[-._+:](?:(?!_)\\w)+)*' // fixme
         this.simplename = '\\w+';
 
-        const prefix = startStringPrefix;
-        const suffix = endStringSuffix;
+//        const prefix = startStringPrefix;
+//        const suffix = endStringSuffix;
 /*      const initialInline =
               { prefix, suffix: '',
                 parts: {
@@ -587,9 +590,7 @@ esn;
         this.language = memo.language;
         this.parent = parent;
 //      console.log(new RegExp(this.patterns.initial[0]));
-        const patternSearch = this.patterns.initial[0][Symbol.match].bind(this.patterns.initial[0]);
 //      console.log(this.patterns.initial[0]);
-        const { dispatch } = this;
 //      console.log(text.constructor.name);
         let remaining = text;// escape2null(text)
         const processed = [];
@@ -642,7 +643,7 @@ esn;
         return [processed, messages];
     }
 
-    /* eslint-disable-next-line camelcase */
+    /* eslint-disable-next-line camelcase,no-unused-vars */
     implicit_inline(text, lineno) {
         /*
         Check each of the patterns in `self.implicit_dispatch` for a match,
