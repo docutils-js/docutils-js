@@ -166,10 +166,10 @@ class Inliner {
         const remaining = string.substring(match.result.index + match.result[0].length);
         let refnode;
         if (match.groups.citationlabel) {
-            refnode = new nodes.citation_reference('[%s]_' % label, [],
+            refnode = new nodes.citation_reference(`[${label}]_`, '', [],
                                                    { refname });
-            refnode += nodes.Text(label);
-            this.document.note_citation_ref(refnode);
+            refnode.add(new nodes.Text(label));
+            this.document.noteCitationRef(refnode);
         } else {
             refnode = new nodes.footnote_reference(`[${label}]_`);
             if (refname[0] === '#') {
@@ -675,7 +675,7 @@ esn;
         return uri; // fixme
     }
     /*
-        console.log(uri);
+        //console.log(uri);
         const match = this.patterns.email.exec(uri)
         if(match) {
             return 'mailto:' + uri

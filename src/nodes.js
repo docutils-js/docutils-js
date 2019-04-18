@@ -505,7 +505,7 @@ export class document extends Element {
         this.nameTypes = {};
         this.ids = {};
         this.footnoteRefs = {};
-        this.citatonRefs = {};
+        this.citationRefs = {};
         this.autofootnotes = [];
         this.autofootnoteRefs = [];
         this.symbolFootnotes = [];
@@ -711,7 +711,11 @@ export class document extends Element {
 
     noteCitationRef(ref) {
         this.setId(ref);
-        this.citationRefs.setDefault(ref.refname, []).push(ref);
+        if (this.citationRefs[ref.refname]) {
+            this.citationRefs[ref.refname].push(ref);
+        } else {
+            this.citationRefs[ref.refname] = [ref];
+        }
         this.noteRefname(ref);
     }
 

@@ -174,8 +174,7 @@ how
     or more paragraphs or body elements, indented relative to
     the term.
 `],
-           ['Footnote', `.. [1] A footnote contains body elements, consistently
-   indented by at least 3 spaces.`],
+           ['Citation', `Hello [Goober]_\n\n.. [Goober] Citation.\n`],
            ['Footnote', `.. [1] A footnote contains body elements, consistently
    indented by at least 3 spaces.`],
            ['Image Directive', '.. image:: mylogo.png\n'],
