@@ -8,4 +8,3 @@ class Image extends Directive {
 }
 
 export { Image };
-

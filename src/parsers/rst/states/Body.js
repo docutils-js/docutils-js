@@ -149,7 +149,7 @@ class Body extends RSTState {
         /* eslint-disable-next-line no-unused-vars */
         const [indented, indent, offset, blankFinish] = this.stateMachine.getFirstKnownIndented(
             { indent: match.index + match[0].length },
-            
+
         );
         console.log(`indented is ${indented}`);
         const label = match[1];
@@ -441,10 +441,10 @@ node: substitutionNode,
     directive(match, optionPresets) {
         // """Returns a 2-tuple: list of nodes, and a "blank finish" boolean."""
         const typeName = match[1];
-        if(typeof typeName === 'undefined') {
-            throw new Error("need typename");
+        if (typeof typeName === 'undefined') {
+            throw new Error('need typename');
         }
-        
+
         console.log(`typeName = ${typeName};  lang = ${this.memo.language};`);
         const [directiveClass, messages] = directives.directive(
             typeName, this.memo.language, this.document,

@@ -20,5 +20,5 @@ export {
     EnumeratedList, Explicit, ExtensionOptions,
     FieldList, LineBlock, Line, OptionList,
     QuotedLiteralBlock, SpecializedBody, SpecializedText, Text,
-    SubstitutionDef
+    SubstitutionDef,
 };

@@ -935,6 +935,7 @@ export class emphasis extends TextElement {
     constructor(...args) {
         super(...args);
     }
+
     isInline() { return true; }
 } // Inline
 export class strong extends TextElement {
@@ -942,6 +943,7 @@ export class strong extends TextElement {
     constructor(...args) {
         super(...args);
     }
+
     isInline() { return true; }
 } // Inline
 export class literal extends TextElement {
@@ -949,6 +951,7 @@ export class literal extends TextElement {
     constructor(...args) {
         super(...args);
     }
+
     isInline() { return true; }
 } // Inline
 export class reference extends TextElement {
@@ -956,6 +959,7 @@ export class reference extends TextElement {
     constructor(...args) {
         super(...args);
     }
+
     isInline() { return true; }
 } // General, Inline, Referential
 /* eslint-disable-next-line camelcase */
@@ -964,6 +968,7 @@ export class footnote_reference extends TextElement {
     constructor(...args) {
         super(...args);
     }
+
     isInline() { return true; }
 } // General, Inline, Referential
 /* eslint-disable-next-line camelcase */
@@ -972,6 +977,7 @@ export class citation_reference extends TextElement {
     constructor(...args) {
         super(...args);
     }
+
     isInline() { return true; }
 } // General, Inline, Referential
 /* eslint-disable-next-line camelcase */
@@ -980,6 +986,7 @@ export class substitution_reference extends TextElement {
     constructor(...args) {
         super(...args);
     }
+
     isInline() { return true; }
 } // General, Inline, Referential
 /* eslint-disable-next-line camelcase */
@@ -988,6 +995,7 @@ export class title_reference extends TextElement {
     constructor(...args) {
         super(...args);
     }
+
     isInline() { return true; }
 } // General, Inline, Referential
 
@@ -996,6 +1004,7 @@ export class problematic extends TextElement {
     constructor(...args) {
         super(...args);
     }
+
     isInline() { return true; }
 } // Inline
 
