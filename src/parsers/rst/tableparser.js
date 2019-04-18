@@ -229,7 +229,7 @@ class GridTableParser extends TableParser {
         const last = this.bottom - 1;
         for (let i = 0; i < this.right; i += 1) {
             if (this.done[i] !== last) {
-                console.log(`${this.done[i]} !== ${last}`);
+//                console.log(`${this.done[i]} !== ${last}`);
                 return false;
             }
         }
@@ -517,25 +517,25 @@ class SimpleTableParser extends TableParser {
 /*        """
         Given a column span underline, return a list of (begin, end) pairs.
         """ */
-        console.log(`parsing columns from ${line}, ${offset}`);
+//        console.log(`parsing columns from ${line}, ${offset}`);
         const cols = [];
         let end = 0;
         while (true) {
             const begin = line.indexOf('-', end);
-            console.log(`looking for '-' begin is ${begin}`);
+//            console.log(`looking for '-' begin is ${begin}`);
             end = line.indexOf(' ', begin);
-            console.log(`end is ${end}`);
+//            console.log(`end is ${end}`);
             if (begin < 0) {
                 break;
             }
             if (end < 0) {
                 end = line.length;
             }
-            console.log(`pushing [${begin}, ${end}] on cols`);
+//            console.log(`pushing [${begin}, ${end}] on cols`);
             cols.push([begin, end]);
         }
 
-        console.log(`checking this.columns : ${this.columns}`);
+//        console.log(`checking this.columns : ${this.columns}`);
         if (this.columns.length) {
             if(this.border_end == null) {
                 throw new Error("no border_end value");

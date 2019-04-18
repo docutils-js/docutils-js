@@ -395,6 +395,35 @@ export class Element extends Node {
         }
         return true;
     }
+
+    firstChildNotMatchingClass(childClass, start=0,
+                               end=2 ** 31 - 1) {
+        /*"""
+        Return the index of the first child whose class does *not* match.
+
+        Parameters:
+
+        - `childclass`: A `Node` subclass to skip, or a tuple of `Node`
+          classes. If a tuple, none of the classes may match.
+        - `start`: Initial index to check.
+        - `end`: Initial index to *not* check.
+        """*/
+        let myChildClass = Array.isArray(childClass) ? childClass : [childClass];
+        for(let index = start; index <= Math.min(this.length, end); index += 1) {
+            let gotIt;
+            for(let ci = 0; ci < childClass.length; ci += 1) {
+                const c = childClass[ci];
+                if(this.children[index] instanceof c) {
+                    gotIt = true;
+                    break;
+                }
+            }
+            if(!gotIt) {
+                return index;
+            }
+        }
+        return undefined;
+    }
 }
 
 export class Text extends Node {
@@ -732,12 +761,12 @@ export class document extends Element {
             this.decoration = new decoration();
             const index = this.firstChildNotMatchingClass(Titular);
             if (index === undefined) {
-                this.push(this.decoration);
+                this.children.push(this.decoration);
             } else {
-                this.insert(index, this.decoration);
+                this.children.splice(index, 0, this.decoration);
             }
         }
-        return this.decotration;
+        return this.decoration;
     }
 }
 

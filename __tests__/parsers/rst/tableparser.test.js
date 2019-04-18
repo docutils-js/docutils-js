@@ -6,5 +6,6 @@ test('gridtableparser', () => {
 
 test('simpletableparser', () => {
     const table = new SimpleTableParser();
-    
+});
+
     
