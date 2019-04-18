@@ -231,7 +231,7 @@ matchTitles,
         const newabsoffset = this.nestedParse(
             this.stateMachine.inputLines.slice(offset), {
  inputOffset: absoffset,
-                                                         node: section_node,
+                                                         node: sectionNode,
 matchTitles: true,
 },
 );

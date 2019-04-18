@@ -2,13 +2,14 @@ import * as utils from '../src/utils';
 import unescape from '../src/utils/unescape';
 import baseSettings from '../src/baseSettings';
 import Reporter from '../src/Reporter';
+import newReporter from '../src/newReporter';
 
 function createReporter() {
     return new Reporter(undefined, 0, 4, undefined, true, 'utf-8');
 }
 			      
 test('1', () => {
-    const r = utils.newReporter({}, { ...baseSettings });
+    const r = newReporter({}, { ...baseSettings });
 
 //    r.attachObserver(node => {
 //	console.log(node.children[0].children[0].astext());
