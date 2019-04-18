@@ -24,7 +24,7 @@ const defaultArgs = {
 
 const defaultSettings = { ...baseSettings };
 
-test.only('full rst2xml pipeline with specific input', () => {
+test.skip('full rst2xml pipeline with specific input', () => {
     const settings = { ...defaultSettings };
     const args = { ...defaultArgs };
 
