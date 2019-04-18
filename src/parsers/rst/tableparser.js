@@ -157,6 +157,7 @@ class GridTableParser extends TableParser {
         this.colseps = { 0: [0] };
     }
 
+    /* eslint-disable-next-line camelcase */
     parse_table() {
         /* """
         Start with a queue of upper-left corners, containing the upper-left
@@ -214,6 +215,7 @@ class GridTableParser extends TableParser {
         }
     }
 
+    /* eslint-disable-next-line camelcase */
     mark_done(top, left, bottom, right) {
         // """For keepoing track of how much of each text column has been seen."""
         const before = top - 1;
@@ -224,6 +226,7 @@ class GridTableParser extends TableParser {
         }
     }
 
+    /* eslint-disable-next-line camelcase */
     check_parse_complete() {
         /* """Each text column should have been completely seen.""" */
         const last = this.bottom - 1;
@@ -236,6 +239,7 @@ class GridTableParser extends TableParser {
         return true;
     }
 
+    /* eslint-disable-next-line camelcase */
     scan_cell(top, left) {
         /* """Starting at the top-left corner, start tracing out a cell.""" */
         // assert this.block[top][left] == '+'
@@ -246,6 +250,7 @@ class GridTableParser extends TableParser {
         return result;
     }
 
+    /* eslint-disable-next-line camelcase */
     scan_right(top, left) {
 /*
         """
@@ -271,6 +276,7 @@ class GridTableParser extends TableParser {
         return null;
     }
 
+    /* eslint-disable-next-line camelcase */
     scan_down(top, left, right) {
 /*        """
         Look for the bottom-right corner of the cell, making note of all row
@@ -298,6 +304,7 @@ if (typeof right === 'undefined') {
         return null;
     }
 
+    /* eslint-disable-next-line camelcase */
     scan_left(top, left, bottom, right) {
         /* """
         Noting column boundaries, look for the bottom-left corner of the cell.
@@ -325,6 +332,7 @@ if (typeof right === 'undefined') {
         return null;
     }
 
+    /* eslint-disable-next-line camelcase */
     scan_up(top, left, bottom, right) {
 /*        """
         Noting row boundaries, see if we can return to the starting point.
@@ -341,6 +349,7 @@ if (typeof right === 'undefined') {
     }
 
 
+    /* eslint-disable-next-line camelcase */
     structure_from_cells() {
         /* """
         From the data collected by `scan_cell()`, convert to the final data
@@ -473,6 +482,7 @@ class SimpleTableParser extends TableParser {
         this.colseps = { 0: [0] };
     }
 
+    /* eslint-disable-next-line camelcase */
     parse_table() {
         /* """
         First determine the column boundaries from the top border, then
@@ -513,6 +523,7 @@ class SimpleTableParser extends TableParser {
         }
     }
 
+    /* eslint-disable-next-line camelcase */
     parse_columns(line, offset) {
 /*        """
         Given a column span underline, return a list of (begin, end) pairs.
@@ -550,6 +561,7 @@ class SimpleTableParser extends TableParser {
         return cols;
     }
 
+    /* eslint-disable-next-line camelcase */
     init_row(colspec, offset) {
         let i = 0;
         const cells = [];
@@ -578,6 +590,7 @@ class SimpleTableParser extends TableParser {
     }
 
 
+    /* eslint-disable-next-line camelcase */
     parse_row(lines, start, spanline) {
         /* """
         Given the text `lines` of a row, parse it and append to `this.table`.
@@ -613,6 +626,7 @@ class SimpleTableParser extends TableParser {
         this.table.push(row);
     }
 
+    /* eslint-disable-next-line camelcase */
     check_columns(lines, first_line, columns) {
         /* """
         Check for text in column margins and text overflow in the last column.
@@ -654,6 +668,7 @@ class SimpleTableParser extends TableParser {
         columns.pop();
     }
 
+    /* eslint-disable-next-line camelcase */
     structure_from_cells() {
         const colspecs = this.columns.map(([start, end]) => end - start);
         let first_body_row = 0;
@@ -670,6 +685,7 @@ class SimpleTableParser extends TableParser {
     }
 }
 
+    /* eslint-disable-next-line camelcase */
 function update_dict_of_lists(master, newdata) {
     Object.entries(newdata).forEach(([key, values]) => {
         if (master[key]) {
