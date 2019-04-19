@@ -60,7 +60,8 @@ class Line extends SpecializedText {
             if (error instanceof EOFError) {
                 const blocktext = `${overline}\n${title}`;
                 if (overline.trimEnd().length < 4) {
-                    this.shortOverline(context, blocktext, lineno, 2);
+
+		    this.shortOverline(context, blocktext, lineno, 2);
                 } else {
                     const msg = this.reporter.severe(
                         'Incomplete section title.',
@@ -84,7 +85,7 @@ class Line extends SpecializedText {
             } else {
                 const msg = this.reporter.severe(
                     'Missing matching underline for section title overline.',
-                    [nodes.literal_block(source, source)],
+                    [new nodes.literal_block(source, source)],
                     { line: lineno },
 );
                 this.parent.add(msg);
@@ -97,7 +98,7 @@ class Line extends SpecializedText {
             } else {
                 const msg = this.reporter.severe(
                     'Title overline & underline mismatch.',
-                    [nodes.literal_block(source, source)],
+                    [new nodes.literal_block(source, source)],
                     { line: lineno },
 );
                 this.parent.add(msg);
@@ -113,7 +114,7 @@ class Line extends SpecializedText {
             } else {
                 const msg = this.reporter.warning(
                     'Title overline too short.',
-                    [nodes.literal_block(source, source)],
+                    [new nodes.literal_block(source, source)],
                     { line: lineno },
 );
                 messages.push(msg);
@@ -138,7 +139,7 @@ class Line extends SpecializedText {
         }
         const msg = this.reporter.error(
             'Invalid section title or transition marker.',
-            [nodes.literal_block(blocktext, blocktext)],
+            [new nodes.literal_block(blocktext, blocktext)],
             { line: lineno },
 );
         this.parent.add(msg);
