@@ -17,6 +17,7 @@
     "@babel/preset-env": "^7.3.1",
     "babel-jest": "^24.7.1",
     "babel-register": "^6.26.0",
+    "docutils-parser": "^0.1.11",
     "eslint": "^5.16.0",
     "eslint-config-airbnb-base": "^13.1.0",
     "eslint-plugin-import": "^2.16.0",

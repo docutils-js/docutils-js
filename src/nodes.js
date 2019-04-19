@@ -1,6 +1,6 @@
 import xmlescape from 'xml-escape';
 import Transformer from './Transformer';
-import { InvalidArgumentsError } from './Exceptions';
+import { InvalidArgumentsError, ApplicationError } from './Exceptions';
 import unescape from './utils/unescape';
 import { isIterable } from './utils';
 
@@ -244,7 +244,70 @@ GenericNodeVisitor.nodeClassNames = nodeClassNames;
 // mixin
 export class Titular { }
 
+/*
+ * `Element` is the superclass to all specific elements.
+
+ *  Elements contain attributes and child nodes.  Elements emulate
+ *  dictionaries for attributes, indexing by attribute name (a string).  To
+ *  set the attribute 'att' to 'value', do::
+ *
+ *      element['att'] = 'value'
+ *
+ *  There are two special attributes: 'ids' and 'names'.  Both are
+ *  lists of unique identifiers, and names serve as human interfaces
+ *  to IDs.  Names are case- and whitespace-normalized (see the
+ *  fully_normalize_name() function), and IDs conform to the regular
+ *  expression ``[a-z](-?[a-z0-9]+)*`` (see the make_id() function).
+ *
+ *  Elements also emulate lists for child nodes (element nodes and/or text
+ *  nodes), indexing by integer.  To get the first child node, use::
+ *
+ *      element[0]
+ *
+ *  Elements may be constructed using the ``+=`` operator.  To add one new
+ *  child node to element, do::
+ *
+ *      element += node
+ *
+ *  This is equivalent to ``element.append(node)``.
+ *
+ *  To add a list of multiple child nodes at once, use the same ``+=``
+ *  operator::
+ *
+ *      element += [node1, node2]
+ *
+ *  This is equivalent to ``element.extend([node1, node2])``.
+ */
 export class Element extends Node {
+    _init() {
+        super._init();
+	/* List attributes which are defined for every Element-derived class
+	   instance and can be safely transferred to a different node. */
+        this.basicAttributes = ['ids', 'classes', 'names', 'dupnames'];
+	/*
+	  "A list of class-specific attributes that should not be copied with the
+	  standard attributes when replacing a node.
+	  
+	  NOTE: Derived classes should override this value to prevent any of its
+	  attributes being copied by adding to the value in its parent class.
+	*/
+        this.localAttributes = ['backrefs'];
+
+	/* List attributes, automatically initialized to empty lists
+	   for all nodes. */
+        this.listAttributes = [...this.basicAttributes, ...this.localAttributes];
+
+	/* List attributes that are known to the Element base class. */
+	this.knownAttributes = [...this.listAttributes, 'source', 'rawsource'];
+
+	/* The element generic identifier. If None, it is set as an
+	   instance attribute to the name of the class. */
+	//this.tagname = undefined; (already set in Node.constructor) 
+
+        /* Separator for child nodes, used by `astext()` method. */
+	this.childTextSeparator = '\n\n';
+    }
+
     constructor(rawsource, children, attributes) {
         super();
         this.nodeName = Symbol.for('Element');
@@ -273,6 +336,34 @@ export class Element extends Node {
                 this.attributes[att] = value;
             }
         });
+
+	//unsure of the correct js equivalent
+	/*
+	  if self.tagname is None:
+          self.tagname = self.__class__.__name__
+	*/
+
+    }
+
+    _domNode(domroot) {
+	const element = domroot.createElement(this.tagname);
+	const r = this.attlist();
+	Object.entries(this.attlist()).forEach(([attribute, value]) => {
+	    let myVal;
+	    if(isIterable(value)) {
+		myVal = value.map((v) => serialEscape(v.toString())).join(' ');
+	    } else {
+		myVal = value.toString();
+	    }
+	    element.setAttribute(attribute, myVal);
+	});
+	this.children.forEach((child) => {
+	    if(typeof child._domNode !== 'function') {
+		throw new ApplicationError(`${child} has no _domNode`);
+	    }
+	    element.appendChild(child._domNode(domroot));
+	});
+	return element;
     }
 
     toString() {
@@ -284,14 +375,6 @@ export class Element extends Node {
 
     emptytag() {
         return `<${[this.tagname, ...Object.entries(this.attlist()).map(([n, v]) => `${n}="${v}"`)].join(' ')}/>`;
-    }
-
-    _init() {
-        super._init();
-        this.childTextSeparator = '\n\n';
-        this.basicAttributes = ['ids', 'classes', 'names', 'dupnames'];
-        this.localAttributes = ['backrefs'];
-        this.listAttributes = [...this.basicAttributes, ...this.localAttributes];
     }
 
 
@@ -440,6 +523,10 @@ export class Text extends Node {
         this.children = [];
     }
 
+    _domNode(domroot) {
+	return domroot.createTextNode(this.data);
+    }
+
     astext() {
         return unescape(this.data);
     }
@@ -464,6 +551,8 @@ export class TextElement extends Element {
         }
         super(rawsource, (typeof text !== 'undefined' && text !== '') ? [new Text(text), ...children] : children, attributes);
     }
+
+   
 }
 
 // =====================

@@ -1,7 +1,9 @@
 import * as nodes from '../src/nodes';
 import newDocument from "../src/newDocument";
-
 import baseSettings from '../src/baseSettings'
+const jsdom = require("jsdom");
+const { JSDOM } = jsdom;
+const DOMParser = require('xmldom').DOMParser;
 
 function createNodeVisitor() {
     return new nodes.NodeVisitor({ reporter: { debug: () => {} } });
@@ -11,7 +13,12 @@ test('paragraph with text', () => {
     /* constructor(rawsource, text, children, attributes) */
     const paraText = 'This is my paragraph text.';
     const p = new nodes.paragraph(paraText, paraText, [], {});
+    expect(p.tagname).toBe('paragraph');
+    expect(p.children).toHaveLength(1);
+    expect(p.children[0]).toBeDefined();
+    expect(p.children[0].astext()).toEqual(paraText);
     expect(p.toString()).toMatchSnapshot();
+    expect(p).toMatchSnapshot();
 });
 
 test('problematic', () => {
@@ -35,3 +42,18 @@ test('NodeVisitor.constructor', () => {
     const visitor = createNodeVisitor();
     
 });
+
+test.only('_domNode', () => {
+    const dom = new JSDOM();
+    const p = new nodes.paragraph('test', 'test', [], {});
+    const domParser = new DOMParser({});
+    expect(domParser).toBeDefined();
+    const domRoot = domParser.documentElement;
+    expect(domRoot).toBeDefined();
+    console.log(domRoot);
+    const domNode = p._domNode(domRoot);
+    expect(domNode).toBeDefined();
+    console.log(domNode);
+    //expect(domNode).toMatchSnapshot();
+});
+    

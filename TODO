@@ -1,0 +1,20 @@
+citations
+substitutions
+math blocks
+
+nodes:
+attention
+caution
+danger
+error
+important
+note
+tip
+hint
+warning
+admonition
+substitution_definition
+citation
+figure
+caption
+legend

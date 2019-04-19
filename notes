@@ -1,0 +1,29 @@
+The terminology is confusing also, because there is a Reader and there
+is a source, but the source is an Input in terms of class. The main
+reader is the standalone reader, although there are others.
+
+We also have to consider streams, etc. We probably out to push the IO
+on to the client since javascript has no built-in IO, really.
+
+Is there a point to having the reader/writer abstraction? Should it redefined?
+
+publish - reader.read(this.source, this.parser, this.settings, (error, doc) => {
+   applyTransforms()
+   output = writer.write(doc, this.destination)
+   output.writer.assembleParts();
+
+reader.read (source, parser, settings, cb):
+    this.source.read((error, data) =>
+       this.input = data;
+       this.parse(); -> sets this.document
+                        there is no reason to not simply return the document
+			from parse!
+       cb(error, this.document);
+       
+
+reader.read can become a single callback, screw the class!
+maybe accept the class?
+
+Any I/O will involve asynchronicity.
+This is a main difference.
+

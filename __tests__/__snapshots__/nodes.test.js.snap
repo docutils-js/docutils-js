@@ -1,3 +1,63 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`_domNode 1`] = `undefined`;
+
 exports[`paragraph with text 1`] = `"<paragraph>This is my paragraph text.</paragraph>"`;
+
+exports[`paragraph with text 2`] = `
+paragraph {
+  "attributes": Object {
+    "backrefs": Array [],
+    "classes": Array [],
+    "dupnames": Array [],
+    "ids": Array [],
+    "names": Array [],
+  },
+  "basicAttributes": Array [
+    "ids",
+    "classes",
+    "names",
+    "dupnames",
+  ],
+  "childTextSeparator": "
+
+",
+  "children": Array [
+    Text {
+      "children": Array [],
+      "data": "This is my paragraph text.",
+      "document": undefined,
+      "line": undefined,
+      "parent": [Circular],
+      "rawsource": "",
+      "source": undefined,
+      "tagname": "Text",
+    },
+  ],
+  "document": undefined,
+  "knownAttributes": Array [
+    "ids",
+    "classes",
+    "names",
+    "dupnames",
+    "backrefs",
+    "source",
+    "rawsource",
+  ],
+  "line": undefined,
+  "listAttributes": Array [
+    "ids",
+    "classes",
+    "names",
+    "dupnames",
+    "backrefs",
+  ],
+  "localAttributes": Array [
+    "backrefs",
+  ],
+  "nodeName": Symbol(Element),
+  "parent": undefined,
+  "source": undefined,
+  "tagname": "paragraph",
+}
+`;
