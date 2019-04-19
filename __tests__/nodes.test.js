@@ -3,7 +3,7 @@ import newDocument from "../src/newDocument";
 import baseSettings from '../src/baseSettings'
 const jsdom = require("jsdom");
 const { JSDOM } = jsdom;
-const DOMParser = require('xmldom').DOMParser;
+import { DOMParser, DOMImplementation, XMLSerializer } from 'xmldom';
 
 function createNodeVisitor() {
     return new nodes.NodeVisitor({ reporter: { debug: () => {} } });
@@ -43,17 +43,19 @@ test('NodeVisitor.constructor', () => {
     
 });
 
-test.only('_domNode', () => {
+test('_domNode', () => {
     const dom = new JSDOM();
     const p = new nodes.paragraph('test', 'test', [], {});
     const domParser = new DOMParser({});
-    expect(domParser).toBeDefined();
-    const domRoot = domParser.documentElement;
+    const doc = domParser.parseFromString('<document/>');
+    const domRoot = doc;
     expect(domRoot).toBeDefined();
-    console.log(domRoot);
+    const serializer = new XMLSerializer();
+
     const domNode = p._domNode(domRoot);
     expect(domNode).toBeDefined();
-    console.log(domNode);
-    //expect(domNode).toMatchSnapshot();
+
+    const stringRep = serializer.serializeToString(domNode);
+    expect(stringRep).toMatchSnapshot();
 });
     

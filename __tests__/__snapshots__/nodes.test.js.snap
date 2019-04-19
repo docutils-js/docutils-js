@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`_domNode 1`] = `undefined`;
+exports[`_domNode 1`] = `"<paragraph>test</paragraph>"`;
 
 exports[`paragraph with text 1`] = `"<paragraph>This is my paragraph text.</paragraph>"`;
 
