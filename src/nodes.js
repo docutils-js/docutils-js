@@ -287,7 +287,7 @@ export class Element extends Node {
 	/*
 	  "A list of class-specific attributes that should not be copied with the
 	  standard attributes when replacing a node.
-	  
+
 	  NOTE: Derived classes should override this value to prevent any of its
 	  attributes being copied by adding to the value in its parent class.
 	*/
@@ -302,7 +302,7 @@ export class Element extends Node {
 
 	/* The element generic identifier. If None, it is set as an
 	   instance attribute to the name of the class. */
-	//this.tagname = undefined; (already set in Node.constructor) 
+	// this.tagname = undefined; (already set in Node.constructor)
 
         /* Separator for child nodes, used by `astext()` method. */
 	this.childTextSeparator = '\n\n';
@@ -337,12 +337,11 @@ export class Element extends Node {
             }
         });
 
-	//unsure of the correct js equivalent
+	// unsure of the correct js equivalent
 	/*
 	  if self.tagname is None:
           self.tagname = self.__class__.__name__
 	*/
-
     }
 
     _domNode(domroot) {
@@ -350,15 +349,15 @@ export class Element extends Node {
 	const r = this.attlist();
 	Object.entries(this.attlist()).forEach(([attribute, value]) => {
 	    let myVal;
-	    if(isIterable(value)) {
-		myVal = value.map((v) => serialEscape(v.toString())).join(' ');
+	    if (isIterable(value)) {
+		myVal = value.map(v => serialEscape(v.toString())).join(' ');
 	    } else {
 		myVal = value.toString();
 	    }
 	    element.setAttribute(attribute, myVal);
 	});
 	this.children.forEach((child) => {
-	    if(typeof child._domNode !== 'function') {
+	    if (typeof child._domNode !== 'function') {
 		throw new ApplicationError(`${child} has no _domNode`);
 	    }
 	    element.appendChild(child._domNode(domroot));
@@ -551,8 +550,6 @@ export class TextElement extends Element {
         }
         super(rawsource, (typeof text !== 'undefined' && text !== '') ? [new Text(text), ...children] : children, attributes);
     }
-
-   
 }
 
 // =====================
