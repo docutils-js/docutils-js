@@ -3,7 +3,7 @@ import newDocument from "../src/newDocument";
 import baseSettings from '../src/baseSettings'
 const jsdom = require("jsdom");
 const { JSDOM } = jsdom;
-const DOMParser = require('xmldom').DOMParser;
+import { DOMParser, DOMImplementation } from 'xmldom';
 
 function createNodeVisitor() {
     return new nodes.NodeVisitor({ reporter: { debug: () => {} } });
@@ -47,7 +47,9 @@ test.only('_domNode', () => {
     const dom = new JSDOM();
     const p = new nodes.paragraph('test', 'test', [], {});
     const domParser = new DOMParser({});
+    console.log(new DOMImplementation());
     expect(domParser).toBeDefined();
+    domParser.parseFromString('<document/>');
     const domRoot = domParser.documentElement;
     expect(domRoot).toBeDefined();
     console.log(domRoot);
