@@ -25,4 +25,7 @@ export default {
     exposeInternalAttribute: null,
     strictVisitor: null,
     warningStream: null,
+    // html writer
+    mathOutput: 'HTML math.css',
+    initialHeaderLevel: 1,
 };

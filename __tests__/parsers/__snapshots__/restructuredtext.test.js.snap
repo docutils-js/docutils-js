@@ -1,3 +1,30 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`1 1`] = `"<document source=\\"\\"><bullet_list bullet=\\"*\\"><list_item><paragraph>a bullet point</paragraph></list_item></bullet_list></document>"`;
+
+exports[`readme rst 1`] = `
+"<document source=\\"\\"><section ids=\\"docutils-js\\" names=\\"docutils-js\\"><title>Docutils-JS</title><field_list><field><field_name>Author</field_name><field_body><paragraph>Kay McCormick</paragraph></field_body></field><field><field_name>Contact</field_name><field_body><paragraph>kaym2038@gmail.com</paragraph></field_body></field><field><field_name>Date</field_name><field_body><paragraph>Thu 18 Apr 2019 06:40:03 PM PDT</paragraph></field_body></field><field><field_name>Copyright</field_name><field_body><paragraph>MIT License</paragraph></field_body></field></field_list><target ids=\\"docutils-js github repository\\" names=\\"docutils-js github repository\\" refuri=\\"http://github.com/kaymccormick/docutils-js.git\\"/><target ids=\\"docutils\\" names=\\"docutils\\" refuri=\\"http://docutils.sourceforge.net/\\"/><target ids=\\"docutils distribution\\" names=\\"docutils distribution\\" refuri=\\"http://docutils.sourceforge.net/#download\\"/><system_message line=\\"11\\"><paragraph>Using English fallback for directive contents</paragraph></system_message><comment>unimplemented directive contents</comment></section><section ids=\\"introduction\\" names=\\"introduction\\"><title>Introduction</title><section ids=\\"about\\\\ the\\\\ docutils\\" names=\\"about\\\\ the\\\\ docutils\\"><title>About the Docutils</title><paragraph>The <reference name=\\"Docutils\\" refname=\\"docutils\\">Docutils</reference> is a Python library for producing documentation based on
+a text format called RST or reStructuredText. RST is used for
+documenting many prominent software projects. While primarily in the
+Python ecosystem, the linux kernel also uses RST for its
+documentation.</paragraph></section><section ids=\\"about\\\\ this\\\\ software\\" names=\\"about\\\\ this\\\\ software\\"><title>About this software</title><paragraph>Welcome to the port of the Docutils to JavaScript. This package is
+designed to enable reStructuredText (RST) processing (reading,
+transforming, writing) in a JavaScript environment. It is intended to
+work in a browser and in NodeJS.</paragraph></section></section><section ids=\\"using\\\\ the\\\\ software\\" names=\\"using\\\\ the\\\\ software\\"><title>Using the software</title><paragraph>1. Clone the repository with <literal>git</literal>:</paragraph><block_quote><literal_block>$ git clone http://github.com/kaymccormick/docutils-js.git docutils-js</literal_block></block_quote><paragraph>2. Enter the source directory:</paragraph><block_quote><literal_block>$ cd docutils-js</literal_block></block_quote><paragraph>3. Install the dependencies using <literal>yarn</literal>:</paragraph><block_quote><literal_block>$ yarn install</literal_block></block_quote><paragraph>4. Run <literal>grunt</literal> to transpile the source code:</paragraph><block_quote><literal_block>$ yarn grunt</literal_block></block_quote><paragraph>5. The output of this command should be in the <literal>lib</literal> subdirectory. Then, optionally run the tests:</paragraph><block_quote><literal_block>$ yarn jest</literal_block></block_quote><paragraph>6. For now, the simplest method to use the software appears to be:</paragraph><block_quote><literal_block>import { Parser } from 'docutils-js/lib/parsers/restructuredtext';
+import newDocument from 'docutils-js/lib/newDocument';
+import baseSettings from 'docutils-js/lib/baseSettings';
+
+const p = new Parser({});
+const document = newDocument({ sourcePath: '' }, baseSettings);
+p.parse('* a bullet point', document);
+document.toString(); //   <==== this returns the xml.</literal_block></block_quote><comment/><block_quote><paragraph>Using this method, a simple string can be supplied to the parse
+method, which fills the document instance with the parsed
+data. This document can be traversed, transformed, or placed in a
+backing store.</paragraph><paragraph>Yes, this method is highly verbose, but is for now the simplest
+interface on offer. Contributions are welcome!</paragraph></block_quote></section><section ids=\\"addendum\\" names=\\"addendum\\"><title>Addendum</title><paragraph>Remaining to be implemented:</paragraph><block_quote><bullet_list bullet=\\"*\\"><list_item><paragraph>Transformers (output is not currently processed as docutils would)</paragraph></list_item><list_item><paragraph>Directives (there are a couple of no-op directives in place, such as image
+and contents.</paragraph></list_item></bullet_list></block_quote><paragraph>There are currently quite a number of bugs.</paragraph><block_quote><bullet_list bullet=\\"*\\"><list_item><paragraph>Problems with sections</paragraph></list_item><list_item><paragraph>Problems with tables</paragraph></list_item><list_item><paragraph>Lack of transformers and directives</paragraph></list_item><list_item><paragraph>Running rst2xml.js on sample documents produces documents that
+'work', sort-of, but which are significantly different from
+docutils-python output.</paragraph></list_item></bullet_list></block_quote><paragraph>However, the project should be usable for people who want to
+experiment, play around, or contribute through bug fixes or feature
+enhancements.</paragraph></section></document>"
+`;

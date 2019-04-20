@@ -1,6 +1,10 @@
 class TransformSpec {
     constructor(args) {
         this.unknownReferenceResolvers = [];
+	this._init(args);
+    }
+
+    _init(...args) {
     }
 
     getTransforms() {

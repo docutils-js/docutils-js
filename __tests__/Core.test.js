@@ -24,7 +24,7 @@ const defaultArgs = {
 
 const defaultSettings = { ...baseSettings };
 
-test.skip('full rst2xml pipeline with specific input', () => {
+test.only('full rst2xml pipeline with specific input', () => {
     const settings = { ...defaultSettings };
     const args = { ...defaultArgs };
 
@@ -36,113 +36,121 @@ test.skip('full rst2xml pipeline with specific input', () => {
 
     const { readerName, parserName, writerName } = args;
     const source = new StringInput({
-	source: `===================
- Docutils Web Site
-===================
+	source: `Docutils-JS
+===========
 
-:Author: David Goodger; open to all Docutils developers
-:Contact: docutils-develop@lists.sourceforge.net
-:Date: $Date: 2017-07-05 07:33:33 -0700 (Wed, 05 Jul 2017) $
-:Revision: $Revision: 8133 $
-:Copyright: This document has been placed in the public domain.
+:Author: Kay McCormick
+:Contact: kaym2038@gmail.com
+:Date: Thu 18 Apr 2019 06:40:03 PM PDT
+:Copyright: MIT License
 
-The Docutils web site, <http://docutils.sourceforge.net/>, is
-maintained by the \`\`docutils-update.local\`\` script, run by project 
-maintainers on their local machines.  The script
-will process any .txt file which is newer than the corresponding .html
-file in the local copy of the project's web directory and upload the changes
-to the web site at SourceForge.
+.. _docutils-js GitHub repository: http://github.com/kaymccormick/docutils-js.git
+.. _Docutils: http://docutils.sourceforge.net/
+.. _Docutils distribution: http://docutils.sourceforge.net/#download
 
-..  .. old instructions, for cron job:
+.. contents::
+    
+Introduction
+============
 
-    The Docutils web site, <http://docutils.sourceforge.net/>, is
-    maintained automatically by the \`\`docutils-update\`\` script, run as an
-    hourly cron job on shell.berlios.de (by user "wiemann").  The script
-    will process any .txt file which is newer than the corresponding .html
-    file in the project's web directory on shell.berlios.de
-    (\`\`/home/groups/docutils/htdocs/aux/htdocs/\`\`) and upload the changes
-    to the web site at SourceForge.
+About the Docutils
+------------------
 
-Please **do not** add any generated .html files to the Docutils
-repository.  They will be generated automatically after a one-time
-setup (\`described below\`__).
+The Docutils_ is a Python library for producing documentation based on
+a text format called RST or reStructuredText. RST is used for
+documenting many prominent software projects. While primarily in the
+Python ecosystem, the linux kernel also uses RST for its
+documentation.
 
-__ \`Adding .txt Files\`_
+About this software
+-------------------
 
-The docutils-update.local__ script is located at
-\`\`sandbox/infrastructure/docutils-update.local\`\`.
+Welcome to the port of the Docutils to JavaScript. This package is
+designed to enable reStructuredText (RST) processing (reading,
+transforming, writing) in a JavaScript environment. It is intended to
+work in a browser and in NodeJS.
 
-__ http://docutils.sf.net/sandbox/infrastructure/docutils-update.local
+Using the software
+==================
 
-If you want to share files via the web, you can upload them using the
-uploaddocutils.sh__ script
-(\`\`sandbox/infrastructure/uploaddocutils.sh\`\`).
+1. Clone the repository with \`\`git\`\`:
 
-__ http://docutils.sf.net/sandbox/infrastructure/uploaddocutils.sh
+  ::
 
+    $ git clone http://github.com/kaymccormick/docutils-js.git docutils-js
 
-Setting Up
-==========
+2. Enter the source directory:
 
-(TBA)
+  ::
 
-.. hint:: 
-  Anyone with checkin privileges can be a web-site maintainer. You need to
-  set up the directories for a local website build.
+    $ cd docutils-js
 
-  The procedure for that was on the docutils-devel list a while ago.
+3. Install the dependencies using \`\`yarn\`\`:
 
+  ::
 
-Adding .txt Files
-=================
+    $ yarn install
 
-User/Contributor
-----------------
+4. Run \`\`grunt\`\` to transpile the source code:
 
-When adding a new .txt file that should be converted to HTML:
+  ::
 
-#. Edit sandbox/infrastructure/htmlfiles.lst, and add the .html file
-   corresponding to the new .txt file (please keep the sorted order).
+    $ yarn grunt
 
-#. Commit the edited version to the SVN repository.
+5. The output of this command should be in the \`\`lib\`\` subdirectory. Then, optionally run the tests:
 
-Maintainer
-----------
+  ::
 
-#. If there are new directories in the SVN, allow the update script to run
-   once to create the directories in the filesystem before preparing for
-   HTML processing.
+    $ yarn jest
 
-#. Run the sandbox/infrastructure/update-htmlfiles shell script to generate
-   .html files::
+6. For now, the simplest method to use the software appears to be:
 
-      cd <DOCUTILS-ROOT>/docutils/
-      sandbox/infrastructure/update-htmlfiles \\
-      sandbox/infrastructure/htmlfiles.lst
+  ::
 
-   (Maybe this should become part of docutils-update.local.)
+     import { Parser } from 'docutils-js/lib/parsers/restructuredtext';
+     import newDocument from 'docutils-js/lib/newDocument';
+     import baseSettings from 'docutils-js/lib/baseSettings';
 
+     const p = new Parser({});
+     const document = newDocument({ sourcePath: '' }, baseSettings);
+     p.parse('* a bullet point', document);
+     document.toString(); //   <==== this returns the xml.
 
-Removing Files & Directories
-============================
-
-#. Remove from SVN
-
-#. Remove to-be-generated HTML files from
-   \`\`sandbox/infrastructure/htmlfiles.lst\`\`.
-  
-#. Removing files and directories from SVN will not trigger their removal
-   from the web site.  Files and directories must be manually removed from
-   sourceforge.net (under \`\`/home/project-web/docutils/htdocs/\`\`). 
-
-
 ..
-   Local Variables:
-   mode: indented-text
-   indent-tabs-mode: nil
-   sentence-end-double-space: t
-   fill-column: 70
-   End:
+
+   Using this method, a simple string can be supplied to the parse
+   method, which fills the document instance with the parsed
+   data. This document can be traversed, transformed, or placed in a
+   backing store.
+
+   Yes, this method is highly verbose, but is for now the simplest
+   interface on offer. Contributions are welcome!
+
+Addendum
+========
+
+Remaining to be implemented:
+
+  * Transformers (output is not currently processed as docutils would)
+
+  * Directives (there are a couple of no-op directives in place, such as image
+    and contents.
+
+There are currently quite a number of bugs.
+
+  * Problems with sections
+
+  * Problems with tables
+
+  * Lack of transformers and directives
+
+  * Running rst2xml.js on sample documents produces documents that
+    'work', sort-of, but which are significantly different from
+    docutils-python output.
+
+However, the project should be usable for people who want to
+experiment, play around, or contribute through bug fixes or feature
+enhancements.
 ` });
         const destination = new StringOutput({});
     const pub = new Publisher({

@@ -121,6 +121,22 @@ export class Node {
     _init() {
     }
 
+    nextNode(self, condition, includeSelf=false, descend=true,
+              siblings=false, ascend=false) {
+        /*"""
+        Return the first node in the iterable returned by traverse(),
+        or None if the iterable is empty.
+
+        Parameter list is the same as of traverse.  Note that
+        include_self defaults to 0, though.
+        """*/
+        const iterable = this.traverse(condition, includeSelf, descend, siblings, ascend);
+        if(iterable.length) {
+            return iterable[0];
+        }
+        return undefined;
+    }
+
     isInline() { return false; }
 
     asdom() {

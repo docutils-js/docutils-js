@@ -1,5 +1,5 @@
- Docutils-JS
-=============
+Docutils-JS
+===========
 
 :Author: Kay McCormick
 :Contact: kaym2038@gmail.com
@@ -11,7 +11,7 @@
 .. _Docutils distribution: http://docutils.sourceforge.net/#download
 
 .. contents::
-	    
+
 Introduction
 ============
 

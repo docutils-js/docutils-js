@@ -170,3 +170,6 @@ export function stripCombiningChars(text) {
     return text;// fixme
     // return u''.join([c for c in text if not unicodedata.combining(c)])
 }
+export function pySplit(text) {
+    return text.trim().split(/s+/);
+}
