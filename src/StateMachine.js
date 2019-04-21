@@ -20,8 +20,8 @@ export class StateMachine {
 
        Parameters:
 
-        - `state_classes`: a list of `State` (sub)classes.
-        - `initial_state`: a string, the class name of the initial state.
+        - `stateClasses`: a list of `State` (sub)classes.
+        - `initialState`: a string, the class name of the initial state.
         - `debug`: a boolean; produce verbose output if true (nonzero).
         */
 
@@ -369,7 +369,7 @@ src;
 
         //        console.log(transitions);
         for (const name of transitions) {
-            const [pattern, method, nextState] = state.transitions[name];
+            const [pattern, method, nextState] = state.transitions[name]; // how is this initialized?
             //      console.log(method);
 //          console.log(`checkLine: ${name} ${pattern} ${nextState}`);
             const result = pattern.exec(this.line);

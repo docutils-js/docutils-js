@@ -57,16 +57,11 @@ class ViewList extends Array {
         return new this.constructor(returnAry);
     }
 
-    slice(start, end) {
+    slice(start = 0, end = this.length) {
         const initList = [];
-        if (end == null) {
-            end = this.length;
-        }
-        if (typeof start === 'undefined') {
-            start = 0;
-        }
 
-        for (let i = start; i < Math.min(end, this.length); i += 1) {
+	const myEnd = Math.min(end, this.length)
+        for (let i = start; i < myEnd; i += 1) {
             initList.push(this[i]);
         }
         return new this.constructor(initList);

@@ -381,12 +381,12 @@ export class Element extends Node {
 	return element;
     }
 
-    toString() {
+/*    toString() {
         if (this.children.length) {
             return [this.starttag(), ...this.children.map(c => c.toString()), this.endtag()].join('');
         }
         return this.emptytag();
-    }
+    }*/
 
     emptytag() {
         return `<${[this.tagname, ...Object.entries(this.attlist()).map(([n, v]) => `${n}="${v}"`)].join(' ')}/>`;
