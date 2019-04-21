@@ -1,9 +1,10 @@
+
 import BaseParser from '../Parser';
 import * as statemachine from '../StateMachine';
 import RSTStateMachine from './rst/RSTStateMachine';
 import StateFactory from './rst/StateFactory';
 
-export class Parser extends BaseParser {
+class Parser extends BaseParser {
     constructor(args) {
         super(args);
         this.configSection = 'restructuredtext parser';
@@ -55,6 +56,6 @@ export class Parser extends BaseParser {
     }
 }
 
-export default {
-    Parser,
-};
+export { Parser };
+
+export default Parser;
