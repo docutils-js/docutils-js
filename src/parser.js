@@ -4,10 +4,10 @@ import baseSettings from './baseSettings';
 
 function parse(docSource, settings) {
     const parser = new Parser({});
-    if(typeof settings === 'undefined') {
-	settings = { ... baseSettings };
+    if (typeof settings === 'undefined') {
+	settings = { ...baseSettings };
     }
-    const document = newDocument({sourcePath: ''}, settings);
+    const document = newDocument({ sourcePath: '' }, settings);
     parser.parse(docSource, document);
-    return document;    
+    return document;
 }

@@ -60,7 +60,7 @@ class ViewList extends Array {
     slice(start = 0, end = this.length) {
         const initList = [];
 
-	const myEnd = Math.min(end, this.length)
+	const myEnd = Math.min(end, this.length);
         for (let i = start; i < myEnd; i += 1) {
             initList.push(this[i]);
         }

@@ -121,17 +121,17 @@ export class Node {
     _init() {
     }
 
-    nextNode(self, condition, includeSelf=false, descend=true,
-              siblings=false, ascend=false) {
-        /*"""
+    nextNode(self, condition, includeSelf = false, descend = true,
+              siblings = false, ascend = false) {
+        /* """
         Return the first node in the iterable returned by traverse(),
         or None if the iterable is empty.
 
         Parameter list is the same as of traverse.  Note that
         include_self defaults to 0, though.
-        """*/
+        """ */
         const iterable = this.traverse(condition, includeSelf, descend, siblings, ascend);
-        if(iterable.length) {
+        if (iterable.length) {
             return iterable[0];
         }
         return undefined;
@@ -386,7 +386,7 @@ export class Element extends Node {
             return [this.starttag(), ...this.children.map(c => c.toString()), this.endtag()].join('');
         }
         return this.emptytag();
-    }*/
+    } */
 
     emptytag() {
         return `<${[this.tagname, ...Object.entries(this.attlist()).map(([n, v]) => `${n}="${v}"`)].join(' ')}/>`;

@@ -1,9 +1,9 @@
+import * as ejs from 'ejs';
 import BaseWriter from '../Writer';
 import * as docutils from '../index';
 import * as nodes from '../nodes';
 import * as utils from '../utils';
 import { getLanguage } from '../languages';
-import * as ejs from 'ejs';
 
 const defaultTemplate = `<%- head_prefix %>
 <%- head %>
@@ -36,12 +36,12 @@ export default class Writer extends BaseWriter {
         'htmlProlog', 'htmlHead', 'htmlTitle', 'htmlSubtitle',
             'htmlBody'];
     }
-	
+
 
     translate() {
         this.visitor = new this.translatorClass(this.document);
         const visitor = this.visitor;
-	if(!visitor) {
+	if (!visitor) {
 	    throw new Error();
 	}
         this.document.walkabout(visitor);
@@ -65,15 +65,16 @@ export default class Writer extends BaseWriter {
 
     templateVars() {
 	const vars = {};
-        const settings = this.document.settings
-	this.visitorAttributes.forEach((attr) => vars[attr] = (this[attr] || []).join('').trim());
-        vars['encoding'] = settings.output_encoding
-        vars['version'] = docutils.__version__
+        const settings = this.document.settings;
+	this.visitorAttributes.forEach(attr => vars[attr] = (this[attr] || []).join('').trim());
+        vars.encoding = settings.output_encoding;
+        vars.version = docutils.__version__;
 	return vars;
     }
+
     assembleParts() {
 	super.assembleParts();
-	this.visitorAttributes.forEach((part) => this.parts[part] = (this[part] || []).join(''));
+	this.visitorAttributes.forEach(part => this.parts[part] = (this[part] || []).join(''));
     }
 }
 
@@ -132,14 +133,14 @@ class HTMLTranslator extends nodes.NodeVisitor {
         this.mathHeader = [];
     }
 
-    attVal(text, whitespace=/[\n\r\t\v\f]/g) {
+    attVal(text, whitespace = /[\n\r\t\v\f]/g) {
 	console.log(whitespace);
-	//"""Cleanse, HTML encode, and return attribute value text."""
+	// """Cleanse, HTML encode, and return attribute value text."""
 	let encoded = this.encode(text.replace(whitespace, ' '));
-	if(this.inMailto && this.settings.cloakEmailAddresses) {
+	if (this.inMailto && this.settings.cloakEmailAddresses) {
 	    // Cloak at-signs ("%40") and periods with HTML entities.
             encoded = encoded.replace('%40', '&#37;&#52;&#48;');
-	    encoded = encoded.replace('.', '&#46;')
+	    encoded = encoded.replace('.', '&#46;');
 	}
 	return encoded;
     }
@@ -203,13 +204,13 @@ class HTMLTranslator extends nodes.NodeVisitor {
 
 */
         const attlist = { ...atts };
-        //attlist.sort()
+        // attlist.sort()
         const parts = [myTagname];
-	Object.entries(attlist).forEach(( [ name, value ] ) => {
+	Object.entries(attlist).forEach(([name, value]) => {
             // value=None was used for boolean attributes without
             // value, but this isn't supported by XHTML.
 //            assert value is not None
-	    if(Array.isArray(value)) {
+	    if (Array.isArray(value)) {
                 parts.push(`${name.toLowerCase()}="${this.attVal(value.join(' '))}"`);
 	    } else {
                 parts.push(`${name.toLowerCase()}="${this.attVal(value)}"`);
@@ -716,49 +717,49 @@ class HTMLTranslator extends nodes.NodeVisitor {
         this.body.push('</ol>\n')
     }
 */
-    visit_field_list( node) {
+    visit_field_list(node) {
         // Keep simple paragraphs in the field_body to enable CSS
         // rule to start body on new line if the label is too long
-        let classes = 'field-list'
+        let classes = 'field-list';
         if (this.isCompactable(node)) {
             classes += ' simple';
 	}
-        this.body.push(this.starttag(node, 'dl', '\n', false, { CLASS: classes }))
+        this.body.push(this.starttag(node, 'dl', '\n', false, { CLASS: classes }));
     }
 
-    depart_field_list( node) {
-        this.body.push('</dl>\n')
+    depart_field_list(node) {
+        this.body.push('</dl>\n');
     }
 
-    visit_field( node) {
+    visit_field(node) {
     }
 
-    depart_field( node) {
+    depart_field(node) {
     }
 
     // as field is ignored, pass class arguments to field-name and field-body:
 
-    visit_field_name( node) {
-        this.body.push(this.starttag(node, 'dt', '', false, 
-                                     { CLASS: node.parent.attributes['classes'].join(' ') }));
+    visit_field_name(node) {
+        this.body.push(this.starttag(node, 'dt', '', false,
+                                     { CLASS: node.parent.attributes.classes.join(' ') }));
     }
 
-    depart_field_name( node) {
-        this.body.push('</dt>\n')
+    depart_field_name(node) {
+        this.body.push('</dt>\n');
     }
 
-    visit_field_body( node) {
-        this.body.push(this.starttag(node, 'dd', '', false, 
-                                     { CLASS: node.parent.attributes['classes'].join(' ') }));
+    visit_field_body(node) {
+        this.body.push(this.starttag(node, 'dd', '', false,
+                                     { CLASS: node.parent.attributes.classes.join(' ') }));
 
         // prevent misalignment of following content if the field is empty:
-        if(!node.children.length) {
+        if (!node.children.length) {
             this.body.push('<p></p>');
 	}
     }
 
-    depart_field_body( node) {
-        this.body.push('</dd>\n')
+    depart_field_body(node) {
+        this.body.push('</dd>\n');
     }
 
 /*    visit_figure( node) {
@@ -796,36 +797,36 @@ class HTMLTranslator extends nodes.NodeVisitor {
         // TODO: use the new HTML5 element <aside>? (Also for footnote text)
     }
 */
-    visit_footnote( node) {
-        if(!this.inFootnoteList) {
+    visit_footnote(node) {
+        if (!this.inFootnoteList) {
             const classes = `footnote ${this.settings.footnoteReferences}`;
             this.body.push(`<dl class="${classes}">\n`);
 	    this.inFootnoteList = true;
 	}
     }
 
-    depart_footnote( node) {
-        this.body.push('</dd>\n')
-        if(! node.nextNode(undefined, false, false, true) instanceof nodes.footnote) {
-            this.body.push('</dl>\n')
-	    this.inFootnoteList = false
+    depart_footnote(node) {
+        this.body.push('</dd>\n');
+        if (!(node.nextNode(undefined, false, false, true) instanceof nodes.footnote)) {
+            this.body.push('</dl>\n');
+	    this.inFootnoteList = false;
 	}
     }
 
     /* whoops this requires references transform!! */
-    visit_footnote_reference( node) {
-	if(!node.attributes.refid) {
+    visit_footnote_reference(node) {
+	if (!node.attributes.refid) {
 	    console.log('warning, no refid ( implement transforms )');
 	}
         const href = `#${node.attributes.refid || ''}`;
         const classes = `footnote-reference ${this.settings.footnoteReferences}`;
-        this.body.push(this.starttag(node, 'a', '', //suffix,
+        this.body.push(this.starttag(node, 'a', '', // suffix,
 				     false,
 				     { CLASS: classes, href }));
     }
 
-    depart_footnote_reference( node) {
-        this.body.push('</a>')
+    depart_footnote_reference(node) {
+        this.body.push('</a>');
     }
 
 /*    // Docutils-generated text: put section numbers in a span for CSS styling:
@@ -1006,37 +1007,38 @@ class HTMLTranslator extends nodes.NodeVisitor {
     }
 */
     // inline literal
-    visit_literal( node) {
+    visit_literal(node) {
         // special case: "code" role
         const classes = node.attributes.classes || [];
-        if(classes.indexOf('code') !== -1) {
+        if (classes.indexOf('code') !== -1) {
             // filter 'code' from class arguments
-            //fixme //node.attributes['classes'] = [cls for cls in classes if cls != 'code']
+            // fixme //node.attributes['classes'] = [cls for cls in classes if cls != 'code']
             return this.body.push(this.starttag(node, 'span', '', false, { CLASS: 'docutils literal' }));
 	}
         let text = node.astext();
         // remove hard line breaks (except if in a parsed-literal block)
-        if(!node.parent instanceof nodes.literal_block) {
+        if (!(node.parent instanceof nodes.literal_block)) {
             text = text.replace('\n', ' ');
 	}
         // Protect text like ``--an-option`` and the regular expression
         // ``[+]?(\d+(\.\d*)?|\.\d+)`` from bad line wrapping
 	this.wordsAndSpaces.findall(text).forEach((token) => {
-	    if(token.trim() && this.inWordWrapPoint.search(token)) {
+	    if (token.trim() && this.inWordWrapPoint.search(token)) {
 		this.body.push(`<span class="pre">${this.encode(token)}</span>`);
 	    } else {
 		this.body.push(this.encode(token));
 	    }
 	});
-        this.body.push('</span>')
+        this.body.push('</span>');
 	// Content already processed:
 	throw new nodes.SkipNode();
     }
 
-    depart_literal( node) {
+    depart_literal(node) {
         // skipped unless literal element is from "code" role:
-        this.body.push('</code>')
+        this.body.push('</code>');
     }
+
 /*
     visit_literal_block( node) {
         this.body.push(this.starttag(node, 'pre', '', { CLASS: 'literal-block' }))
@@ -1308,36 +1310,37 @@ class HTMLTranslator extends nodes.NodeVisitor {
     raise nodes.SkipNode
     }
 */
-    visit_reference( node) {
-        const atts = {'class': 'reference'}
-        if('refuri' in node.attributes) {
-            atts['href'] = node.attributes['refuri'];
-            if ( this.settings.cloakEmailAddresses
-		 && atts['href'].substring(0, 6) === 'mailto:') {
-		atts['href'] = this.cloakMailto(atts['href'])
-		this.in_mailto = true
+    visit_reference(node) {
+        const atts = { class: 'reference' };
+        if ('refuri' in node.attributes) {
+            atts.href = node.attributes.refuri;
+            if (this.settings.cloakEmailAddresses
+		 && atts.href.substring(0, 6) === 'mailto:') {
+		atts.href = this.cloakMailto(atts.href);
+		this.in_mailto = true;
 	    }
-            atts['class'] += ' external';
+            atts.class += ' external';
 	} else {
-            //assert 'refid' in node, \ 'References must have "refuri" or "refid" attribute.'
-            atts['href'] = '#' + node.attributes['refid']
-            atts['class'] += ' internal';
+            // assert 'refid' in node, \ 'References must have "refuri" or "refid" attribute.'
+            atts.href = `#${node.attributes.refid}`;
+            atts.class += ' internal';
 	}
-	
-        if(!node.parent instanceof nodes.TextElement) {
-            //assert len(node) == 1 and isinstance(node.attributes[0], nodes.image)
-            atts['class'] += ' image-reference';
+
+        if (!(node.parent instanceof nodes.TextElement)) {
+            // assert len(node) == 1 and isinstance(node.attributes[0], nodes.image)
+            atts.class += ' image-reference';
 	}
         this.body.push(this.starttag(node, 'a', '', false, atts));
     }
 
-    depart_reference( node) {
-        this.body.push('</a>')
-        if(!node.parent instanceof nodes.TextElement) {
-            this.body.push('\n')
+    depart_reference(node) {
+        this.body.push('</a>');
+        if (!(node.parent instanceof nodes.TextElement)) {
+            this.body.push('\n');
 	}
 	this.inMailto = false;
     }
+
 /*
     visit_revision( node) {
         this.visit_docinfo_item(node, 'revision', meta=false)
@@ -1715,4 +1718,3 @@ class HTMLTranslator extends nodes.NodeVisitor {
         throw new nodes.SkipNode();
     }
 }
-
