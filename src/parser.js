@@ -11,3 +11,5 @@ function parse(docSource, settings) {
     parser.parse(docSource, document);
     return document;
 }
+
+export default parse;
