@@ -4,10 +4,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta name="generator" content="Docutils 0.14: http://docutils.sourceforge.net/" />
-<title>Docutils-JS</title>
-<meta name="author" content="Kay McCormick" />
-<meta name="date" content="Thu 18 Apr 2019 06:40:03 PM PDT" />
-<meta name="copyright" content="MIT License" />
+<title>README.rst</title>
 <style type="text/css">
 
 /*
@@ -363,38 +360,44 @@ ul.auto-toc {
 </style>
 </head>
 <body>
-<div class="document" id="docutils-js">
-<h1 class="title">Docutils-JS</h1>
-<table class="docinfo" frame="void" rules="none">
-<col class="docinfo-name" />
-<col class="docinfo-content" />
+<div class="document">
+
+
+<div class="section" id="docutils-js">
+<h1><a class="toc-backref" href="#id1">Docutils-JS</a></h1>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
 <tbody valign="top">
-<tr><th class="docinfo-name">Author:</th>
-<td>Kay McCormick</td></tr>
-<tr><th class="docinfo-name">Contact:</th>
-<td><a class="first last reference external" href="mailto:kaym2038&#64;gmail.com">kaym2038&#64;gmail.com</a></td></tr>
-<tr><th class="docinfo-name">Date:</th>
-<td>Thu 18 Apr 2019 06:40:03 PM PDT</td></tr>
-<tr><th class="docinfo-name">Copyright:</th>
-<td>MIT License</td></tr>
+<tr class="field"><th class="field-name">Author:</th><td class="field-body">Kay McCormick</td>
+</tr>
+<tr class="field"><th class="field-name">Contact:</th><td class="field-body"><a class="reference external" href="mailto:kaym2038&#64;gmail.com">kaym2038&#64;gmail.com</a></td>
+</tr>
+<tr class="field"><th class="field-name">Date:</th><td class="field-body">Thu 18 Apr 2019 06:40:03 PM PDT</td>
+</tr>
+<tr class="field"><th class="field-name">Copyright:</th><td class="field-body">MIT License</td>
+</tr>
 </tbody>
 </table>
 <div class="contents topic" id="contents">
 <p class="topic-title first">Contents</p>
 <ul class="simple">
-<li><a class="reference internal" href="#introduction" id="id1">Introduction</a><ul>
-<li><a class="reference internal" href="#about-the-docutils" id="id2">About the Docutils</a></li>
-<li><a class="reference internal" href="#about-this-software" id="id3">About this software</a></li>
+<li><a class="reference internal" href="#docutils-js" id="id1">Docutils-JS</a></li>
+<li><a class="reference internal" href="#introduction" id="id2">Introduction</a><ul>
+<li><a class="reference internal" href="#about-the-docutils" id="id3">About the Docutils</a></li>
+<li><a class="reference internal" href="#about-this-software" id="id4">About this software</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#using-the-software" id="id4">Using the software</a></li>
-<li><a class="reference internal" href="#addendum" id="id5">Addendum</a></li>
+<li><a class="reference internal" href="#setup-and-configuration" id="id5">Setup and configuration</a></li>
+<li><a class="reference internal" href="#using-the-api" id="id6">Using the API</a></li>
+<li><a class="reference internal" href="#addendum" id="id7">Addendum</a></li>
 </ul>
 </div>
+</div>
 <div class="section" id="introduction">
-<h1><a class="toc-backref" href="#id1">Introduction</a></h1>
+<h1><a class="toc-backref" href="#id2">Introduction</a></h1>
 <div class="section" id="about-the-docutils">
-<h2><a class="toc-backref" href="#id2">About the Docutils</a></h2>
+<h2><a class="toc-backref" href="#id3">About the Docutils</a></h2>
 <p>The <a class="reference external" href="http://docutils.sourceforge.net/">Docutils</a> is a Python library for producing documentation based on
 a text format called RST or reStructuredText. RST is used for
 documenting many prominent software projects. While primarily in the
@@ -402,15 +405,15 @@ Python ecosystem, the linux kernel also uses RST for its
 documentation.</p>
 </div>
 <div class="section" id="about-this-software">
-<h2><a class="toc-backref" href="#id3">About this software</a></h2>
+<h2><a class="toc-backref" href="#id4">About this software</a></h2>
 <p>Welcome to the port of the Docutils to JavaScript. This package is
 designed to enable reStructuredText (RST) processing (reading,
 transforming, writing) in a JavaScript environment. It is intended to
 work in a browser and in NodeJS.</p>
 </div>
 </div>
-<div class="section" id="using-the-software">
-<h1><a class="toc-backref" href="#id4">Using the software</a></h1>
+<div class="section" id="setup-and-configuration">
+<h1><a class="toc-backref" href="#id5">Setup and configuration</a></h1>
 <ol class="arabic simple">
 <li>Clone the repository with <tt class="docutils literal">git</tt>:</li>
 </ol>
@@ -451,33 +454,30 @@ $ yarn grunt
 $ yarn jest
 </pre>
 </blockquote>
-<ol class="arabic simple" start="6">
-<li>For now, the simplest method to use the software appears to be:</li>
-</ol>
-<blockquote>
+</div>
+<div class="section" id="using-the-api">
+<h1><a class="toc-backref" href="#id6">Using the API</a></h1>
+<p>Take a look at tools/rst2pojo.js. The API is in flux, because a
+straight port of the docutils interfaces is not appropriate for a JS
+API. JS does not have native IO - this is provided via the host in
+some way. Node provides its own <tt class="docutils literal">fs</tt> module, and web browsers of
+course have many other ways of getting <tt class="docutils literal">RST</tt> input, from
+<tt class="docutils literal">XMLHttpRequest</tt>/<tt class="docutils literal">fetch</tt> to extracting text from the current
+document or a form input (e.g. <tt class="docutils literal">textarea</tt>).</p>
+<p>Further, moving the IO responsibilities up the stack ensures that
+deferred/asynchronous execution is handled outside of the <a class="reference internal" href="#docutils-js">docutils-js</a>
+module itself, improving the developer experience.</p>
+<p>Example: For now, the simplest method to use the software appears to be:</p>
 <pre class="literal-block">
-import { Parser } from 'docutils-js/lib/parsers/restructuredtext';
-import newDocument from 'docutils-js/lib/newDocument';
-import baseSettings from 'docutils-js/lib/baseSettings';
-
-const p = new Parser({});
-const document = newDocument({ sourcePath: '' }, baseSettings);
-p.parse('* a bullet point', document);
-document.toString(); //   &lt;==== this returns the xml.
+const parse = require('../lib/index').parse;
+const PojoWriter = require('../lib/writers/pojo.js').default;
+const docSource = 'However you get your document sources'
+const document = parse(docSource);
 </pre>
-</blockquote>
-<!--  -->
-<blockquote>
-<p>Using this method, a simple string can be supplied to the parse
-method, which fills the document instance with the parsed
-data. This document can be traversed, transformed, or placed in a
-backing store.</p>
-<p>Yes, this method is highly verbose, but is for now the simplest
-interface on offer. Contributions are welcome!</p>
-</blockquote>
+<p>The variable <tt class="docutils literal">document</tt> is now ready for further processing.</p>
 </div>
 <div class="section" id="addendum">
-<h1><a class="toc-backref" href="#id5">Addendum</a></h1>
+<h1><a class="toc-backref" href="#id7">Addendum</a></h1>
 <p>Remaining to be implemented:</p>
 <blockquote>
 <ul class="simple">

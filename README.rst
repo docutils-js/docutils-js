@@ -32,8 +32,8 @@ designed to enable reStructuredText (RST) processing (reading,
 transforming, writing) in a JavaScript environment. It is intended to
 work in a browser and in NodeJS.
 
-Using the software
-==================
+Setup and configuration
+=======================
 
 1. Clone the repository with ``git``:
 
@@ -65,28 +65,30 @@ Using the software
 
     $ yarn jest
 
-6. For now, the simplest method to use the software appears to be:
+Using the API
+=============
 
-  ::
+Take a look at tools/rst2pojo.js. The API is in flux, because a
+straight port of the docutils interfaces is not appropriate for a JS
+API. JS does not have native IO - this is provided via the host in
+some way. Node provides its own ``fs`` module, and web browsers of
+course have many other ways of getting ``RST`` input, from
+``XMLHttpRequest``/``fetch`` to extracting text from the current
+document or a form input (e.g. ``textarea``).
 
-     import { Parser } from 'docutils-js/lib/parsers/restructuredtext';
-     import newDocument from 'docutils-js/lib/newDocument';
-     import baseSettings from 'docutils-js/lib/baseSettings';
+Further, moving the IO responsibilities up the stack ensures that
+deferred/asynchronous execution is handled outside of the docutils-js_
+module itself, improving the developer experience.
 
-     const p = new Parser({});
-     const document = newDocument({ sourcePath: '' }, baseSettings);
-     p.parse('* a bullet point', document);
-     document.toString(); //   <==== this returns the xml.
+Example: For now, the simplest method to use the software appears to be::
 
-..
+  const parse = require('../lib/index').parse;
+  const PojoWriter = require('../lib/writers/pojo.js').default;
+  const docSource = 'However you get your document sources'
+  const document = parse(docSource);
 
-   Using this method, a simple string can be supplied to the parse
-   method, which fills the document instance with the parsed
-   data. This document can be traversed, transformed, or placed in a
-   backing store.
+The variable ``document`` is now ready for further processing.
 
-   Yes, this method is highly verbose, but is for now the simplest
-   interface on offer. Contributions are welcome!
 
 Addendum
 ========

@@ -2,7 +2,7 @@ import xmlescape from 'xml-escape';
 import Transformer from './Transformer';
 import { InvalidArgumentsError, ApplicationError } from './Exceptions';
 import unescape from './utils/unescape';
-import { isIterable } from './utils';
+import { isIterable, checkDocumentArg } from './utils';
 
 function dupname(node, name) {
     node.attributes.dupnames.push(name);
@@ -68,6 +68,9 @@ const SkipSiblings = class {};
 
 export class NodeVisitor {
     constructor(document) {
+	if(!checkDocumentArg(document)) {
+	    throw new Error(`Invalid document arg: ${document}`);
+	}
         this.document = document;
         this.optional = [];
     }
@@ -241,6 +244,7 @@ export function _addNodeClassNames(names, o) {
 export class GenericNodeVisitor extends NodeVisitor {
     constructor(document) {
         super(document);
+	// document this/
         _addNodeClassNames(nodeClassNames, this);
     }
 

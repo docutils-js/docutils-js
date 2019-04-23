@@ -173,3 +173,10 @@ export function stripCombiningChars(text) {
 export function pySplit(text) {
     return text.trim().split(/s+/);
 }
+
+export function checkDocumentArg(document) {
+    if(typeof document === 'undefined') {
+	throw new Error("undefined document");
+    }
+    return true;
+}
