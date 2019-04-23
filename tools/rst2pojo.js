@@ -2,22 +2,21 @@
 
 require('@babel/polyfill');
 
+const fs = require('fs');
+
 const path = require('path');
 const baseSettings = require('../lib/baseSettings').default;
-const docutilsCore = require('../lib/Core');
+const parse = require('../lib/index').parse;
+const PojoWriter = require('../lib/writers/pojo.js').default;
+
 const argv = process.argv.slice(2);
-const description = 'Generates Docutils-native XML from standalone reStructuredText sources.';
-docutilsCore.publishCmdLine({
-    settings: { ...baseSettings, _source: argv[0] },
-    argv,
-    writerName: 'pojo',
-    description,
-}, (error, ...args) => {
-    if (error) {
-        if (error.error) {
-            throw error.error;
-        } else {
-            throw error;
-        }
-    }
-});
+const docSource = fs.readFileSync(argv[0], { encoding: 'utf-8' });
+const document = parse(docSource);
+
+const writer = new PojoWriter(document);
+writer.translate();
+process.stdout.write(writer.output);
+
+
+
+
