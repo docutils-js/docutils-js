@@ -16,8 +16,8 @@ if(typeof document === 'undefined') {
     throw new Error("received undefined from parse, no document");
 }
 
-const writer = new PojoWriter(document);
-writer.translate();
+const writer = new PojoWriter();
+writer.translate(document);
 process.stdout.write(writer.output);
 
 
