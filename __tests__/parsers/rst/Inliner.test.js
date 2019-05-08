@@ -7,21 +7,12 @@ import XmlWriter from '../../../src/writers/xml';
 import { StringOutput } from '../../../src/io';
 import xmlescape from 'xml-escape';
 import * as nodes from '../../../src/nodes';
+import * as utils from '../../../src/utils';
 
 const currentLogLines = [];
 
-function inlineToXml(node) {
-    if (node instanceof nodes.Text) {
-        const text = xmlescape(node.astext());
-        return text;
-    }
-    if (node.children.length) {
-        return [node.starttag(), ...node.children.map(c => inlineToXml(c)), node.endtag()].join('');
-    }
-    return node.emptytag();
-}
-
 const xmlWriter = new XmlWriter({});
+const inlineToXml = utils.nodeToXml;
 
 afterEach(() => {
     if (currentLogLines.length) {
