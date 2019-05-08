@@ -87,7 +87,7 @@ test("Instantiate publisher", () => {
 	  throw error;
       }
       const write = destination.write;
-      expect(output.toString()).toMatchSnapshot();
+      expect(output).toMatchSnapshot();
   });
 });
 
@@ -102,6 +102,6 @@ test("Instantiate publisher #2", () => {
 	  throw error;
       }
       const write = destination.write;
-      expect(output.toString()).toMatchSnapshot();
+      expect(output).toMatchSnapshot();
   });
 });

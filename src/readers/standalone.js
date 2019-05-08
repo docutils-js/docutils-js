@@ -1,6 +1,7 @@
 import BaseReader from '../Reader';
 import * as frontend from '../FrontEnd';
 import * as references from '../transforms/references';
+import * as frontmatter from '../transforms/frontmatter';
 
 
 /* Ported from code written by David Goodger <goodger@python.org>
@@ -63,7 +64,10 @@ default: 0,
     }
 
     getTransforms() {
-        const r = [references.PropagateTargets];
+        const r = [references.PropagateTargets,
+		   frontmatter.DocTitle,
+		   frontmatter.SectionSubTitle,
+		  frontmatter.DocInfo];
         return r;
     }
     /*

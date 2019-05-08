@@ -4,6 +4,7 @@ import { InvalidArgumentsError, ApplicationError } from './Exceptions';
 import unescape from './utils/unescape';
 import { isIterable, checkDocumentArg } from './utils';
 
+
 function dupname(node, name) {
     node.attributes.dupnames.push(name);
     node.attributes.names.splice(node.attributes.names.indexOf(name), 1);
@@ -1381,4 +1382,15 @@ export class system_message extends Element {
         super(attributes.rawsource || '', message ? [new paragraph('', message), ...children] : children, attributes);
         setupBacklinkable(this);
     }
+}
+
+export function nodeToXml(node) {
+    if (node instanceof Text) {
+        const text = xmlescape(node.astext());
+        return text;
+    }
+    if (node.children.length) {
+        return [node.starttag(), ...node.children.map(c => nodeToXml(c)), node.endtag()].join('');
+    }
+    return node.emptytag();
 }

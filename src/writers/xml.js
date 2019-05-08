@@ -2,7 +2,7 @@ import BaseWriter from '../Writer';
 import * as docutils from '../index';
 import * as nodes from '../nodes';
 
-function escapeXml(unsafe) {
+export function escapeXml(unsafe) {
     if (typeof unsafe === 'undefined') {
         throw new Error('need unsafE');
     }

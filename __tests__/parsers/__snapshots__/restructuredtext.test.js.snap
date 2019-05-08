@@ -10,20 +10,20 @@ Python ecosystem, the linux kernel also uses RST for its
 documentation.</paragraph></section><section ids=\\"about\\\\ this\\\\ software\\" names=\\"about\\\\ this\\\\ software\\"><title>About this software</title><paragraph>Welcome to the port of the Docutils to JavaScript. This package is
 designed to enable reStructuredText (RST) processing (reading,
 transforming, writing) in a JavaScript environment. It is intended to
-work in a browser and in NodeJS.</paragraph></section></section><section ids=\\"using\\\\ the\\\\ software\\" names=\\"using\\\\ the\\\\ software\\"><title>Using the software</title><paragraph>1. Clone the repository with <literal>git</literal>:</paragraph><block_quote><literal_block>$ git clone http://github.com/kaymccormick/docutils-js.git docutils-js</literal_block></block_quote><paragraph>2. Enter the source directory:</paragraph><block_quote><literal_block>$ cd docutils-js</literal_block></block_quote><paragraph>3. Install the dependencies using <literal>yarn</literal>:</paragraph><block_quote><literal_block>$ yarn install</literal_block></block_quote><paragraph>4. Run <literal>grunt</literal> to transpile the source code:</paragraph><block_quote><literal_block>$ yarn grunt</literal_block></block_quote><paragraph>5. The output of this command should be in the <literal>lib</literal> subdirectory. Then, optionally run the tests:</paragraph><block_quote><literal_block>$ yarn jest</literal_block></block_quote><paragraph>6. For now, the simplest method to use the software appears to be:</paragraph><block_quote><literal_block>import { Parser } from 'docutils-js/lib/parsers/restructuredtext';
-import newDocument from 'docutils-js/lib/newDocument';
-import baseSettings from 'docutils-js/lib/baseSettings';
-
-const p = new Parser({});
-const document = newDocument({ sourcePath: '' }, baseSettings);
-p.parse('* a bullet point', document);
-document.toString(); //   <==== this returns the xml.</literal_block></block_quote><comment/><block_quote><paragraph>Using this method, a simple string can be supplied to the parse
-method, which fills the document instance with the parsed
-data. This document can be traversed, transformed, or placed in a
-backing store.</paragraph><paragraph>Yes, this method is highly verbose, but is for now the simplest
-interface on offer. Contributions are welcome!</paragraph></block_quote></section><section ids=\\"addendum\\" names=\\"addendum\\"><title>Addendum</title><paragraph>Remaining to be implemented:</paragraph><block_quote><bullet_list bullet=\\"*\\"><list_item><paragraph>Transformers (output is not currently processed as docutils would)</paragraph></list_item><list_item><paragraph>Directives (there are a couple of no-op directives in place, such as image
+work in a browser and in NodeJS.</paragraph></section></section><section ids=\\"setup\\\\ and\\\\ configuration\\" names=\\"setup\\\\ and\\\\ configuration\\"><title>Setup and configuration</title><paragraph>1. Clone the repository with <literal>git</literal>:</paragraph><block_quote><literal_block>$ git clone http://github.com/kaymccormick/docutils-js.git docutils-js</literal_block></block_quote><paragraph>2. Enter the source directory:</paragraph><block_quote><literal_block>$ cd docutils-js</literal_block></block_quote><paragraph>3. Install the dependencies using <literal>yarn</literal>:</paragraph><block_quote><literal_block>$ yarn install</literal_block></block_quote><paragraph>4. Run <literal>grunt</literal> to transpile the source code:</paragraph><block_quote><literal_block>$ yarn grunt</literal_block></block_quote><paragraph>5. The output of this command should be in the <literal>lib</literal> subdirectory. Then, optionally run the tests:</paragraph><block_quote><literal_block>$ yarn jest</literal_block></block_quote></section><section ids=\\"using\\\\ the\\\\ api\\" names=\\"using\\\\ the\\\\ api\\"><title>Using the API</title><paragraph>Take a look at tools/rst2pojo.js. The API is in flux, because a
+straight port of the docutils interfaces is not appropriate for a JS
+API. JS does not have native IO - this is provided via the host in
+some way. Node provides its own <literal>fs</literal> module, and web browsers of
+course have many other ways of getting <literal>RST</literal> input, from
+<literal>XMLHttpRequest</literal>/<literal>fetch</literal> to extracting text from the current
+document or a form input (e.g. <literal>textarea</literal>).</paragraph><paragraph>Further, moving the IO responsibilities up the stack ensures that
+deferred/asynchronous execution is handled outside of the docutils-<reference name=\\"js\\" refname=\\"js\\">js</reference>
+module itself, improving the developer experience.</paragraph><paragraph>Example: For now, the simplest method to use the software appears to be:</paragraph><literal_block>const parse = require(&apos;../lib/index&apos;).parse;
+const PojoWriter = require(&apos;../lib/writers/pojo.js&apos;).default;
+const docSource = &apos;However you get your document sources&apos;
+const document = parse(docSource);</literal_block><paragraph>The variable <literal>document</literal> is now ready for further processing.</paragraph></section><section ids=\\"addendum\\" names=\\"addendum\\"><title>Addendum</title><paragraph>Remaining to be implemented:</paragraph><block_quote><bullet_list bullet=\\"*\\"><list_item><paragraph>Transformers (output is not currently processed as docutils would)</paragraph></list_item><list_item><paragraph>Directives (there are a couple of no-op directives in place, such as image
 and contents.</paragraph></list_item></bullet_list></block_quote><paragraph>There are currently quite a number of bugs.</paragraph><block_quote><bullet_list bullet=\\"*\\"><list_item><paragraph>Problems with sections</paragraph></list_item><list_item><paragraph>Problems with tables</paragraph></list_item><list_item><paragraph>Lack of transformers and directives</paragraph></list_item><list_item><paragraph>Running rst2xml.js on sample documents produces documents that
-'work', sort-of, but which are significantly different from
+&apos;work&apos;, sort-of, but which are significantly different from
 docutils-python output.</paragraph></list_item></bullet_list></block_quote><paragraph>However, the project should be usable for people who want to
 experiment, play around, or contribute through bug fixes or feature
 enhancements.</paragraph></section></document>"

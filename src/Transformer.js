@@ -18,6 +18,12 @@ export default class Transformer {
             }
 //          console.log(`processing ${component.toString()} ${component.componentType}`);
             const transforms = component.getTransforms() || [];
+	    transforms.forEach(t => {
+		if(typeof t === 'undefined') {
+                    throw new Error(`got invalid transform from ${component}`);
+		}
+	    });
+	    
             if (transforms.filter(x => typeof x === 'undefined').length !== 0) {
                 throw new Error(`got invalid transform from ${component}`);
             }

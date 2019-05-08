@@ -17,7 +17,7 @@ test('paragraph with text', () => {
     expect(p.children).toHaveLength(1);
     expect(p.children[0]).toBeDefined();
     expect(p.children[0].astext()).toEqual(paraText);
-    expect(p.toString()).toMatchSnapshot();
+    expect(nodes.nodeToXml(p)).toMatchSnapshot();
     expect(p).toMatchSnapshot();
 });
 
@@ -35,7 +35,7 @@ test('paragraph text unescaped', () =>
     const d = newDocument({}, baseSettings);
     const text = 'escape <me>';
     const p = new nodes.paragraph(text, text, [], {});
-    expect(p.toString()).toEqual(expect.stringContaining('<'));
+    expect(nodes.nodeToXml(p)).toEqual(expect.stringContaining('<'));
 })
 
 test('NodeVisitor.constructor', () => {

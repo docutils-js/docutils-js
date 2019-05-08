@@ -57,6 +57,8 @@ class Publisher {
 
     setWriter(writerName) {
         const writerClass = writers.getWriterClass(writerName);
+	/* not setting document here, the write method takes it, which
+	 * is confusing */
         this.writer = new writerClass();
     }
 

@@ -6,13 +6,11 @@ import baseSettings from '../../../src/baseSettings';
 import XmlWriter from '../../../src/writers/xml';
 import { StringOutput } from '../../../src/io';
 import xmlescape from 'xml-escape';
-import * as nodes from '../../../src/nodes';
-import * as utils from '../../../src/utils';
+import { nodeToXml } from '../../../src/nodes';
 
 const currentLogLines = [];
 
 const xmlWriter = new XmlWriter({});
-const inlineToXml = utils.nodeToXml;
 
 afterEach(() => {
     if (currentLogLines.length) {
@@ -46,8 +44,8 @@ test('inliner 1', () => {
 
     const result = inliner.parse('`test`:foo:', { lineno: 1, memo, parent: document });
     const [nodes, messages] = result;
-    expect(nodes.map(n => inlineToXml(n)).join('')).toMatchSnapshot();
-    expect(messages.map(n => inlineToXml(n)).join('')).toMatchSnapshot();
+    expect(nodes.map(n => nodeToXml(n)).join('')).toMatchSnapshot();
+    expect(messages.map(n => nodeToXml(n)).join('')).toMatchSnapshot();
 });
 
 test.each([['Interpreted text', '`test`:foo:'],
@@ -70,29 +68,6 @@ test.each([['Interpreted text', '`test`:foo:'],
 
     const result = inliner.parse(a, { lineno: 1, memo, parent: document });
               const [nodes, messages] = result;
-              expect(nodes.map(n => inlineToXml(n)).join('')).toMatchSnapshot();
-              expect(messages.map(n => inlineToXml(n)).join('')).toMatchSnapshot();
+              expect(nodes.map(n => nodeToXml(n)).join('')).toMatchSnapshot();
+              expect(messages.map(n => nodeToXml(n)).join('')).toMatchSnapshot();
 });
-
-/*
-    if(isIterable(nodes)) {
-        console.log('is iterable');
-        nodes.forEach((e, i) => {
-            if(typeof e === 'object' && e instanceof Element) {
-                console.log(e.tagname);
-            } else if(Array.isArray(e)) {
-                e.forEach((e2, i2) => {
-                    if(e2 instanceof Element) {
-                        console.log(e.tagname);
-                    } else {
-                        console.log(`    ${i2}: ${e2}`);
-                    }
-
-                })
-            } else {
-                console.log(`${i}: ${e}`);
-            }
-        });
-
-    }
-*/
