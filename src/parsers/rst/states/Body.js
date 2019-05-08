@@ -438,6 +438,14 @@ node: substitutionNode,
         return [[substitutionNode], blankFinish];
     }
 
+    disallowedInsideSubstitutionDefinitions(node) {
+        if (node.attributes.ids.length || node instanceof nodes.reference ||
+            node instanceof nodes.footnote_reference && node.attributes.auto) {
+            return true;
+        } else {
+            return false;
+        }
+    }
     directive(match, optionPresets) {
         // """Returns a 2-tuple: list of nodes, and a "blank finish" boolean."""
         const typeName = match[1];

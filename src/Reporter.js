@@ -76,8 +76,9 @@ class Reporter {
         if (!('source' in attributes)) {
             // fixme
         }
+
         const msg = new nodes.system_message(message, children, attributes);
-        if (this.stream) {
+        if (this.stream) { // fixme
             this.stream.write(`${msg.astext()}\n`);
         }
         if (this.stream && (level >= this.reportLevel

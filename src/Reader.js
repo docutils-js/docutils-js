@@ -1,11 +1,11 @@
 import Component from './Component';
-// /import universal from './transforms/universal';
+import * as universal from './transforms/universal';
 import parsers from './parsers';
 import newDocument from './newDocument';
 
 export default class Reader extends Component {
     getTransforms() {
-        return [];// /*...super.getTransforms()*/ universal.Decorations,
+        return [...super.getTransforms(), universal.Decorations]; // fixme
 //               universal.ExportInternals, universal.StripComments ];
     }
 

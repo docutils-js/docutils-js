@@ -180,3 +180,30 @@ export function checkDocumentArg(document) {
     }
     return true;
 }
+export function relativePath(source, target) {
+/*
+    Build and return a path to `target`, relative to `source` (both files).
+
+    If there is no common prefix, return the absolute path to `target`.
+*/
+    return `${source}/${target}`; // fixme broken url 
+/*    source_parts = os.path.abspath(source or type(target)('dummy_file')
+                                  ).split(os.sep)
+    target_parts = os.path.abspath(target).split(os.sep)
+    # Check first 2 parts because '/dir'.split('/') == ['', 'dir']:
+    if source_parts[:2] != target_parts[:2]:
+        # Nothing in common between paths.
+        # Return absolute path, using '/' for URLs:
+        return '/'.join(target_parts)
+    source_parts.reverse()
+    target_parts.reverse()
+    while (source_parts and target_parts
+           and source_parts[-1] == target_parts[-1]):
+        # Remove path components in common:
+        source_parts.pop()
+        target_parts.pop()
+    target_parts.reverse()
+    parts = ['..'] * (len(source_parts) - 1) + target_parts
+    return '/'.join(parts)
+*/
+}

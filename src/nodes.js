@@ -206,6 +206,7 @@ export class Node {
     }
 
     isInline() {
+        console.log(this.classes);
         return this.classes.firstIndex(c => c.prototype instanceof Inline || c === Inline) !== -1;
     }
 
@@ -1457,7 +1458,7 @@ export class field_list extends Element {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
-        this.classes = [Seqeuential];
+        this.classes = [Sequential];
     }
 } // (Sequential, Element
 export class field extends Element {

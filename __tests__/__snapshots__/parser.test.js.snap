@@ -90,7 +90,9 @@ document {
                   "tagname": "Text",
                 },
               ],
-              "classes": Array [],
+              "classes": Array [
+                [Function],
+              ],
               "document": undefined,
               "knownAttributes": Array [
                 "ids",
@@ -118,7 +120,9 @@ document {
               "tagname": "paragraph",
             },
           ],
-          "classes": Array [],
+          "classes": Array [
+            [Function],
+          ],
           "document": undefined,
           "knownAttributes": Array [
             "ids",
@@ -146,7 +150,9 @@ document {
           "tagname": "list_item",
         },
       ],
-      "classes": Array [],
+      "classes": Array [
+        [Function],
+      ],
       "document": undefined,
       "knownAttributes": Array [
         "ids",
@@ -223,7 +229,9 @@ document {
               "tagname": "Text",
             },
           ],
-          "classes": Array [],
+          "classes": Array [
+            [Function],
+          ],
           "document": undefined,
           "knownAttributes": Array [
             "ids",
@@ -251,7 +259,11 @@ document {
           "tagname": "paragraph",
         },
       ],
-      "classes": Array [],
+      "classes": Array [
+        [Function],
+        [Function],
+        [Function],
+      ],
       "document": undefined,
       "knownAttributes": Array [
         "ids",
@@ -329,7 +341,9 @@ document {
               "tagname": "Text",
             },
           ],
-          "classes": Array [],
+          "classes": Array [
+            [Function],
+          ],
           "document": undefined,
           "knownAttributes": Array [
             "ids",
@@ -368,7 +382,9 @@ document {
           "tagname": "Text",
         },
       ],
-      "classes": Array [],
+      "classes": Array [
+        [Function],
+      ],
       "document": undefined,
       "knownAttributes": Array [
         "ids",
@@ -449,7 +465,9 @@ document {
               "tagname": "Text",
             },
           ],
-          "classes": Array [],
+          "classes": Array [
+            [Function],
+          ],
           "document": undefined,
           "knownAttributes": Array [
             "ids",
@@ -477,7 +495,11 @@ document {
           "tagname": "paragraph",
         },
       ],
-      "classes": Array [],
+      "classes": Array [
+        [Function],
+        [Function],
+        [Function],
+      ],
       "document": undefined,
       "knownAttributes": Array [
         "ids",
@@ -634,7 +656,9 @@ document {
                   "tagname": "Text",
                 },
               ],
-              "classes": Array [],
+              "classes": Array [
+                [Function],
+              ],
               "document": undefined,
               "knownAttributes": Array [
                 "ids",
@@ -662,7 +686,9 @@ document {
               "tagname": "paragraph",
             },
           ],
-          "classes": Array [],
+          "classes": Array [
+            [Function],
+          ],
           "document": undefined,
           "knownAttributes": Array [
             "ids",
@@ -690,7 +716,9 @@ document {
           "tagname": "block_quote",
         },
       ],
-      "classes": Array [],
+      "classes": Array [
+        [Function],
+      ],
       "document": undefined,
       "knownAttributes": Array [
         "ids",
@@ -862,7 +890,9 @@ document {
                   "tagname": "Text",
                 },
               ],
-              "classes": Array [],
+              "classes": Array [
+                [Function],
+              ],
               "document": undefined,
               "knownAttributes": Array [
                 "ids",
@@ -890,7 +920,9 @@ document {
               "tagname": "paragraph",
             },
           ],
-          "classes": Array [],
+          "classes": Array [
+            [Function],
+          ],
           "document": undefined,
           "knownAttributes": Array [
             "ids",
@@ -918,7 +950,9 @@ document {
           "tagname": "block_quote",
         },
       ],
-      "classes": Array [],
+      "classes": Array [
+        [Function],
+      ],
       "document": undefined,
       "knownAttributes": Array [
         "ids",
@@ -999,7 +1033,9 @@ document {
               "tagname": "Text",
             },
           ],
-          "classes": Array [],
+          "classes": Array [
+            [Function],
+          ],
           "document": undefined,
           "knownAttributes": Array [
             "ids",
@@ -1027,7 +1063,11 @@ document {
           "tagname": "paragraph",
         },
       ],
-      "classes": Array [],
+      "classes": Array [
+        [Function],
+        [Function],
+        [Function],
+      ],
       "document": undefined,
       "knownAttributes": Array [
         "ids",
@@ -1087,7 +1127,9 @@ document {
           "tagname": "Text",
         },
       ],
-      "classes": Array [],
+      "classes": Array [
+        [Function],
+      ],
       "document": undefined,
       "knownAttributes": Array [
         "ids",
@@ -1141,7 +1183,9 @@ document {
             "tagname": "Text",
           },
         ],
-        "classes": Array [],
+        "classes": Array [
+          [Function],
+        ],
         "document": undefined,
         "knownAttributes": Array [
           "ids",
