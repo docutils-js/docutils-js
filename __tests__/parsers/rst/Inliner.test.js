@@ -1,3 +1,4 @@
+import xmlescape from 'xml-escape';
 import Inliner from '../../../src/parsers/rst/Inliner';
 import newReporter from '../../../src/newReporter';
 import newDocument from '../../../src/newDocument';
@@ -5,7 +6,6 @@ import { Element } from '../../../src/nodes';
 import baseSettings from '../../../src/baseSettings';
 import XmlWriter from '../../../src/writers/xml';
 import { StringOutput } from '../../../src/io';
-import xmlescape from 'xml-escape';
 import { nodeToXml } from '../../../src/nodes';
 
 const currentLogLines = [];

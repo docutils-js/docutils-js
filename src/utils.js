@@ -175,8 +175,8 @@ export function pySplit(text) {
 }
 
 export function checkDocumentArg(document) {
-    if(typeof document === 'undefined') {
-	throw new Error("undefined document");
+    if (typeof document === 'undefined') {
+	throw new Error('undefined document');
     }
     return true;
 }
@@ -186,7 +186,7 @@ export function relativePath(source, target) {
 
     If there is no common prefix, return the absolute path to `target`.
 */
-    return `${source}/${target}`; // fixme broken url 
+    return `${source}/${target}`; // fixme broken url
 /*    source_parts = os.path.abspath(source or type(target)('dummy_file')
                                   ).split(os.sep)
     target_parts = os.path.abspath(target).split(os.sep)

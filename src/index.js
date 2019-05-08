@@ -8,4 +8,6 @@ import * as nodes from './nodes';
 
 export const __version__ = '0.14js';
 
-export { parse, StringOutput, StandaloneReader, newDocument, baseSettings, nodes };
+export {
+ parse, StringOutput, StandaloneReader, newDocument, baseSettings, nodes,
+};

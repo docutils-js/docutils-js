@@ -1,18 +1,18 @@
-import Publisher from "../src/Publisher";
-import Reader from "../src/Reader";
-import Writer from "../src/Writer";
-import Output from "../src/io/Output";
-import Input from "../src/io/Input";
-import baseSettings from "../src/baseSettings";
-import { ApplicationError } from "../src/Exceptions";
-import newDocument from "../src/newDocument";
+import Publisher from '../src/Publisher';
+import Reader from '../src/Reader';
+import Writer from '../src/Writer';
+import Output from '../src/io/Output';
+import Input from '../src/io/Input';
+import baseSettings from '../src/baseSettings';
+import { ApplicationError } from '../src/Exceptions';
+import newDocument from '../src/newDocument';
 
 const publishingSettings = baseSettings;
 
-jest.mock("../src/Reader");
-jest.mock("../src/Writer");
-jest.mock("../src/io/Output");
-jest.mock("../src/io/Input");
+jest.mock('../src/Reader');
+jest.mock('../src/Writer');
+jest.mock('../src/io/Output');
+jest.mock('../src/io/Input');
 
 const input = [];
 
@@ -21,23 +21,20 @@ beforeEach(() => {
   input.length = 0;
 
   Input.mockClear();
-  Input.mockImplementation(({ source }) => {
-    return {
+  Input.mockImplementation(({ source }) => ({
       getTransforms: () => [],
-      read: cb => {
+      read: (cb) => {
         cb(undef, newDocument({}, publishSettings));
       },
-      decode: data => data
-    };
-  });
+      decode: data => data,
+    }));
 
   Reader.mockClear();
-  Reader.mockImplementation((parser, parserName, args) => {
-    return {
+  Reader.mockImplementation((parser, parserName, args) => ({
       getTransforms: () => [],
-      setParser: parserName => {},
+      setParser: (parserName) => {},
       parse: () => {
-        parser.parse(/*input,document*/);
+        parser.parse(/* input,document */);
       },
       newDocument: () => newDocument({}, publishingSettings),
       read: (source, parser, settings, cb) => {
@@ -45,27 +42,23 @@ beforeEach(() => {
 //        console.log(`in read ${cb}`);
         cb(
           undefined,
-          /* expects document */ newDocument({}, publishingSettings)
+          /* expects document */ newDocument({}, publishingSettings),
         );
-      }
-    };
-  });
-  Writer.mockClear();
-  Writer.mockImplementation(args => {
-    return {
-      getTransforms: () => [],
-      write: (document, destination) => {
-//        console.log(`in write ${document}`);
-        return document;
       },
-      assembleParts: () => {}
-    };
-  });
+    }));
+  Writer.mockClear();
+  Writer.mockImplementation(args => ({
+      getTransforms: () => [],
+      write: (document, destination) =>
+//        console.log(`in write ${document}`);
+         document,
+      assembleParts: () => {},
+    }));
 
   Output.mockClear();
 });
 
-test("Instantiate publisher", () => {
+test('Instantiate publisher', () => {
   const reader = new Reader();
   const writer = new Writer();
   const source = new Input({});
@@ -80,7 +73,7 @@ test("Instantiate publisher", () => {
     reader,
     writer,
     destination,
-    settings: baseSettings
+    settings: baseSettings,
   });
   publisher.publish({}, (error, output) => {
       if (error) {
@@ -91,12 +84,14 @@ test("Instantiate publisher", () => {
   });
 });
 
-test("Instantiate publisher #2", () => {
+test('Instantiate publisher #2', () => {
   const reader = new Reader();
   const writer = new Writer();
   const source = new Input({});
   const destination = new Output();
-  const publisher = new Publisher({ source, reader, writer, destination, settings: baseSettings });
+  const publisher = new Publisher({
+ source, reader, writer, destination, settings: baseSettings,
+});
   publisher.publish({}, (error, output) => {
       if (error) {
 	  throw error;

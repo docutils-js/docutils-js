@@ -6,23 +6,24 @@ import { Element } from '../../../src/nodes';
 import baseSettings from '../../../src/baseSettings';
 
 function testInitialInlinerPattern(text, inliner) {
-    if(typeof inliner === 'undefined') {
+    if (typeof inliner === 'undefined') {
 	inliner = setupInliner();
     }
     const result = inliner.patterns.initial[0].exec(text);
-    if(!result) {
+    if (!result) {
 	return undefined;
     }
-    const rr = {}
+    const rr = {};
     inliner.patterns.initial[1].forEach((x, index) => {
 	if (x != null) {
             rr[x] = result[index];
 	}
     });
-    return { groups: rr,
+    return {
+ groups: rr,
 	     input: text,
 	     result,
-	     pattern: inliner.patterns.initial[0]
+	     pattern: inliner.patterns.initial[0],
 	   };
 }
 
@@ -32,7 +33,8 @@ function setupInliner() {
     const document = newDocument({}, { ...baseSettings });
     const reporter = newReporter({}, { ...baseSettings });
     let language;
-    const memo = { document,
+    const memo = {
+ document,
 		   reporter,
 		   language,
 		 };
@@ -105,8 +107,7 @@ test.each([
     ['interpreted with role prefix', ':hello:`test`'],
     ['interpreted with role suffix', '`test`:hello:'],
     ['emphasis surrounded by text', 'hello *and* goodbye'],
-])("%s", (a, b) => {
-
+])('%s', (a, b) => {
     const results = testInitialInlinerPattern(b);
     expect(results.groups).toMatchSnapshot();
 });

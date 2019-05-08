@@ -22,4 +22,3 @@ test('Decorations.apply with sourceLink', () => {
     const d = new Decorations(document, startNode);
     d.apply();
 });
-

@@ -35,8 +35,7 @@ test('full rst2xml pipeline with specific input', () => {
     };
 
     const { readerName, parserName, writerName } = args;
-    const source = new StringInput({
-	source: `test` });
+    const source = new StringInput({ source: 'test' });
         const destination = new StringOutput({});
     const pub = new Publisher({
  source, destination, settings, debug: true, debugFn,
@@ -169,7 +168,7 @@ how
     or more paragraphs or body elements, indented relative to
     the term.
 `],
-           ['Citation', `Hello [Goober]_\n\n.. [Goober] Citation.\n`],
+           ['Citation', 'Hello [Goober]_\n\n.. [Goober] Citation.\n'],
            ['Footnote', `.. [1] A footnote contains body elements, consistently
    indented by at least 3 spaces.`],
            ['Image Directive', '.. image:: mylogo.png\n'],
@@ -313,7 +312,7 @@ footnote 2.
                   /* {argv, usage, description, settingsSpec, settingsOverrides, configSection, enableExitStatus } */
 		  const fn = () => pub.publish({}, (error, ...args) => {
                       if (error) {
-			  if(myOpts.expectError) {
+			  if (myOpts.expectError) {
 			      resolve();
 			  } else {
                               reject(error);

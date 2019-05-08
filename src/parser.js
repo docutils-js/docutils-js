@@ -8,8 +8,8 @@ function parse(docSource, settings) {
 	settings = { ...baseSettings };
     }
     const document = newDocument({ sourcePath: '' }, settings);
-    if(!document.reporter) {
-	throw new Error("need document reporter");
+    if (!document.reporter) {
+	throw new Error('need document reporter');
     }
     parser.parse(docSource, document);
     return document;

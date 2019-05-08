@@ -1,9 +1,11 @@
-import * as nodes from '../src/nodes';
-import newDocument from "../src/newDocument";
-import baseSettings from '../src/baseSettings'
-const jsdom = require("jsdom");
-const { JSDOM } = jsdom;
 import { DOMParser, DOMImplementation, XMLSerializer } from 'xmldom';
+import * as nodes from '../src/nodes';
+import newDocument from '../src/newDocument';
+import baseSettings from '../src/baseSettings';
+
+const jsdom = require('jsdom');
+
+const { JSDOM } = jsdom;
 
 function createNodeVisitor() {
     return new nodes.NodeVisitor({ reporter: { debug: () => {} } });
@@ -30,17 +32,15 @@ test('setId', () => {
     const p = new nodes.paragraph('test', 'test', [], {});
     const id = d.setId(p);
 });
-test('paragraph text unescaped', () =>
-{
+test('paragraph text unescaped', () => {
     const d = newDocument({}, baseSettings);
     const text = 'escape <me>';
     const p = new nodes.paragraph(text, text, [], {});
     expect(nodes.nodeToXml(p)).toEqual(expect.stringContaining('<'));
-})
+});
 
 test('NodeVisitor.constructor', () => {
     const visitor = createNodeVisitor();
-    
 });
 
 test('_domNode', () => {
@@ -58,7 +58,7 @@ test('_domNode', () => {
     const stringRep = serializer.serializeToString(domNode);
     expect(stringRep).toMatchSnapshot();
 });
-    
+
 test('firstChildNotMatchingClass', () => {
     const node = new nodes.document();
     node.children.push(new nodes.section());

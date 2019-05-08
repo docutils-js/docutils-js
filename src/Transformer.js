@@ -18,12 +18,12 @@ export default class Transformer {
             }
 //          console.log(`processing ${component.toString()} ${component.componentType}`);
             const transforms = component.getTransforms() || [];
-	    transforms.forEach(t => {
-		if(typeof t === 'undefined') {
+	    transforms.forEach((t) => {
+		if (typeof t === 'undefined') {
                     throw new Error(`got invalid transform from ${component}`);
 		}
 	    });
-	    
+
             if (transforms.filter(x => typeof x === 'undefined').length !== 0) {
                 throw new Error(`got invalid transform from ${component}`);
             }
@@ -60,10 +60,10 @@ export default class Transformer {
         while (this.transforms.length) {
             if (!this.sorted) {
                 this.transforms.sort((el1, el2) => {
-                    if(el1[0] < el2[0]) {
+                    if (el1[0] < el2[0]) {
                         return -1;
                     }
-                    if(el1[0] > el2[0]) {
+                    if (el1[0] > el2[0]) {
                         return 1;
                     }
                     return 0;

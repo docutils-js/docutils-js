@@ -7,7 +7,7 @@ import newReporter from '../src/newReporter';
 function createReporter() {
     return new Reporter(undefined, 0, 4, undefined, true, 'utf-8');
 }
-			      
+
 test('1', () => {
     const r = newReporter({}, { ...baseSettings });
 
@@ -22,10 +22,10 @@ test('2', () => {
 });
 
 test('findCombiningChars', () => {
-    expect(utils.findCombiningChars('A t̆ab̆lĕ')).toEqual([3, 6, 9])
+    expect(utils.findCombiningChars('A t̆ab̆lĕ')).toEqual([3, 6, 9]);
 });
 test('columnIndicies', () => {
-    expect(utils.columnIndicies('A t̆ab̆lĕ')).toEqual([0, 1, 2, 4, 5, 7, 8])
+    expect(utils.columnIndicies('A t̆ab̆lĕ')).toEqual([0, 1, 2, 4, 5, 7, 8]);
 });
 
 test('isIterable with null or undefined value', () => {

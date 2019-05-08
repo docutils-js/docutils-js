@@ -1,6 +1,6 @@
-import StateFactory from "../../../src/parsers/rst/StateFactory";
+import StateFactory from '../../../src/parsers/rst/StateFactory';
 
-test("StateFactory.getStateClasses", () => {
+test('StateFactory.getStateClasses', () => {
   const stateFactory = new StateFactory();
   expect(stateFactory.getStateClasses()).toMatchInlineSnapshot(`
     Array [

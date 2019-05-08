@@ -9,7 +9,7 @@ jest.mock('../../src/io/Output');
 const currentLogLines = [];
 
 afterEach(() => {
-    if(currentLogLines.length) {
+    if (currentLogLines.length) {
 //	console.log(currentLogLines.join('\n') + '\n');
 	currentLogLines.length = 0;
     }
@@ -24,7 +24,7 @@ const defaultArgs = {
     writerName: 'pojo',
 };
 
-const defaultSettings = { ... baseSettings };
+const defaultSettings = { ...baseSettings };
 
 test.only('rst2pojo pipeline', () => {
     const settings = { ...defaultSettings };
@@ -37,15 +37,17 @@ test.only('rst2pojo pipeline', () => {
     };
 
     const { readerName, parserName, writerName } = args;
-    const source = new StringInput({ source: `Random test
+    const source = new StringInput({
+ source: `Random test
 ===========
 I like food.
 
-`});
-    
+`,
+});
+
     const destination = new StringOutput({});
     const pub = new Publisher({
-	source, destination, settings, debug: true, debugFn
+	source, destination, settings, debug: true, debugFn,
     });
     pub.setComponents(readerName, parserName, writerName);
     return new Promise((resolve, reject) => {
@@ -60,4 +62,3 @@ I like food.
 	});
     });
 });
-

@@ -5,7 +5,7 @@ import newDocument from '../../src/newDocument';
 import baseSettings from '../../src/baseSettings';
 import * as nodes from '../../src/nodes';
 
-const ReadmeRst = fs.readFileSync(path.join(__dirname, '../../README.rst'), { encoding: 'UTF-8'});
+const ReadmeRst = fs.readFileSync(path.join(__dirname, '../../README.rst'), { encoding: 'UTF-8' });
 
 test('1', () => {
     const p = new Parser({});
