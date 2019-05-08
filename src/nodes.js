@@ -4,19 +4,66 @@ import { InvalidArgumentsError, ApplicationError } from './Exceptions';
 import unescape from './utils/unescape';
 import { isIterable, checkDocumentArg } from './utils';
 
+const _nonIdChars = /[^a-z0-9]+/ig;
+const _nonIdAtEnds = /^[-0-9]+|-+$/;
+const _nonIdTranslate = {
+    0x00f8: 'o',       // o with stroke
+    0x0111: 'd',       // d with stroke
+    0x0127: 'h',       // h with stroke
+    0x0131: 'i',       // dotless i
+    0x0142: 'l',       // l with stroke
+    0x0167: 't',       // t with stroke
+    0x0180: 'b',       // b with stroke
+    0x0183: 'b',       // b with topbar
+    0x0188: 'c',       // c with hook
+    0x018c: 'd',       // d with topbar
+    0x0192: 'f',       // f with hook
+    0x0199: 'k',       // k with hook
+    0x019a: 'l',       // l with bar
+    0x019e: 'n',       // n with long right leg
+    0x01a5: 'p',       // p with hook
+    0x01ab: 't',       // t with palatal hook
+    0x01ad: 't',       // t with hook
+    0x01b4: 'y',       // y with hook
+    0x01b6: 'z',       // z with stroke
+    0x01e5: 'g',       // g with stroke
+    0x0225: 'z',       // z with hook
+    0x0234: 'l',       // l with curl
+    0x0235: 'n',       // n with curl
+    0x0236: 't',       // t with curl
+    0x0237: 'j',       // dotless j
+    0x023c: 'c',       // c with stroke
+    0x023f: 's',       // s with swash tail
+    0x0240: 'z',       // z with swash tail
+    0x0247: 'e',       // e with stroke
+    0x0249: 'j',       // j with stroke
+    0x024b: 'q',       // q with hook tail
+    0x024d: 'r',       // r with stroke
+    0x024f: 'y',       // y with stroke
+}
+const _nonIdTranslateDigraphs = {
+    0x00df: 'sz',      // ligature sz
+    0x00e6: 'ae',      // ae
+    0x0153: 'oe',      // ligature oe
+    0x0238: 'db',      // db digraph
+    0x0239: 'qp',      // qp digraph
+}
 
 function dupname(node, name) {
+    /* What is the intention of this function? */
     node.attributes.dupnames.push(name);
     node.attributes.names.splice(node.attributes.names.indexOf(name), 1);
     // Assume that this method is referenced, even though it isn't; we
     // don't want to throw unnecessary system_messages.
     node.referenced = 1;
 }
+
 function serialEscape(value) {
     // """Escape string values that are elements of a list, for serialization."""
     return value.replace(/\\/g, '\\\\').replace(/ /g, '\\ ');
 }
 
+/* We don't do 'psuedo-xml' but perhaps we should */
 function pseudoQuoteattr(value) {
     return `"${xmlescape(value)}"`;
 }
@@ -33,15 +80,19 @@ export function fullyNormalizeName(name) {
 function setupBacklinkable(o) {
     o.addBackref = refid => o.attributes.backrefs.push(refid);
 }
+
+/* This needs to be implemented - fixme */
 function makeId(string) {
     return string;
-    /*    id = string.lower()
-    if not isinstance(id, str):
-        id = id.decode()
+    /*
+    let id = string.lower();
+    // This is for unicode, I believe?
+    //if not isinstance(id, str):
+    //id = id.decode()
     id = id.translate(_non_id_translate_digraphs)
     id = id.translate(_non_id_translate)
-    # get rid of non-ascii characters.
-    # 'ascii' lowercase to prevent problems with turkish locale.
+    // get rid of non-ascii characters.
+    // 'ascii' lowercase to prevent problems with turkish locale.
     id = unicodedata.normalize('NFKD', id).\
          encode('ascii', 'ignore').decode('ascii')
     # shrink runs of whitespace and replace by hyphen
@@ -59,7 +110,22 @@ function _callDefaultDeparture(node) {
     return this.default_departure(node);
 }
 
-const nodeClassNames = ['Text', 'abbreviation', 'acronym', 'address', 'admonition', 'attention', 'attribution', 'author', 'authors', 'block_quote', 'bullet_list', 'caption', 'caution', 'citation', 'citation_reference', 'classifier', 'colspec', 'comment', 'compound', 'contact', 'container', 'copyright', 'danger', 'date', 'decoration', 'definition', 'definition_list', 'definition_list_item', 'description', 'docinfo', 'doctest_block', 'document', 'emphasis', 'entry', 'enumerated_list', 'error', 'field', 'field_body', 'field_list', 'field_name', 'figure', 'footer', 'footnote', 'footnote_reference', 'generated', 'header', 'hint', 'image', 'important', 'inline', 'label', 'legend', 'line', 'line_block', 'list_item', 'literal', 'literal_block', 'math', 'math_block', 'note', 'option', 'option_argument', 'option_group', 'option_list', 'option_list_item', 'option_string', 'organization', 'paragraph', 'pending', 'problematic', 'raw', 'reference', 'revision', 'row', 'rubric', 'section', 'sidebar', 'status', 'strong', 'subscript', 'substitution_definition', 'substitution_reference', 'subtitle', 'superscript', 'system_message', 'table', 'target', 'tbody', 'term', 'tgroup', 'thead', 'tip', 'title', 'title_reference', 'topic', 'transition', 'version', 'warning'];
+const nodeClassNames = ['Text', 'abbreviation', 'acronym', 'address', 'admonition', 'attention',
+                        'attribution', 'author', 'authors', 'block_quote', 'bullet_list', 'caption',
+                        'caution', 'citation', 'citation_reference', 'classifier', 'colspec', 'comment',
+                        'compound', 'contact', 'container', 'copyright', 'danger', 'date', 'decoration',
+                        'definition', 'definition_list', 'definition_list_item', 'description', 'docinfo',
+                        'doctest_block', 'document', 'emphasis', 'entry', 'enumerated_list', 'error', 'field',
+                        'field_body', 'field_list', 'field_name', 'figure', 'footer', 'footnote',
+                        'footnote_reference', 'generated', 'header', 'hint', 'image', 'important', 'inline',
+                        'label', 'legend', 'line', 'line_block', 'list_item', 'literal', 'literal_block', 'math',
+                        'math_block', 'note', 'option', 'option_argument', 'option_group', 'option_list',
+                        'option_list_item', 'option_string', 'organization', 'paragraph', 'pending',
+                        'problematic', 'raw', 'reference', 'revision', 'row', 'rubric', 'section', 'sidebar',
+                        'status', 'strong', 'subscript', 'substitution_definition', 'substitution_reference',
+                        'subtitle', 'superscript', 'system_message', 'table', 'target', 'tbody', 'term',
+                        'tgroup', 'thead', 'tip', 'title', 'title_reference', 'topic', 'transition', 'version',
+                        'warning'];
 
 const SkipChildren = class {};
 const StopTraversal = class {};
@@ -79,10 +145,8 @@ export class NodeVisitor {
     dispatchVisit(node) {
         const nodeName = node.tagname;
         const methodName = `visit_${nodeName}`;
-//      console.log(`visiting ${nodeName}`);
         let method = this[methodName];
         if (!method) {
-//            console.log('selecting unknown visit');
             method = this.unknownVisit;
         }
         this.document.reporter.debug(`docutils.nodes.NodeVisitor.dispatch_visit calling for ${nodeName}`);
@@ -100,7 +164,6 @@ export class NodeVisitor {
 
     unknownVisit(node) {
         if (this.document.settings.strictVisitor || !(this.optional.includes(node.tagname))) {
-//            console.log('throwing error');
             throw new Error(`visiting unknown node type:${node.tagname}`);
         }
     }
@@ -142,7 +205,9 @@ export class Node {
         return undefined;
     }
 
-    isInline() { return false; }
+    isInline() {
+        return this.classes.firstIndex(c => c.prototype instanceof Inline || c === Inline) !== -1;
+    }
 
     asdom() {
     }
@@ -730,27 +795,6 @@ export class TextElement extends Element {
     }
 }
 
-// =====================
-//  Decorative Elements
-// =====================
-export class header extends Element { } // Decorative
-export class footer extends Element { } // Decorative
-
-export class decoration extends Element {
-    getHeader() {
-        if (!this.children.length || !(this.children[0] instanceof header)) {
-            this.insert(0, new header());
-        }
-        return this.children[0];
-    }
-
-    getFooter() {
-        if (!this.children.length || !(this.children[this.children.length - 1] instanceof footer)) {
-            this.add(new footer());
-        }
-        return this.children[this.children.length - 1];
-    }
-}
 
 export class document extends Element {
     constructor(settings, reporter, ...args) {
@@ -1113,15 +1157,6 @@ export class Targetable extends Resolvable {
 // """Contains a `label` as its first element."""
 export class Labeled { }
 
-
-export class section extends Element {
-/* eslint-disable-next-line no-useless-constructor */
-    constructor(...args) {
-        super(...args);
-    }
-} // Structural
-
-
 // ================
 //  Title Elements
 // ================
@@ -1153,70 +1188,267 @@ export class rubric extends TextElement {
 //  Bibliographic Elements
 // ========================
 
-export class docinfo extends Element { }
+export class docinfo extends Element {
+    constructor(...args) {
+        super(...args);
+        this.classes = [Bibliographic];
+    }
+}
 
-export class author extends TextElement { }
+export class author extends TextElement {
+    constructor(...args) {
+        super(...args);
+        this.classes = [Bibliographic];
+    }
+}
 
-export class authors extends Element { }
+export class authors extends Element {
+    constructor(...args) {
+        super(...args);
+        this.classes = [Bibliographic];
+    }
+}
 
-export class organization extends TextElement { }
+export class organization extends TextElement {
+    constructor(...args) {
+        super(...args);
+        this.classes = [Bibliographic];
+    }
+}
 
-export class address extends FixedTextElement { }
+export class address extends FixedTextElement {
+    constructor(...args) {
+        super(...args);
+        this.classes = [Bibliographic];
+    }
+}
 
-export class contact extends TextElement { }
+export class contact extends TextElement {
+    constructor(...args) {
+        super(...args);
+        this.classes = [Bibliographic];
+    }
+}
 
-export class version extends TextElement { }
+export class version extends TextElement {
+    constructor(...args) {
+        super(...args);
+        this.classes = [Bibliographic];
+    }
+}
 
-export class revision extends TextElement { }
+export class revision extends TextElement {
+    constructor(...args) {
+        super(...args);
+        this.classes = [Bibliographic];
+    }
+}
 
-export class status extends TextElement { }
+export class status extends TextElement {
+    constructor(...args) {
+        super(...args);
+        this.classes = [Bibliographic];
+    }
+}
 
-export class date extends TextElement { }
+export class date extends TextElement {
+    constructor(...args) {
+        super(...args);
+        this.classes = [Bibliographic];
+    }
+}
 
-export class copyright extends TextElement { }
+export class copyright extends TextElement {
+    constructor(...args) {
+        super(...args);
+        this.classes = [Bibliographic];
+    }
+}
 
+// =====================
+//  Decorative Elements
+// =====================
+export class decoration extends Element {
+    constructor(...args) {
+        super(...args);
+        this.classes = [Decorative];
+    }
+
+    getHeader() {
+        if (!this.children.length || !(this.children[0] instanceof header)) {
+            this.insert(0, new header());
+        }
+        return this.children[0];
+    }
+
+    getFooter() {
+        if (!this.children.length || !(this.children[this.children.length - 1] instanceof footer)) {
+            this.add(new footer());
+        }
+        return this.children[this.children.length - 1];
+    }
+}
+export class header extends Element {
+    constructor(...args) {
+        super(...args);
+        this.classes = [Decorative];
+    }
+} // Decorative
+export class footer extends Element {
+    constructor(...args) {
+        super(...args);
+        this.classes = [Decorative];
+    }
+} // Decorative
+
+export class section extends Element {
+/* eslint-disable-next-line no-useless-constructor */
+    constructor(...args) {
+        super(...args);
+        this.classes = [Structural];
+    }
+
+    }
+} // Structural
+
+/*    """
+    Topics are terminal, "leaf" mini-sections, like block quotes with titles,
+    or textual figures.  A topic is just like a section, except that it has no
+    subsections, and it doesn't have to conform to section placement rules.
+
+    Topics are allowed wherever body elements (list, table, etc.) are allowed,
+    but only at the top level of a section or document.  Topics cannot nest
+    inside topics, sidebars, or body elements; you can't have a topic inside a
+    table, list, block quote, etc.
+    """*/
+export class topic extends Element {
+    constructor(...args) {
+        super(...args);
+        this.classes = [Structural];
+    }
+    
+}
+
+/*
+    Sidebars are like miniature, parallel documents that occur inside other
+    documents, providing related or reference material.  A sidebar is
+    typically offset by a border and "floats" to the side of the page; the
+    document's main text may flow around it.  Sidebars can also be likened to
+    super-footnotes; their content is outside of the flow of the document's
+    main text.
+
+    Sidebars are allowed wherever body elements (list, table, etc.) are
+    allowed, but only at the top level of a section or document.  Sidebars
+    cannot nest inside sidebars, topics, or body elements; you can't have a
+    sidebar inside a table, list, block quote, etc.
+*/
+export class sidebar extends Element {
+    constructor(...args) {
+        super(...args);
+        this.classes = [Structural];
+    }
+    
+}
+
+export class transition extends Element {
+/* eslint-disable-next-line no-useless-constructor */
+    constructor(...args) {
+        super(...args);
+        this.classes = [Structural];
+    }
+} // Structural
+
+// ===============
+//  Body Elements
+// ===============
 
 export class paragraph extends TextElement {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
+        this.classes = [General];
     }
 } // General
-/* class compound(General, Element): pass
-class container(General, Element): pass
-class bullet_list(Sequential, Element): pass
-class enumerated_list(Sequential, Element): pass
-class list_item(Part, Element): pass */
-export class classifier extends TextElement {
+
+export class compound extends Element {
+    constructor(...args) {
+        super(...args);
+        this.classes = [General];
+    }
+}
+
+
+export class container extends Element {
+    constructor(...args) {
+        super(...args);
+        this.classes = [General];
+    }
+}
+/* eslint-disable-next-line camelcase */
+export class bullet_list extends Element {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
+        this.classes = [Sequential];
+    }
+} // Sequential
+
+export class enumerated_list extends Element {
+/* eslint-disable-next-line no-useless-constructor */
+    constructor(...args) {
+        super(...args);
+        this.classes = [Sequential];
+    }
+} // Sequential
+
+
+/* eslint-disable-next-line camelcase */
+export class list_item extends Element {
+/* eslint-disable-next-line no-useless-constructor */
+    constructor(...args) {
+        super(...args);
+        this.classes = [Part];
     }
 }
+
 /* eslint-disable-next-line camelcase */
 export class definition_list extends Element {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
+        this.classes = [Sequential];
     }
 }
+
 /* eslint-disable-next-line camelcase */
 export class definition_list_item extends Element {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
+        this.classes = [Part];
     }
 }
+
 export class term extends TextElement {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
+        this.classes = [Part];
+    }
+}
+
+export class classifier extends TextElement {
+/* eslint-disable-next-line no-useless-constructor */
+    constructor(...args) {
+        super(...args);
+        this.classes = [Part];
     }
 }
 export class definition extends Element {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
+        this.classes = [Part];
     }
 }
 /*
@@ -1227,12 +1459,14 @@ export class field_list extends Element {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
+        this.classes = [Seqeuential];
     }
 } // (Sequential, Element
 export class field extends Element {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
+        this.classes = [Part];
     }
 } // (Part
 /* eslint-disable-next-line camelcase */
@@ -1240,6 +1474,7 @@ export class field_name extends TextElement {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
+        this.classes = [Part];
     }
 } // (Part
 /* eslint-disable-next-line camelcase */
@@ -1247,126 +1482,39 @@ export class field_body extends Element {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
+        this.classes = [Part];
     }
 } // (Part
 
-
-/* eslint-disable-next-line camelcase */
-export class bullet_list extends Element {
-/* eslint-disable-next-line no-useless-constructor */
-    constructor(...args) {
-        super(...args);
-    }
-} // Sequential
-/* eslint-disable-next-line camelcase */
-export class list_item extends Element {
-/* eslint-disable-next-line no-useless-constructor */
-    constructor(...args) {
-        super(...args);
-    }
-}
-
-/* Inline elements */
-export class emphasis extends TextElement {
-/* eslint-disable-next-line no-useless-constructor */
-    constructor(...args) {
-        super(...args);
-    }
-
-    isInline() { return true; }
-} // Inline
-export class strong extends TextElement {
-/* eslint-disable-next-line no-useless-constructor */
-    constructor(...args) {
-        super(...args);
-    }
-
-    isInline() { return true; }
-} // Inline
-export class literal extends TextElement {
-/* eslint-disable-next-line no-useless-constructor */
-    constructor(...args) {
-        super(...args);
-    }
-
-    isInline() { return true; }
-} // Inline
-export class reference extends TextElement {
-/* eslint-disable-next-line no-useless-constructor */
-    constructor(...args) {
-        super(...args);
-    }
-
-    isInline() { return true; }
-} // General, Inline, Referential
-/* eslint-disable-next-line camelcase */
-export class footnote_reference extends TextElement {
-/* eslint-disable-next-line no-useless-constructor */
-    constructor(...args) {
-        super(...args);
-    }
-
-    isInline() { return true; }
-} // General, Inline, Referential
-/* eslint-disable-next-line camelcase */
-export class citation_reference extends TextElement {
-/* eslint-disable-next-line no-useless-constructor */
-    constructor(...args) {
-        super(...args);
-    }
-
-    isInline() { return true; }
-} // General, Inline, Referential
-/* eslint-disable-next-line camelcase */
-export class substitution_reference extends TextElement {
-/* eslint-disable-next-line no-useless-constructor */
-    constructor(...args) {
-        super(...args);
-    }
-
-    isInline() { return true; }
-} // General, Inline, Referential
-/* eslint-disable-next-line camelcase */
-export class title_reference extends TextElement {
-/* eslint-disable-next-line no-useless-constructor */
-    constructor(...args) {
-        super(...args);
-    }
-
-    isInline() { return true; }
-} // General, Inline, Referential
-
-export class problematic extends TextElement {
-/* eslint-disable-next-line no-useless-constructor */
-    constructor(...args) {
-        super(...args);
-    }
-
-    isInline() { return true; }
-} // Inline
-
-export class transition extends Element {
-/* eslint-disable-next-line no-useless-constructor */
-    constructor(...args) {
-        super(...args);
-    }
-} // Structura
-
-
 export class option extends Element {
-    // fixme//child_text_separator = ''
+    constructor(...args) {
+        super(...args);
+        this.classes = [Part];
+        this.childTextSeparator = ''; // fixme test this
+    }
 }
 
 /* eslint-disable-next-line camelcase */
 export class option_argument extends TextElement {
-    // fixme
-    // def astext(self):
-    // return self.get('delimiter', ' ') + TextElement.astext(self)
+    constructor(...args) {
+        super(...args);
+        this.classes = [Part];
+    }
+
+    // fixme test this
+    astext() {
+        const r = super().astext();
+        return (this.attributes['delimiter'] || ' ') + r;
+    }
 }
 
 /* eslint-disable-next-line camelcase */
 export class option_group extends Element {
-    // child_text_separator = ', '
+    constructor(...args) {
+        super(...args);
+        this.classes = [Part];
+        this.childTextSeparator = ', '
+    }
 }
 
 /* eslint-disable-next-line camelcase */
@@ -1374,6 +1522,7 @@ export class option_list extends Element {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
+        this.classes = [Sequential];
     }
 } // Sequential
 /* eslint-disable-next-line camelcase */
@@ -1381,40 +1530,51 @@ export class option_list_item extends Element {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
+        this.classes = [Part];
+        this.childTextSeparator = '  ';
     }
-} //    child_text_separator = '
+}
+
 /* eslint-disable-next-line camelcase */
 export class option_string extends TextElement {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
+        this.classes = [Part];
     }
 } // (Part
 export class description extends Element {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
+        this.classes = [Part];
     }
 } // (Part
+
 /* eslint-disable-next-line camelcase */
 export class literal_block extends FixedTextElement {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
+        this.classes = [General];
     }
 }
+
 /* eslint-disable-next-line camelcase */
 export class doctest_block extends FixedTextElement {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
+        this.classes = [General];
     }
 }
+
 /* eslint-disable-next-line camelcase */
 export class math_block extends FixedTextElement {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
+        this.classes = [General];
     }
 }
 /* eslint-disable-next-line camelcase */
@@ -1422,91 +1582,108 @@ export class line_block extends Element {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
+        this.classes = [General];
     }
 }
 export class line extends TextElement {
     _init(...args) {
         super._init(...args);
         this.indent = undefined;
+        this.classes = [Part];
     }
 } // Part
+
 /* eslint-disable-next-line camelcase */
 export class block_quote extends Element {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
+        this.classes = [General];
     }
 }
 export class attribution extends TextElement {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
-    }
+        this.classes = [Part];
+   }
 }
 export class attention extends Element {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
+        this.classes = [Admonition];
     }
 }
 export class caution extends Element {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
+        this.classes = [Admonition];
     }
 }
 export class danger extends Element {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
+        this.classes = [Admonition];
     }
 }
 export class error extends Element {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
+        this.classes = [Admonition];
     }
 }
 export class important extends Element {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
+        this.classes = [Admonition];
     }
 }
 export class note extends Element {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
+        this.classes = [Admonition];
     }
 }
+
 export class tip extends Element {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
+        this.classes = [Admonition];
     }
 }
 export class hint extends Element {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
+        this.classes = [Admonition];
     }
 }
 export class warning extends Element {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
+        this.classes = [Admonition];
     }
 }
 export class admonition extends Element {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
+        this.classes = [Admonition];
     }
 }
 export class comment extends FixedTextElement {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
+        this.classes = [Special, Invisible, Inline, Targetable];
     }
 }
 /* eslint-disable-next-line camelcase */
@@ -1514,101 +1691,356 @@ export class substitution_definition extends TextElement {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
+        this.classes = [Special, Invisible];
     }
 }
 export class target extends TextElement {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
+        this.classes = [Special, Invisible, Inline, Targetable];
     }
 }
 export class footnote extends Element {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
+        this.classes = [General, BackLinkable, Labeled, Targetable];
     }
 }
 export class citation extends Element {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
+        this.classes = [General, BackLinkable, Labeled, Targetable];
     }
 }
 export class label extends TextElement {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
+        this.classes = [Part];
+
     }
 }
 export class figure extends Element {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
+        this.classes = [General];
     }
 }
 export class caption extends TextElement {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
+        this.classes = [Part];
     }
 }
 export class legend extends Element {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
+        this.classes = [Part];
     }
 }
+
 export class table extends Element {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
+        this.classes = [General];
     }
 }
 export class tgroup extends Element {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
+        this.classes = [Part];
     }
 }
 export class colspec extends Element {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
+        this.classes = [Part];
     }
 }
 export class thead extends Element {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
+        this.classes = [Part];
     }
 }
 export class tbody extends Element {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
+        this.classes = [Part];
     }
 }
 export class row extends Element {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
+        this.classes = [Part];
     }
 }
 export class entry extends Element {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
+        this.classes = [Part];
     }
 }
-
 
 /* eslint-disable-next-line camelcase */
 export class system_message extends Element {
     constructor(message, children, attributes) {
         super(attributes.rawsource || '', message ? [new paragraph('', message), ...children] : children, attributes);
         setupBacklinkable(this);
+        this.classes = [Special, BackLinkable, PreBibliographic];
     }
 }
+/*class pending(Special, Invisible, Element):
+
+    """
+    The "pending" element is used to encapsulate a pending operation: the
+    operation (transform), the point at which to apply it, and any data it
+    requires.  Only the pending operation's location within the document is
+    stored in the public document tree (by the "pending" object itself); the
+    operation and its data are stored in the "pending" object's internal
+    instance attributes.
+
+    For example, say you want a table of contents in your reStructuredText
+    document.  The easiest way to specify where to put it is from within the
+    document, with a directive::
+
+        .. contents::
+
+    But the "contents" directive can't do its work until the entire document
+    has been parsed and possibly transformed to some extent.  So the directive
+    code leaves a placeholder behind that will trigger the second phase of its
+    processing, something like this::
+
+        <pending ...public attributes...> + internal attributes
+
+    Use `document.note_pending()` so that the
+    `docutils.transforms.Transformer` stage of processing can run all pending
+    transforms.
+    """
+
+    def __init__(self, transform, details=None,
+                 rawsource='', *children, **attributes):
+        Element.__init__(self, rawsource, *children, **attributes)
+
+        self.transform = transform
+        """The `docutils.transforms.Transform` class implementing the pending
+        operation."""
+
+        self.details = details or {}
+        """Detail data (dictionary) required by the pending operation."""
+
+    def pformat(self, indent='    ', level=0):
+        internals = [
+              '.. internal attributes:',
+              '     .transform: %s.%s' % (self.transform.__module__,
+                                          self.transform.__name__),
+              '     .details:']
+        details = self.details.items()
+        details.sort()
+        for key, value in details:
+            if isinstance(value, Node):
+                internals.append('%7s%s:' % ('', key))
+                internals.extend(['%9s%s' % ('', line)
+                                  for line in value.pformat().splitlines()])
+            elif value and isinstance(value, list) \
+                  and isinstance(value[0], Node):
+                internals.append('%7s%s:' % ('', key))
+                for v in value:
+                    internals.extend(['%9s%s' % ('', line)
+                                      for line in v.pformat().splitlines()])
+            else:
+                internals.append('%7s%s: %r' % ('', key, value))
+        return (Element.pformat(self, indent, level)
+                + ''.join([('    %s%s\n' % (indent * level, line))
+                           for line in internals]))
+
+    def copy(self):
+        obj = self.__class__(self.transform, self.details, self.rawsource,
+                              **self.attributes)
+        obj.document = self.document
+        obj.source = self.source
+        obj.line = self.line
+        return obj
+
+*/
+export class raw extends FixedTextElement {
+    constructor(...args) {
+        super(...args);
+        this.classes = [Special, Inline, PreBibliographic];
+    }
+}
+
+// =================
+//  Inline Elements
+// =================
+export class emphasis extends TextElement {
+/* eslint-disable-next-line no-useless-constructor */
+    constructor(...args) {
+        super(...args);
+        this.classes = [Inline];
+    }
+
+}
+export class strong extends TextElement {
+/* eslint-disable-next-line no-useless-constructor */
+    constructor(...args) {
+        super(...args);
+        this.classes = [Inline];
+    }
+
+} // Inline
+export class literal extends TextElement {
+/* eslint-disable-next-line no-useless-constructor */
+    constructor(...args) {
+        super(...args);
+        this.classes = [Inline];
+    }
+
+} // Inline
+export class reference extends TextElement {
+/* eslint-disable-next-line no-useless-constructor */
+    constructor(...args) {
+        super(...args);
+        this.classes = [General, Inline, Referential];
+    }
+
+} // General, Inline, Referential
+/* eslint-disable-next-line camelcase */
+export class footnote_reference extends TextElement {
+/* eslint-disable-next-line no-useless-constructor */
+    constructor(...args) {
+        super(...args);
+        this.classes = [General, Inline, Referential];
+    }
+
+} // General, Inline, Referential
+/* eslint-disable-next-line camelcase */
+export class citation_reference extends TextElement {
+/* eslint-disable-next-line no-useless-constructor */
+    constructor(...args) {
+        super(...args);
+        this.classes = [General, Inline, Referential];
+    }
+
+} // General, Inline, Referential
+/* eslint-disable-next-line camelcase */
+export class substitution_reference extends TextElement {
+/* eslint-disable-next-line no-useless-constructor */
+    constructor(...args) {
+        super(...args);
+        this.classes = [Inline];
+    }
+
+} // General, Inline, Referential
+/* eslint-disable-next-line camelcase */
+export class title_reference extends TextElement {
+/* eslint-disable-next-line no-useless-constructor */
+    constructor(...args) {
+        super(...args);
+        this.classes = [Inline];
+    }
+
+} // General, Inline, Referential
+
+/* eslint-disable-next-line camelcase */
+export class abbreviation extends TextElement {
+/* eslint-disable-next-line no-useless-constructor */
+    constructor(...args) {
+        super(...args);
+        this.classes = [Inline];
+    }
+
+}
+
+export class acronym extends TextElement {
+/* eslint-disable-next-line no-useless-constructor */
+    constructor(...args) {
+        super(...args);
+        this.classes = [Inline];
+    }
+
+}
+
+export class superscript extends TextElement {
+/* eslint-disable-next-line no-useless-constructor */
+    constructor(...args) {
+        super(...args);
+        this.classes = [Inline];
+    }
+
+}
+
+export class subscript extends TextElement {
+/* eslint-disable-next-line no-useless-constructor */
+    constructor(...args) {
+        super(...args);
+        this.classes = [Inline];
+    }
+
+}
+export class math extends TextElement {
+/* eslint-disable-next-line no-useless-constructor */
+    constructor(...args) {
+        super(...args);
+        this.classes = [Inline];
+    }
+
+}
+export class image extends Element {
+/* eslint-disable-next-line no-useless-constructor */
+    constructor(...args) {
+        super(...args);
+        this.classes = [General, Inline];
+    }
+    astext() {
+        return this.attributes.alt || '';
+    }
+
+}
+
+
+export class inline extends TextElement {
+/* eslint-disable-next-line no-useless-constructor */
+    constructor(...args) {
+        super(...args);
+        this.classes = [Inline];
+    }
+}
+
+export class problematic extends TextElement {
+/* eslint-disable-next-line no-useless-constructor */
+    constructor(...args) {
+        super(...args);
+        this.classes = [Inline];
+    }
+
+}
+
+export class generated extends TextElement {
+/* eslint-disable-next-line no-useless-constructor */
+    constructor(...args) {
+        super(...args);
+        this.classes = [Inline];
+    }
+
+}
+
+// ========================================
+//  Auxiliary Classes, Functions, and Data
+// ========================================
 
 export function nodeToXml(node) {
     if (node instanceof Text) {
