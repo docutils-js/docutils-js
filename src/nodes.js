@@ -69,9 +69,9 @@ const SkipSiblings = class {};
 
 export class NodeVisitor {
     constructor(document) {
-	if(!checkDocumentArg(document)) {
-	    throw new Error(`Invalid document arg: ${document}`);
-	}
+        if (!checkDocumentArg(document)) {
+            throw new Error(`Invalid document arg: ${document}`);
+        }
         this.document = document;
         this.optional = [];
     }
@@ -245,7 +245,7 @@ export function _addNodeClassNames(names, o) {
 export class GenericNodeVisitor extends NodeVisitor {
     constructor(document) {
         super(document);
-	// document this/
+        // document this/
         _addNodeClassNames(nodeClassNames, this);
     }
 
@@ -261,9 +261,6 @@ export class GenericNodeVisitor extends NodeVisitor {
 }
 GenericNodeVisitor.nodeClassNames = nodeClassNames;
 
-
-// mixin
-export class Titular { }
 
 /*
  * `Element` is the superclass to all specific elements.
@@ -302,31 +299,31 @@ export class Titular { }
 export class Element extends Node {
     _init() {
         super._init();
-	/* List attributes which are defined for every Element-derived class
-	   instance and can be safely transferred to a different node. */
+        /* List attributes which are defined for every Element-derived class
+           instance and can be safely transferred to a different node. */
         this.basicAttributes = ['ids', 'classes', 'names', 'dupnames'];
-	/*
-	  "A list of class-specific attributes that should not be copied with the
-	  standard attributes when replacing a node.
+        /*
+          "A list of class-specific attributes that should not be copied with the
+          standard attributes when replacing a node.
 
-	  NOTE: Derived classes should override this value to prevent any of its
-	  attributes being copied by adding to the value in its parent class.
-	*/
+          NOTE: Derived classes should override this value to prevent any of its
+          attributes being copied by adding to the value in its parent class.
+        */
         this.localAttributes = ['backrefs'];
 
-	/* List attributes, automatically initialized to empty lists
-	   for all nodes. */
+        /* List attributes, automatically initialized to empty lists
+           for all nodes. */
         this.listAttributes = [...this.basicAttributes, ...this.localAttributes];
 
-	/* List attributes that are known to the Element base class. */
-	this.knownAttributes = [...this.listAttributes, 'source', 'rawsource'];
+        /* List attributes that are known to the Element base class. */
+        this.knownAttributes = [...this.listAttributes, 'source', 'rawsource'];
 
-	/* The element generic identifier. If None, it is set as an
-	   instance attribute to the name of the class. */
-	// this.tagname = undefined; (already set in Node.constructor)
+        /* The element generic identifier. If None, it is set as an
+           instance attribute to the name of the class. */
+        // this.tagname = undefined; (already set in Node.constructor)
 
         /* Separator for child nodes, used by `astext()` method. */
-	this.childTextSeparator = '\n\n';
+        this.childTextSeparator = '\n\n';
     }
 
     constructor(rawsource, children, attributes) {
@@ -358,43 +355,36 @@ export class Element extends Node {
             }
         });
 
-	// unsure of the correct js equivalent
-	/*
-	  if self.tagname is None:
+        // unsure of the correct js equivalent
+        /*
+          if self.tagname is None:
           self.tagname = self.__class__.__name__
-	*/
+        */
     }
 
     _domNode(domroot) {
-	const element = domroot.createElement(this.tagname);
-	const r = this.attlist();
-	Object.entries(this.attlist()).forEach(([attribute, value]) => {
-	    let myVal;
-	    if (isIterable(value)) {
-		myVal = value.map(v => serialEscape(v.toString())).join(' ');
-	    } else {
-		myVal = value.toString();
-	    }
-	    element.setAttribute(attribute, myVal);
-	});
-	this.children.forEach((child) => {
-	    if (typeof child._domNode !== 'function') {
-		throw new ApplicationError(`${child} has no _domNode`);
-	    }
-	    element.appendChild(child._domNode(domroot));
-	});
-	return element;
+        const element = domroot.createElement(this.tagname);
+        Object.entries(this.attlist()).forEach(([attribute, value]) => {
+            let myVal;
+            if (isIterable(value)) {
+                myVal = value.map(v => serialEscape(v.toString())).join(' ');
+            } else {
+                myVal = value.toString();
+            }
+            element.setAttribute(attribute, myVal);
+        });
+        this.children.forEach((child) => {
+            if (typeof child._domNode !== 'function') {
+                throw new ApplicationError(`${child} has no _domNode`);
+            }
+            element.appendChild(child._domNode(domroot));
+        });
+        return element;
     }
 
-/*    toString() {
-        if (this.children.length) {
-            return [this.starttag(), ...this.children.map(c => c.toString()), this.endtag()].join('');
-        }
-        return this.emptytag();
-    } */
-
     emptytag() {
-        return `<${[this.tagname, ...Object.entries(this.attlist()).map(([n, v]) => `${n}="${v}"`)].join(' ')}/>`;
+        return `<${[this.tagname, ...Object.entries(this.attlist())
+                 .map(([n, v]) => `${n}="${v}"`)].join(' ')}/>`;
     }
 
 
@@ -502,7 +492,7 @@ export class Element extends Node {
     }
 
     firstChildNotMatchingClass(childClass, start = 0,
-                               end = (2 ** 31) - 1) {
+                               end = Number.MAX_VALUE) {
         /* """
         Return the index of the first child whose class does *not* match.
 
@@ -518,7 +508,7 @@ export class Element extends Node {
             let gotIt;
             for (let ci = 0; ci < myChildClass.length; ci += 1) {
                 const c = myChildClass[ci];
-                if (this.children[index] instanceof c) {
+                if (this.children[index] instanceof c || this.children[index].classes.filter(c2 => c2 instanceof c)) {
                     gotIt = true;
                     break;
                 }
@@ -544,7 +534,7 @@ export class Text extends Node {
     }
 
     _domNode(domroot) {
-	return domroot.createTextNode(this.data);
+        return domroot.createTextNode(this.data);
     }
 
     astext() {
@@ -598,6 +588,7 @@ export class decoration extends Element {
 export class document extends Element {
     constructor(settings, reporter, ...args) {
         super(...args);
+        this.classes = [Root, Structural];
         this.tagname = 'document';
         this.currentSource = undefined;
         this.currentLine = undefined;
@@ -890,6 +881,73 @@ export class FixedTextElement extends TextElement {
 */
 }
 
+// ========
+//  Mixins
+// ========
+
+export class Resolvable {
+//    resolved = 0
+}
+
+export class BackLinkable {
+    addBackref(refid) {
+        this.backrefs.push(refid);
+    }
+}
+
+
+// ====================
+//  Element Categories
+// ====================
+
+export class Root { }
+
+export class Titular { }
+
+// """Category of Node which may occur before Bibliographic Nodes."""
+export class PreBibliographic { }
+
+export class Bibliographic { }
+
+export class Decorative extends PreBibliographic { }
+
+export class Structural { }
+
+export class Body { }
+
+export class General extends Body { }
+
+// """List-like elements."""
+export class Sequential extends Body {
+}
+
+export class Admonition extends Body { }
+
+// """Special internal body elements."""
+export class Special extends Body { }
+
+// """Internal elements that don't appear in output."""
+export class Invisible extends PreBibliographic { }
+
+export class Part { }
+
+export class Inline { }
+
+export class Referential extends Resolvable { }
+
+export class Targetable extends Resolvable {
+    // referenced = 0
+    // indirect_reference_name = null
+    /* """Holds the whitespace_normalized_name (contains mixed case) of a target.
+    Required for MoinMoin/reST compatibility."""
+    */
+}
+
+// """Contains a `label` as its first element."""
+export class Labeled { }
+
+
+
 export class section extends Element {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
@@ -905,23 +963,25 @@ export class title extends TextElement {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
+        this.classes = [Titular, PreBibliographic];
     }
-} // Titular, Prebib
+} 
 
 export class subtitle extends TextElement {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
+        this.classes = [Titular, PreBibliographic];
     }
-} // Titular, Prebib
+}
 
 export class rubric extends TextElement {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
+        this.classes = [Titular];
     }
-} // Titular
-
+}
 
 // ========================
 //  Bibliographic Elements
