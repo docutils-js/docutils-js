@@ -180,3 +180,14 @@ export function checkDocumentArg(document) {
     }
     return true;
 }
+
+export function nodeToXml(node) {
+    if (node instanceof nodes.Text) {
+        const text = xmlescape(node.astext());
+        return text;
+    }
+    if (node.children.length) {
+        return [node.starttag(), ...node.children.map(c => inlineToXml(c)), node.endtag()].join('');
+    }
+    return node.emptytag();
+}
