@@ -24,6 +24,10 @@ document {
   "children": Array [],
   "citationRefs": Object {},
   "citations": Array [],
+  "classes": Array [
+    [Function],
+    [Function],
+  ],
   "currentLine": 0,
   "currentSource": undefined,
   "decoration": undefined,
@@ -168,6 +172,10 @@ document {
   "children": Array [],
   "citationRefs": Object {},
   "citations": Array [],
+  "classes": Array [
+    [Function],
+    [Function],
+  ],
   "currentLine": 0,
   "currentSource": undefined,
   "decoration": undefined,

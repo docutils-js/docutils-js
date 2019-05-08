@@ -4,34 +4,27 @@ exports[`rst2pojo pipeline 1`] = `
 Array [
   "document",
   Object {
+    "ids": Array [
+      "random test",
+    ],
+    "names": Array [
+      "random test",
+    ],
     "source": "<string>",
   },
   Array [
     Array [
-      "section",
-      Object {
-        "ids": Array [
-          "random test",
-        ],
-        "names": Array [
-          "random test",
-        ],
-      },
+      "title",
+      Object {},
       Array [
-        Array [
-          "title",
-          Object {},
-          Array [
-            "Random test",
-          ],
-        ],
-        Array [
-          "paragraph",
-          Object {},
-          Array [
-            "I like food.",
-          ],
-        ],
+        "Random test",
+      ],
+    ],
+    Array [
+      "paragraph",
+      Object {},
+      Array [
+        "I like food.",
       ],
     ],
   ],

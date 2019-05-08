@@ -80,6 +80,7 @@ document {
               "children": Array [
                 Text {
                   "children": Array [],
+                  "classes": Array [],
                   "data": "hello",
                   "document": undefined,
                   "line": undefined,
@@ -89,6 +90,7 @@ document {
                   "tagname": "Text",
                 },
               ],
+              "classes": Array [],
               "document": undefined,
               "knownAttributes": Array [
                 "ids",
@@ -116,6 +118,7 @@ document {
               "tagname": "paragraph",
             },
           ],
+          "classes": Array [],
           "document": undefined,
           "knownAttributes": Array [
             "ids",
@@ -143,6 +146,7 @@ document {
           "tagname": "list_item",
         },
       ],
+      "classes": Array [],
       "document": undefined,
       "knownAttributes": Array [
         "ids",
@@ -209,6 +213,7 @@ document {
           "children": Array [
             Text {
               "children": Array [],
+              "classes": Array [],
               "data": "Bullet list ends without a blank line; unexpected unindent.",
               "document": undefined,
               "line": undefined,
@@ -218,6 +223,7 @@ document {
               "tagname": "Text",
             },
           ],
+          "classes": Array [],
           "document": undefined,
           "knownAttributes": Array [
             "ids",
@@ -245,6 +251,7 @@ document {
           "tagname": "paragraph",
         },
       ],
+      "classes": Array [],
       "document": undefined,
       "knownAttributes": Array [
         "ids",
@@ -312,6 +319,7 @@ document {
           "children": Array [
             Text {
               "children": Array [],
+              "classes": Array [],
               "data": "*",
               "document": undefined,
               "line": undefined,
@@ -321,6 +329,7 @@ document {
               "tagname": "Text",
             },
           ],
+          "classes": Array [],
           "document": undefined,
           "knownAttributes": Array [
             "ids",
@@ -349,6 +358,7 @@ document {
         },
         Text {
           "children": Array [],
+          "classes": Array [],
           "data": "test",
           "document": undefined,
           "line": undefined,
@@ -358,6 +368,7 @@ document {
           "tagname": "Text",
         },
       ],
+      "classes": Array [],
       "document": undefined,
       "knownAttributes": Array [
         "ids",
@@ -428,6 +439,7 @@ document {
           "children": Array [
             Text {
               "children": Array [],
+              "classes": Array [],
               "data": "Inline Function start-string without end-string.",
               "document": undefined,
               "line": undefined,
@@ -437,6 +449,7 @@ document {
               "tagname": "Text",
             },
           ],
+          "classes": Array [],
           "document": undefined,
           "knownAttributes": Array [
             "ids",
@@ -464,6 +477,7 @@ document {
           "tagname": "paragraph",
         },
       ],
+      "classes": Array [],
       "document": undefined,
       "knownAttributes": Array [
         "ids",
@@ -532,6 +546,7 @@ document {
           "children": Array [
             Text {
               "children": Array [],
+              "classes": Array [],
               "data": "Butter",
               "document": undefined,
               "line": undefined,
@@ -540,6 +555,10 @@ document {
               "source": undefined,
               "tagname": "Text",
             },
+          ],
+          "classes": Array [
+            [Function],
+            [Function],
           ],
           "document": undefined,
           "knownAttributes": Array [
@@ -605,6 +624,7 @@ document {
               "children": Array [
                 Text {
                   "children": Array [],
+                  "classes": Array [],
                   "data": "I am a test.",
                   "document": undefined,
                   "line": undefined,
@@ -614,6 +634,7 @@ document {
                   "tagname": "Text",
                 },
               ],
+              "classes": Array [],
               "document": undefined,
               "knownAttributes": Array [
                 "ids",
@@ -641,6 +662,7 @@ document {
               "tagname": "paragraph",
             },
           ],
+          "classes": Array [],
           "document": undefined,
           "knownAttributes": Array [
             "ids",
@@ -668,6 +690,7 @@ document {
           "tagname": "block_quote",
         },
       ],
+      "classes": Array [],
       "document": undefined,
       "knownAttributes": Array [
         "ids",
@@ -697,6 +720,10 @@ document {
   ],
   "citationRefs": Object {},
   "citations": Array [],
+  "classes": Array [
+    [Function],
+    [Function],
+  ],
   "currentLine": undefined,
   "currentSource": undefined,
   "decoration": undefined,
@@ -747,6 +774,7 @@ document {
           "children": Array [
             Text {
               "children": Array [],
+              "classes": Array [],
               "data": "Butter",
               "document": undefined,
               "line": undefined,
@@ -755,6 +783,10 @@ document {
               "source": undefined,
               "tagname": "Text",
             },
+          ],
+          "classes": Array [
+            [Function],
+            [Function],
           ],
           "document": undefined,
           "knownAttributes": Array [
@@ -820,6 +852,7 @@ document {
               "children": Array [
                 Text {
                   "children": Array [],
+                  "classes": Array [],
                   "data": "I am a test.",
                   "document": undefined,
                   "line": undefined,
@@ -829,6 +862,7 @@ document {
                   "tagname": "Text",
                 },
               ],
+              "classes": Array [],
               "document": undefined,
               "knownAttributes": Array [
                 "ids",
@@ -856,6 +890,7 @@ document {
               "tagname": "paragraph",
             },
           ],
+          "classes": Array [],
           "document": undefined,
           "knownAttributes": Array [
             "ids",
@@ -883,6 +918,7 @@ document {
           "tagname": "block_quote",
         },
       ],
+      "classes": Array [],
       "document": undefined,
       "knownAttributes": Array [
         "ids",
@@ -953,6 +989,7 @@ document {
           "children": Array [
             Text {
               "children": Array [],
+              "classes": Array [],
               "data": "Inline Function start-string without end-string.",
               "document": undefined,
               "line": undefined,
@@ -962,6 +999,7 @@ document {
               "tagname": "Text",
             },
           ],
+          "classes": Array [],
           "document": undefined,
           "knownAttributes": Array [
             "ids",
@@ -989,6 +1027,7 @@ document {
           "tagname": "paragraph",
         },
       ],
+      "classes": Array [],
       "document": undefined,
       "knownAttributes": Array [
         "ids",
@@ -1038,6 +1077,7 @@ document {
       "children": Array [
         Text {
           "children": Array [],
+          "classes": Array [],
           "data": "*",
           "document": undefined,
           "line": undefined,
@@ -1047,6 +1087,7 @@ document {
           "tagname": "Text",
         },
       ],
+      "classes": Array [],
       "document": undefined,
       "knownAttributes": Array [
         "ids",
@@ -1090,6 +1131,7 @@ document {
           [Circular],
           Text {
             "children": Array [],
+            "classes": Array [],
             "data": "test",
             "document": undefined,
             "line": undefined,
@@ -1099,6 +1141,7 @@ document {
             "tagname": "Text",
           },
         ],
+        "classes": Array [],
         "document": undefined,
         "knownAttributes": Array [
           "ids",
