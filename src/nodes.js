@@ -7,47 +7,47 @@ import { isIterable, checkDocumentArg } from './utils';
 const _nonIdChars = /[^a-z0-9]+/ig;
 const _nonIdAtEnds = /^[-0-9]+|-+$/;
 const _nonIdTranslate = {
-    0x00f8: 'o',       // o with stroke
-    0x0111: 'd',       // d with stroke
-    0x0127: 'h',       // h with stroke
-    0x0131: 'i',       // dotless i
-    0x0142: 'l',       // l with stroke
-    0x0167: 't',       // t with stroke
-    0x0180: 'b',       // b with stroke
-    0x0183: 'b',       // b with topbar
-    0x0188: 'c',       // c with hook
-    0x018c: 'd',       // d with topbar
-    0x0192: 'f',       // f with hook
-    0x0199: 'k',       // k with hook
-    0x019a: 'l',       // l with bar
-    0x019e: 'n',       // n with long right leg
-    0x01a5: 'p',       // p with hook
-    0x01ab: 't',       // t with palatal hook
-    0x01ad: 't',       // t with hook
-    0x01b4: 'y',       // y with hook
-    0x01b6: 'z',       // z with stroke
-    0x01e5: 'g',       // g with stroke
-    0x0225: 'z',       // z with hook
-    0x0234: 'l',       // l with curl
-    0x0235: 'n',       // n with curl
-    0x0236: 't',       // t with curl
-    0x0237: 'j',       // dotless j
-    0x023c: 'c',       // c with stroke
-    0x023f: 's',       // s with swash tail
-    0x0240: 'z',       // z with swash tail
-    0x0247: 'e',       // e with stroke
-    0x0249: 'j',       // j with stroke
-    0x024b: 'q',       // q with hook tail
-    0x024d: 'r',       // r with stroke
-    0x024f: 'y',       // y with stroke
-}
+    0x00f8: 'o', // o with stroke
+    0x0111: 'd', // d with stroke
+    0x0127: 'h', // h with stroke
+    0x0131: 'i', // dotless i
+    0x0142: 'l', // l with stroke
+    0x0167: 't', // t with stroke
+    0x0180: 'b', // b with stroke
+    0x0183: 'b', // b with topbar
+    0x0188: 'c', // c with hook
+    0x018c: 'd', // d with topbar
+    0x0192: 'f', // f with hook
+    0x0199: 'k', // k with hook
+    0x019a: 'l', // l with bar
+    0x019e: 'n', // n with long right leg
+    0x01a5: 'p', // p with hook
+    0x01ab: 't', // t with palatal hook
+    0x01ad: 't', // t with hook
+    0x01b4: 'y', // y with hook
+    0x01b6: 'z', // z with stroke
+    0x01e5: 'g', // g with stroke
+    0x0225: 'z', // z with hook
+    0x0234: 'l', // l with curl
+    0x0235: 'n', // n with curl
+    0x0236: 't', // t with curl
+    0x0237: 'j', // dotless j
+    0x023c: 'c', // c with stroke
+    0x023f: 's', // s with swash tail
+    0x0240: 'z', // z with swash tail
+    0x0247: 'e', // e with stroke
+    0x0249: 'j', // j with stroke
+    0x024b: 'q', // q with hook tail
+    0x024d: 'r', // r with stroke
+    0x024f: 'y', // y with stroke
+};
 const _nonIdTranslateDigraphs = {
-    0x00df: 'sz',      // ligature sz
-    0x00e6: 'ae',      // ae
-    0x0153: 'oe',      // ligature oe
-    0x0238: 'db',      // db digraph
-    0x0239: 'qp',      // qp digraph
-}
+    0x00df: 'sz', // ligature sz
+    0x00e6: 'ae', // ae
+    0x0153: 'oe', // ligature oe
+    0x0238: 'db', // db digraph
+    0x0239: 'qp', // qp digraph
+};
 
 function dupname(node, name) {
     /* What is the intention of this function? */
@@ -279,16 +279,16 @@ export class Node {
 
     _fastTraverse(cls) {
         // Specialized traverse() that only supports instance checks.
-        const result = []
-        if(this instanceof cls) {
+        const result = [];
+        if (this instanceof cls) {
             result.push(this);
         }
         const myNode = this;
         myNode.children.forEach((child) => {
-            if(typeof child === 'undefined') {
-                throw new Error(`child is undefined`);
+            if (typeof child === 'undefined') {
+                throw new Error('child is undefined');
             }
-            if(typeof child._fastTraverse === 'undefined') {
+            if (typeof child._fastTraverse === 'undefined') {
                 throw new Error(`${child} does not have _fastTraverse`);
             }
             result.push(...child._fastTraverse(cls));
@@ -298,7 +298,7 @@ export class Node {
 
     _allTraverse() {
         // Specialized traverse() that doesn't check for a condition.
-        const result = []
+        const result = [];
         result.push(this);
         this.children.forEach((child) => {
             result.push(...child._allTraverse());
@@ -319,10 +319,10 @@ export class Node {
             const nodeClass = condition;
             /* eslint-disable-next-line no-unused-vars */
             const myCondition = (node, nodeClassArg) => ((node instanceof nodeClassArg) || (node instanceof nodeClass));
-            throw new Error("unimplemented");
+            throw new Error('unimplemented');
         }
 
-        throw new Error("unimplemented");
+        throw new Error('unimplemented');
         return [];
     }
 }
@@ -607,8 +607,8 @@ export class Element extends Node {
                 // if (typeof child === 'undefined') {
                 //     throw new Error(`child should not be undefined, index ${index}`);
                 // }
-                if (child instanceof c ||
-                    (this.children[index].classes.filter((c2 => c2.prototype instanceof c || c2 == c))).length) {
+                if (child instanceof c
+                    || (this.children[index].classes.filter((c2 => c2.prototype instanceof c || c2 === c))).length) {
                     return true;
                 }
                 return false;
@@ -617,7 +617,7 @@ export class Element extends Node {
                 return true;
             }
         });
-        if(r !== -1) {
+        if (r !== -1) {
             return r;
         }
         return undefined;
@@ -645,7 +645,7 @@ export class Element extends Node {
     appendAttrList(attr, values) {
         // List Concatenation
         values.forEach((value) => {
-            if((this.attributes[attr].filter(v => v === value)).length === 0) {
+            if ((this.attributes[attr].filter(v => v === value)).length === 0) {
                 this.attributes[attr].push(value);
             }
         });
@@ -657,7 +657,7 @@ export class Element extends Node {
     */
     replaceAttr(attr, value, force = true) {
         // One or the other
-        if(force || this.attributes[attr] == null) {
+        if (force || this.attributes[attr] == null) {
             this.attributes[attr] = value;
         }
     }
@@ -667,7 +667,7 @@ export class Element extends Node {
       this.attributes[attr] with value.  Otherwise, do nothing.
     */
     copyAttrConsistent(attr, value, replace) {
-        if(this.attributes[attr] !== value) {
+        if (this.attributes[attr] !== value) {
             this.replaceAttr(attr, value, replace);
         }
     }
@@ -696,14 +696,14 @@ export class Element extends Node {
         const dict2 = dict_ instanceof Node ? dict_.attributes : dict_;
         // Include the source attribute when copying?
         let filterFun;
-        if(andSource) {
+        if (andSource) {
             filterFun = this.isNotListAttribute.bind(this);
         } else {
             filterFun = this.isNotKnownAttribute.bind(this);
         }
 
         // Copy the basic attributes
-        this.updateBasicAtts(dict2)
+        this.updateBasicAtts(dict2);
 
         // Grab other attributes in dict_ not in self except the
         // (All basic attributes should be copied already)
@@ -731,12 +731,13 @@ export class Element extends Node {
               'source' is not replaced even when dict_ has a 'source'
               attribute, though it may still be merged into a list depending
               on the value of update_fun.
-              """*/
+              """ */
     updateAllAttsConcatenating(dict_, replace = true,
                                andSource = false) {
         this.updateAllAtts(dict_, this.copyAttrConcatenate, replace,
                            andSource);
     }
+
     /*
       Returns True if and only if the given attribute is NOT one of the
       basic list attributes defined for all Elements.
@@ -744,6 +745,7 @@ export class Element extends Node {
     isNotListAttribute(attr) {
         return !(attr in this.listAttributes);
     }
+
     /*
         Returns True if and only if the given attribute is NOT recognized by
         this class.
@@ -1307,9 +1309,7 @@ export class section extends Element {
         super(...args);
         this.classes = [Structural];
     }
-
-    }
-} // Structural
+}
 
 /*    """
     Topics are terminal, "leaf" mini-sections, like block quotes with titles,
@@ -1320,13 +1320,12 @@ export class section extends Element {
     but only at the top level of a section or document.  Topics cannot nest
     inside topics, sidebars, or body elements; you can't have a topic inside a
     table, list, block quote, etc.
-    """*/
+    """ */
 export class topic extends Element {
     constructor(...args) {
         super(...args);
         this.classes = [Structural];
     }
-    
 }
 
 /*
@@ -1347,7 +1346,6 @@ export class sidebar extends Element {
         super(...args);
         this.classes = [Structural];
     }
-    
 }
 
 export class transition extends Element {
@@ -1503,8 +1501,8 @@ export class option_argument extends TextElement {
 
     // fixme test this
     astext() {
-        const r = super().astext();
-        return (this.attributes['delimiter'] || ' ') + r;
+        const r = super.astext();
+        return (this.attributes.delimiter || ' ') + r;
     }
 }
 
@@ -1513,7 +1511,7 @@ export class option_group extends Element {
     constructor(...args) {
         super(...args);
         this.classes = [Part];
-        this.childTextSeparator = ', '
+        this.childTextSeparator = ', ';
     }
 }
 
@@ -1720,7 +1718,6 @@ export class label extends TextElement {
     constructor(...args) {
         super(...args);
         this.classes = [Part];
-
     }
 }
 export class figure extends Element {
@@ -1803,7 +1800,7 @@ export class system_message extends Element {
         this.classes = [Special, BackLinkable, PreBibliographic];
     }
 }
-/*class pending(Special, Invisible, Element):
+/* class pending(Special, Invisible, Element):
 
     """
     The "pending" element is used to encapsulate a pending operation: the
@@ -1892,7 +1889,6 @@ export class emphasis extends TextElement {
         super(...args);
         this.classes = [Inline];
     }
-
 }
 export class strong extends TextElement {
 /* eslint-disable-next-line no-useless-constructor */
@@ -1900,7 +1896,6 @@ export class strong extends TextElement {
         super(...args);
         this.classes = [Inline];
     }
-
 } // Inline
 export class literal extends TextElement {
 /* eslint-disable-next-line no-useless-constructor */
@@ -1908,7 +1903,6 @@ export class literal extends TextElement {
         super(...args);
         this.classes = [Inline];
     }
-
 } // Inline
 export class reference extends TextElement {
 /* eslint-disable-next-line no-useless-constructor */
@@ -1916,7 +1910,6 @@ export class reference extends TextElement {
         super(...args);
         this.classes = [General, Inline, Referential];
     }
-
 } // General, Inline, Referential
 /* eslint-disable-next-line camelcase */
 export class footnote_reference extends TextElement {
@@ -1925,7 +1918,6 @@ export class footnote_reference extends TextElement {
         super(...args);
         this.classes = [General, Inline, Referential];
     }
-
 } // General, Inline, Referential
 /* eslint-disable-next-line camelcase */
 export class citation_reference extends TextElement {
@@ -1934,7 +1926,6 @@ export class citation_reference extends TextElement {
         super(...args);
         this.classes = [General, Inline, Referential];
     }
-
 } // General, Inline, Referential
 /* eslint-disable-next-line camelcase */
 export class substitution_reference extends TextElement {
@@ -1943,7 +1934,6 @@ export class substitution_reference extends TextElement {
         super(...args);
         this.classes = [Inline];
     }
-
 } // General, Inline, Referential
 /* eslint-disable-next-line camelcase */
 export class title_reference extends TextElement {
@@ -1952,7 +1942,6 @@ export class title_reference extends TextElement {
         super(...args);
         this.classes = [Inline];
     }
-
 } // General, Inline, Referential
 
 /* eslint-disable-next-line camelcase */
@@ -1962,7 +1951,6 @@ export class abbreviation extends TextElement {
         super(...args);
         this.classes = [Inline];
     }
-
 }
 
 export class acronym extends TextElement {
@@ -1971,7 +1959,6 @@ export class acronym extends TextElement {
         super(...args);
         this.classes = [Inline];
     }
-
 }
 
 export class superscript extends TextElement {
@@ -1980,7 +1967,6 @@ export class superscript extends TextElement {
         super(...args);
         this.classes = [Inline];
     }
-
 }
 
 export class subscript extends TextElement {
@@ -1989,7 +1975,6 @@ export class subscript extends TextElement {
         super(...args);
         this.classes = [Inline];
     }
-
 }
 export class math extends TextElement {
 /* eslint-disable-next-line no-useless-constructor */
@@ -1997,7 +1982,6 @@ export class math extends TextElement {
         super(...args);
         this.classes = [Inline];
     }
-
 }
 export class image extends Element {
 /* eslint-disable-next-line no-useless-constructor */
@@ -2005,10 +1989,10 @@ export class image extends Element {
         super(...args);
         this.classes = [General, Inline];
     }
+
     astext() {
         return this.attributes.alt || '';
     }
-
 }
 
 
@@ -2026,7 +2010,6 @@ export class problematic extends TextElement {
         super(...args);
         this.classes = [Inline];
     }
-
 }
 
 export class generated extends TextElement {
@@ -2035,7 +2018,6 @@ export class generated extends TextElement {
         super(...args);
         this.classes = [Inline];
     }
-
 }
 
 // ========================================
