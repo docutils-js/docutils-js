@@ -59,7 +59,15 @@ export default class Transformer {
         this.document.reporter.attachObserver(this.document.noteTransformMessage.bind(this.document));
         while (this.transforms.length) {
             if (!this.sorted) {
-                this.transforms.sort();
+                this.transforms.sort((el1, el2) => {
+                    if(el1[0] < el2[0]) {
+                        return -1;
+                    }
+                    if(el1[0] > el2[0]) {
+                        return 1;
+                    }
+                    return 0;
+                });
                 this.transforms.reverse();
                 this.sorted = 1;
             }

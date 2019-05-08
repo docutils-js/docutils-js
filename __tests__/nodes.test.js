@@ -59,3 +59,16 @@ test('_domNode', () => {
     expect(stringRep).toMatchSnapshot();
 });
     
+test('firstChildNotMatchingClass', () => {
+    const node = new nodes.document();
+    node.children.push(new nodes.section());
+    const index = node.firstChildNotMatchingClass(nodes.Titular);
+    expect(index).toBeUndefined();
+});
+
+test.only('firstChildNotMatchingClass 2', () => {
+    const node = new nodes.document();
+    node.children.push(new nodes.Text('hello'));
+    const index = node.firstChildNotMatchingClass(nodes.Titular);
+    expect(index).toEqual(0);
+});

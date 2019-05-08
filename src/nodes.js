@@ -119,6 +119,7 @@ export class Node {
         this.document = undefined;
         this.source = undefined;
         this.line = undefined;
+        this.classes = [];
         this._init();
     }
 
@@ -211,20 +212,52 @@ export class Node {
         return stop;
     }
 
+    _fastTraverse(cls) {
+        // Specialized traverse() that only supports instance checks.
+        const result = []
+        if(this instanceof cls) {
+            result.push(this);
+        }
+        const myNode = this;
+        myNode.children.forEach((child) => {
+            if(typeof child === 'undefined') {
+                throw new Error(`child is undefined`);
+            }
+            if(typeof child._fastTraverse === 'undefined') {
+                throw new Error(`${child} does not have _fastTraverse`);
+            }
+            result.push(...child._fastTraverse(cls));
+        });
+        return result;
+    }
+
+    _allTraverse() {
+        // Specialized traverse() that doesn't check for a condition.
+        const result = []
+        result.push(this);
+        this.children.forEach((child) => {
+            result.push(...child._allTraverse());
+        });
+        return result;
+    }
+
     traverse(condition, includeSelf = true, descend = true, siblings = false, ascend = false) {
         const mySiblings = ascend ? true : siblings;
         if (includeSelf && descend && !mySiblings) {
             if (!condition) {
                 return this._allTraverse();
-            } if (condition instanceof Node) {
+            } if (condition.prototype instanceof Node || condition === Node) {
                 return this._fastTraverse(condition);
             }
         }
-        if (condition instanceof Node) {
+        if (condition.prototype instanceof Node || condition === Node) {
             const nodeClass = condition;
             /* eslint-disable-next-line no-unused-vars */
-            const myCondition = (node, nodeClassArg) => node instanceof (nodeClassArg || nodeClass);
+            const myCondition = (node, nodeClassArg) => ((node instanceof nodeClassArg) || (node instanceof nodeClass));
+            throw new Error("unimplemented");
         }
+
+        throw new Error("unimplemented");
         return [];
     }
 }
@@ -491,33 +524,167 @@ export class Element extends Node {
         return true;
     }
 
+    /*
+       Return the index of the first child whose class does *not* match.
+
+       Parameters:
+
+       - `childclass`: A `Node` subclass to skip, or a tuple of `Node`
+       classes. If a tuple, none of the classes may match.
+       - `start`: Initial index to check.
+       - `end`: Initial index to *not* check.
+    */
     firstChildNotMatchingClass(childClass, start = 0,
-                               end = Number.MAX_VALUE) {
-        /* """
-        Return the index of the first child whose class does *not* match.
-
-        Parameters:
-
-        - `childclass`: A `Node` subclass to skip, or a tuple of `Node`
-          classes. If a tuple, none of the classes may match.
-        - `start`: Initial index to check.
-        - `end`: Initial index to *not* check.
-        """ */
+                               end = this.children.length) {
         const myChildClass = Array.isArray(childClass) ? childClass : [childClass];
-        for (let index = start; index <= Math.min(this.length, end); index += 1) {
-            let gotIt;
-            for (let ci = 0; ci < myChildClass.length; ci += 1) {
-                const c = myChildClass[ci];
-                if (this.children[index] instanceof c || this.children[index].classes.filter(c2 => c2 instanceof c)) {
-                    gotIt = true;
-                    break;
+        const r = this.children.slice(start, Math.min(this.children.length, end)).findIndex((child, index) => {
+            if (myChildClass.findIndex((c) => {
+                // if (typeof child === 'undefined') {
+                //     throw new Error(`child should not be undefined, index ${index}`);
+                // }
+                if (child instanceof c ||
+                    (this.children[index].classes.filter((c2 => c2.prototype instanceof c || c2 == c))).length) {
+                    return true;
                 }
+                return false;
+            }) === -1) {
+                console.log(`returning index ${index} ${nodeToXml(this.children[index])}`);
+                return true;
             }
-            if (!gotIt) {
-                return index;
-            }
+        });
+        if(r !== -1) {
+            return r;
         }
         return undefined;
+    }
+
+    /*
+      Update basic attributes ('ids', 'names', 'classes',
+      'dupnames', but not 'source') from node or dictionary `dict_`.
+    */
+    updateBasicAtts(dict_) {
+        const dict2 = dict_ instanceof Node ? dict_.attributes : dict_;
+        this.basicAttributes.forEach((att) => {
+            const v = att in dict2 ? dict2[att] : [];
+            this.appendAttrList(att, v);
+        });
+    }
+
+    /*
+      For each element in values, if it does not exist in self[attr], append
+      it.
+
+      NOTE: Requires self[attr] and values to be sequence type and the
+      former should specifically be a list.
+    */
+    appendAttrList(attr, values) {
+        // List Concatenation
+        values.forEach((value) => {
+            if((this.attributes[attr].filter(v => v === value)).length === 0) {
+                this.attributes[attr].push(value);
+            }
+        });
+    }
+
+    /*
+      If self[attr] does not exist or force is True or omitted, set
+      self[attr] to value, otherwise do nothing.
+    */
+    replaceAttr(attr, value, force = true) {
+        // One or the other
+        if(force || this.attributes[attr] == null) {
+            this.attributes[attr] = value;
+        }
+    }
+
+    /*
+      If replace is true or this.attributes[attr] is null, replace
+      this.attributes[attr] with value.  Otherwise, do nothing.
+    */
+    copyAttrConsistent(attr, value, replace) {
+        if(this.attributes[attr] !== value) {
+            this.replaceAttr(attr, value, replace);
+        }
+    }
+
+    /*
+      Updates all attributes from node or dictionary `dict_`.
+
+        Appends the basic attributes ('ids', 'names', 'classes',
+        'dupnames', but not 'source') and then, for all other attributes in
+        dict_, updates the same attribute in self.  When attributes with the
+        same identifier appear in both self and dict_, the two values are
+        merged based on the value of update_fun.  Generally, when replace is
+        True, the values in self are replaced or merged with the values in
+        dict_; otherwise, the values in self may be preserved or merged.  When
+        and_source is True, the 'source' attribute is included in the copy.
+
+        NOTE: When replace is False, and self contains a 'source' attribute,
+              'source' is not replaced even when dict_ has a 'source'
+              attribute, though it may still be merged into a list depending
+              on the value of update_fun.
+        NOTE: It is easier to call the update-specific methods then to pass
+              the update_fun method to this function.
+    */
+    updateAllAtts(dict_, updateFun = this.copyAttrConsistent,
+                    replace = true, andSource = false) {
+        const dict2 = dict_ instanceof Node ? dict_.attributes : dict_;
+        // Include the source attribute when copying?
+        let filterFun;
+        if(andSource) {
+            filterFun = this.isNotListAttribute.bind(this);
+        } else {
+            filterFun = this.isNotKnownAttribute.bind(this);
+        }
+
+        // Copy the basic attributes
+        this.updateBasicAtts(dict2)
+
+        // Grab other attributes in dict_ not in self except the
+        // (All basic attributes should be copied already)
+        const atts = Object.keys(dict2).filter(filterFun);
+        atts.forEach((att) => {
+            updateFun.bind(this)(att, dict2[att], replace);
+        });
+    }
+
+    /*    """
+        Updates all attributes from node or dictionary `dict_`.
+
+        Appends the basic attributes ('ids', 'names', 'classes',
+        'dupnames', but not 'source') and then, for all other attributes in
+        dict_, updates the same attribute in self.  When attributes with the
+        same identifier appear in both self and dict_ whose values aren't each
+        lists and replace is True, the values in self are replaced with the
+        values in dict_; if the values from self and dict_ for the given
+        identifier are both of list type, then the two lists are concatenated
+        and the result stored in self; otherwise, the values in self are
+        preserved.  When and_source is True, the 'source' attribute is
+        included in the copy.
+
+        NOTE: When replace is False, and self contains a 'source' attribute,
+              'source' is not replaced even when dict_ has a 'source'
+              attribute, though it may still be merged into a list depending
+              on the value of update_fun.
+              """*/
+    updateAllAttsConcatenating(dict_, replace = true,
+                               andSource = false) {
+        this.updateAllAtts(dict_, this.copyAttrConcatenate, replace,
+                           andSource);
+    }
+    /*
+      Returns True if and only if the given attribute is NOT one of the
+      basic list attributes defined for all Elements.
+    */
+    isNotListAttribute(attr) {
+        return !(attr in this.listAttributes);
+    }
+    /*
+        Returns True if and only if the given attribute is NOT recognized by
+        this class.
+    */
+    isNotKnownAttribute(attr) {
+        return !(attr in this.knownAttributes);
     }
 }
 
@@ -947,7 +1114,6 @@ export class Targetable extends Resolvable {
 export class Labeled { }
 
 
-
 export class section extends Element {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
@@ -965,7 +1131,7 @@ export class title extends TextElement {
         super(...args);
         this.classes = [Titular, PreBibliographic];
     }
-} 
+}
 
 export class subtitle extends TextElement {
 /* eslint-disable-next-line no-useless-constructor */
