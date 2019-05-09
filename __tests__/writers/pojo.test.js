@@ -26,7 +26,7 @@ const defaultArgs = {
 
 const defaultSettings = { ...baseSettings };
 
-test.only('rst2pojo pipeline', () => {
+test('rst2pojo pipeline', () => {
     const settings = { ...defaultSettings };
     const args = { ...defaultArgs };
 

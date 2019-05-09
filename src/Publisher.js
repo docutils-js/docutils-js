@@ -46,12 +46,7 @@ class Publisher {
 
     setReader(readerName, parser, parserName) {
         const ReaderClass = readers.getReaderClass(readerName);
-        this.reader = new ReaderClass(parser,
-                                      parserName,
-                                      {
- debug: this.debug,
-                                        debugFn: this.debugFn,
-});
+        this.reader = new ReaderClass({ parser, parserName, debug: this.debug, debugFn: this.debugFn });
         this.parser = this.reader.parser;
     }
 

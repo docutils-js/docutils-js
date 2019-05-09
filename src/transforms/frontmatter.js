@@ -23,7 +23,7 @@ export class TitlePromoter extends Transform {
     }
 
     promoteSubtitle(node) {
-        console.log('promoteSubtitle');
+        // console.log('promoteSubtitle');
         // Type check
         const [subsection, index] = this.candidateIndex(node);
         if (index == null) {

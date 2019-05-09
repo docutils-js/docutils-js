@@ -80,7 +80,7 @@ document {
               "children": Array [
                 Text {
                   "children": Array [],
-                  "classes": Array [],
+                  "classTypes": Array [],
                   "data": "hello",
                   "document": undefined,
                   "line": undefined,
@@ -90,7 +90,7 @@ document {
                   "tagname": "Text",
                 },
               ],
-              "classes": Array [
+              "classTypes": Array [
                 [Function],
               ],
               "document": undefined,
@@ -120,7 +120,7 @@ document {
               "tagname": "paragraph",
             },
           ],
-          "classes": Array [
+          "classTypes": Array [
             [Function],
           ],
           "document": undefined,
@@ -150,7 +150,7 @@ document {
           "tagname": "list_item",
         },
       ],
-      "classes": Array [
+      "classTypes": Array [
         [Function],
       ],
       "document": undefined,
@@ -219,7 +219,7 @@ document {
           "children": Array [
             Text {
               "children": Array [],
-              "classes": Array [],
+              "classTypes": Array [],
               "data": "Bullet list ends without a blank line; unexpected unindent.",
               "document": undefined,
               "line": undefined,
@@ -229,7 +229,7 @@ document {
               "tagname": "Text",
             },
           ],
-          "classes": Array [
+          "classTypes": Array [
             [Function],
           ],
           "document": undefined,
@@ -259,7 +259,7 @@ document {
           "tagname": "paragraph",
         },
       ],
-      "classes": Array [
+      "classTypes": Array [
         [Function],
         [Function],
         [Function],
@@ -331,7 +331,7 @@ document {
           "children": Array [
             Text {
               "children": Array [],
-              "classes": Array [],
+              "classTypes": Array [],
               "data": "*",
               "document": undefined,
               "line": undefined,
@@ -341,7 +341,7 @@ document {
               "tagname": "Text",
             },
           ],
-          "classes": Array [
+          "classTypes": Array [
             [Function],
           ],
           "document": undefined,
@@ -372,7 +372,7 @@ document {
         },
         Text {
           "children": Array [],
-          "classes": Array [],
+          "classTypes": Array [],
           "data": "test",
           "document": undefined,
           "line": undefined,
@@ -382,7 +382,7 @@ document {
           "tagname": "Text",
         },
       ],
-      "classes": Array [
+      "classTypes": Array [
         [Function],
       ],
       "document": undefined,
@@ -455,7 +455,7 @@ document {
           "children": Array [
             Text {
               "children": Array [],
-              "classes": Array [],
+              "classTypes": Array [],
               "data": "Inline Function start-string without end-string.",
               "document": undefined,
               "line": undefined,
@@ -465,7 +465,7 @@ document {
               "tagname": "Text",
             },
           ],
-          "classes": Array [
+          "classTypes": Array [
             [Function],
           ],
           "document": undefined,
@@ -495,7 +495,7 @@ document {
           "tagname": "paragraph",
         },
       ],
-      "classes": Array [
+      "classTypes": Array [
         [Function],
         [Function],
         [Function],
@@ -568,7 +568,7 @@ document {
           "children": Array [
             Text {
               "children": Array [],
-              "classes": Array [],
+              "classTypes": Array [],
               "data": "Butter",
               "document": undefined,
               "line": undefined,
@@ -578,7 +578,7 @@ document {
               "tagname": "Text",
             },
           ],
-          "classes": Array [
+          "classTypes": Array [
             [Function],
             [Function],
           ],
@@ -646,7 +646,7 @@ document {
               "children": Array [
                 Text {
                   "children": Array [],
-                  "classes": Array [],
+                  "classTypes": Array [],
                   "data": "I am a test.",
                   "document": undefined,
                   "line": undefined,
@@ -656,7 +656,7 @@ document {
                   "tagname": "Text",
                 },
               ],
-              "classes": Array [
+              "classTypes": Array [
                 [Function],
               ],
               "document": undefined,
@@ -686,7 +686,7 @@ document {
               "tagname": "paragraph",
             },
           ],
-          "classes": Array [
+          "classTypes": Array [
             [Function],
           ],
           "document": undefined,
@@ -716,7 +716,7 @@ document {
           "tagname": "block_quote",
         },
       ],
-      "classes": Array [
+      "classTypes": Array [
         [Function],
       ],
       "document": undefined,
@@ -748,7 +748,7 @@ document {
   ],
   "citationRefs": Object {},
   "citations": Array [],
-  "classes": Array [
+  "classTypes": Array [
     [Function],
     [Function],
   ],
@@ -802,7 +802,7 @@ document {
           "children": Array [
             Text {
               "children": Array [],
-              "classes": Array [],
+              "classTypes": Array [],
               "data": "Butter",
               "document": undefined,
               "line": undefined,
@@ -812,7 +812,7 @@ document {
               "tagname": "Text",
             },
           ],
-          "classes": Array [
+          "classTypes": Array [
             [Function],
             [Function],
           ],
@@ -880,7 +880,7 @@ document {
               "children": Array [
                 Text {
                   "children": Array [],
-                  "classes": Array [],
+                  "classTypes": Array [],
                   "data": "I am a test.",
                   "document": undefined,
                   "line": undefined,
@@ -890,7 +890,7 @@ document {
                   "tagname": "Text",
                 },
               ],
-              "classes": Array [
+              "classTypes": Array [
                 [Function],
               ],
               "document": undefined,
@@ -920,7 +920,7 @@ document {
               "tagname": "paragraph",
             },
           ],
-          "classes": Array [
+          "classTypes": Array [
             [Function],
           ],
           "document": undefined,
@@ -950,7 +950,7 @@ document {
           "tagname": "block_quote",
         },
       ],
-      "classes": Array [
+      "classTypes": Array [
         [Function],
       ],
       "document": undefined,
@@ -1023,7 +1023,7 @@ document {
           "children": Array [
             Text {
               "children": Array [],
-              "classes": Array [],
+              "classTypes": Array [],
               "data": "Inline Function start-string without end-string.",
               "document": undefined,
               "line": undefined,
@@ -1033,7 +1033,7 @@ document {
               "tagname": "Text",
             },
           ],
-          "classes": Array [
+          "classTypes": Array [
             [Function],
           ],
           "document": undefined,
@@ -1063,7 +1063,7 @@ document {
           "tagname": "paragraph",
         },
       ],
-      "classes": Array [
+      "classTypes": Array [
         [Function],
         [Function],
         [Function],
@@ -1117,7 +1117,7 @@ document {
       "children": Array [
         Text {
           "children": Array [],
-          "classes": Array [],
+          "classTypes": Array [],
           "data": "*",
           "document": undefined,
           "line": undefined,
@@ -1127,7 +1127,7 @@ document {
           "tagname": "Text",
         },
       ],
-      "classes": Array [
+      "classTypes": Array [
         [Function],
       ],
       "document": undefined,
@@ -1173,7 +1173,7 @@ document {
           [Circular],
           Text {
             "children": Array [],
-            "classes": Array [],
+            "classTypes": Array [],
             "data": "test",
             "document": undefined,
             "line": undefined,
@@ -1183,7 +1183,7 @@ document {
             "tagname": "Text",
           },
         ],
-        "classes": Array [
+        "classTypes": Array [
           [Function],
         ],
         "document": undefined,

@@ -25,6 +25,7 @@ paragraph {
   "children": Array [
     Text {
       "children": Array [],
+      "classTypes": Array [],
       "data": "This is my paragraph text.",
       "document": undefined,
       "line": undefined,
@@ -33,6 +34,9 @@ paragraph {
       "source": undefined,
       "tagname": "Text",
     },
+  ],
+  "classTypes": Array [
+    [Function],
   ],
   "document": undefined,
   "knownAttributes": Array [

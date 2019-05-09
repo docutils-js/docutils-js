@@ -9,15 +9,19 @@ export default class Reader extends Component {
 //               universal.ExportInternals, universal.StripComments ];
     }
 
-    constructor(parser, parserName, args) {
-        super(parser, parserName);
+    constructor(args) {
+        super(args);
+	const { parser, parseFn, parserName } = args;
         this.componentType = 'reader';
         this.configSection = 'readers';
         this.parser = parser;
+	this.parseFn = parseFn;
         this.debugFn = args.debugFn;
         this.debug = args.debug;
-        if (parser === undefined && parserName) {
-            this.setParser(parserName);
+        if (parser === undefined) {
+	    if(parserName) {
+		this.setParser(parserName);
+	    }
         }
         this.source = undefined;
         this.input = undefined;
@@ -58,23 +62,38 @@ export default class Reader extends Component {
                          });
     }
 
+    /* read method without callbcks and other junk */
+    read2(input, settings) {
+	this.input = input;
+	this.settings = settings;
+	this.parse();
+	return this.document;
+    }
+    
+    
     /* Delegates to this.parser, providing arguments
        based on instance variables */
     parse() {
-        const document = this.newDocument();
-        this.document = document;
-        if (this.input === undefined) {
-            throw new Error(`need input, i have ${this.input}`);
-        }
-
-        this.parser.parse(this.input, document);
-        document.currentSource = undefined;
-        document.currentLine = undefined;
+	if(this.parser) {
+            const document = this.newDocument();
+            this.parser.parse(this.input, document);
+            this.document = document;
+            if (this.input === undefined) {
+		throw new Error(`need input, i have ${this.input}`);
+            }
+	    
+	} else {
+	    const document = this.parseFn(this.input);
+	    this.document = document;
+	}
+        this.document.currentSource = undefined;
+        this.document.currentLine = undefined;
     }
 
     newDocument() {
-        const document = newDocument({ sourcePath: this.source.sourcePath },
-                                           this.settings);
+        const document = newDocument({ sourcePath:
+				       this.source && this.source.sourcePath },
+				     this.settings);
         return document;
     }
 }

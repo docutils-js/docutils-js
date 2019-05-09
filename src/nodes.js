@@ -110,22 +110,32 @@ function _callDefaultDeparture(node) {
     return this.default_departure(node);
 }
 
-const nodeClassNames = ['Text', 'abbreviation', 'acronym', 'address', 'admonition', 'attention',
-                        'attribution', 'author', 'authors', 'block_quote', 'bullet_list', 'caption',
-                        'caution', 'citation', 'citation_reference', 'classifier', 'colspec', 'comment',
-                        'compound', 'contact', 'container', 'copyright', 'danger', 'date', 'decoration',
-                        'definition', 'definition_list', 'definition_list_item', 'description', 'docinfo',
-                        'doctest_block', 'document', 'emphasis', 'entry', 'enumerated_list', 'error', 'field',
-                        'field_body', 'field_list', 'field_name', 'figure', 'footer', 'footnote',
-                        'footnote_reference', 'generated', 'header', 'hint', 'image', 'important', 'inline',
-                        'label', 'legend', 'line', 'line_block', 'list_item', 'literal', 'literal_block', 'math',
-                        'math_block', 'note', 'option', 'option_argument', 'option_group', 'option_list',
-                        'option_list_item', 'option_string', 'organization', 'paragraph', 'pending',
-                        'problematic', 'raw', 'reference', 'revision', 'row', 'rubric', 'section', 'sidebar',
-                        'status', 'strong', 'subscript', 'substitution_definition', 'substitution_reference',
-                        'subtitle', 'superscript', 'system_message', 'table', 'target', 'tbody', 'term',
-                        'tgroup', 'thead', 'tip', 'title', 'title_reference', 'topic', 'transition', 'version',
-                        'warning'];
+const nodeClassNames = ['Text', 'abbreviation', 'acronym', 'address',
+			'admonition', 'attention', 'attribution', 'author',
+			'authors', 'block_quote', 'bullet_list', 'caption',
+                        'caution', 'citation', 'citation_reference',
+			'classifier', 'colspec', 'comment', 'compound',
+			'contact', 'container', 'copyright', 'danger',
+			'date', 'decoration', 'definition', 'definition_list',
+			'definition_list_item', 'description', 'docinfo',
+                        'doctest_block', 'document', 'emphasis', 'entry',
+			'enumerated_list', 'error', 'field', 'field_body',
+			'field_list', 'field_name', 'figure', 'footer',
+			'footnote', 'footnote_reference', 'generated',
+			'header', 'hint', 'image', 'important', 'inline',
+                        'label', 'legend', 'line', 'line_block', 'list_item',
+			'literal', 'literal_block', 'math',
+                        'math_block', 'note', 'option', 'option_argument',
+			'option_group', 'option_list', 'option_list_item',
+			'option_string', 'organization', 'paragraph',
+			'pending', 'problematic', 'raw', 'reference',
+			'revision', 'row', 'rubric', 'section', 'sidebar',
+                        'status', 'strong', 'subscript',
+			'substitution_definition', 'substitution_reference',
+                        'subtitle', 'superscript', 'system_message', 'table',
+			'target', 'tbody', 'term', 'tgroup', 'thead', 'tip',
+			'title', 'title_reference', 'topic', 'transition',
+			'version', 'warning'];
 
 const SkipChildren = class {};
 const StopTraversal = class {};
@@ -182,7 +192,7 @@ export class Node {
         this.document = undefined;
         this.source = undefined;
         this.line = undefined;
-        this.classes = [];
+        this.classTypes = [];
         this._init();
     }
 
@@ -206,8 +216,7 @@ export class Node {
     }
 
     isInline() {
-        console.log(this.classes);
-        return this.classes.firstIndex(c => c.prototype instanceof Inline || c === Inline) !== -1;
+        return this.classTypes.findIndex(c => c.prototype instanceof Inline || c === Inline) !== -1;
     }
 
     asdom() {
@@ -250,8 +259,8 @@ export class Node {
             try {
                 /* eslint-disable-next-line no-restricted-syntax */
                 for (const child of [...children]) {
-                    //                  console.log(typeof child);
-                    //                  console.log(Object.keys(child));
+                    // console.log(typeof child);
+                    // console.log(Object.keys(child));
                     if (child.walkabout(visitor)) {
                         stop = true;
                         break;
@@ -609,12 +618,12 @@ export class Element extends Node {
                 //     throw new Error(`child should not be undefined, index ${index}`);
                 // }
                 if (child instanceof c
-                    || (this.children[index].classes.filter((c2 => c2.prototype instanceof c || c2 === c))).length) {
+                    || (this.children[index].classTypes.filter((c2 => c2.prototype instanceof c || c2 === c))).length) {
                     return true;
                 }
                 return false;
             }) === -1) {
-                console.log(`returning index ${index} ${nodeToXml(this.children[index])}`);
+                //console.log(`returning index ${index} ${nodeToXml(this.children[index])}`);
                 return true;
             }
         });
@@ -802,7 +811,7 @@ export class TextElement extends Element {
 export class document extends Element {
     constructor(settings, reporter, ...args) {
         super(...args);
-        this.classes = [Root, Structural];
+        this.classTypes = [Root, Structural];
         this.tagname = 'document';
         this.currentSource = undefined;
         this.currentLine = undefined;
@@ -1167,7 +1176,7 @@ export class title extends TextElement {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
-        this.classes = [Titular, PreBibliographic];
+        this.classTypes = [Titular, PreBibliographic];
     }
 }
 
@@ -1175,7 +1184,7 @@ export class subtitle extends TextElement {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
-        this.classes = [Titular, PreBibliographic];
+        this.classTypes = [Titular, PreBibliographic];
     }
 }
 
@@ -1183,7 +1192,7 @@ export class rubric extends TextElement {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
-        this.classes = [Titular];
+        this.classTypes = [Titular];
     }
 }
 
@@ -1194,77 +1203,77 @@ export class rubric extends TextElement {
 export class docinfo extends Element {
     constructor(...args) {
         super(...args);
-        this.classes = [Bibliographic];
+        this.classTypes = [Bibliographic];
     }
 }
 
 export class author extends TextElement {
     constructor(...args) {
         super(...args);
-        this.classes = [Bibliographic];
+        this.classTypes = [Bibliographic];
     }
 }
 
 export class authors extends Element {
     constructor(...args) {
         super(...args);
-        this.classes = [Bibliographic];
+        this.classTypes = [Bibliographic];
     }
 }
 
 export class organization extends TextElement {
     constructor(...args) {
         super(...args);
-        this.classes = [Bibliographic];
+        this.classTypes = [Bibliographic];
     }
 }
 
 export class address extends FixedTextElement {
     constructor(...args) {
         super(...args);
-        this.classes = [Bibliographic];
+        this.classTypes = [Bibliographic];
     }
 }
 
 export class contact extends TextElement {
     constructor(...args) {
         super(...args);
-        this.classes = [Bibliographic];
+        this.classTypes = [Bibliographic];
     }
 }
 
 export class version extends TextElement {
     constructor(...args) {
         super(...args);
-        this.classes = [Bibliographic];
+        this.classTypes = [Bibliographic];
     }
 }
 
 export class revision extends TextElement {
     constructor(...args) {
         super(...args);
-        this.classes = [Bibliographic];
+        this.classTypes = [Bibliographic];
     }
 }
 
 export class status extends TextElement {
     constructor(...args) {
         super(...args);
-        this.classes = [Bibliographic];
+        this.classTypes = [Bibliographic];
     }
 }
 
 export class date extends TextElement {
     constructor(...args) {
         super(...args);
-        this.classes = [Bibliographic];
+        this.classTypes = [Bibliographic];
     }
 }
 
 export class copyright extends TextElement {
     constructor(...args) {
         super(...args);
-        this.classes = [Bibliographic];
+        this.classTypes = [Bibliographic];
     }
 }
 
@@ -1274,7 +1283,7 @@ export class copyright extends TextElement {
 export class decoration extends Element {
     constructor(...args) {
         super(...args);
-        this.classes = [Decorative];
+        this.classTypes = [Decorative];
     }
 
     getHeader() {
@@ -1294,13 +1303,13 @@ export class decoration extends Element {
 export class header extends Element {
     constructor(...args) {
         super(...args);
-        this.classes = [Decorative];
+        this.classTypes = [Decorative];
     }
 } // Decorative
 export class footer extends Element {
     constructor(...args) {
         super(...args);
-        this.classes = [Decorative];
+        this.classTypes = [Decorative];
     }
 } // Decorative
 
@@ -1308,7 +1317,7 @@ export class section extends Element {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
-        this.classes = [Structural];
+        this.classTypes = [Structural];
     }
 }
 
@@ -1325,7 +1334,7 @@ export class section extends Element {
 export class topic extends Element {
     constructor(...args) {
         super(...args);
-        this.classes = [Structural];
+        this.classTypes = [Structural];
     }
 }
 
@@ -1345,7 +1354,7 @@ export class topic extends Element {
 export class sidebar extends Element {
     constructor(...args) {
         super(...args);
-        this.classes = [Structural];
+        this.classTypes = [Structural];
     }
 }
 
@@ -1353,7 +1362,7 @@ export class transition extends Element {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
-        this.classes = [Structural];
+        this.classTypes = [Structural];
     }
 } // Structural
 
@@ -1365,14 +1374,14 @@ export class paragraph extends TextElement {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
-        this.classes = [General];
+        this.classTypes = [General];
     }
 } // General
 
 export class compound extends Element {
     constructor(...args) {
         super(...args);
-        this.classes = [General];
+        this.classTypes = [General];
     }
 }
 
@@ -1380,7 +1389,7 @@ export class compound extends Element {
 export class container extends Element {
     constructor(...args) {
         super(...args);
-        this.classes = [General];
+        this.classTypes = [General];
     }
 }
 /* eslint-disable-next-line camelcase */
@@ -1388,7 +1397,7 @@ export class bullet_list extends Element {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
-        this.classes = [Sequential];
+        this.classTypes = [Sequential];
     }
 } // Sequential
 
@@ -1396,7 +1405,7 @@ export class enumerated_list extends Element {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
-        this.classes = [Sequential];
+        this.classTypes = [Sequential];
     }
 } // Sequential
 
@@ -1406,7 +1415,7 @@ export class list_item extends Element {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
-        this.classes = [Part];
+        this.classTypes = [Part];
     }
 }
 
@@ -1415,7 +1424,7 @@ export class definition_list extends Element {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
-        this.classes = [Sequential];
+        this.classTypes = [Sequential];
     }
 }
 
@@ -1424,7 +1433,7 @@ export class definition_list_item extends Element {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
-        this.classes = [Part];
+        this.classTypes = [Part];
     }
 }
 
@@ -1432,7 +1441,7 @@ export class term extends TextElement {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
-        this.classes = [Part];
+        this.classTypes = [Part];
     }
 }
 
@@ -1440,14 +1449,14 @@ export class classifier extends TextElement {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
-        this.classes = [Part];
+        this.classTypes = [Part];
     }
 }
 export class definition extends Element {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
-        this.classes = [Part];
+        this.classTypes = [Part];
     }
 }
 /*
@@ -1458,14 +1467,14 @@ export class field_list extends Element {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
-        this.classes = [Sequential];
+        this.classTypes = [Sequential];
     }
 } // (Sequential, Element
 export class field extends Element {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
-        this.classes = [Part];
+        this.classTypes = [Part];
     }
 } // (Part
 /* eslint-disable-next-line camelcase */
@@ -1473,7 +1482,7 @@ export class field_name extends TextElement {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
-        this.classes = [Part];
+        this.classTypes = [Part];
     }
 } // (Part
 /* eslint-disable-next-line camelcase */
@@ -1481,14 +1490,14 @@ export class field_body extends Element {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
-        this.classes = [Part];
+        this.classTypes = [Part];
     }
 } // (Part
 
 export class option extends Element {
     constructor(...args) {
         super(...args);
-        this.classes = [Part];
+        this.classTypes = [Part];
         this.childTextSeparator = ''; // fixme test this
     }
 }
@@ -1497,7 +1506,7 @@ export class option extends Element {
 export class option_argument extends TextElement {
     constructor(...args) {
         super(...args);
-        this.classes = [Part];
+        this.classTypes = [Part];
     }
 
     // fixme test this
@@ -1511,7 +1520,7 @@ export class option_argument extends TextElement {
 export class option_group extends Element {
     constructor(...args) {
         super(...args);
-        this.classes = [Part];
+        this.classTypes = [Part];
         this.childTextSeparator = ', ';
     }
 }
@@ -1521,7 +1530,7 @@ export class option_list extends Element {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
-        this.classes = [Sequential];
+        this.classTypes = [Sequential];
     }
 } // Sequential
 /* eslint-disable-next-line camelcase */
@@ -1529,7 +1538,7 @@ export class option_list_item extends Element {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
-        this.classes = [Part];
+        this.classTypes = [Part];
         this.childTextSeparator = '  ';
     }
 }
@@ -1539,14 +1548,14 @@ export class option_string extends TextElement {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
-        this.classes = [Part];
+        this.classTypes = [Part];
     }
 } // (Part
 export class description extends Element {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
-        this.classes = [Part];
+        this.classTypes = [Part];
     }
 } // (Part
 
@@ -1555,7 +1564,7 @@ export class literal_block extends FixedTextElement {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
-        this.classes = [General];
+        this.classTypes = [General];
     }
 }
 
@@ -1564,7 +1573,7 @@ export class doctest_block extends FixedTextElement {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
-        this.classes = [General];
+        this.classTypes = [General];
     }
 }
 
@@ -1573,7 +1582,7 @@ export class math_block extends FixedTextElement {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
-        this.classes = [General];
+        this.classTypes = [General];
     }
 }
 /* eslint-disable-next-line camelcase */
@@ -1581,14 +1590,14 @@ export class line_block extends Element {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
-        this.classes = [General];
+        this.classTypes = [General];
     }
 }
 export class line extends TextElement {
     _init(...args) {
         super._init(...args);
         this.indent = undefined;
-        this.classes = [Part];
+        this.classTypes = [Part];
     }
 } // Part
 
@@ -1597,56 +1606,56 @@ export class block_quote extends Element {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
-        this.classes = [General];
+        this.classTypes = [General];
     }
 }
 export class attribution extends TextElement {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
-        this.classes = [Part];
+        this.classTypes = [Part];
    }
 }
 export class attention extends Element {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
-        this.classes = [Admonition];
+        this.classTypes = [Admonition];
     }
 }
 export class caution extends Element {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
-        this.classes = [Admonition];
+        this.classTypes = [Admonition];
     }
 }
 export class danger extends Element {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
-        this.classes = [Admonition];
+        this.classTypes = [Admonition];
     }
 }
 export class error extends Element {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
-        this.classes = [Admonition];
+        this.classTypes = [Admonition];
     }
 }
 export class important extends Element {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
-        this.classes = [Admonition];
+        this.classTypes = [Admonition];
     }
 }
 export class note extends Element {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
-        this.classes = [Admonition];
+        this.classTypes = [Admonition];
     }
 }
 
@@ -1654,35 +1663,35 @@ export class tip extends Element {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
-        this.classes = [Admonition];
+        this.classTypes = [Admonition];
     }
 }
 export class hint extends Element {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
-        this.classes = [Admonition];
+        this.classTypes = [Admonition];
     }
 }
 export class warning extends Element {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
-        this.classes = [Admonition];
+        this.classTypes = [Admonition];
     }
 }
 export class admonition extends Element {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
-        this.classes = [Admonition];
+        this.classTypes = [Admonition];
     }
 }
 export class comment extends FixedTextElement {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
-        this.classes = [Special, Invisible, Inline, Targetable];
+        this.classTypes = [Special, Invisible, Inline, Targetable];
     }
 }
 /* eslint-disable-next-line camelcase */
@@ -1690,56 +1699,56 @@ export class substitution_definition extends TextElement {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
-        this.classes = [Special, Invisible];
+        this.classTypes = [Special, Invisible];
     }
 }
 export class target extends TextElement {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
-        this.classes = [Special, Invisible, Inline, Targetable];
+        this.classTypes = [Special, Invisible, Inline, Targetable];
     }
 }
 export class footnote extends Element {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
-        this.classes = [General, BackLinkable, Labeled, Targetable];
+        this.classTypes = [General, BackLinkable, Labeled, Targetable];
     }
 }
 export class citation extends Element {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
-        this.classes = [General, BackLinkable, Labeled, Targetable];
+        this.classTypes = [General, BackLinkable, Labeled, Targetable];
     }
 }
 export class label extends TextElement {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
-        this.classes = [Part];
+        this.classTypes = [Part];
     }
 }
 export class figure extends Element {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
-        this.classes = [General];
+        this.classTypes = [General];
     }
 }
 export class caption extends TextElement {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
-        this.classes = [Part];
+        this.classTypes = [Part];
     }
 }
 export class legend extends Element {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
-        this.classes = [Part];
+        this.classTypes = [Part];
     }
 }
 
@@ -1747,49 +1756,49 @@ export class table extends Element {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
-        this.classes = [General];
+        this.classTypes = [General];
     }
 }
 export class tgroup extends Element {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
-        this.classes = [Part];
+        this.classTypes = [Part];
     }
 }
 export class colspec extends Element {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
-        this.classes = [Part];
+        this.classTypes = [Part];
     }
 }
 export class thead extends Element {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
-        this.classes = [Part];
+        this.classTypes = [Part];
     }
 }
 export class tbody extends Element {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
-        this.classes = [Part];
+        this.classTypes = [Part];
     }
 }
 export class row extends Element {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
-        this.classes = [Part];
+        this.classTypes = [Part];
     }
 }
 export class entry extends Element {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
-        this.classes = [Part];
+        this.classTypes = [Part];
     }
 }
 
@@ -1798,7 +1807,7 @@ export class system_message extends Element {
     constructor(message, children, attributes) {
         super(attributes.rawsource || '', message ? [new paragraph('', message), ...children] : children, attributes);
         setupBacklinkable(this);
-        this.classes = [Special, BackLinkable, PreBibliographic];
+        this.classTypes = [Special, BackLinkable, PreBibliographic];
     }
 }
 /* class pending(Special, Invisible, Element):
@@ -1877,7 +1886,7 @@ export class system_message extends Element {
 export class raw extends FixedTextElement {
     constructor(...args) {
         super(...args);
-        this.classes = [Special, Inline, PreBibliographic];
+        this.classTypes = [Special, Inline, PreBibliographic];
     }
 }
 
@@ -1888,28 +1897,28 @@ export class emphasis extends TextElement {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
-        this.classes = [Inline];
+        this.classTypes = [Inline];
     }
 }
 export class strong extends TextElement {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
-        this.classes = [Inline];
+        this.classTypes = [Inline];
     }
 } // Inline
 export class literal extends TextElement {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
-        this.classes = [Inline];
+        this.classTypes = [Inline];
     }
 } // Inline
 export class reference extends TextElement {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
-        this.classes = [General, Inline, Referential];
+        this.classTypes = [General, Inline, Referential];
     }
 } // General, Inline, Referential
 /* eslint-disable-next-line camelcase */
@@ -1917,7 +1926,7 @@ export class footnote_reference extends TextElement {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
-        this.classes = [General, Inline, Referential];
+        this.classTypes = [General, Inline, Referential];
     }
 } // General, Inline, Referential
 /* eslint-disable-next-line camelcase */
@@ -1925,7 +1934,7 @@ export class citation_reference extends TextElement {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
-        this.classes = [General, Inline, Referential];
+        this.classTypes = [General, Inline, Referential];
     }
 } // General, Inline, Referential
 /* eslint-disable-next-line camelcase */
@@ -1933,7 +1942,7 @@ export class substitution_reference extends TextElement {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
-        this.classes = [Inline];
+        this.classTypes = [Inline];
     }
 } // General, Inline, Referential
 /* eslint-disable-next-line camelcase */
@@ -1941,7 +1950,7 @@ export class title_reference extends TextElement {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
-        this.classes = [Inline];
+        this.classTypes = [Inline];
     }
 } // General, Inline, Referential
 
@@ -1950,7 +1959,7 @@ export class abbreviation extends TextElement {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
-        this.classes = [Inline];
+        this.classTypes = [Inline];
     }
 }
 
@@ -1958,7 +1967,7 @@ export class acronym extends TextElement {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
-        this.classes = [Inline];
+        this.classTypes = [Inline];
     }
 }
 
@@ -1966,7 +1975,7 @@ export class superscript extends TextElement {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
-        this.classes = [Inline];
+        this.classTypes = [Inline];
     }
 }
 
@@ -1974,21 +1983,21 @@ export class subscript extends TextElement {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
-        this.classes = [Inline];
+        this.classTypes = [Inline];
     }
 }
 export class math extends TextElement {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
-        this.classes = [Inline];
+        this.classTypes = [Inline];
     }
 }
 export class image extends Element {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
-        this.classes = [General, Inline];
+        this.classTypes = [General, Inline];
     }
 
     astext() {
@@ -2001,7 +2010,7 @@ export class inline extends TextElement {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
-        this.classes = [Inline];
+        this.classTypes = [Inline];
     }
 }
 
@@ -2009,7 +2018,7 @@ export class problematic extends TextElement {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
-        this.classes = [Inline];
+        this.classTypes = [Inline];
     }
 }
 
@@ -2017,7 +2026,7 @@ export class generated extends TextElement {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
-        this.classes = [Inline];
+        this.classTypes = [Inline];
     }
 }
 

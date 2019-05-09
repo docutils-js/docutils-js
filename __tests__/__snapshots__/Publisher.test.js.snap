@@ -24,7 +24,7 @@ document {
   "children": Array [],
   "citationRefs": Object {},
   "citations": Array [],
-  "classes": Array [
+  "classTypes": Array [
     [Function],
     [Function],
   ],
@@ -172,7 +172,7 @@ document {
   "children": Array [],
   "citationRefs": Object {},
   "citations": Array [],
-  "classes": Array [
+  "classTypes": Array [
     [Function],
     [Function],
   ],

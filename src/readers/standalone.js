@@ -14,8 +14,8 @@ import * as frontmatter from '../transforms/frontmatter';
 
 export const __docformat__ = 'reStructuredText';
 export default class Reader extends BaseReader {
-    constructor(...args) {
-        super(...args);
+    constructor(args) {
+        super(args);
 
         // """Contexts this reader supports."""
         this.supported = ['standalone'];
@@ -64,10 +64,11 @@ default: 0,
     }
 
     getTransforms() {
-        const r = [references.PropagateTargets,
+	const s = super.getTransforms();
+        const r = [...s, references.PropagateTargets,
 		   frontmatter.DocTitle,
 		   frontmatter.SectionSubTitle,
-		  frontmatter.DocInfo];
+		   frontmatter.DocInfo];
         return r;
     }
     /*
