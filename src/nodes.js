@@ -185,6 +185,77 @@ export class NodeVisitor {
     }
 }
 
+// ========
+//  Mixins
+// ========
+
+export class Resolvable {
+//    resolved = 0
+}
+
+export class BackLinkable {
+    addBackref(refid) {
+        this.backrefs.push(refid);
+    }
+}
+
+// ====================
+//  Element Categories
+// ====================
+
+export class Root { }
+
+export class Titular { }
+
+// """Category of Node which may occur before Bibliographic Nodes."""
+export class PreBibliographic { }
+
+export class Bibliographic { }
+
+export class Decorative extends PreBibliographic { }
+
+export class Structural { }
+
+export class Body { }
+
+export class General extends Body { }
+
+// """List-like elements."""
+export class Sequential extends Body {
+}
+
+export class Admonition extends Body { }
+
+// """Special internal body elements."""
+export class Special extends Body { }
+
+// """Internal elements that don't appear in output."""
+export class Invisible extends PreBibliographic { }
+
+export class Part { }
+
+export class Inline { }
+
+export class Referential extends Resolvable { }
+
+export class Targetable extends Resolvable {
+    // referenced = 0
+    // indirect_reference_name = null
+    /* """Holds the whitespace_normalized_name (contains mixed case) of a target.
+    Required for MoinMoin/reST compatibility."""
+    */
+}
+
+// """Contains a `label` as its first element."""
+export class Labeled { }
+
+// ==============================
+//  Functional Node Base Classes
+// ==============================
+/**
+ * Node class.
+ * The base class for all nodes.
+ */
 export class Node {
     constructor() {
         this.tagname = this.constructor.name;
@@ -220,7 +291,9 @@ export class Node {
     }
 
     isAdmonition() {
-        return this.classTypes.findIndex(c => c.prototype instanceof Admonition || c === Admonition) !== -1;
+        return this.classTypes.findIndex(
+            c => c.prototype instanceof Admonition || c === Admonition,
+        ) !== -1;
     }
 
     asdom() {
@@ -332,47 +405,16 @@ export class Node {
         if (condition.prototype instanceof Node || condition === Node) {
             const nodeClass = condition;
             /* eslint-disable-next-line no-unused-vars */
-            const myCondition = (node, nodeClassArg) => ((node instanceof nodeClassArg) || (node instanceof nodeClass));
+            const myCondition = (node, nodeClassArg) => (
+                (node instanceof nodeClassArg) || (node instanceof nodeClass)
+            );
             throw new Error('unimplemented');
         }
 
         throw new Error('unimplemented');
-        return [];
+        // return [];
     }
 }
-
-/* This is designed to be called later, a-nd not with an object. hmm */
-export function _addNodeClassNames(names, o) {
-    names.forEach((_name) => {
-        const v = `visit_${_name}`;
-        if (!o[v]) {
-            o[v] = _callDefaultVisit.bind(o);
-        }
-        const d = `depart_${_name}`;
-        if (!o[d]) {
-            o[d] = _callDefaultDeparture.bind(o);
-        }
-    });
-}
-export class GenericNodeVisitor extends NodeVisitor {
-    constructor(document) {
-        super(document);
-        // document this/
-        _addNodeClassNames(nodeClassNames, this);
-    }
-
-    /* eslint-disable-next-line */
-    default_visit(node) {
-        throw new Error('not implemented');
-    }
-
-    /* eslint-disable-next-line */
-    default_departure(node) {
-        throw new Error('not implemented');
-    }
-}
-GenericNodeVisitor.nodeClassNames = nodeClassNames;
-
 
 /*
  * `Element` is the superclass to all specific elements.
@@ -616,13 +658,18 @@ export class Element extends Node {
     firstChildNotMatchingClass(childClass, start = 0,
                                end = this.children.length) {
         const myChildClass = Array.isArray(childClass) ? childClass : [childClass];
-        const r = this.children.slice(start, Math.min(this.children.length, end)).findIndex((child, index) => {
+        const r = this.children.slice(start,
+                                      Math.min(this.children.length, end))
+              .findIndex((child, index) => {
             if (myChildClass.findIndex((c) => {
                 // if (typeof child === 'undefined') {
                 //     throw new Error(`child should not be undefined, index ${index}`);
                 // }
                 if (child instanceof c
-                    || (this.children[index].classTypes.filter((c2 => c2.prototype instanceof c || c2 === c))).length) {
+                    || (this.children[index].classTypes.filter(
+                        (c2 => c2.prototype instanceof c || c2 === c),
+))
+                    .length) {
                     return true;
                 }
                 return false;
@@ -630,6 +677,7 @@ export class Element extends Node {
                 // console.log(`returning index ${index} ${nodeToXml(this.children[index])}`);
                 return true;
             }
+                  return false;
         });
         if (r !== -1) {
             return r;
@@ -768,6 +816,77 @@ export class Element extends Node {
         return !(attr in this.knownAttributes);
     }
 }
+
+// =====================
+//  Decorative Elements
+// =====================
+export class header extends Element {
+    constructor(...args) {
+        super(...args);
+        this.classTypes = [Decorative];
+    }
+}
+
+export class footer extends Element {
+    constructor(...args) {
+        super(...args);
+        this.classTypes = [Decorative];
+    }
+}
+
+export class decoration extends Element {
+    constructor(...args) {
+        super(...args);
+        this.classTypes = [Decorative];
+    }
+
+    getHeader() {
+        if (!this.children.length || !(this.children[0] instanceof header)) {
+            this.insert(0, new header());
+        }
+        return this.children[0];
+    }
+
+    getFooter() {
+        if (!this.children.length || !(this.children[this.children.length - 1] instanceof footer)) {
+            this.add(new footer());
+        }
+        return this.children[this.children.length - 1];
+    }
+}
+
+/* This is designed to be called later, a-nd not with an object. hmm */
+export function _addNodeClassNames(names, o) {
+    names.forEach((_name) => {
+        const v = `visit_${_name}`;
+        if (!o[v]) {
+            o[v] = _callDefaultVisit.bind(o);
+        }
+        const d = `depart_${_name}`;
+        if (!o[d]) {
+            o[d] = _callDefaultDeparture.bind(o);
+        }
+    });
+}
+export class GenericNodeVisitor extends NodeVisitor {
+    constructor(document) {
+        super(document);
+        // document this/
+        _addNodeClassNames(nodeClassNames, this);
+    }
+
+    /* eslint-disable-next-line */
+    default_visit(node) {
+        throw new Error('not implemented');
+    }
+
+    /* eslint-disable-next-line */
+    default_departure(node) {
+        throw new Error('not implemented');
+    }
+}
+GenericNodeVisitor.nodeClassNames = nodeClassNames;
+
 
 export class Text extends Node {
     constructor(data, rawsource = '') {
@@ -1108,71 +1227,6 @@ export class FixedTextElement extends TextElement {
 */
 }
 
-// ========
-//  Mixins
-// ========
-
-export class Resolvable {
-//    resolved = 0
-}
-
-export class BackLinkable {
-    addBackref(refid) {
-        this.backrefs.push(refid);
-    }
-}
-
-
-// ====================
-//  Element Categories
-// ====================
-
-export class Root { }
-
-export class Titular { }
-
-// """Category of Node which may occur before Bibliographic Nodes."""
-export class PreBibliographic { }
-
-export class Bibliographic { }
-
-export class Decorative extends PreBibliographic { }
-
-export class Structural { }
-
-export class Body { }
-
-export class General extends Body { }
-
-// """List-like elements."""
-export class Sequential extends Body {
-}
-
-export class Admonition extends Body { }
-
-// """Special internal body elements."""
-export class Special extends Body { }
-
-// """Internal elements that don't appear in output."""
-export class Invisible extends PreBibliographic { }
-
-export class Part { }
-
-export class Inline { }
-
-export class Referential extends Resolvable { }
-
-export class Targetable extends Resolvable {
-    // referenced = 0
-    // indirect_reference_name = null
-    /* """Holds the whitespace_normalized_name (contains mixed case) of a target.
-    Required for MoinMoin/reST compatibility."""
-    */
-}
-
-// """Contains a `label` as its first element."""
-export class Labeled { }
-
 // ================
 //  Title Elements
 // ================
@@ -1281,41 +1335,6 @@ export class copyright extends TextElement {
     }
 }
 
-// =====================
-//  Decorative Elements
-// =====================
-export class decoration extends Element {
-    constructor(...args) {
-        super(...args);
-        this.classTypes = [Decorative];
-    }
-
-    getHeader() {
-        if (!this.children.length || !(this.children[0] instanceof header)) {
-            this.insert(0, new header());
-        }
-        return this.children[0];
-    }
-
-    getFooter() {
-        if (!this.children.length || !(this.children[this.children.length - 1] instanceof footer)) {
-            this.add(new footer());
-        }
-        return this.children[this.children.length - 1];
-    }
-}
-export class header extends Element {
-    constructor(...args) {
-        super(...args);
-        this.classTypes = [Decorative];
-    }
-} // Decorative
-export class footer extends Element {
-    constructor(...args) {
-        super(...args);
-        this.classTypes = [Decorative];
-    }
-} // Decorative
 
 export class section extends Element {
 /* eslint-disable-next-line no-useless-constructor */
@@ -1404,16 +1423,16 @@ export class bullet_list extends Element {
         super(...args);
         this.classTypes = [Sequential];
     }
-} // Sequential
+}
 
+/* eslint-disable-next-line camelcase */
 export class enumerated_list extends Element {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
         this.classTypes = [Sequential];
     }
-} // Sequential
-
+}
 
 /* eslint-disable-next-line camelcase */
 export class list_item extends Element {
