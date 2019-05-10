@@ -108,7 +108,7 @@ There are currently quite a number of bugs.
 
   * Lack of transformers and directives
 
-  * Running rst2xml.js on sample documents produces documents that
+  * Running ``rst2xml.js`` on sample documents produces documents that
     'work', sort-of, but which are significantly different from
     docutils-python output.
 

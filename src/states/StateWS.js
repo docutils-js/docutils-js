@@ -61,7 +61,7 @@ class StateWS extends State {
     }
 
     knownIndent(match, context, nextState) {
-        const [indetned, ineOffset, blankFinish] = this.stateMachine.getKnownIndented(
+        const [indented, lineOffset, blankFinish] = this.stateMachine.getKnownIndented(
             match.end(),
 );
         const knownIndentSm = this.knownIdentSm;

@@ -1,9 +1,36 @@
 import Publisher from './Publisher';
+import * as defaults from './defaults';
 
 export { Publisher };
 
 export const defaultUsage = '%prog [options] [<source> [<destination>]]';
 export const defaultDescription = ('Reads from <source> (default is stdin) and writes to <destination> (default is stdout).  See <http://docutils.sf.net/docs/user/config.html> for the full reference.');
+
+/* We need a non command-line parsing based function */
+
+/* We should document all the arguments to this function */
+export function publish(args) {
+    const _defaults = {
+        readerName: defaults.defaultReaderName,
+        parserName: defaults.defaultParserName,
+        usage: defaultUsage,
+        description: defaultDescription,
+        enableExitStatus: defaults.defaultEnableExitStatus,
+};
+    const myArgs = { ..._defaults, ...args };
+    const {
+        reader, readerName, parser, parserName, writer, writerName,
+        settings, settingsSpec, settingsOverrides, configSection,
+        enableExitStatus, argv, usage, description,
+    } = myArgs;
+    const pub = new Publisher({
+        reader, parser, writer, settings,
+    });
+    pub.setComponents(readerName, parserName, writerName);
+    pub.publish2({
+argv, usage, description, settingsSpec, settingsOverrides, configSection, enableExitStatus,
+});
+}
 
 
 export function publishCmdLine(args, cb) {

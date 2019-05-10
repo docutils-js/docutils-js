@@ -4,12 +4,26 @@ import OptionParser from './OptParse';
 import * as readers from './Readers';
 import * as writers from './Writers';
 import SettingsSpec from './SettingsSpec';
+import pojoTranslate from './fn/pojoTranslate';
 
 /**
- ** Port of docutils.core.Publisher
- **
- * */
+ * Publisher class.
+ */
+
 class Publisher {
+    /**
+     * Create a publisher instance.
+     * @param {Object} args - arguments
+     * @param {Reader} args.reader - instance of Reader
+     * @param {Parser} args.parser - instance of Parser
+     * @param {Writer} args.writer - instance of Writer
+     * @param {Source} args.source - instance of Source
+     * @param {function} args.sourceClass - class for source, mutually exclusive with souce paramter
+     * @param {Destination} args.destination - where the output should be written
+     * @param {function} args.destinationClass - Class for destination, mutually exclusiv with destination paramter.
+     * @param {object} args.settings - Settings for docutils engine.
+     * @param {function} args.debugFn - Debug function.
+     */
     constructor(args) {
         let {
  reader, parser, writer, source, sourceClass, destination,
@@ -46,14 +60,16 @@ class Publisher {
 
     setReader(readerName, parser, parserName) {
         const ReaderClass = readers.getReaderClass(readerName);
-        this.reader = new ReaderClass({ parser, parserName, debug: this.debug, debugFn: this.debugFn });
+        this.reader = new ReaderClass({
+ parser, parserName, debug: this.debug, debugFn: this.debugFn,
+});
         this.parser = this.reader.parser;
     }
 
     setWriter(writerName) {
         const writerClass = writers.getWriterClass(writerName);
-	/* not setting document here, the write method takes it, which
-	 * is confusing */
+        /* not setting document here, the write method takes it, which
+         * is confusing */
         this.writer = new writerClass();
     }
 
@@ -170,6 +186,12 @@ encoding:
         this.document.transformer.applyTransforms();
     }
 
+    publish2(args) {
+        const {
+            argv, usage, description, settingsSpec, settingsOverrides, configSection, enableExitStatus,
+        } = args;
+    }
+
     /* This doesnt seem to return anything ? */
     publish(args, cb) {
         const {
@@ -204,6 +226,7 @@ encoding:
                         throw new Error('need document');
                     }
                     this.applyTransforms();
+
                     const output = this.writer.write(this.document, this.destination);
                     this.writer.assembleParts();
                     cb(undefined, output);

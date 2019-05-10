@@ -1,3 +1,7 @@
+import { InvalidArgumentsError } from '../Exceptions';
+import UnknownTransitionError from '../UnknownTransitionError';
+import DuplicateTransitionError from '../DuplicateTransitionError';
+
 class State {
     constructor(args = {}) {
         const { stateMachine, debug } = args;
@@ -62,7 +66,7 @@ class State {
                 throw new DuplicateTransitionError(name);
             }
             if (!(name in transitions)) {
-                throw new UnknownTrransitionError(name);
+                throw new UnknownTransitionError(name);
             }
         }));
         this.transitionOrder.splice(0, 0, ...names);

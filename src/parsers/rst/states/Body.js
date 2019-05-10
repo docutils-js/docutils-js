@@ -8,6 +8,7 @@ import * as tableparser from '../tableparser';
 import { ApplicationError, UnimplementedError as Unimp } from '../../../Exceptions';
 import TransitionCorrection from '../../../TransitionCorrection';
 import * as directives from '../directives';
+import UnexpectedIndentationError from '../../../UnexpectedIndentationError';
 
 const fullyNormalizeName = nodes.fullyNormalizeName;
 
@@ -413,7 +414,7 @@ node: substitutionNode,
                 i += 1;
             }
         });
-        for (const node of substitutionNode.traverse(nodes.Element)) {
+        const result = substitutionNode.traverse(nodes.Element).map((node) => {
             if (this.disallowedInsideSubstitutionDefinitions(node)) {
                 const pformat = new nodes.literal_block('', node.pformat().trimEnd());
                 const msg = this.reporter.error(
@@ -423,6 +424,10 @@ node: substitutionNode,
 );
                 return [[msg], blankFinish];
             }
+            return undefined;
+        }).filter(x => x);
+        if (result.length) {
+            return result[0];
         }
         if (substitutionNode.children.length === 0) {
             const msg = this.reporter.warning(
@@ -439,11 +444,11 @@ node: substitutionNode,
     }
 
     disallowedInsideSubstitutionDefinitions(node) {
-        if (node.attributes.ids.length || node instanceof nodes.reference
-            || node instanceof nodes.footnote_reference && node.attributes.auto) {
+        if ((node.attributes.ids.length || node instanceof nodes.reference
+             || node instanceof nodes.footnote_reference) && node.attributes.auto) {
             return true;
         }
-            return false;
+        return false;
     }
 
     directive(match, optionPresets) {
@@ -546,12 +551,14 @@ contentOffset;
                 blankFinish || this.stateMachine.isNextLineBlank()];
     }
 
+    /* eslint-disable-next-line camelcase */
     unknown_directive(typeName) {
         const lineno = this.stateMachine.absLineNumber();
         const [indented,
                 indent,
                 offset,
-                blankFinish] = this.stateMachine.getFirstKnownIndented({ indent: 0, stripIndent: false });
+               blankFinish] = this.stateMachine
+              .getFirstKnownIndented({ indent: 0, stripIndent: false });
         const text = indented.join('\n');
         const error = this.reporter.error(
             `Unknown directive type "${typeName}".`,
@@ -596,28 +603,23 @@ contentOffset;
     /* eslint-disable-next-line camelcase */
     explicit_construct(match) {
         // """Determine which explicit construct this is, parse & return it."""
-//        throw new Unimp("explciit_construct");
         const errors = [];
-        for (const [method, pattern] of this.explicit.constructs) {
-//      this.explicit.constructs.forEach(([ method, pattern ]) =>{
-            const expmatch = pattern.exec(match.result.input);
-            if (expmatch) {
-                try {
-                    const r = method(expmatch); /* can also use bind */
-                    /* istanbul ignore if */
-                    if (!isIterable(r)) {
-                        throw new Error(`eed iterable from method related to ${pattern}`);
-                    }
-                    return r;
-                } catch (error) {
-                    if (error instanceof MarkupError) {
-                        const lineno = this.stateMachine.absLineNumber();
-                        const message = error.args ? error.args.join(' ') : '';
-                        errors.push(this.reporter.warning(message, [], { line: lineno }));
-                        break;
-                    } else {
-                        throw error;
-                    }
+        const r = this.explicit.constructs.map(
+            ([method, pattern]) => [method, pattern, pattern.exec(match.result.input)],
+);
+        const r2 = r
+              .find(x => x[2] && x[0]);
+        if (r2) {
+            const [method, pattern, expmatch] = r2;
+            try {
+                return method(expmatch);
+            } catch (error) {
+                if (error instanceof MarkupError) {
+                    const lineno = this.stateMachine.absLineNumber();
+                    const message = error.args ? error.args.join(' ') : '';
+                    errors.push(this.reporter.warning(message, [], { line: lineno }));
+                } else {
+                    throw error;
                 }
             }
         }
@@ -1459,7 +1461,7 @@ initialState: 'LineBlock',
 
     /* eslint-disable-next-line camelcase */
     build_table(tabledata, tableline, stubColumns = 0, widths) {
-        const [colwidths, headrows, bodyrows] = tabledata;
+        const [colwidths, headRows, bodyrows] = tabledata;
         const table = new nodes.table();
         if (widths === 'auto') {
             table.attributes.classes.push('colwidths-auto');
@@ -1476,30 +1478,21 @@ initialState: 'LineBlock',
             }
             tgroup.add(colspec);
         });
-        if (headrows) {
+        if (headRows) {
             const thead = new nodes.thead('', '', [], {});
             tgroup.add(thead);
-            for (const row of headrows) {
-                thead.add(this.build_table_row(row, tableline));
-            }
+            headRows.map(row => this.buildTableRow(row, tableline))
+                .forEach(row => thead.add(row));
         }
         const tbody = new nodes.tbody();
         tgroup.add(tbody);
-        for (const row of bodyrows) {
-            tbody.add(this.build_table_row(row, tableline));
-        }
+        bodyrows.map(row => this.buildTableRow(row, tableline)).forEach(row => tbody.add(row));
         return table;
     }
 
-
-    /* eslint-disable-next-line camelcase */
-    build_table_row(rowdata, tableline) {
+    buildTableRow(rowdata, tableline) {
         const row = new nodes.row('', [], {});
-        for (const cell of rowdata) {
-            if (typeof cell === 'undefined') {
-                continue;
-            }
-            const [morerows, morecols, offset, cellblock] = cell;
+        rowdata.filter(x => x).forEach(([morerows, morecols, offset, cellblock]) => {
             const attributes = {};
             if (morerows) {
                 attributes.morerows = morerows;
@@ -1515,7 +1508,7 @@ initialState: 'LineBlock',
                                               node: entry,
 });
             }
-        }
+        });
         return row;
     }
 

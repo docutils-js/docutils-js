@@ -1,9 +1,9 @@
 import Parser from '../Parser';
-import * as rst from './restructuredtext';
+import RestructuredTextParser from './restructuredtext';
 
 function getParserClass(parserName) {
     if (parserName === 'restructuredtext') {
-        return rst;
+        return RestructuredTextParser;
     }
     throw new Error('');
 //    return require(`./${parserName}.js`).default;

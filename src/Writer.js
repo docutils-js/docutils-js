@@ -1,8 +1,16 @@
-import { __version__ } from './index';
 import Component from './Component';
 import languages from './languages';
 
+const __version__ = '';
+
+/**
+ * Base class for all writers.
+ */
 export default class Writer extends Component {
+    /*
+     * @constructor
+     *
+     */
     constructor(args) {
         super(args);
         this.parts = {};
@@ -14,9 +22,15 @@ export default class Writer extends Component {
                                              document.reporter);
         this.destination = destination;
         this.translate();
-        // console.log(this.output);
-        const output = this.destination.write(this.output);
-        return output;
+//        console.log(this.output);
+        let fn;
+        if (typeof this.destination.write === 'function') {
+            fn = this.destination.write.bind(this.destination);
+        } else if (this.destination === 'function') {
+            fn = this.destination;
+        }
+
+        return fn(this.output);
     }
 
     translate() {

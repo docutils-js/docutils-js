@@ -60,7 +60,7 @@ class Line extends SpecializedText {
             if (error instanceof EOFError) {
                 const blocktext = `${overline}\n${title}`;
                 if (overline.trimEnd().length < 4) {
-		    this.shortOverline(context, blocktext, lineno, 2);
+                    this.shortOverline(context, blocktext, lineno, 2);
                 } else {
                     const msg = this.reporter.severe(
                         'Incomplete section title.',

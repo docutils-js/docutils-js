@@ -7,4 +7,7 @@ class Image extends Directive {
     }
 }
 
-export { Image };
+class Figure extends Image {
+}
+
+export { Image, Figure };

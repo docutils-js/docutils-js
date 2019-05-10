@@ -111,7 +111,7 @@ export default class Writer extends BaseWriter {
         this.document.walkabout(visitor);
         this.output = visitor.output.join('');
         if (process.stderr) {
-            process.stderr.write(this.output);
+            // process.stderr.write(this.output);
         }
     }
 }

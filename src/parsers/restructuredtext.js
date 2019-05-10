@@ -1,4 +1,3 @@
-
 import BaseParser from '../Parser';
 import * as statemachine from '../StateMachine';
 import RSTStateMachine from './rst/RSTStateMachine';
@@ -55,7 +54,5 @@ class Parser extends BaseParser {
         this.finishParse();
     }
 }
-
-export { Parser };
 
 export default Parser;

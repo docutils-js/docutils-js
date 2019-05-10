@@ -439,7 +439,6 @@ src;
     }
 
     notifyObservers() {
-        let observer;
         for (const observer of this.observers) {
             /* istanbul ignore if */
             if (observer === undefined) {

@@ -1,6 +1,6 @@
 import * as fs from 'fs';
 import * as path from 'path';
-import { Parser } from '../../src/parsers/restructuredtext';
+import Parser from '../../src/parsers/restructuredtext';
 import newDocument from '../../src/newDocument';
 import baseSettings from '../../src/baseSettings';
 import * as nodes from '../../src/nodes';

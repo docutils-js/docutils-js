@@ -35,7 +35,9 @@ test('full rst2xml pipeline with specific input', () => {
     };
 
     const { readerName, parserName, writerName } = args;
-    const source = new StringInput({ source: 'test' });
+    const source = new StringInput({ source: `.. _A ReStructuredText Primer: ../../user/rst/quickstart.html
+.. _Quick reStructuredText: ../../user/rst/quickref.html
+` });
         const destination = new StringOutput({});
     const pub = new Publisher({
  source, destination, settings, debug: true, debugFn,

@@ -11,24 +11,24 @@ export default class Reader extends Component {
 
     constructor(args) {
         super(args);
-	const { parser, parseFn, parserName } = args;
+        const { parser, parseFn, parserName } = args;
         this.componentType = 'reader';
         this.configSection = 'readers';
         this.parser = parser;
-	this.parseFn = parseFn;
+        this.parseFn = parseFn;
         this.debugFn = args.debugFn;
         this.debug = args.debug;
         if (parser === undefined) {
-	    if(parserName) {
-		this.setParser(parserName);
-	    }
+            if (parserName) {
+                this.setParser(parserName);
+            }
         }
         this.source = undefined;
         this.input = undefined;
     }
 
     setParser(parserName) {
-        const ParserClass = parsers.getParserClass(parserName).Parser;
+        const ParserClass = parsers.getParserClass(parserName);
         this.parser = new ParserClass({
  debug: this.debug,
                                        debugFn: this.debugFn,
@@ -36,10 +36,10 @@ export default class Reader extends Component {
     }
 
     /**
-      * Magic read method. Returns document. Clearly this is meant to read
-      * the stream in its entirety?
-      * why do we have both read and parse??
-      * we may have to change api semantics!
+      * Magic read method::
+      *
+      *   test123
+      *
       */
     read(source, parser, settings, cb) {
         this.source = source;
@@ -64,36 +64,37 @@ export default class Reader extends Component {
 
     /* read method without callbcks and other junk */
     read2(input, settings) {
-	this.input = input;
-	this.settings = settings;
-	this.parse();
-	return this.document;
+        this.input = input;
+        this.settings = settings;
+        this.parse();
+        return this.document;
     }
-    
-    
+
+
     /* Delegates to this.parser, providing arguments
        based on instance variables */
     parse() {
-	if(this.parser) {
+        if (this.parser) {
             const document = this.newDocument();
             this.parser.parse(this.input, document);
             this.document = document;
             if (this.input === undefined) {
-		throw new Error(`need input, i have ${this.input}`);
+                throw new Error(`need input, i have ${this.input}`);
             }
-	    
-	} else {
-	    const document = this.parseFn(this.input);
-	    this.document = document;
-	}
+        } else {
+            const document = this.parseFn(this.input);
+            this.document = document;
+        }
         this.document.currentSource = undefined;
         this.document.currentLine = undefined;
     }
 
     newDocument() {
-        const document = newDocument({ sourcePath:
-				       this.source && this.source.sourcePath },
-				     this.settings);
+        const document = newDocument({
+ sourcePath:
+                                       this.source && this.source.sourcePath,
+},
+                                     this.settings);
         return document;
     }
 }

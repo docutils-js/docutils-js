@@ -3,9 +3,18 @@ module.exports = function(grunt) {
     // Project configuration.
     grunt.initConfig({
 	pkg: grunt.file.readJSON('package.json'),
+        jsdoc: {
+            dist: {
+                src: ['src/**/*.js'],
+                options: {
+                    destination: 'doc',
+                    config: 'jsdoc-config.js',
+                },
+            },
+        },
 	watch: {
 	    src: {
-		files: "src/*.js",
+		files: "src/**/*.js",
 		tasks: ["babel:dist"],
 	    },
 	    gruntfile: {
@@ -36,6 +45,7 @@ module.exports = function(grunt) {
     });
 
     // Load the plugin that provides the "uglify" task.
+    grunt.loadNpmTasks('grunt-jsdoc');
     grunt.loadNpmTasks('grunt-babel');
     grunt.loadNpmTasks('grunt-contrib-watch');
         grunt.loadNpmTasks('grunt-eslint');

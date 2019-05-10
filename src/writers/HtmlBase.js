@@ -17,7 +17,6 @@ const defaultTemplate = `<%- head_prefix %>
 
 const template = ejs.compile(defaultTemplate, {});
 
-
 export default class Writer extends BaseWriter {
     constructor(args) {
         super(args);
@@ -150,6 +149,10 @@ class HTMLTranslator extends nodes.NodeVisitor {
         Construct and return a start tag given a node (id & class attributes
         are extracted), tag name, and optional attributes.
         """ */
+        if (typeof suffix !== 'string') {
+            throw new Error('suffix should be a string!!');
+        }
+
         const myTagname = tagname.toLowerCase();
         const prefix = [];
         const atts = {};
@@ -158,7 +161,7 @@ class HTMLTranslator extends nodes.NodeVisitor {
         const classes = [];
         const languages = [];
         // unify class arguments and move language specification
-        const c = node.attributes.classes || [];
+        const c = (node.attributes && node.attributes.classes) || [];
 	console.log(c);
 	console.log(atts.class);
         c.splice(c.length - 1, 0, ...utils.pySplit(atts.class || ''));
@@ -218,7 +221,20 @@ class HTMLTranslator extends nodes.NodeVisitor {
 	});
 	const infix = empty ? ' /' : '';
         // return ''.join(prefix) + '<%s%s>' % (' '.join(parts), infix) + suffix
-        return `${prefix.join('')}<${parts.join(' ')}${infix}>${suffix}`;
+        const result = `${prefix.join('')}<${parts.join(' ')}${infix}>${suffix}`;
+        const badStr = '[object Object]';
+        if (result.indexOf(badStr) !== -1) {
+            let invalidVar = '';
+            if (prefix.join('').indexOf('[object Object]') !== -1) {
+                invalidVar = 'prefix';
+            } else if (parts.join(' ').indexOf(badStr) !== -1) {
+            } else if (infix.indexOf(badStr) !== -1) {
+            } else if (suffix.indexOf(badStr) !== -1) {
+                invalidVar = 'suffix';
+            }
+            throw new Error(`invalid object in ${invalidVar} thing ${prefix} ${parts} ${infix}`);
+        }
+        return result;
     }
 
     encode(text) {
@@ -296,10 +312,10 @@ class HTMLTranslator extends nodes.NodeVisitor {
     }
 
     visit_attribution(node) {
-        prefix, suffix = this.attribution_formats[this.settings.attribution];
+        const [prefix, suffix] = this.attribution_formats[this.settings.attribution];
         this.context.push(suffix);
         this.body.push(
-            this.starttag(node, 'p', prefix, CLASS = 'attribution'),
+            this.starttag(node, 'p', prefix, false, { CLASS: 'attribution' }),
 );
     }
 
@@ -394,7 +410,7 @@ class HTMLTranslator extends nodes.NodeVisitor {
         if (this.compactSimple && !oldCompactSimple) {
             atts.class = 'simple';
         }
-        this.body.push(this.starttag(node, 'ul', atts));
+        this.body.push(`${this.starttag(node, 'ul', '', false, atts)}\n`);
     }
 
     depart_bullet_list(node) {
@@ -657,15 +673,16 @@ class HTMLTranslator extends nodes.NodeVisitor {
                              + this.body_suffix[:-1])
         //        assert not this.context, 'len(context) = %s' % len(this.context)
     }
-
-    visit_emphasis( node) {
-        this.body.push(this.starttag(node, 'em', ''))
+*/
+    visit_emphasis(node) {
+        this.body.push(this.starttag(node, 'em', ''));
     }
 
-    depart_emphasis( node) {
-        this.body.push('</em>')
+    depart_emphasis(node) {
+        this.body.push('</em>');
     }
 
+/*
     visit_entry( node) {
         const atts = {'class': []}
         if(node.parent.parnet instanceof nodes.thead) {
@@ -1399,14 +1416,16 @@ class HTMLTranslator extends nodes.NodeVisitor {
         this.depart_docinfo_item()
     }
 
-    visit_strong( node) {
-        this.body.push(this.starttag(node, 'strong', ''))
+*/
+    visit_strong(node) {
+        this.body.push(this.starttag(node, 'strong', ''));
     }
 
-    depart_strong( node) {
-        this.body.push('</strong>')
+    depart_strong(node) {
+        this.body.push('</strong>');
     }
 
+/*
     visit_subscript( node) {
         this.body.push(this.starttag(node, 'sub', ''))
     }
@@ -1601,21 +1620,24 @@ class HTMLTranslator extends nodes.NodeVisitor {
         // """Only 6 section levels are supported by HTML."""
         const checkId = 0; // TODO: is this a bool (false) or a counter?
         let closeTag = '</p>\n';
-/*        if isinstance(node.parent, nodes.topic):
+        if (node.parent instanceof nodes.topic) {
             this.body.push(
-                  this.starttag(node, 'p', '', { CLASS: 'topic-title first' }))
-        elif isinstance(node.parent, nodes.sidebar):
+                this.starttag(node, 'p', '', { CLASS: 'topic-title first' }),
+);
+        } else if (node.parent instanceof nodes.sidebar) {
             this.body.push(
-                  this.starttag(node, 'p', '', { CLASS: 'sidebar-title' }))
-        elif isinstance(node.parent, nodes.Admonition):
+                this.starttag(node, 'p', '', { CLASS: 'sidebar-title' }),
+);
+        } else if (node.parent.isAdmonition()) {
             this.body.push(
-                  this.starttag(node, 'p', '', { CLASS: 'admonition-title' }))
-        elif isinstance(node.parent, nodes.table):
+                this.starttag(node, 'p', '', { CLASS: 'admonition-title' }),
+);
+        } else if (node.parent instanceof nodes.table) {
             this.body.push(
-                  this.starttag(node, 'caption', ''))
-            close_tag = '</caption>\n'
-*/
-        if (node.parent instanceof nodes.document) {
+                  this.starttag(node, 'caption', ''),
+);
+            closeTag = '</caption>\n';
+        } else if (node.parent instanceof nodes.document) {
             this.body.push(this.starttag(node, 'h1', '', false, { CLASS: 'title' }));
             closeTag = '</h1>\n';
             this.inDocumentTitle = this.body.length;
@@ -1623,21 +1645,24 @@ class HTMLTranslator extends nodes.NodeVisitor {
             // assert isinstance(node.parent, nodes.section)
             const headerLevel = this.sectionLevel + this.initialHeaderLevel - 1;
             let atts = {};
-/*            if (len(node.parent) >= 2 and
-                isinstance(node.parent[1], nodes.subtitle)):
-                atts['CLASS'] = 'with-subtitle' */
+            if (node.parent.children.length >= 2
+                && node.parent.children[1] instanceof nodes.subtitle) {
+                atts.CLASS = 'with-subtitle';
+            }
             this.body.push(
                 this.starttag(node, `h${headerLevel}`, '', false, atts),
-);
+            );
             atts = {};
-/*            if node.hasattr('refid'):
-                atts['class'] = 'toc-backref'
-                atts['href'] = '#' + node['refid']
-            if atts:
-                this.body.push(this.starttag({}, 'a', '', **atts))
-                close_tag = '</a></h%s>\n' % (h_level)
-            else: */
-            closeTag = `</h${headerLevel}>\n`;
+            if (Object.prototype.hasOwnProperty(node, 'refid')) {
+                atts.class = 'toc-backref';
+                atts.href = `#${node.refid}`;
+            }
+            if (Object.keys(atts).length) {
+                this.body.push(this.starttag({}, 'a', '', atts));
+                closeTag = `</a></h${hLevel}>\n`;
+            } else {
+                closeTag = `</h${headerLevel}>\n`;
+            }
         }
         this.context.push(closeTag);
     }
@@ -1673,7 +1698,7 @@ class HTMLTranslator extends nodes.NodeVisitor {
         if (this.compactSimple && !oldCompactSimple) {
             atts.class = 'simple';
         }
-        this.body.push(this.starttag(node, 'ul', atts));
+        this.body.push(this.starttag(node, 'ul', '', false, atts));
     }
 
     depart_bullet_list(node) {

@@ -6,3 +6,5 @@ export class Contents extends Directive {
         return [new nodes.comment('', 'unimplemented directive contents')];
     }
 }
+export class Sectnum extends Directive {
+}
