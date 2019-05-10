@@ -111,31 +111,31 @@ function _callDefaultDeparture(node) {
 }
 
 const nodeClassNames = ['Text', 'abbreviation', 'acronym', 'address',
-			'admonition', 'attention', 'attribution', 'author',
-			'authors', 'block_quote', 'bullet_list', 'caption',
+                        'admonition', 'attention', 'attribution', 'author',
+                        'authors', 'block_quote', 'bullet_list', 'caption',
                         'caution', 'citation', 'citation_reference',
-			'classifier', 'colspec', 'comment', 'compound',
-			'contact', 'container', 'copyright', 'danger',
-			'date', 'decoration', 'definition', 'definition_list',
-			'definition_list_item', 'description', 'docinfo',
+                        'classifier', 'colspec', 'comment', 'compound',
+                        'contact', 'container', 'copyright', 'danger',
+                        'date', 'decoration', 'definition', 'definition_list',
+                        'definition_list_item', 'description', 'docinfo',
                         'doctest_block', 'document', 'emphasis', 'entry',
-			'enumerated_list', 'error', 'field', 'field_body',
-			'field_list', 'field_name', 'figure', 'footer',
-			'footnote', 'footnote_reference', 'generated',
-			'header', 'hint', 'image', 'important', 'inline',
+                        'enumerated_list', 'error', 'field', 'field_body',
+                        'field_list', 'field_name', 'figure', 'footer',
+                        'footnote', 'footnote_reference', 'generated',
+                        'header', 'hint', 'image', 'important', 'inline',
                         'label', 'legend', 'line', 'line_block', 'list_item',
-			'literal', 'literal_block', 'math',
+                        'literal', 'literal_block', 'math',
                         'math_block', 'note', 'option', 'option_argument',
-			'option_group', 'option_list', 'option_list_item',
-			'option_string', 'organization', 'paragraph',
-			'pending', 'problematic', 'raw', 'reference',
-			'revision', 'row', 'rubric', 'section', 'sidebar',
+                        'option_group', 'option_list', 'option_list_item',
+                        'option_string', 'organization', 'paragraph',
+                        'pending', 'problematic', 'raw', 'reference',
+                        'revision', 'row', 'rubric', 'section', 'sidebar',
                         'status', 'strong', 'subscript',
-			'substitution_definition', 'substitution_reference',
+                        'substitution_definition', 'substitution_reference',
                         'subtitle', 'superscript', 'system_message', 'table',
-			'target', 'tbody', 'term', 'tgroup', 'thead', 'tip',
-			'title', 'title_reference', 'topic', 'transition',
-			'version', 'warning'];
+                        'target', 'tbody', 'term', 'tgroup', 'thead', 'tip',
+                        'title', 'title_reference', 'topic', 'transition',
+                        'version', 'warning'];
 
 const SkipChildren = class {};
 const StopTraversal = class {};
@@ -217,6 +217,10 @@ export class Node {
 
     isInline() {
         return this.classTypes.findIndex(c => c.prototype instanceof Inline || c === Inline) !== -1;
+    }
+
+    isAdmonition() {
+        return this.classTypes.findIndex(c => c.prototype instanceof Admonition || c === Admonition) !== -1;
     }
 
     asdom() {
@@ -623,7 +627,7 @@ export class Element extends Node {
                 }
                 return false;
             }) === -1) {
-                //console.log(`returning index ${index} ${nodeToXml(this.children[index])}`);
+                // console.log(`returning index ${index} ${nodeToXml(this.children[index])}`);
                 return true;
             }
         });
@@ -1321,16 +1325,16 @@ export class section extends Element {
     }
 }
 
-/*    """
-    Topics are terminal, "leaf" mini-sections, like block quotes with titles,
-    or textual figures.  A topic is just like a section, except that it has no
-    subsections, and it doesn't have to conform to section placement rules.
-
-    Topics are allowed wherever body elements (list, table, etc.) are allowed,
-    but only at the top level of a section or document.  Topics cannot nest
-    inside topics, sidebars, or body elements; you can't have a topic inside a
-    table, list, block quote, etc.
-    """ */
+/**
+ *  Topics are terminal, "leaf" mini-sections, like block quotes with titles,
+ *  or textual figures.  A topic is just like a section, except that it has no
+ *  subsections, and it doesn't have to conform to section placement rules.
+ *
+ *  Topics are allowed wherever body elements (list, table, etc.) are allowed,
+ *  but only at the top level of a section or document.  Topics cannot nest
+ *  inside topics, sidebars, or body elements; you can't have a topic inside a
+ *  table, list, block quote, etc.
+ */
 export class topic extends Element {
     constructor(...args) {
         super(...args);
@@ -1339,18 +1343,19 @@ export class topic extends Element {
 }
 
 /*
-    Sidebars are like miniature, parallel documents that occur inside other
-    documents, providing related or reference material.  A sidebar is
-    typically offset by a border and "floats" to the side of the page; the
-    document's main text may flow around it.  Sidebars can also be likened to
-    super-footnotes; their content is outside of the flow of the document's
-    main text.
+ *  Sidebars are like miniature, parallel documents that occur inside other
+ *  documents, providing related or reference material.  A sidebar is
+ *  typically offset by a border and "floats" to the side of the page; the
+ *  document's main text may flow around it.  Sidebars can also be likened to
+ *  super-footnotes; their content is outside of the flow of the document's
+ *  main text.
+ *
+ *  Sidebars are allowed wherever body elements (list, table, etc.) are
+ *  allowed, but only at the top level of a section or document.  Sidebars
+ *  cannot nest inside sidebars, topics, or body elements; you can't have a
+ *  sidebar inside a table, list, block quote, etc.
+ */
 
-    Sidebars are allowed wherever body elements (list, table, etc.) are
-    allowed, but only at the top level of a section or document.  Sidebars
-    cannot nest inside sidebars, topics, or body elements; you can't have a
-    sidebar inside a table, list, block quote, etc.
-*/
 export class sidebar extends Element {
     constructor(...args) {
         super(...args);
