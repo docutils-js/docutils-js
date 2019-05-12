@@ -12,9 +12,9 @@ exports[`Interpreted text 1`] = `"<title_reference>test</title_reference>"`;
 
 exports[`Interpreted text 2`] = `""`;
 
-exports[`Interpreted text, no specified role 1`] = `"<problematic ids=\\"id2\\" refid=\\"id1\\">\`test\`</problematic>"`;
+exports[`Interpreted text, no specified role 1`] = `"<title_reference>test</title_reference>"`;
 
-exports[`Interpreted text, no specified role 2`] = `"<system_message ids=\\"id1\\" backrefs=\\"id2\\" line=\\"1\\"><paragraph>Unknown interpreted text role &quot;&quot;.</paragraph></system_message>"`;
+exports[`Interpreted text, no specified role 2`] = `""`;
 
 exports[`Literal 1`] = `"<literal>literal</literal>"`;
 

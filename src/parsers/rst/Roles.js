@@ -73,17 +73,20 @@ function roleInterface(roleName, languageModule, lineno, reporter) {
         try {
             canonicalname = languageModule.roles[normname];
         } catch (error) {
-/*
+            throw error;
+            /*
 
-        except AttributeError, error:
-            msgText.append('Problem retrieving role entry from language '
-                            'module %r: %s.' % (languageModule, error))
-        except KeyError:
-            msgText.append('No role entry for "%s" in module "%s".'
-                            % (roleName, languageModule.__name__))
-*/
-            canonicalname = DEFAULT_INTERPRETED_ROLE;
+                    except AttributeError, error:
+                        msgText.append('Problem retrieving role entry from language '
+                                        'module %r: %s.' % (languageModule, error))
+                    except KeyError:
+                        msgText.append('No role entry for "%s" in module "%s".'
+                                        % (roleName, languageModule.__name__))
+            */
+
         }
+    } else {
+            canonicalname = DEFAULT_INTERPRETED_ROLE;
     }
 
     // # If we didn't find it, try English as a fallback.

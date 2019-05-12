@@ -1289,6 +1289,7 @@ document {
     "reportLevel": 2,
     "sectionNumbering": true,
     "strictVisitor": null,
+    "tableStyle": "",
     "tocBacklinks": "entry",
     "traceback": null,
     "warningStream": null,

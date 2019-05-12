@@ -9,10 +9,14 @@ import Writer from './Writer';
 import Transform from './Transform';
 import * as defaults from './defaults';
 import pojoTranslate from './fn/pojoTranslate';
+import htmlTranslate from './fn/htmlTranslate';
+
+const __docformat__ = 'reStructuredText';
 
 export const __version__ = '0.14js';
 
 export {
     parse, StringOutput, StandaloneReader, newDocument, baseSettings,
     nodes, Writer, Transform, defaults, pojoTranslate,
+    htmlTranslate,
 };

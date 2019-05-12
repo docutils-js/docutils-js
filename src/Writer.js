@@ -24,10 +24,11 @@ export default class Writer extends Component {
         this.translate();
 //        console.log(this.output);
         let fn;
+        if (typeof this.destination === 'function') {
+            fn = this.destination;
+        } else
         if (typeof this.destination.write === 'function') {
             fn = this.destination.write.bind(this.destination);
-        } else if (this.destination === 'function') {
-            fn = this.destination;
         }
 
         return fn(this.output);

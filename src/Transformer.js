@@ -1,6 +1,13 @@
 import leftPad from 'left-pad';
 
-export default class Transformer {
+/**
+ * Transformer class responsible for transforming document output
+ */
+class Transformer {
+    /**
+     * Create transformer class
+     * @param {nodes.document} document - document to transform
+     */
     constructor(document) {
         this.transforms = [];
         this.unknownReferenceResolvers = [];
@@ -11,6 +18,10 @@ export default class Transformer {
         this.serialno = 0;
     }
 
+    /**
+     * populateFromComponents
+     *
+     */
     populateFromComponents(...components) {
         for (const component of components) {
             if (!component) {
@@ -55,6 +66,9 @@ export default class Transformer {
         this.unknownReferenceResolvers.push(...decoratedList.map(f => f[1]));
     }
 
+    /**
+     * apply the transforms
+     */
     applyTransforms() {
         this.document.reporter.attachObserver(this.document.noteTransformMessage.bind(this.document));
         while (this.transforms.length) {
@@ -84,13 +98,17 @@ export default class Transformer {
         }
     }
 
+    /**
+     * addTransforms
+     * @param {Array} transformList - Array of transform classes (not instances).
+     */
     addTransforms(transformList) {
         // """Store multiple transforms, with default priorities."""
         transformList.forEach((transform_class) => {
             if (!transform_class) {
                 throw new Error('invalid argument');
             }
-            const priority_string = this.get_priority_string(
+            const priority_string = this.getPriorityString(
                 transform_class, 'defaultPriority',
 );
 //          console.log(`priority string is ${priority_string}`);
@@ -102,12 +120,13 @@ export default class Transformer {
         });
     }
 
-    get_priority_string(class_, priority) {
-        /* """
-        Return a string, `priority` combined with `self.serialno`.
-
-        This ensures FIFO order on transforms with identical priority.
-        """ */
+    /**
+     *
+     * Return a string, `priority` combined with `self.serialno`.
+     *
+     * This ensures FIFO order on transforms with identical priority.
+     */
+    getPriorityString(class_, priority) {
         if (typeof class_ === 'undefined') {
             throw new Error('undefined');
         }
@@ -117,3 +136,5 @@ export default class Transformer {
         return `${leftPad(p, 3, '0')}-${leftPad(this.serialno, 3, '0')}`;
     }
 }
+
+export default Transformer;

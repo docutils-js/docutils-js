@@ -3,6 +3,8 @@ import * as universal from './transforms/universal';
 import parsers from './parsers';
 import newDocument from './newDocument';
 
+const __docformat__ = 'reStructuredText';
+
 export default class Reader extends Component {
     getTransforms() {
         return [...super.getTransforms(), universal.Decorations]; // fixme

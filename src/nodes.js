@@ -1,8 +1,28 @@
+/**
+ * Docutils document tree element class library.
+ * 
+ * Classes in CamelCase are abstract base classes or auxiliary classes. The one
+ * exception is `Text`, for a text (PCDATA) node; uppercase is used to
+ * differentiate from element classes.  Classes in lower_case_with_underscores
+ * are element classes, matching the XML element generic identifiers in the DTD_.
+ * 
+ * The position of each node (the level at which it can occur) is significant and
+ * is represented by abstract base classes (`Root`, `Structural`, `Body`,
+ * `Inline`, etc.).  Certain transformations will be easier because we can use
+ * ``isinstance(node, base_class)`` to determine the position of the node in the
+ * hierarchy.
+ * 
+ * .. _DTD: http://docutils.sourceforge.net/docs/ref/docutils.dtd
+ * 
+ */
 import xmlescape from 'xml-escape';
 import Transformer from './Transformer';
-import { InvalidArgumentsError, ApplicationError } from './Exceptions';
+import { InvalidArgumentsError, ApplicationError, UnimplementedError } from './Exceptions';
 import unescape from './utils/unescape';
 import { isIterable, checkDocumentArg } from './utils';
+
+const __docformat__ = 'reStructuredText';
+
 
 const _nonIdChars = /[^a-z0-9]+/ig;
 const _nonIdAtEnds = /^[-0-9]+|-+$/;
@@ -49,6 +69,14 @@ const _nonIdTranslateDigraphs = {
     0x0239: 'qp', // qp digraph
 };
 
+/**
+ * +------+------+
+ * | this | is a |
+ * +------+------+
+ * |ridiculous   |
+ * |test         |
+ * +-------------+
+ */
 function dupname(node, name) {
     /* What is the intention of this function? */
     node.attributes.dupnames.push(name);
@@ -58,8 +86,11 @@ function dupname(node, name) {
     node.referenced = 1;
 }
 
+/**
+ * Escape string values that are elements of a list, for serialization.
+ * @param {String} value - Value to escape.
+ */
 function serialEscape(value) {
-    // """Escape string values that are elements of a list, for serialization."""
     return value.replace(/\\/g, '\\\\').replace(/ /g, '\\ ');
 }
 
@@ -68,8 +99,10 @@ function pseudoQuoteattr(value) {
     return `"${xmlescape(value)}"`;
 }
 
-export function whitespaceNormalizeName(name) {
-// """Return a whitespace-normalized name."""
+/**
+ * Return a whitespace-normalized name.
+ */
+function whitespaceNormalizeName(name) {
     return name.replace(/\s+/, ' ');
 }
 
@@ -109,6 +142,19 @@ function _callDefaultVisit(node) {
 function _callDefaultDeparture(node) {
     return this.default_departure(node);
 }
+/* This is designed to be called later, a-nd not with an object. hmm */
+function _addNodeClassNames(names, o) {
+    names.forEach((_name) => {
+        const v = `visit_${_name}`;
+        if (!o[v]) {
+            o[v] = _callDefaultVisit.bind(o);
+        }
+        const d = `depart_${_name}`;
+        if (!o[d]) {
+            o[d] = _callDefaultDeparture.bind(o);
+        }
+    });
+}
 
 const nodeClassNames = ['Text', 'abbreviation', 'acronym', 'address',
                         'admonition', 'attention', 'attribution', 'author',
@@ -139,11 +185,42 @@ const nodeClassNames = ['Text', 'abbreviation', 'acronym', 'address',
 
 const SkipChildren = class {};
 const StopTraversal = class {};
-const SkipNode = class {};
+class SkipNode extends Error {
+}
 const SkipDeparture = class {};
 const SkipSiblings = class {};
 
-export class NodeVisitor {
+/**
+ *  "Visitor" pattern [GoF95]_ abstract superclass implementation for
+ *  document tree traversals.
+ *
+ *  Each node class has corresponding methods, doing nothing by
+ *  default; override individual methods for specific and useful
+ *  behaviour.  The `dispatch_visit()` method is called by
+ *  `Node.walk()` upon entering a node.  `Node.walkabout()` also calls
+ *  the `dispatch_departure()` method before exiting a node.
+ *
+ *  The dispatch methods call "``visit_`` + node class name" or
+ *  "``depart_`` + node class name", resp.
+ *
+ *  This is a base class for visitors whose ``visit_...`` & ``depart_...``
+ *  methods should be implemented for *all* node types encountered (such as
+ *  for `docutils.writers.Writer` subclasses).  Unimplemented methods will
+ *  raise exceptions.
+ *
+ *  For sparse traversals, where only certain node types are of interest,
+ *  subclass `SparseNodeVisitor` instead.  When (mostly or entirely) uniform
+ *  processing is desired, subclass `GenericNodeVisitor`.
+ *
+ *  .. [GoF95] Gamma, Helm, Johnson, Vlissides. *Design Patterns: Elements of
+ *     Reusable Object-Oriented Software*. Addison-Wesley, Reading, MA, USA,
+ *     1995.
+ */
+class NodeVisitor {
+    /**
+      * Create a NodeVisitor.
+      * @param {nodes.document} document - document to visit
+      */
     constructor(document) {
         if (!checkDocumentArg(document)) {
             throw new Error(`Invalid document arg: ${document}`);
@@ -152,6 +229,11 @@ export class NodeVisitor {
         this.optional = [];
     }
 
+    /**
+     * Call this."``visit_`` + node class name" with `node` as
+     * parameter.  If the ``visit_...`` method does not exist, call
+     * this.unknown_visit.
+     */
     dispatchVisit(node) {
         const nodeName = node.tagname;
         const methodName = `visit_${nodeName}`;
@@ -163,6 +245,11 @@ export class NodeVisitor {
         return method.bind(this)(node);
     }
 
+    /*
+     * Call this."``depart_`` + node class name" with `node` as
+     * parameter.  If the ``depart_...`` method does not exist, call
+     * this.unknown_departure.
+     */
     dispatchDeparture(node) {
         const nodeName = node.tagname;
         const method = this[`depart_${nodeName}`] || this.unknownDeparture;
@@ -172,28 +259,80 @@ export class NodeVisitor {
         return method.bind(this)(node);
     }
 
+    /**
+     * Called when entering unknown `Node` types.
+     *
+     * Raise an exception unless overridden.
+     */
     unknownVisit(node) {
         if (this.document.settings.strictVisitor || !(this.optional.includes(node.tagname))) {
             throw new Error(`visiting unknown node type:${node.tagname}`);
         }
     }
 
+    /**
+     * Called before exiting unknown `Node` types.
+     *
+     * Raise exception unless overridden.
+     */
     unknownDeparture(node) {
         if (this.document.settings.strictVisitor || !(this.optional.includes(node.tagname))) {
             throw new Error(`departing unknown node type: ${node.tagname}`);
         }
     }
 }
+/**
+ * Base class for sparse traversals, where only certain node types are of
+ * interest.  When ``visit_...`` & ``depart_...`` methods should be
+ * implemented for *all* node types (such as for `docutils.writers.Writer`
+ * subclasses), subclass `NodeVisitor` instead.
+ */
+class SparseNodeVisitor extends NodeVisitor {
+}
+
+/**
+ *  Generic "Visitor" abstract superclass, for simple traversals.
+ *
+ *  Unless overridden, each ``visit_...`` method calls `default_visit()`, and
+ *  each ``depart_...`` method (when using `Node.walkabout()`) calls
+ *  `default_departure()`. `default_visit()` (and `default_departure()`) must
+ *  be overridden in subclasses.
+ *
+ *  Define fully generic visitors by overriding `default_visit()` (and
+ *  `default_departure()`) only. Define semi-generic visitors by overriding
+ *  individual ``visit_...()`` (and ``depart_...()``) methods also.
+ *
+ *  `NodeVisitor.unknown_visit()` (`NodeVisitor.unknown_departure()`) should
+ *  be overridden for default behavior.
+ */
+class GenericNodeVisitor extends NodeVisitor {
+    constructor(document) {
+        super(document);
+        // document this/
+        _addNodeClassNames(nodeClassNames, this);
+    }
+
+    /* eslint-disable-next-line */
+    default_visit(node) {
+        throw new Error('not implemented');
+    }
+
+    /* eslint-disable-next-line */
+    default_departure(node) {
+        throw new Error('not implemented');
+    }
+}
+GenericNodeVisitor.nodeClassNames = nodeClassNames;
 
 // ========
 //  Mixins
 // ========
 
-export class Resolvable {
+class Resolvable {
 //    resolved = 0
 }
 
-export class BackLinkable {
+class BackLinkable {
     addBackref(refid) {
         this.backrefs.push(refid);
     }
@@ -203,42 +342,44 @@ export class BackLinkable {
 //  Element Categories
 // ====================
 
-export class Root { }
+class Root { }
 
-export class Titular { }
+class Titular { }
 
-// """Category of Node which may occur before Bibliographic Nodes."""
-export class PreBibliographic { }
+/**
+ * Category of Node which may occur before Bibliographic Nodes.
+ */
+class PreBibliographic { }
 
-export class Bibliographic { }
+class Bibliographic { }
 
-export class Decorative extends PreBibliographic { }
+class Decorative extends PreBibliographic { }
 
-export class Structural { }
+class Structural { }
 
-export class Body { }
+class Body { }
 
-export class General extends Body { }
+class General extends Body { }
 
 // """List-like elements."""
-export class Sequential extends Body {
+class Sequential extends Body {
 }
 
-export class Admonition extends Body { }
+class Admonition extends Body { }
 
 // """Special internal body elements."""
-export class Special extends Body { }
+class Special extends Body { }
 
 // """Internal elements that don't appear in output."""
-export class Invisible extends PreBibliographic { }
+class Invisible extends PreBibliographic { }
 
-export class Part { }
+class Part { }
 
-export class Inline { }
+class Inline { }
 
-export class Referential extends Resolvable { }
+class Referential extends Resolvable { }
 
-export class Targetable extends Resolvable {
+class Targetable extends Resolvable {
     // referenced = 0
     // indirect_reference_name = null
     /* """Holds the whitespace_normalized_name (contains mixed case) of a target.
@@ -247,16 +388,21 @@ export class Targetable extends Resolvable {
 }
 
 // """Contains a `label` as its first element."""
-export class Labeled { }
+class Labeled { }
 
 // ==============================
 //  Functional Node Base Classes
 // ==============================
+
 /**
  * Node class.
- * The base class for all nodes.
+ *
+ * The base class for all docutils nodes.
  */
-export class Node {
+class Node {
+    /**
+      * Create a node
+      */
     constructor() {
         this.tagname = this.constructor.name;
         this.parent = undefined;
@@ -270,8 +416,7 @@ export class Node {
     _init() {
     }
 
-    nextNode(self, condition, includeSelf = false, descend = true,
-              siblings = false, ascend = false) {
+    nextNode(args) {
         /* """
         Return the first node in the iterable returned by traverse(),
         or None if the iterable is empty.
@@ -279,7 +424,8 @@ export class Node {
         Parameter list is the same as of traverse.  Note that
         include_self defaults to 0, though.
         """ */
-        const iterable = this.traverse(condition, includeSelf, descend, siblings, ascend);
+
+        const iterable = this.traverse(args);
         if (iterable.length) {
             return iterable[0];
         }
@@ -393,7 +539,9 @@ export class Node {
         return result;
     }
 
-    traverse(condition, includeSelf = true, descend = true, siblings = false, ascend = false) {
+    traverse({
+ condition, includeSelf = true, descend = true, siblings = false, ascend = false,
+}) {
         const mySiblings = ascend ? true : siblings;
         if (includeSelf && descend && !mySiblings) {
             if (!condition) {
@@ -402,7 +550,7 @@ export class Node {
                 return this._fastTraverse(condition);
             }
         }
-        if (condition.prototype instanceof Node || condition === Node) {
+        if (typeof condition !== 'undefined' && (condition.prototype instanceof Node || condition === Node)) {
             const nodeClass = condition;
             /* eslint-disable-next-line no-unused-vars */
             const myCondition = (node, nodeClassArg) => (
@@ -410,15 +558,53 @@ export class Node {
             );
             throw new Error('unimplemented');
         }
-
-        throw new Error('unimplemented');
-        // return [];
+/*
+        if isinstance(condition, (types.ClassType, type)):
+            node_class = condition
+            def condition(node, node_class=node_class):
+                return isinstance(node, node_class)
+*/
+        const r = [];
+        if (includeSelf && (condition == null || condition(this))) {
+            r.push(this);
+        }
+        if (descend && this.children.length) {
+            this.children.forEach((child) => {
+                r.push(...child.traverse({
+ includeSelf: true,
+descend: true,
+siblings: false,
+ascend: false,
+                                          condition,
+}));
+            });
+        }
+        if (siblings || ascend) {
+            let node = this;
+            while (node != null && node.parent != null) {
+                const index = node.parent.children.indexOf(node);
+                node.parent.children.slice(index + 1).forEach((sibling) => {
+                    r.push(...sibling.traverse({
+ includeSelf: true,
+                                              descend,
+                                                 siblings: false,
+ascend: false,
+                                                 condition,
+}));
+                });
+                if (!ascend) {
+                    node = undefined;
+                } else {
+                    node = node.parent;
+                }
+            }
+        }
+        return r;
     }
 }
 
 /*
  * `Element` is the superclass to all specific elements.
-
  *  Elements contain attributes and child nodes.  Elements emulate
  *  dictionaries for attributes, indexing by attribute name (a string).  To
  *  set the attribute 'att' to 'value', do::
@@ -449,37 +635,15 @@ export class Node {
  *      element += [node1, node2]
  *
  *  This is equivalent to ``element.extend([node1, node2])``.
+ *
+ * @extends module:nodes~Node
  */
-export class Element extends Node {
-    _init() {
-        super._init();
-        /* List attributes which are defined for every Element-derived class
-           instance and can be safely transferred to a different node. */
-        this.basicAttributes = ['ids', 'classes', 'names', 'dupnames'];
-        /*
-          "A list of class-specific attributes that should not be copied with the
-          standard attributes when replacing a node.
-
-          NOTE: Derived classes should override this value to prevent any of its
-          attributes being copied by adding to the value in its parent class.
-        */
-        this.localAttributes = ['backrefs'];
-
-        /* List attributes, automatically initialized to empty lists
-           for all nodes. */
-        this.listAttributes = [...this.basicAttributes, ...this.localAttributes];
-
-        /* List attributes that are known to the Element base class. */
-        this.knownAttributes = [...this.listAttributes, 'source', 'rawsource'];
-
-        /* The element generic identifier. If None, it is set as an
-           instance attribute to the name of the class. */
-        // this.tagname = undefined; (already set in Node.constructor)
-
-        /* Separator for child nodes, used by `astext()` method. */
-        this.childTextSeparator = '\n\n';
-    }
-
+class Element extends Node {
+    /**
+     * Create element.
+     * @classdesc Abstracts a docutils Element.
+     * @extends module:nodes~Node
+     */
     constructor(rawsource, children, attributes) {
         super();
         this.nodeName = Symbol.for('Element');
@@ -515,6 +679,36 @@ export class Element extends Node {
           self.tagname = self.__class__.__name__
         */
     }
+    
+    _init() {
+        super._init();
+        /* List attributes which are defined for every Element-derived class
+           instance and can be safely transferred to a different node. */
+        this.basicAttributes = ['ids', 'classes', 'names', 'dupnames'];
+        /*
+          "A list of class-specific attributes that should not be copied with the
+          standard attributes when replacing a node.
+
+          NOTE: Derived classes should override this value to prevent any of its
+          attributes being copied by adding to the value in its parent class.
+        */
+        this.localAttributes = ['backrefs'];
+
+        /* List attributes, automatically initialized to empty lists
+           for all nodes. */
+        this.listAttributes = [...this.basicAttributes, ...this.localAttributes];
+
+        /* List attributes that are known to the Element base class. */
+        this.knownAttributes = [...this.listAttributes, 'source', 'rawsource'];
+
+        /* The element generic identifier. If None, it is set as an
+           instance attribute to the name of the class. */
+        // this.tagname = undefined; (already set in Node.constructor)
+
+        /* Separator for child nodes, used by `astext()` method. */
+        this.childTextSeparator = '\n\n';
+    }
+
 
     _domNode(domroot) {
         const element = domroot.createElement(this.tagname);
@@ -555,6 +749,7 @@ export class Element extends Node {
         this.children.push(item);
     }
 
+
     add(item, ...args) {
         /* istanbul ignore if */
         if (args.length !== 0) {
@@ -566,7 +761,6 @@ export class Element extends Node {
             this.append(item);
         }
     }
-
 
     setupChild(child) {
         /* istanbul ignore if */
@@ -679,6 +873,7 @@ export class Element extends Node {
             }
                   return false;
         });
+
         if (r !== -1) {
             return r;
         }
@@ -820,21 +1015,21 @@ export class Element extends Node {
 // =====================
 //  Decorative Elements
 // =====================
-export class header extends Element {
+class header extends Element {
     constructor(...args) {
         super(...args);
         this.classTypes = [Decorative];
     }
 }
 
-export class footer extends Element {
+class footer extends Element {
     constructor(...args) {
         super(...args);
         this.classTypes = [Decorative];
     }
 }
 
-export class decoration extends Element {
+class decoration extends Element {
     constructor(...args) {
         super(...args);
         this.classTypes = [Decorative];
@@ -855,40 +1050,7 @@ export class decoration extends Element {
     }
 }
 
-/* This is designed to be called later, a-nd not with an object. hmm */
-export function _addNodeClassNames(names, o) {
-    names.forEach((_name) => {
-        const v = `visit_${_name}`;
-        if (!o[v]) {
-            o[v] = _callDefaultVisit.bind(o);
-        }
-        const d = `depart_${_name}`;
-        if (!o[d]) {
-            o[d] = _callDefaultDeparture.bind(o);
-        }
-    });
-}
-export class GenericNodeVisitor extends NodeVisitor {
-    constructor(document) {
-        super(document);
-        // document this/
-        _addNodeClassNames(nodeClassNames, this);
-    }
-
-    /* eslint-disable-next-line */
-    default_visit(node) {
-        throw new Error('not implemented');
-    }
-
-    /* eslint-disable-next-line */
-    default_departure(node) {
-        throw new Error('not implemented');
-    }
-}
-GenericNodeVisitor.nodeClassNames = nodeClassNames;
-
-
-export class Text extends Node {
+class Text extends Node {
     constructor(data, rawsource = '') {
         super();
         if (typeof data === 'undefined') {
@@ -917,7 +1079,7 @@ export class Text extends Node {
     }
 }
 
-export class TextElement extends Element {
+class TextElement extends Element {
     constructor(rawsource, text, children, attributes) {
         if (!children) {
             children = [];
@@ -930,8 +1092,14 @@ export class TextElement extends Element {
     }
 }
 
-
-export class document extends Element {
+/**
+ * Document class
+ *
+ * To create a document, call {@link newDocument}.
+ * @extends Element 
+ */
+class document extends Element {
+    /** Private constructor */
     constructor(settings, reporter, ...args) {
         super(...args);
         this.classTypes = [Root, Structural];
@@ -1220,7 +1388,7 @@ export class document extends Element {
     }
 }
 
-export class FixedTextElement extends TextElement {
+class FixedTextElement extends TextElement {
 /*    def __init__(self, rawsource='', text='', *children, **attributes):
         TextElement.__init__(self, rawsource, text, *children, **attributes)
         self.attributes['xml:space'] = 'preserve'
@@ -1230,7 +1398,7 @@ export class FixedTextElement extends TextElement {
 // ================
 //  Title Elements
 // ================
-export class title extends TextElement {
+class title extends TextElement {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
@@ -1238,7 +1406,7 @@ export class title extends TextElement {
     }
 }
 
-export class subtitle extends TextElement {
+class subtitle extends TextElement {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
@@ -1246,7 +1414,7 @@ export class subtitle extends TextElement {
     }
 }
 
-export class rubric extends TextElement {
+class rubric extends TextElement {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
@@ -1258,77 +1426,77 @@ export class rubric extends TextElement {
 //  Bibliographic Elements
 // ========================
 
-export class docinfo extends Element {
+class docinfo extends Element {
     constructor(...args) {
         super(...args);
         this.classTypes = [Bibliographic];
     }
 }
 
-export class author extends TextElement {
+class author extends TextElement {
     constructor(...args) {
         super(...args);
         this.classTypes = [Bibliographic];
     }
 }
 
-export class authors extends Element {
+class authors extends Element {
     constructor(...args) {
         super(...args);
         this.classTypes = [Bibliographic];
     }
 }
 
-export class organization extends TextElement {
+class organization extends TextElement {
     constructor(...args) {
         super(...args);
         this.classTypes = [Bibliographic];
     }
 }
 
-export class address extends FixedTextElement {
+class address extends FixedTextElement {
     constructor(...args) {
         super(...args);
         this.classTypes = [Bibliographic];
     }
 }
 
-export class contact extends TextElement {
+class contact extends TextElement {
     constructor(...args) {
         super(...args);
         this.classTypes = [Bibliographic];
     }
 }
 
-export class version extends TextElement {
+class version extends TextElement {
     constructor(...args) {
         super(...args);
         this.classTypes = [Bibliographic];
     }
 }
 
-export class revision extends TextElement {
+class revision extends TextElement {
     constructor(...args) {
         super(...args);
         this.classTypes = [Bibliographic];
     }
 }
 
-export class status extends TextElement {
+class status extends TextElement {
     constructor(...args) {
         super(...args);
         this.classTypes = [Bibliographic];
     }
 }
 
-export class date extends TextElement {
+class date extends TextElement {
     constructor(...args) {
         super(...args);
         this.classTypes = [Bibliographic];
     }
 }
 
-export class copyright extends TextElement {
+class copyright extends TextElement {
     constructor(...args) {
         super(...args);
         this.classTypes = [Bibliographic];
@@ -1336,7 +1504,7 @@ export class copyright extends TextElement {
 }
 
 
-export class section extends Element {
+class section extends Element {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
@@ -1354,7 +1522,7 @@ export class section extends Element {
  *  inside topics, sidebars, or body elements; you can't have a topic inside a
  *  table, list, block quote, etc.
  */
-export class topic extends Element {
+class topic extends Element {
     constructor(...args) {
         super(...args);
         this.classTypes = [Structural];
@@ -1375,14 +1543,14 @@ export class topic extends Element {
  *  sidebar inside a table, list, block quote, etc.
  */
 
-export class sidebar extends Element {
+class sidebar extends Element {
     constructor(...args) {
         super(...args);
         this.classTypes = [Structural];
     }
 }
 
-export class transition extends Element {
+class transition extends Element {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
@@ -1394,7 +1562,7 @@ export class transition extends Element {
 //  Body Elements
 // ===============
 
-export class paragraph extends TextElement {
+class paragraph extends TextElement {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
@@ -1402,7 +1570,7 @@ export class paragraph extends TextElement {
     }
 } // General
 
-export class compound extends Element {
+class compound extends Element {
     constructor(...args) {
         super(...args);
         this.classTypes = [General];
@@ -1410,14 +1578,14 @@ export class compound extends Element {
 }
 
 
-export class container extends Element {
+class container extends Element {
     constructor(...args) {
         super(...args);
         this.classTypes = [General];
     }
 }
 /* eslint-disable-next-line camelcase */
-export class bullet_list extends Element {
+class bullet_list extends Element {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
@@ -1426,7 +1594,7 @@ export class bullet_list extends Element {
 }
 
 /* eslint-disable-next-line camelcase */
-export class enumerated_list extends Element {
+class enumerated_list extends Element {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
@@ -1435,7 +1603,7 @@ export class enumerated_list extends Element {
 }
 
 /* eslint-disable-next-line camelcase */
-export class list_item extends Element {
+class list_item extends Element {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
@@ -1444,7 +1612,7 @@ export class list_item extends Element {
 }
 
 /* eslint-disable-next-line camelcase */
-export class definition_list extends Element {
+class definition_list extends Element {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
@@ -1453,7 +1621,7 @@ export class definition_list extends Element {
 }
 
 /* eslint-disable-next-line camelcase */
-export class definition_list_item extends Element {
+class definition_list_item extends Element {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
@@ -1461,7 +1629,7 @@ export class definition_list_item extends Element {
     }
 }
 
-export class term extends TextElement {
+class term extends TextElement {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
@@ -1469,14 +1637,14 @@ export class term extends TextElement {
     }
 }
 
-export class classifier extends TextElement {
+class classifier extends TextElement {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
         this.classTypes = [Part];
     }
 }
-export class definition extends Element {
+class definition extends Element {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
@@ -1487,14 +1655,14 @@ export class definition extends Element {
 class classifier(Part, TextElement): pass
 */
 /* eslint-disable-next-line camelcase */
-export class field_list extends Element {
+class field_list extends Element {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
         this.classTypes = [Sequential];
     }
 } // (Sequential, Element
-export class field extends Element {
+class field extends Element {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
@@ -1502,7 +1670,7 @@ export class field extends Element {
     }
 } // (Part
 /* eslint-disable-next-line camelcase */
-export class field_name extends TextElement {
+class field_name extends TextElement {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
@@ -1510,7 +1678,7 @@ export class field_name extends TextElement {
     }
 } // (Part
 /* eslint-disable-next-line camelcase */
-export class field_body extends Element {
+class field_body extends Element {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
@@ -1518,7 +1686,7 @@ export class field_body extends Element {
     }
 } // (Part
 
-export class option extends Element {
+class option extends Element {
     constructor(...args) {
         super(...args);
         this.classTypes = [Part];
@@ -1527,7 +1695,7 @@ export class option extends Element {
 }
 
 /* eslint-disable-next-line camelcase */
-export class option_argument extends TextElement {
+class option_argument extends TextElement {
     constructor(...args) {
         super(...args);
         this.classTypes = [Part];
@@ -1541,7 +1709,7 @@ export class option_argument extends TextElement {
 }
 
 /* eslint-disable-next-line camelcase */
-export class option_group extends Element {
+class option_group extends Element {
     constructor(...args) {
         super(...args);
         this.classTypes = [Part];
@@ -1550,7 +1718,7 @@ export class option_group extends Element {
 }
 
 /* eslint-disable-next-line camelcase */
-export class option_list extends Element {
+class option_list extends Element {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
@@ -1558,7 +1726,7 @@ export class option_list extends Element {
     }
 } // Sequential
 /* eslint-disable-next-line camelcase */
-export class option_list_item extends Element {
+class option_list_item extends Element {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
@@ -1568,14 +1736,14 @@ export class option_list_item extends Element {
 }
 
 /* eslint-disable-next-line camelcase */
-export class option_string extends TextElement {
+class option_string extends TextElement {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
         this.classTypes = [Part];
     }
 } // (Part
-export class description extends Element {
+class description extends Element {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
@@ -1584,7 +1752,7 @@ export class description extends Element {
 } // (Part
 
 /* eslint-disable-next-line camelcase */
-export class literal_block extends FixedTextElement {
+class literal_block extends FixedTextElement {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
@@ -1593,7 +1761,7 @@ export class literal_block extends FixedTextElement {
 }
 
 /* eslint-disable-next-line camelcase */
-export class doctest_block extends FixedTextElement {
+class doctest_block extends FixedTextElement {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
@@ -1602,7 +1770,7 @@ export class doctest_block extends FixedTextElement {
 }
 
 /* eslint-disable-next-line camelcase */
-export class math_block extends FixedTextElement {
+class math_block extends FixedTextElement {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
@@ -1610,14 +1778,14 @@ export class math_block extends FixedTextElement {
     }
 }
 /* eslint-disable-next-line camelcase */
-export class line_block extends Element {
+class line_block extends Element {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
         this.classTypes = [General];
     }
 }
-export class line extends TextElement {
+class line extends TextElement {
     _init(...args) {
         super._init(...args);
         this.indent = undefined;
@@ -1626,56 +1794,56 @@ export class line extends TextElement {
 } // Part
 
 /* eslint-disable-next-line camelcase */
-export class block_quote extends Element {
+class block_quote extends Element {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
         this.classTypes = [General];
     }
 }
-export class attribution extends TextElement {
+class attribution extends TextElement {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
         this.classTypes = [Part];
    }
 }
-export class attention extends Element {
+class attention extends Element {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
         this.classTypes = [Admonition];
     }
 }
-export class caution extends Element {
+class caution extends Element {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
         this.classTypes = [Admonition];
     }
 }
-export class danger extends Element {
+class danger extends Element {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
         this.classTypes = [Admonition];
     }
 }
-export class error extends Element {
+class error extends Element {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
         this.classTypes = [Admonition];
     }
 }
-export class important extends Element {
+class important extends Element {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
         this.classTypes = [Admonition];
     }
 }
-export class note extends Element {
+class note extends Element {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
@@ -1683,35 +1851,35 @@ export class note extends Element {
     }
 }
 
-export class tip extends Element {
+class tip extends Element {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
         this.classTypes = [Admonition];
     }
 }
-export class hint extends Element {
+class hint extends Element {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
         this.classTypes = [Admonition];
     }
 }
-export class warning extends Element {
+class warning extends Element {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
         this.classTypes = [Admonition];
     }
 }
-export class admonition extends Element {
+class admonition extends Element {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
         this.classTypes = [Admonition];
     }
 }
-export class comment extends FixedTextElement {
+class comment extends FixedTextElement {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
@@ -1719,56 +1887,56 @@ export class comment extends FixedTextElement {
     }
 }
 /* eslint-disable-next-line camelcase */
-export class substitution_definition extends TextElement {
+class substitution_definition extends TextElement {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
         this.classTypes = [Special, Invisible];
     }
 }
-export class target extends TextElement {
+class target extends TextElement {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
         this.classTypes = [Special, Invisible, Inline, Targetable];
     }
 }
-export class footnote extends Element {
+class footnote extends Element {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
         this.classTypes = [General, BackLinkable, Labeled, Targetable];
     }
 }
-export class citation extends Element {
+class citation extends Element {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
         this.classTypes = [General, BackLinkable, Labeled, Targetable];
     }
 }
-export class label extends TextElement {
+class label extends TextElement {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
         this.classTypes = [Part];
     }
 }
-export class figure extends Element {
+class figure extends Element {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
         this.classTypes = [General];
     }
 }
-export class caption extends TextElement {
+class caption extends TextElement {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
         this.classTypes = [Part];
     }
 }
-export class legend extends Element {
+class legend extends Element {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
@@ -1776,49 +1944,49 @@ export class legend extends Element {
     }
 }
 
-export class table extends Element {
+class table extends Element {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
         this.classTypes = [General];
     }
 }
-export class tgroup extends Element {
+class tgroup extends Element {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
         this.classTypes = [Part];
     }
 }
-export class colspec extends Element {
+class colspec extends Element {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
         this.classTypes = [Part];
     }
 }
-export class thead extends Element {
+class thead extends Element {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
         this.classTypes = [Part];
     }
 }
-export class tbody extends Element {
+class tbody extends Element {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
         this.classTypes = [Part];
     }
 }
-export class row extends Element {
+class row extends Element {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
         this.classTypes = [Part];
     }
 }
-export class entry extends Element {
+class entry extends Element {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
@@ -1827,59 +1995,57 @@ export class entry extends Element {
 }
 
 /* eslint-disable-next-line camelcase */
-export class system_message extends Element {
+class system_message extends Element {
     constructor(message, children, attributes) {
         super(attributes.rawsource || '', message ? [new paragraph('', message), ...children] : children, attributes);
         setupBacklinkable(this);
         this.classTypes = [Special, BackLinkable, PreBibliographic];
     }
 }
-/* class pending(Special, Invisible, Element):
+/**
+ *  The "pending" element is used to encapsulate a pending operation: the
+ *  operation (transform), the point at which to apply it, and any data it
+ *  requires.  Only the pending operation's location within the document is
+ *  stored in the public document tree (by the "pending" object itself); the
+ *  operation and its data are stored in the "pending" object's internal
+ *  instance attributes.
+ *
+ *  For example, say you want a table of contents in your reStructuredText
+ *  document.  The easiest way to specify where to put it is from within the
+ *  document, with a directive::
+ *
+ *      .. contents::
+ *
+ *  But the "contents" directive can't do its work until the entire document
+ *  has been parsed and possibly transformed to some extent.  So the directive
+ *  code leaves a placeholder behind that will trigger the second phase of its
+ *  processing, something like this::
+ *
+ *      <pending ...public attributes...> + internal attributes
+ *
+ *  Use `document.note_pending()` so that the
+ *  `docutils.transforms.Transformer` stage of processing can run all pending
+ *  transforms.
+ */
+class pending extends Element {
+    constructor(transform, details,
+                rawsource = '', children, attributes) {
+        super(rawsource, children, attributes);
+        /* """The `docutils.transforms.Transform` class implementing the pending
+        operation.""" */
+        this.transform = transform;
 
-    """
-    The "pending" element is used to encapsulate a pending operation: the
-    operation (transform), the point at which to apply it, and any data it
-    requires.  Only the pending operation's location within the document is
-    stored in the public document tree (by the "pending" object itself); the
-    operation and its data are stored in the "pending" object's internal
-    instance attributes.
-
-    For example, say you want a table of contents in your reStructuredText
-    document.  The easiest way to specify where to put it is from within the
-    document, with a directive::
-
-        .. contents::
-
-    But the "contents" directive can't do its work until the entire document
-    has been parsed and possibly transformed to some extent.  So the directive
-    code leaves a placeholder behind that will trigger the second phase of its
-    processing, something like this::
-
-        <pending ...public attributes...> + internal attributes
-
-    Use `document.note_pending()` so that the
-    `docutils.transforms.Transformer` stage of processing can run all pending
-    transforms.
-    """
-
-    def __init__(self, transform, details=None,
-                 rawsource='', *children, **attributes):
-        Element.__init__(self, rawsource, *children, **attributes)
-
-        self.transform = transform
-        """The `docutils.transforms.Transform` class implementing the pending
-        operation."""
-
-        self.details = details or {}
-        """Detail data (dictionary) required by the pending operation."""
-
+        /* """Detail data (dictionary) required by the pending operation.""" */
+        this.details = details || {};
+    }
+/*
     def pformat(self, indent='    ', level=0):
         internals = [
               '.. internal attributes:',
-              '     .transform: %s.%s' % (self.transform.__module__,
-                                          self.transform.__name__),
+              '     .transform: %s.%s' % (this.transform.__module__,
+                                          this.transform.__name__),
               '     .details:']
-        details = self.details.items()
+        details = this.details.items()
         details.sort()
         for key, value in details:
             if isinstance(value, Node):
@@ -1899,15 +2065,17 @@ export class system_message extends Element {
                            for line in internals]))
 
     def copy(self):
-        obj = self.__class__(self.transform, self.details, self.rawsource,
-                              **self.attributes)
-        obj.document = self.document
-        obj.source = self.source
-        obj.line = self.line
+        obj = this.__class__(this.transform, this.details, this.rawsource,
+                              **this.attributes)
+        obj.document = this.document
+        obj.source = this.source
+        obj.line = this.line
         return obj
 
 */
-export class raw extends FixedTextElement {
+}
+
+class raw extends FixedTextElement {
     constructor(...args) {
         super(...args);
         this.classTypes = [Special, Inline, PreBibliographic];
@@ -1917,28 +2085,28 @@ export class raw extends FixedTextElement {
 // =================
 //  Inline Elements
 // =================
-export class emphasis extends TextElement {
+class emphasis extends TextElement {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
         this.classTypes = [Inline];
     }
 }
-export class strong extends TextElement {
+class strong extends TextElement {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
         this.classTypes = [Inline];
     }
 } // Inline
-export class literal extends TextElement {
+class literal extends TextElement {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
         this.classTypes = [Inline];
     }
 } // Inline
-export class reference extends TextElement {
+class reference extends TextElement {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
@@ -1946,7 +2114,7 @@ export class reference extends TextElement {
     }
 } // General, Inline, Referential
 /* eslint-disable-next-line camelcase */
-export class footnote_reference extends TextElement {
+class footnote_reference extends TextElement {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
@@ -1954,7 +2122,7 @@ export class footnote_reference extends TextElement {
     }
 } // General, Inline, Referential
 /* eslint-disable-next-line camelcase */
-export class citation_reference extends TextElement {
+class citation_reference extends TextElement {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
@@ -1962,7 +2130,7 @@ export class citation_reference extends TextElement {
     }
 } // General, Inline, Referential
 /* eslint-disable-next-line camelcase */
-export class substitution_reference extends TextElement {
+class substitution_reference extends TextElement {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
@@ -1970,7 +2138,7 @@ export class substitution_reference extends TextElement {
     }
 } // General, Inline, Referential
 /* eslint-disable-next-line camelcase */
-export class title_reference extends TextElement {
+class title_reference extends TextElement {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
@@ -1979,7 +2147,7 @@ export class title_reference extends TextElement {
 } // General, Inline, Referential
 
 /* eslint-disable-next-line camelcase */
-export class abbreviation extends TextElement {
+class abbreviation extends TextElement {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
@@ -1987,7 +2155,7 @@ export class abbreviation extends TextElement {
     }
 }
 
-export class acronym extends TextElement {
+class acronym extends TextElement {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
@@ -1995,7 +2163,7 @@ export class acronym extends TextElement {
     }
 }
 
-export class superscript extends TextElement {
+class superscript extends TextElement {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
@@ -2003,21 +2171,21 @@ export class superscript extends TextElement {
     }
 }
 
-export class subscript extends TextElement {
+class subscript extends TextElement {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
         this.classTypes = [Inline];
     }
 }
-export class math extends TextElement {
+class math extends TextElement {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
         this.classTypes = [Inline];
     }
 }
-export class image extends Element {
+class image extends Element {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
@@ -2030,7 +2198,7 @@ export class image extends Element {
 }
 
 
-export class inline extends TextElement {
+class inline extends TextElement {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
@@ -2038,7 +2206,7 @@ export class inline extends TextElement {
     }
 }
 
-export class problematic extends TextElement {
+class problematic extends TextElement {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
@@ -2046,7 +2214,7 @@ export class problematic extends TextElement {
     }
 }
 
-export class generated extends TextElement {
+class generated extends TextElement {
 /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
@@ -2057,8 +2225,10 @@ export class generated extends TextElement {
 // ========================================
 //  Auxiliary Classes, Functions, and Data
 // ========================================
-
-export function nodeToXml(node) {
+/**
+ * convert a node to XML
+ */
+function nodeToXml(node) {
     if (node instanceof Text) {
         const text = xmlescape(node.astext());
         return text;
@@ -2068,3 +2238,30 @@ export function nodeToXml(node) {
     }
     return node.emptytag();
 }
+
+export {
+    Node, whitespaceNormalizeName, NodeVisitor, GenericNodeVisitor,
+    SparseNodeVisitor, nodeToXml, Element, TextElement,
+         Text, abbreviation, acronym, address, admonition, attention,
+         attribution, author, authors, block_quote, bullet_list, caption,
+         caution, citation, citation_reference, classifier, colspec, comment,
+         compound, contact, container, copyright, danger, date, decoration,
+         definition, definition_list, definition_list_item, description,
+         docinfo, doctest_block, document, emphasis, entry, enumerated_list,
+         error, field, field_body, field_list, field_name, figure, footer,
+         footnote, footnote_reference, generated, header, hint, image,
+         important, inline, label, legend, line, line_block, list_item,
+         literal, literal_block, math, math_block, note, option,
+         option_argument, option_group, option_list, option_list_item,
+         option_string, organization, paragraph, pending, problematic, raw,
+         reference, revision, row, rubric, section, sidebar, status, strong,
+         subscript, substitution_definition, substitution_reference, subtitle,
+         superscript, system_message, table, target, tbody, term, tgroup,
+         thead, tip, title, title_reference, topic, transition, version,
+         warning,
+
+    SkipNode, Root, Titular, PreBibliographic, Bibliographic,
+    Decorative, Structural, Body, General, Sequential,
+    Admonition, Special, Invisible, Part, Inline, Referential, Targetable, Labeled,
+    _addNodeClassNames,
+};

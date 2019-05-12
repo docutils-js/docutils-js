@@ -10,8 +10,8 @@ export class PropagateTargets extends Transform {
     }
 
     apply() {
-        this.document.traverse(nodes.target).forEach((target) => {
-            console.log(`target is ${target}`);
+        this.document.traverse({ condition: nodes.target }).forEach((target) => {
+            // console.log(`target is ${target}`);
         });
     }
 }

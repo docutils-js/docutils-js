@@ -3,7 +3,11 @@ import * as utils from '../utils';
 import Transform from '../Transform';
 import TransformError from '../TransformError';
 
-export class TitlePromoter extends Transform {
+/**
+ * TitlePromoter transform.
+ * Base class for other transforms which promote section names to title and subtitle
+ */
+class TitlePromoter extends Transform {
     promoteTitle(node) {
         if (!(node instanceof nodes.Element)) {
             throw new TypeError('node must be of Element-derived type.');
@@ -97,7 +101,7 @@ export class SectionSubTitle extends TitlePromoter {
 
     apply() {
         if (this.document.settings.sectsubtitleXform || typeof this.document.settings.sectsubtitleXform === 'undefined') {
-            this.document.traverse(nodes.section).forEach((section) => {
+            this.document.traverse({ condition: nodes.section }).forEach((section) => {
             // On our way through the node tree, we are deleting
             // sections, but we call self.promote_subtitle for those
             // sections nonetheless.  To do: Write a test case which
@@ -162,3 +166,5 @@ export class DocInfo extends Transform {
     }
 }
 DocInfo.defaultPriority = 340;
+
+export { TitlePromoter };
