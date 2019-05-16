@@ -954,12 +954,6 @@ class Body extends RSTState {
     */
       }
 
-    // fixme
-    /* eslint-disable-next-line camelcase,no-unused-vars */
-    parse_enumerator(match, expectedSequence) {
-        throw new Unimp('parse_enumerator');
-    }
-
     /* eslint-disable-next-line camelcase */
     field_marker(match, context, nextState) {
         const fieldList = new nodes.field_list();
