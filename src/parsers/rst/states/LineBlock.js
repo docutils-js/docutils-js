@@ -2,7 +2,6 @@ import SpecializedBody from './SpecializedBody';
 
 /** Second and subsequent lines of a line_block. */
 class LineBlock extends SpecializedBody {
-
     blank() {
         this.invalid_input();
     }

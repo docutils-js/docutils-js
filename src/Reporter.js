@@ -7,7 +7,6 @@ import { UnimplementedError as Unimp, SystemMessage } from './Exceptions';
     its closest ancestor.
  */
 function getSourceLine(node) {
-
     let myNode = node;
     while (myNode) {
         if (myNode.source || myNode.line) {
@@ -130,4 +129,3 @@ class Reporter {
 }
 export default Reporter;
 export { getSourceLine };
-

@@ -296,7 +296,6 @@ class GridTableParser extends TableParser {
              */
         /* eslint-disable-next-line camelcase */
     scan_down(top, left, right) {
-
         /* istanbul ignore if */
 if (typeof right === 'undefined') {
     right = 0;
@@ -616,7 +615,6 @@ class SimpleTableParser extends TableParser {
          */
     /* eslint-disable-next-line camelcase */
     parse_row(lines, start, spanline) {
-
         if (!((lines && lines.length) || spanline)) {
             // # No new row, just blank lines.
             return;

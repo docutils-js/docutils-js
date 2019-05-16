@@ -1507,6 +1507,7 @@ class HTMLTranslator extends nodes.NodeVisitor {
     visit_substitution_definition(node) {
         throw new nodes.SkipNode();
     }
+
 /*
       visit_substitution_reference(node) {
       this.unimplemented_visit(node)

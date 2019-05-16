@@ -491,7 +491,6 @@ class Body extends RSTState {
                   */
     /* eslint-disable-next-line camelcase */
     run_directive(directive, match, typeName, option_presets) {
-
         /*        if isinstance(directive, (FunctionType, MethodType)):
                   from docutils.parsers.rst import convert_directive_function
                   directive = convert_directive_function(directive)

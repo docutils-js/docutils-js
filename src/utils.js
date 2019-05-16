@@ -142,7 +142,7 @@ function splitEscapedWhitespace(text) {
 
     >>> from docutils.utils import column_indices
     >>> column_indices(u'A t ab le ')
-    [0, 1, 2, 4, 5, 7, 8]*/
+    [0, 1, 2, 4, 5, 7, 8] */
 function columnIndicies(text) {
     const stringIndicies = new Array(text.length);
     for (let i = 0; i < text.length; i += 1) {
@@ -213,5 +213,6 @@ export function relativePath(source, target) {
 */
 }
 
-export { findCombiningChars, columnWidth, escape2null, splitEscapedWhitespace, columnIndicies
+export {
+ findCombiningChars, columnWidth, escape2null, splitEscapedWhitespace, columnIndicies,
 };

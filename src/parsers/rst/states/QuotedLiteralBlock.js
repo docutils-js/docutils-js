@@ -10,7 +10,6 @@ import { EOFError } from '../../../Exceptions';
     Special-purpose.  Not for inclusion in `state_classes`.
 */
 class QuotedLiteralBlock extends RSTState {
-
     _init() {
         super._init();
         this.patterns = {
