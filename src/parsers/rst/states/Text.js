@@ -37,9 +37,9 @@ class Text extends RSTState {
         return [];
     }
 
+    /** Definition list item. */
     /* eslint-disable-next-line no-unused-vars */
     indent(match, context, nextState) {
-        /* """Definition list item.""" */
         const definitionlist = new nodes.definition_list();
         const [definitionlistitem, blankFinish1] = this.definition_list_item(context);
         let blankFinish = blankFinish1;
@@ -152,9 +152,9 @@ srcline;
         return [[], nextState, []];
     }
 
+    /** Return a list of nodes. */
     /* eslint-disable-next-line camelcase,no-unused-vars */
     literal_block(match, context, nextState) {
-        // """Return a list of nodes."""
         /* eslint-disable-next-line no-unused-vars */
         const [indented, indent, offset, blankFinish] = this.stateMachine.getIndented({});
         while (indented && indented.length && !indented[indented.length - 1].trim()) {

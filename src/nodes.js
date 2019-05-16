@@ -367,16 +367,16 @@ class Body { }
 
 class General extends Body { }
 
-// """List-like elements."""
+/** List-like elements. */
 class Sequential extends Body {
 }
 
 class Admonition extends Body { }
 
-// """Special internal body elements."""
+/** Special internal body elements.  */
 class Special extends Body { }
 
-// """Internal elements that don't appear in output."""
+/** Internal elements that don't appear in output. */
 class Invisible extends PreBibliographic { }
 
 class Part { }
@@ -388,12 +388,12 @@ class Referential extends Resolvable { }
 class Targetable extends Resolvable {
     // referenced = 0
     // indirect_reference_name = null
-    /* """Holds the whitespace_normalized_name (contains mixed case) of a target.
-    Required for MoinMoin/reST compatibility."""
+    /* Holds the whitespace_normalized_name (contains mixed case) of a target.
+    Required for MoinMoin/reST compatibility.
     */
 }
 
-// """Contains a `label` as its first element."""
+/** Contains a `label` as its first element. */
 class Labeled { }
 
 // ==============================
@@ -422,15 +422,15 @@ class Node {
     _init() {
     }
 
+
+    /**
+    Return the first node in the iterable returned by traverse(),
+    or None if the iterable is empty.
+
+    Parameter list is the same as of traverse.  Note that
+    include_self defaults to 0, though.
+    */
     nextNode(args) {
-        /* """
-        Return the first node in the iterable returned by traverse(),
-        or None if the iterable is empty.
-
-        Parameter list is the same as of traverse.  Note that
-        include_self defaults to 0, though.
-        """ */
-
         const iterable = this.traverse(args);
         if (iterable.length) {
             return iterable[0];
@@ -976,7 +976,7 @@ class Element extends Node {
         });
     }
 
-    /*    """
+    /**
         Updates all attributes from node or dictionary `dict_`.
 
         Appends the basic attributes ('ids', 'names', 'classes',
@@ -994,14 +994,14 @@ class Element extends Node {
               'source' is not replaced even when dict_ has a 'source'
               attribute, though it may still be merged into a list depending
               on the value of update_fun.
-              """ */
+     */
     updateAllAttsConcatenating(dict_, replace = true,
                                andSource = false) {
         this.updateAllAtts(dict_, this.copyAttrConcatenate, replace,
                            andSource);
     }
 
-    /*
+    /**
       Returns True if and only if the given attribute is NOT one of the
       basic list attributes defined for all Elements.
     */
@@ -1009,7 +1009,7 @@ class Element extends Node {
         return !(attr in this.listAttributes);
     }
 
-    /*
+    /**
         Returns True if and only if the given attribute is NOT recognized by
         this class.
     */
@@ -2037,11 +2037,11 @@ class pending extends Element {
     constructor(transform, details,
                 rawsource = '', children, attributes) {
         super(rawsource, children, attributes);
-        /* """The `docutils.transforms.Transform` class implementing the pending
-        operation.""" */
+        /** The `docutils.transforms.Transform` class implementing the pending
+        operation. */
         this.transform = transform;
 
-        /* """Detail data (dictionary) required by the pending operation.""" */
+        /** Detail data (dictionary) required by the pending operation. */
         this.details = details || {};
     }
 /*

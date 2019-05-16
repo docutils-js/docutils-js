@@ -1,13 +1,13 @@
 import { combining } from './utils/combining';
 
-export function findCombiningChars(text) {
-/* """Return indices of all combining chars in  Unicode string `text`.
+/** Return indices of all combining chars in  Unicode string `text`.
 
     >>> from docutils.utils import find_combining_chars
     >>> find_combining_chars(u'A t ab le ')
     [3, 6, 9]
 
-    """ */
+    */
+function findCombiningChars(text) {
     return text.split('').map((c, i) => {
         const r = combining[text.codePointAt(i)];
         return [r, i];
@@ -16,16 +16,16 @@ export function findCombiningChars(text) {
 }
 
 
-/* eslint-disable-next-line no-unused-vars */
-export function getTrimFootnoteRefSpace(settings) { // fixme
-    /*    """
+    /*
     Return whether or not to trim footnote space.
 
     If trim_footnote_reference_space is not None, return it.
 
     If trim_footnote_reference_space is None, return False unless the
     footnote reference style is 'superscript'.
-    """ */
+    */
+/* eslint-disable-next-line no-unused-vars */
+export function getTrimFootnoteRefSpace(settings) { // fixme
     return false;
 }
 /*
@@ -36,7 +36,7 @@ export function getTrimFootnoteRefSpace(settings) { // fixme
         return settings.trim_footnote_reference_space
 */
 
-export function columnWidth(text) { // fixme
+function columnWidth(text) { // fixme
     return text.length;
 }
 export function isIterable(obj) {
@@ -105,8 +105,8 @@ function _getCallerFile() {
     return [callerfile, callerlineno];
 }
 
-export function escape2null(text) {
-    // """Return a string with escape-backslashes converted to nulls."""
+/* Return a string with escape-backslashes converted to nulls. */
+function escape2null(text) {
     const parts = [];
     let start = 0;
     /* eslint-disable-next-line no-constant-condition */
@@ -123,11 +123,11 @@ export function escape2null(text) {
 }
 
 
-export function splitEscapedWhitespace(text) {
-    /*    """
+    /**
     Split `text` on escaped whitespace (null+space or null+newline).
     Return a list of strings.
-    """ */
+     */
+function splitEscapedWhitespace(text) {
     const strings = text.split('\x00 ');
     const s = [];
     /* eslint-disable-next-line no-restricted-syntax */
@@ -137,7 +137,13 @@ export function splitEscapedWhitespace(text) {
     return s;
 }
 
-export function columnIndicies(text) {
+/**
+    Indices of Unicode string `text` when skipping combining characters.
+
+    >>> from docutils.utils import column_indices
+    >>> column_indices(u'A t ab le ')
+    [0, 1, 2, 4, 5, 7, 8]*/
+function columnIndicies(text) {
     const stringIndicies = new Array(text.length);
     for (let i = 0; i < text.length; i += 1) {
         stringIndicies[i] = i;
@@ -149,13 +155,6 @@ export function columnIndicies(text) {
     return stringIndicies.filter(i => typeof i !== 'undefined');
 }
 
-/*    """Indices of Unicode string `text` when skipping combining characters.
-
-    >>> from docutils.utils import column_indices
-    >>> column_indices(u'A t ab le ')
-    [0, 1, 2, 4, 5, 7, 8]
-
-    """ */
     // TODO: account for asian wide chars here instead of using dummy
     // replacements in the tableparser?
 /*    string_indices = range(len(text))
@@ -213,3 +212,6 @@ export function relativePath(source, target) {
     return '/'.join(parts)
 */
 }
+
+export { findCombiningChars, columnWidth, escape2null, splitEscapedWhitespace, columnIndicies
+};

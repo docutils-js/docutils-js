@@ -4,14 +4,13 @@ import { escapeRegExp } from '../../../utils';
 import * as nodes from '../../../nodes';
 import { EOFError } from '../../../Exceptions';
 
-class QuotedLiteralBlock extends RSTState {
-/*
-    """
+/**
     Nested parse handler for quoted (unindented) literal blocks.
 
     Special-purpose.  Not for inclusion in `state_classes`.
-    """
 */
+class QuotedLiteralBlock extends RSTState {
+
     _init() {
         super._init();
         this.patterns = {
@@ -66,9 +65,9 @@ class QuotedLiteralBlock extends RSTState {
         throw new EOFError();
     }
 
+    /** Match arbitrary quote character on the first line only. */
     /* eslint-disable-next-line camelcase */
     initial_quoted(match, context, nextState) {
-        // """Match arbitrary quote character on the first line only."""
         this.removeTransition('initial_quoted');
         const quote = match.result.input[0];
         const pattern = new RegExp(escapeRegExp(quote));
@@ -80,8 +79,8 @@ class QuotedLiteralBlock extends RSTState {
         return [[match.result.input], nextState, []];
     }
 
+    /** Match consistent quotes on subsequent lines. */
     quoted(match, context, nextState) {
-        // """Match consistent quotes on subsequent lines."""
         context.push(match.result.input);
         return [context, nextState, []];
     }

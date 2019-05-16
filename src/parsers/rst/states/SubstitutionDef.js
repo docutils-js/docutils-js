@@ -3,11 +3,8 @@ import { EOFError } from '../../../Exceptions';
 import * as nodes from '../../../nodes';
 import * as RegExps from '../RegExps';
 
-
+/** Parser for the contents of a substitution_definition element. */
 class SubstitutionDef extends Body {
-    /* """
-    Parser for the contents of a substitution_definition element.
-    """ */
     _init() {
         super._init();
         this.patterns = {
@@ -17,10 +14,9 @@ class SubstitutionDef extends Body {
         this.initialTransitions = ['embedded_directive', 'text'];
     }
 
-
+/** Return a list of nodes. */
     /* eslint-disable-next-line camelcase,no-unused-vars */
     literal_block(match, context, nextState) {
-        // """Return a list of nodes."""
         /* eslint-disable-next-line no-unused-vars */
         const [indented, indent, offset, blankFinish] = this.stateMachine.getIndented({});
         while (indented && indented.length && !indented[indented.length - 1].trim()) {

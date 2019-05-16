@@ -31,18 +31,21 @@ export const quotePairs = {// open char: matching closing characters // usage ex
                '\u203a': '\u203a', // › › Swedish
               };
 
-export function matchChars(c1, c2) {
-    /* """Test whether `c1` and `c2` are a matching open/close character pair.
+/**
+    Test whether `c1` and `c2` are a matching open/close character pair.
 
     Matching open/close pairs are at the same position in
     `punctuation_chars.openers` and `punctuation_chars.closers`.
     The pairing of open/close quotes is ambiguous due to  different
     typographic conventions in different languages,
     so we test for additional matches stored in `quote_pairs`.
-    """ */
+    */
+function matchChars(c1, c2) {
     if (!openers.includes(c1)) {
         return false;
     }
     const i = openers.indexOf(c1);
     return c2 === closers[i] || (quotePairs[c1] || '').includes(c2);
 }
+
+export { matchChars };

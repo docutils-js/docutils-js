@@ -5,9 +5,9 @@ class ExtensionOptions extends FieldList {
     /* Parse field_list fields for extension options. */
     /* No nested parsing is done (including inline markup parsing). */
 
+    /** Override `Body.parse_field_body` for simpler parsing. */
     /* eslint-disable-next-line camelcase */
     parse_field_body(indented, offset, node) {
-        // """Override `Body.parse_field_body` for simpler parsing."""
         const lines = [];
         /* eslint-disable-next-line no-restricted-syntax */
         for (const line of [...indented, '']) {

@@ -17,10 +17,10 @@ export default class Reader extends BaseReader {
     constructor(args) {
         super(args);
 
-        // """Contexts this reader supports."""
+        /** Contexts this reader supports. */
         this.supported = ['standalone'];
 
-        // """A single document tree."""
+        /** A single document tree. */
         this.document = undefined;
 
         this.settingsSpec = [

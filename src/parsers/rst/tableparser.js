@@ -16,39 +16,37 @@ and produce a well-formed data structure suitable for building a CALS table.
 import { DataError } from '../../Exceptions';
 import { stripCombiningChars } from '../../utils';
 
+/**
+ Raise if there is any problem with table markup.
+
+ The keyword argument `offset` denotes the offset of the problem
+ from the table's start line.
+ */
 class TableMarkupError extends DataError {
-    /* """
-    Raise if there is any problem with table markup.
-
-    The keyword argument `offset` denotes the offset of the problem
-    from the table's start line.
-    """ */
-
     constructor(message, offset) {
         super(message);
         this.offset = offset;
     }
 }
 
+/**
+ Abstract superclass for the common parts of the syntax-specific parsers.
+ */
 class TableParser {
-    /* """
-    Abstract superclass for the common parts of the syntax-specific parsers.
-    """ */
-    constructor(...args) {
+constructor(...args) {
         this._init(...args);
     }
 
     /* eslint-disable-next-line no-unused-vars */
     _init(...args) {
-        // """Matches the row separator between head rows and body rows."""
+        /** Matches the row separator between head rows and body rows. */
         this.headbodyseparatorpat = undefined;
 
-        // """Padding character for East Asian double-width text."""
+        /** Padding character for East Asian double-width text. */
         this.doubleWidthPadChar = '\x00';
     }
 
-    parse(block) {
-        /* """
+        /**
         Analyze the text `block` and return a table data structure.
 
         Given a plaintext-graphic table in `block` (list of lines of text; no
@@ -56,19 +54,20 @@ class TableParser {
         necessary to construct a CALS table or equivalent.
 
         Raise `TableMarkupError` if there is any problem with the markup.
-        """ */
+        */
+    parse(block) {
         this.setup(block);
-        this.find_head_body_sep();
+        this.findHeadBodySep();
         this.parse_table();
         const structure = this.structure_from_cells();
         return structure;
     }
 
+    /**
+     Look for a head/body row separator line; store the line index.
+     */
     /* eslint-disable-next-line camelcase */
-    find_head_body_sep() {
-        /*
-        """Look for a head/body row separator line; store the line index."""
-        */
+    findHeadBodySep() {
         let i;
         for (i = 0; i < this.block.length; i += 1) {
             const line = this.block[i];
@@ -100,8 +99,7 @@ function update_dict_of_lists(master, newdata) {
     });
 }
 
-class GridTableParser extends TableParser {
-    /* """
+    /**
     Parse a grid table using `parse()`.
 
     Here's an example of a grid table::
@@ -151,8 +149,9 @@ class GridTableParser extends TableParser {
     (morerows); the number of extra columns used by the cell in a horizontal
     span (morecols); the line offset of the first line of the cell contents;
     and the cell contents, a list of lines of text.
-    """ */
+    */
 
+class GridTableParser extends TableParser {
     _init() {
         super._init();
         this.headBodySeparatorPat = new RegExp('\\+=[=+]+=\\+ *$');
@@ -171,8 +170,7 @@ class GridTableParser extends TableParser {
     }
 
     /* eslint-disable-next-line camelcase */
-    parse_table() {
-        /* """
+        /**
         Start with a queue of upper-left corners, containing the upper-left
         corner of the table itthis. Trace out one rectangular cell, remember
         it, and add its upper-right and lower-left corners to the queue of
@@ -182,7 +180,8 @@ class GridTableParser extends TableParser {
 
         We'll end up knowing all the row and column boundaries, cell positions
         and their dimensions.
-        """ */
+         */
+        parse_table() {
         const corners = [[0, 0]];
         while (corners.length) {
             const [top, left] = corners.shift();
@@ -230,9 +229,9 @@ class GridTableParser extends TableParser {
         }
     }
 
-    /* eslint-disable-next-line camelcase */
+        /** For keeping track of how much of each text column has been seen. */
+        /* eslint-disable-next-line camelcase */
     mark_done(top, left, bottom, right) {
-        // """For keepoing track of how much of each text column has been seen."""
         // const before = top - 1; // part of assert
         const after = bottom - 1;
         for (let col = left; col < right; col += 1) {
@@ -241,9 +240,9 @@ class GridTableParser extends TableParser {
         }
     }
 
-    /* eslint-disable-next-line camelcase */
+        /** Each text column should have been completely seen. */
+        /* eslint-disable-next-line camelcase */
     check_parse_complete() {
-        /* """Each text column should have been completely seen.""" */
         const last = this.bottom - 1;
         for (let i = 0; i < this.right; i += 1) {
             if (this.done[i] !== last) {
@@ -254,9 +253,9 @@ class GridTableParser extends TableParser {
         return true;
     }
 
-    /* eslint-disable-next-line camelcase */
+        /** Starting at the top-left corner, start tracing out a cell. */
+        /* eslint-disable-next-line camelcase */
     scan_cell(top, left) {
-        /* """Starting at the top-left corner, start tracing out a cell.""" */
         // assert this.block[top][left] == '+'
         if (this.block[top][left] !== '+') {
             throw new Error('AssertError');
@@ -265,15 +264,15 @@ class GridTableParser extends TableParser {
         return result;
     }
 
-    /* eslint-disable-next-line camelcase */
-    scan_right(top, left) {
-/*
-        """
+    /**
+
         Look for the top-right corner of the cell, and make note of all column
         boundaries ('+').
-        """
+
 */
-        const colseps = {};
+        /* eslint-disable-next-line camelcase */
+        scan_right(top, left) {
+            const colseps = {};
         const line = this.block[top];
         for (let i = left + 1; i < this.right + 1; i += 1) {
             if (line[i] === '+') {
@@ -291,12 +290,13 @@ class GridTableParser extends TableParser {
         return null;
     }
 
-    /* eslint-disable-next-line camelcase */
+        /**
+             Look for the bottom-right corner of the cell, making note of all row
+             boundaries.
+             */
+        /* eslint-disable-next-line camelcase */
     scan_down(top, left, right) {
-/*        """
-        Look for the bottom-right corner of the cell, making note of all row
-        boundaries.
-        """ */
+
         /* istanbul ignore if */
 if (typeof right === 'undefined') {
     right = 0;
@@ -319,13 +319,13 @@ if (typeof right === 'undefined') {
         return null;
     }
 
-    /* eslint-disable-next-line camelcase */
-    scan_left(top, left, bottom, right) {
-        /* """
+        /**
         Noting column boundaries, look for the bottom-left corner of the cell.
         It must line up with the starting point.
-        """ */
+        */
 
+        /* eslint-disable-next-line camelcase */
+    scan_left(top, left, bottom, right) {
         const colseps = {};
         const line = this.block[bottom];
         for (let i = right - 1; i > left; i = -1) {
@@ -347,11 +347,11 @@ if (typeof right === 'undefined') {
         return null;
     }
 
+        /**
+                Noting row boundaries, see if we can return to the starting point.
+         */
     /* eslint-disable-next-line camelcase,no-unused-vars */
     scan_up(top, left, bottom, right) {
-/*        """
-        Noting row boundaries, see if we can return to the starting point.
-        """ */
         const rowseps = {};
         for (let i = bottom - 1; i > top; i -= 1) {
             if (this.block[i][left] === '+') {
@@ -364,12 +364,12 @@ if (typeof right === 'undefined') {
     }
 
 
-    /* eslint-disable-next-line camelcase */
-    structure_from_cells() {
-        /* """
+        /**
         From the data collected by `scan_cell()`, convert to the final data
         structure.
-        """ */
+        */
+    /* eslint-disable-next-line camelcase */
+    structure_from_cells() {
         const rowseps = Object.keys(this.rowseps); // .keys()   # list of row boundaries
         rowseps.sort((a, b) => a - b);
 
@@ -430,52 +430,51 @@ if (typeof right === 'undefined') {
 
 // GridTableParser.headBodySeparatorPat = /\\+=[=+]+=\\+ *$/;
 
+/**
+Parse a simple table using `parse()`.
+
+Here's an example of a simple table::
+
+    =====  =====
+    col 1  col 2
+    =====  =====
+    1      Second column of row 1.
+    2      Second column of row 2.
+           Second line of paragraph.
+    3      - Second column of row 3.
+
+           - Second item in bullet
+             list (row 3, column 2).
+    4 is a span
+    ------------
+    5
+    =====  =====
+
+Top and bottom borders use '=', column span underlines use '-', column
+separation is indicated with spaces.
+
+Passing the above table to the `parse()` method will result in the
+following data structure, whose interpretation is the same as for
+`GridTableParser`::
+
+    ([5, 25],
+     [[(0, 0, 1, ['col 1']),
+       (0, 0, 1, ['col 2'])]],
+     [[(0, 0, 3, ['1']),
+       (0, 0, 3, ['Second column of row 1.'])],
+      [(0, 0, 4, ['2']),
+       (0, 0, 4, ['Second column of row 2.',
+                  'Second line of paragraph.'])],
+      [(0, 0, 6, ['3']),
+       (0, 0, 6, ['- Second column of row 3.',
+                  '',
+                  '- Second item in bullet',
+                  '  list (row 3, column 2).'])],
+      [(0, 1, 10, ['4 is a span'])],
+      [(0, 0, 12, ['5']),
+       (0, 0, 12, [''])]])
+*/
 class SimpleTableParser extends TableParser {
-    /* """
-    Parse a simple table using `parse()`.
-
-    Here's an example of a simple table::
-
-        =====  =====
-        col 1  col 2
-        =====  =====
-        1      Second column of row 1.
-        2      Second column of row 2.
-               Second line of paragraph.
-        3      - Second column of row 3.
-
-               - Second item in bullet
-                 list (row 3, column 2).
-        4 is a span
-        ------------
-        5
-        =====  =====
-
-    Top and bottom borders use '=', column span underlines use '-', column
-    separation is indicated with spaces.
-
-    Passing the above table to the `parse()` method will result in the
-    following data structure, whose interpretation is the same as for
-    `GridTableParser`::
-
-        ([5, 25],
-         [[(0, 0, 1, ['col 1']),
-           (0, 0, 1, ['col 2'])]],
-         [[(0, 0, 3, ['1']),
-           (0, 0, 3, ['Second column of row 1.'])],
-          [(0, 0, 4, ['2']),
-           (0, 0, 4, ['Second column of row 2.',
-                      'Second line of paragraph.'])],
-          [(0, 0, 6, ['3']),
-           (0, 0, 6, ['- Second column of row 3.',
-                      '',
-                      '- Second item in bullet',
-                      '  list (row 3, column 2).'])],
-          [(0, 1, 10, ['4 is a span'])],
-          [(0, 0, 12, ['5']),
-           (0, 0, 12, [''])]])
-    """ */
-
     _init(...args) {
         super._init(...args);
         this.headBodySeparatorPat = /=[ =]*$/;
@@ -500,15 +499,14 @@ class SimpleTableParser extends TableParser {
     }
 
     /* eslint-disable-next-line camelcase */
-    parse_table() {
-        /* """
+        /**
         First determine the column boundaries from the top border, then
         process rows.  Each row may consist of multiple lines; accumulate
         lines until a row is complete.  Call `this.parse_row` to finish the
         job.
-        """ */
-
-        // Top border must fully describe all table columns.
+        */
+        parse_table() {
+            // Top border must fully describe all table columns.
         if (!this.block[0]) {
             throw new Error('here');
         }
@@ -540,11 +538,9 @@ class SimpleTableParser extends TableParser {
         }
     }
 
+/**     Given a column span underline, return a list of (begin, end) pairs. */
     /* eslint-disable-next-line camelcase */
     parse_columns(line, offset) {
-/*        """
-        Given a column span underline, return a list of (begin, end) pairs.
-        """ */
 //        console.log(`parsing columns from ${line}, ${offset}`);
         const cols = [];
         let end = 0;
@@ -610,16 +606,16 @@ class SimpleTableParser extends TableParser {
     }
 
 
-    /* eslint-disable-next-line camelcase */
-    parse_row(lines, start, spanline) {
-        /* """
+        /**
         Given the text `lines` of a row, parse it and append to `this.table`.
 
         The row is parsed according to the current column spec (either
         `spanline` if provided or `this.columns`).  For each column, extract
         text from each line, and check for text in column margins.  Finally,
         adjust for insignificant whitespace.
-        """ */
+         */
+    /* eslint-disable-next-line camelcase */
+    parse_row(lines, start, spanline) {
 
         if (!((lines && lines.length) || spanline)) {
             // # No new row, just blank lines.
@@ -647,13 +643,13 @@ class SimpleTableParser extends TableParser {
         this.table.push(row);
     }
 
-    /* eslint-disable-next-line camelcase */
-    check_columns(lines, firstLine, columns) {
-        /* """
+        /**
         Check for text in column margins and text overflow in the last column.
         Raise TableMarkupError if anything but whitespace is in column margins.
         Adjust the end value for the last column if there is text overflow.
-        """ */
+        */
+    /* eslint-disable-next-line camelcase */
+    check_columns(lines, firstLine, columns) {
         // "Infinite" value for a dummy last column's beginning, used to
         // check for text overflow:
         columns.push([Number.MAX_SAFE_INTEGER, undefined]);
@@ -711,7 +707,7 @@ class SimpleTableParser extends TableParser {
 /*    Extend the list values of `master` with those from `newdata`.
 
     Both parameters must be dictionaries containing list values.
-    """
+
     for key, values in newdata.items():
         master.setdefault(key, []).extend(values)
 */

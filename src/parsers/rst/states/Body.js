@@ -265,10 +265,7 @@ class Body extends RSTState {
         return data;
     }
 
-    /* eslint-disable-next-line camelcase,no-unused-vars */
-    parse_target(block, blockText, lineno) {
-        //        console.log(`parse_target(${block}, ${blockText}, ${lineno})`);
-        /* """
+    /**
            Determine the type of reference of a target.
 
            :Return: A 2-tuple, one of:
@@ -276,7 +273,9 @@ class Body extends RSTState {
            - 'refname' and the indirect reference name
            - 'refuri' and the URI
            - 'malformed' and a system_message node
-           """ */
+           */
+    /* eslint-disable-next-line camelcase,no-unused-vars */
+    parse_target(block, blockText, lineno) {
         if (block.length && block[block.length - 1].trim().endsWith('_')) {
             const lines = [];
             block.forEach(line => lines.push(line.trim()));
@@ -451,8 +450,8 @@ class Body extends RSTState {
         return false;
     }
 
+    /** Returns a 2-tuple: list of nodes, and a "blank finish" boolean. */
     directive(match, optionPresets) {
-        // """Returns a 2-tuple: list of nodes, and a "blank finish" boolean."""
         const typeName = match[1];
         if (typeof typeName === 'undefined') {
             throw new Error('need typename');
@@ -470,9 +469,7 @@ class Body extends RSTState {
         return this.unknown_directive(typeName);
     }
 
-    /* eslint-disable-next-line camelcase */
-    run_directive(directive, match, typeName, option_presets) {
-        /*        """
+        /**
                   Parse a directive then run its directive function.
 
                   Parameters:
@@ -491,7 +488,9 @@ class Body extends RSTState {
                   be used by an embedded image directive.
 
                   Returns a 2-tuple: list of nodes, and a "blank finish" boolean.
-                  """ */
+                  */
+    /* eslint-disable-next-line camelcase */
+    run_directive(directive, match, typeName, option_presets) {
 
         /*        if isinstance(directive, (FunctionType, MethodType)):
                   from docutils.parsers.rst import convert_directive_function
@@ -588,9 +587,9 @@ class Body extends RSTState {
         return [[new nodes.comment(text, text)], blankFinish];
     }
 
+        /** Footnotes, hyperlink targets, directives, comments. */
     /* eslint-disable-next-line camelcase */
     explicit_markup(match, context, nextState) {
-        /* """Footnotes, hyperlink targets, directives, comments.""" */
         const r = this.explicit_construct(match);
         /* istanbul ignore if */
         if (!isIterable(r)) {
@@ -602,9 +601,9 @@ class Body extends RSTState {
         return [[], nextState, []];
     }
 
+    /** Determine which explicit construct this is, parse & return it. */
     /* eslint-disable-next-line camelcase */
     explicit_construct(match) {
-        // """Determine which explicit construct this is, parse & return it."""
         const errors = [];
         const r = this.explicit.constructs.map(
             ([method, pattern]) => [method, pattern, pattern.exec(match.result.input)],
@@ -631,12 +630,12 @@ class Body extends RSTState {
         return [[...nodelist], [...errors], blankFinish];
     }
 
-    /* eslint-disable-next-line camelcase */
-    explicit_list(blankFinish) {
-        /* """
+        /**
            Create a nested state machine for a series of explicit markup
            constructs (including anonymous hyperlink targets).
-           """ */
+           */
+    /* eslint-disable-next-line camelcase */
+    explicit_list(blankFinish) {
         const offset = this.stateMachine.lineOffset + 1; // next line
         const [newlineOffset, blankFinish1] = this.nestedListParse(
             this.stateMachine.inputLines.slice(offset),
@@ -654,8 +653,8 @@ class Body extends RSTState {
         }
     }
 
+    /** Anonymous hyperlink targets. */
     anonymous(match, context, nextState) {
-        /* """Anonymous hyperlink targets.""" */
         const [nodelist, blankFinish] = this.anonymous_target(match);
         this.parent.add(nodelist);
         this.explicit_list(blankFinish);
@@ -906,9 +905,9 @@ class Body extends RSTState {
         return [listitem, blankFinish];
     }
 
-    /*
+    /** Enumerated List Item */
       enumerator(match, context, nextState) {
-      // """Enumerated List Item"""
+    /*
       const [format, sequence, text, ordinal] = this.parse_enumerator(match);
       if (!this.is_enumerated_list_item(ordinal, sequence, format)) {
       throw new TransitionCorrection('text');
@@ -953,8 +952,9 @@ class Body extends RSTState {
       this.parent.add(this.unindent_warning('Enumerated list'));
       }
       return [[], nextState, []];
-      }
     */
+      }
+
     // fixme
     /* eslint-disable-next-line camelcase,no-unused-vars */
     parse_enumerator(match, expectedSequence) {
@@ -1009,10 +1009,9 @@ class Body extends RSTState {
         return [fieldNode, blankFinish];
     }
 
+    /** Extract & return field name from a field marker match. */
     /* eslint-disable-next-line camelcase */
     parse_field_marker(match) {
-        /* """Extract & return field name from a field marker match.""" */
-        //        console.log(match);
         let field = match.result[0].substring(1);
         field = field.substring(0, field.lastIndexOf(':'));
         return field;
@@ -1023,9 +1022,9 @@ class Body extends RSTState {
         this.nestedParse(indented, { inputOffset: offset, node });
     }
 
+    /** Option list item. */
     /* eslint-disable-next-line camelcase */
     option_marker(match, context, nextState) {
-        // """Option list item."""
         const optionlist = new nodes.option_list();
         /* eslint-disable-next-line no-unused-vars */// fixme
         const [source, line] = this.stateMachine.getSourceAndLine();
@@ -1102,14 +1101,14 @@ class Body extends RSTState {
         return [optionListItem, blankFinish];
     }
 
-    /* eslint-disable-next-line camelcase */
-    parse_option_marker(match) {
-        /* """
+        /**
            Return a list of `node.option` and `node.option_argument` objects,
            parsed from an option marker match.
 
            :Exception: `MarkupError` for invalid option markers.
-           """ */
+           */
+    /* eslint-disable-next-line camelcase */
+    parse_option_marker(match) {
         const optlist = [];
         const optionstrings = match.result[0].trimEnd().split(', ');
         optionstrings.forEach((optionstring) => {
@@ -1157,9 +1156,9 @@ class Body extends RSTState {
         return [[], nextState, []];
     }
 
+    /** First line of a line block. */
     /* eslint-disable-next-line camelcase */
     line_block(match, context, nextState) {
-        // """First line of a line block."""
         const block = new nodes.line_block();
         this.parent.add(block);
         const lineno = this.stateMachine.absLineNumber();
@@ -1196,9 +1195,9 @@ class Body extends RSTState {
         return [[], nextState, []];
     }
 
+    /** Return one line element of a line_block. */
     /* eslint-disable-next-line camelcase */
     line_block_line(match, lineno) {
-        // """Return one line element of a line_block."""
         /* eslint-disable-next-line no-unused-vars */
         const [indented, indent, lineOffset, blankFinish] = this
               .stateMachine.getFirstKnownIndented(
@@ -1264,25 +1263,25 @@ class Body extends RSTState {
         block.length = newItems.length;
     }
 
+    /** Top border of a full table. */
     /* eslint-disable-next-line camelcase */
     grid_table_top(match, context, nextState) {
-        // """Top border of a full table."""
         return this.table_top(match, context, nextState,
                               this.isolate_grid_table.bind(this),
                               tableparser.GridTableParser);
     }
 
+    /** Top border of a simple table. */
     /* eslint-disable-next-line camelcase */
     simple_table_top(match, context, nextState) {
-        /* """Top border of a simple table.""" */
         return this.table_top(match, context, nextState,
                               this.isolate_simple_table.bind(this),
                               tableparser.SimpleTableParser);
     }
 
+    /* Top border of a generic table. */
     /* eslint-disable-next-line camelcase */
     table_top(match, context, nextState, isolate_function, parser_class) {
-        // """Top border of a generic table."""
         const [nodelist, blankFinish] = this.table(isolate_function, parser_class);
         this.parent.add(nodelist);
         if (!blankFinish) {
@@ -1295,8 +1294,8 @@ class Body extends RSTState {
         return [[], nextState, []];
     }
 
+    /** Parse a table. */
     table(isolateFunction, parserClass) {
-        // """Parse a table."""
         const r = isolateFunction();
         if (!isIterable(r)) {
             throw new Error();

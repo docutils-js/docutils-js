@@ -2,11 +2,12 @@ import * as nodes from './nodes';
 import { isIterable } from './utils';
 import { UnimplementedError as Unimp, SystemMessage } from './Exceptions';
 
-export function getSourceLine(node) {
-    /* """
+/**
     Return the "source" and "line" attributes from the `node` given or from
     its closest ancestor.
-    """ */
+ */
+function getSourceLine(node) {
+
     let myNode = node;
     while (myNode) {
         if (myNode.source || myNode.line) {
@@ -128,3 +129,5 @@ class Reporter {
     }
 }
 export default Reporter;
+export { getSourceLine };
+

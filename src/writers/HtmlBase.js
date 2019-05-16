@@ -34,7 +34,7 @@ class HTMLTranslator extends nodes.NodeVisitor {
         const settings = this.settings;
         const langCode = settings.languageCode;
         this.language = getLanguage(langCode, document.reporter);
-        this.meta = '';// fixme: this.meta = [this.generator % docutils.__version__]
+        this.meta = [];// fixme: this.meta = [this.generator % docutils.__version__]
         this.headPrefix = [];
         this.htmlProlog = [];
         if (settings.xmlDeclaration) {
@@ -504,7 +504,7 @@ class HTMLTranslator extends nodes.NodeVisitor {
     /*
       visit_comment(self, node,
       sub=re.compile('-(?=-)').sub):
-      """Escape double-dashes in comment text."""
+      // Escape double-dashes in comment text.
       this.body.push('<!-- %s -->\n' % sub('- ', node.astext()))
       // Content already processed:
       raise nodes.SkipNode
@@ -1501,12 +1501,13 @@ class HTMLTranslator extends nodes.NodeVisitor {
       depart_subscript(node) {
       this.body.push('</sub>')
       }
+*/
 
-      """Internal only."""
-      visit_substitution_definition(node) {
-      raise nodes.SkipNode
-      }
-
+    /** Internal only. */
+    visit_substitution_definition(node) {
+        throw new nodes.SkipNode();
+    }
+/*
       visit_substitution_reference(node) {
       this.unimplemented_visit(node)
       }

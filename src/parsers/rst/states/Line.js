@@ -32,9 +32,9 @@ class Line extends SpecializedText {
         return [];
     }
 
+    /** Transition marker. */
     /* eslint-disable-next-line no-unused-vars */
     blank(match, context, nextState) {
-        /* """Transition marker.""" */
         const [src, srcline] = this.stateMachine.getSourceAndLine();
         const marker = context[0].trim();
         if (marker.length < 4) {
@@ -47,9 +47,9 @@ class Line extends SpecializedText {
         return [[], 'Body', []];
     }
 
+    /** Potential over- & underlined title. */
     /* eslint-disable-next-line no-unused-vars */
     text(match, context, nextState) {
-        /* """Potential over- & underlined title.""" */
         const lineno = this.stateMachine.absLineNumber() - 1;
         let overline = context[0];
         let title = match.result.input;

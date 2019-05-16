@@ -105,11 +105,10 @@ class Transformer {
     }
 
     /**
-     * addTransforms
+     * Store multiple transforms, with default priorities.
      * @param {Array} transformList - Array of transform classes (not instances).
      */
     addTransforms(transformList) {
-        // """Store multiple transforms, with default priorities."""
         transformList.forEach((transformClass) => {
             if (!transformClass) {
                 throw new Error('invalid argument');

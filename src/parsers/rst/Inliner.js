@@ -416,14 +416,14 @@ class Inliner {
         return [before, nodeList, after, []];
     }
 
-    /* eslint-disable-next-line camelcase */
-    quoted_start(match) {
-        /* """Test if inline markup start-string is 'quoted'.
+    /** Test if inline markup start-string is 'quoted'.
 
            'Quoted' in this context means the start-string is enclosed in a pair
            of matching opening/closing delimiters (not necessarily quotes)
            or at the end of the match.
-           """ */
+    */
+    /* eslint-disable-next-line camelcase */
+    quoted_start(match) {
         const string = match.result.input;
         const start = match.result.index;
         if (start === 0) { // start-string at beginning of text
@@ -578,23 +578,7 @@ class Inliner {
             email: new RegExp(emailPattern), // fixme % args + '$',
             // re.VERBOSE | re.UNICODE),
             uri: new RegExp(`${startStringPrefix}((([a-zA-Z][a-zA-Z0-9.+-]*):(((//?)?${uric}*${uriEnd})(\\?${uric}*${uriEnd})?(\\#${uriEnd})?))|(${emailPattern}))${endStringSuffix}`),
-            /*          pep=re.compile(
-                        r"""
-                        %(start_string_prefix)s
-                        (
-                        (pep-(?P<pepnum1>\d+)(.txt)?) # reference to source file
-                        |
-                        (PEP\s+(?P<pepnum2>\d+))      # reference by name
-                        )
-                        %(end_string_suffix)s""" % args, re.VERBOSE | re.UNICODE),
-                        rfc=re.compile(
-                        r"""
-                        %(start_string_prefix)s
-                        (RFC(-|\s+)?(?P<rfcnum>\d+))
-                        %(end_string_suffix)s""" % args, re.VERBOSE | re.UNICODE)) */
-
-        };
-        // console.log(this.patterns.initial);
+            };
     }
 
     parse(text, { lineno, memo, parent }) {

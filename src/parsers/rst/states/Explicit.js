@@ -1,22 +1,19 @@
 import SpecializedBody from './SpecializedBody';
 import MarkupError from '../MarkupError';
-
+/** Second and subsequent explicit markup construct. */
 class Explicit extends SpecializedBody {
-    /*
-    """Second and subsequent explicit markup construct."""
-    */
+    /** Footnotes, hyperlink targets, directives, comments. */
     /* eslint-disable-next-line camelcase */
     explicit_markup(match, context, nextState) {
-        // """Footnotes, hyperlink targets, directives, comments."""
         const [nodelist, blankFinish] = this.explicit_construct(match);
         this.parent.add(nodelist);
         this.blankFinish = blankFinish;
         return [[], nextState, []];
     }
 
+    /** Determine which explicit construct this is, parse & return it. */
     /* eslint-disable-next-line camelcase */
     explicit_construct(match) {
-        // """Determine which explicit construct this is, parse & return it."""
         const errors = [];
         /* eslint-disable-next-line no-restricted-syntax */
         for (const [method, pattern] of this.explicit.constructs) {
@@ -41,8 +38,8 @@ class Explicit extends SpecializedBody {
         return [[...nodelist, ...errors], blankFinish];
     }
 
+    /** Anonymous hyperlink targets. */
     anonymous(match, context, nextState) {
-        // """Anonymous hyperlink targets."""
         const [nodelist, blankFinish] = this.anonymous_target(match);
         this.parent.add(nodelist);
         this.blankFinish = blankFinish;

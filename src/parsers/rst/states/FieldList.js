@@ -1,11 +1,10 @@
 import SpecializedBody from './SpecializedBody';
 
+/** Second and subsequent field_list fields. */
 class FieldList extends SpecializedBody {
-/*    """Second and subsequent field_list fields.""" */
-
+    /** Field list field. */
     /* eslint-disable-next-line camelcase */
     field_marker(match, context, nextState) {
-        /* """Field list field.""" */
         const [field, blankFinish] = this.field(match);
         this.parent.add(field);
         this.blankFinish = blankFinish;

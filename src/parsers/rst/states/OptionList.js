@@ -1,13 +1,11 @@
 import SpecializedBody from './SpecializedBody';
 import MarkupError from '../MarkupError';
 
+/** Second and subsequent option_list option_list_items. */
 class OptionList extends SpecializedBody {
-/*
-    """Second and subsequent option_list option_list_items."""
-*/
+    /** Option list item. */
     /* eslint-disable-next-line */
     option_marker(match, context, nextState) {
-        // """Option list item."""
         let optionListItem;
         let blankFinish;
         try {
