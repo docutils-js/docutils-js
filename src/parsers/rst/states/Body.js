@@ -5,6 +5,7 @@ import MarkupError from '../MarkupError';
 import { escape2null, isIterable, splitEscapedWhitespace } from '../../../utils';
 import StringList from '../../../StringList';
 import * as tableparser from '../tableparser';
+/* eslint-disable-next-line no-unused-vars */
 import { ApplicationError, UnimplementedError as Unimp } from '../../../Exceptions';
 import TransitionCorrection from '../../../TransitionCorrection';
 import * as directives from '../directives';
@@ -121,7 +122,6 @@ class Body extends RSTState {
             line: `(${pats.nonalphanum7bit})\\1* *$`,
             text: '',
         };
-        //      console.log(this.enumerator);
 
         this.initialTransitions = ['bullet', 'enumerator', 'field_marker', 'option_marker', 'doctest', 'line_block', 'grid_table_top', 'simple_table_top', 'explicit_markup', 'anonymous', 'line', 'text'];
 
@@ -775,6 +775,7 @@ class Body extends RSTState {
         return [i, indent || 0];
     }
 
+    /** Enumerated List Item */
     enumerator(match, context, nextState) {
         const [format, sequence, text, ordinal] = this.parseEnumerator(match);
         if (!this.isEnumeratedListItem(ordinal, sequence, format)) {
@@ -903,56 +904,6 @@ class Body extends RSTState {
         }
         return [listitem, blankFinish];
     }
-
-    /** Enumerated List Item */
-      enumerator(match, context, nextState) {
-    /*
-      const [format, sequence, text, ordinal] = this.parse_enumerator(match);
-      if (!this.is_enumerated_list_item(ordinal, sequence, format)) {
-      throw new TransitionCorrection('text');
-      }
-      const enumlist = new nodes.enumerated_list();
-      this.parent.add(enumlist);
-      if (sequence === '#') {
-      enumlist.attributes.enumtype = 'arabic';
-      } else {
-      enumlist.attributes.enumtype = sequence;
-      }
-      enumlist.attributes.prefix = this.enum.formatinfo[format].prefix; // fixme check
-      enumlist.attributes.suffix = this.enum.formatinfo[format].suffix;
-      if (ordinal !== 1) {
-      enumlist.attributes.start = ordinal;
-      const msg = this.reporter.info(
-      `Enumerated list start value not ordinal-1: "${text}" (ordinal ${ordinal})`, [], {},
-      );
-      this.parent.add(msg);
-      }
-      let listitem;
-      let blankFinish;
-      [listitem, blankFinish] = this.list_item(match.result.index + match.result[0].length);
-      enumlist.add(listitem);
-      const offset = this.stateMachine.lineOffset + 1; // next line
-      let newlineOffset;
-      const [newlineOffset, blankFinish1] = this.nestedListParse(
-      this.stateMachine.inputLines.slice(offset), {
-      inputOffset: this.stateMachine.absLineOffset() + 1,
-      node: enumlist,
-      initialState: 'EnumeratedList',
-      blankFinish,
-      extraSettings: {
-      lastordinal: ordinal,
-      format,
-      auto: sequence === '#',
-      },
-      },
-      );
-      this.gotoLine(newlineOffset);
-      if (!blankFinish) {
-      this.parent.add(this.unindent_warning('Enumerated list'));
-      }
-      return [[], nextState, []];
-    */
-      }
 
     /* eslint-disable-next-line camelcase */
     field_marker(match, context, nextState) {

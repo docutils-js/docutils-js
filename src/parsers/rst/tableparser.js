@@ -169,7 +169,6 @@ class GridTableParser extends TableParser {
         this.colseps = { 0: [0] };
     }
 
-    /* eslint-disable-next-line camelcase */
         /**
         Start with a queue of upper-left corners, containing the upper-left
         corner of the table itthis. Trace out one rectangular cell, remember
@@ -181,7 +180,8 @@ class GridTableParser extends TableParser {
         We'll end up knowing all the row and column boundaries, cell positions
         and their dimensions.
          */
-        parse_table() {
+    /* eslint-disable-next-line camelcase */
+    parse_table() {
         const corners = [[0, 0]];
         while (corners.length) {
             const [top, left] = corners.shift();
@@ -497,13 +497,13 @@ class SimpleTableParser extends TableParser {
         this.colseps = { 0: [0] };
     }
 
-    /* eslint-disable-next-line camelcase */
         /**
         First determine the column boundaries from the top border, then
         process rows.  Each row may consist of multiple lines; accumulate
         lines until a row is complete.  Call `this.parse_row` to finish the
         job.
         */
+    /* eslint-disable-next-line camelcase */
         parse_table() {
             // Top border must fully describe all table columns.
         if (!this.block[0]) {

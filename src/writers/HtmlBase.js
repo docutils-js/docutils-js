@@ -1504,6 +1504,7 @@ class HTMLTranslator extends nodes.NodeVisitor {
 */
 
     /** Internal only. */
+    /* eslint-disable-next-line camelcase,no-unused-vars */
     visit_substitution_definition(node) {
         throw new nodes.SkipNode();
     }
