@@ -1,5 +1,6 @@
 import ViewList from './ViewList';
 import { columnIndicies } from './utils';
+import UnexpectedIndentationError from './UnexpectedIndentationError';
 
 class StringList extends ViewList {
     trimLeft(trimLength, start = 0, end) {
@@ -112,7 +113,7 @@ class StringList extends ViewList {
                 indent = Math.min(indent, line.length - line.trimStart().length);
             }
         }
-        if (stripIndent && indent > 0 < right) {
+        if (stripIndent && (indent > 0) && (right > 0)) {
             for (let i = 0; i < block.length; i += 1) {
                 block[i] = block[i].substring(indent);
             }
@@ -126,7 +127,7 @@ class StringList extends ViewList {
     }
 
     replace(old, newStr) {
-        for (let i = 0; i < this.length; i++) {
+        for (let i = 0; i < this.length; i += 1) {
             this[i] = this[i].replace(old, newStr); // fix me !!
         }
     }

@@ -9,6 +9,7 @@ class ExtensionOptions extends FieldList {
     parse_field_body(indented, offset, node) {
         // """Override `Body.parse_field_body` for simpler parsing."""
         const lines = [];
+        /* eslint-disable-next-line no-restricted-syntax */
         for (const line of [...indented, '']) {
             if (line.trim()) {
                 lines.push(line);

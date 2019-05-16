@@ -1,4 +1,5 @@
 import leftPad from 'left-pad';
+import { ApplicationError } from './Exceptions';
 
 /**
  * Transformer class responsible for transforming document output
@@ -23,17 +24,19 @@ class Transformer {
      *
      */
     populateFromComponents(...components) {
+        /* eslint-disable-next-line no-restricted-syntax */
         for (const component of components) {
             if (!component) {
+                /* eslint-disable-next-line no-continue */
                 continue;
             }
 //          console.log(`processing ${component.toString()} ${component.componentType}`);
             const transforms = component.getTransforms() || [];
-	    transforms.forEach((t) => {
-		if (typeof t === 'undefined') {
+            transforms.forEach((t) => {
+                if (typeof t === 'undefined') {
                     throw new Error(`got invalid transform from ${component}`);
-		}
-	    });
+                }
+            });
 
             if (transforms.filter(x => typeof x === 'undefined').length !== 0) {
                 throw new Error(`got invalid transform from ${component}`);
@@ -44,6 +47,7 @@ class Transformer {
         }
         this.sorted = 0;
         const urr = [];
+        /* eslint-disable-next-line no-restricted-syntax */
         for (const i of components) {
             if (typeof i !== 'undefined') {
 //              console.log(`collecting unknownReferenceResolver from component ${i}`);
@@ -54,8 +58,7 @@ class Transformer {
 //              console.log('component is undefined. fixme');
             }
         }
-//      console.log('urr is ')
-        //      console.log(urr);
+        /* eslint-disable-next-line no-restricted-syntax */
         for (const f of urr) {
             if (typeof f === 'undefined') {
                 throw new ApplicationError('Unexpected undefined value in ist of unknown reference resolvers');
@@ -70,7 +73,10 @@ class Transformer {
      * apply the transforms
      */
     applyTransforms() {
-        this.document.reporter.attachObserver(this.document.noteTransformMessage.bind(this.document));
+        this.document.reporter.attachObserver(
+            this.document.noteTransformMessage
+                .bind(this.document),
+);
         while (this.transforms.length) {
             if (!this.sorted) {
                 this.transforms.sort((el1, el2) => {
@@ -104,17 +110,17 @@ class Transformer {
      */
     addTransforms(transformList) {
         // """Store multiple transforms, with default priorities."""
-        transformList.forEach((transform_class) => {
-            if (!transform_class) {
+        transformList.forEach((transformClass) => {
+            if (!transformClass) {
                 throw new Error('invalid argument');
             }
-            const priority_string = this.getPriorityString(
-                transform_class, 'defaultPriority',
+            const priorityString = this.getPriorityString(
+                transformClass, 'defaultPriority',
 );
-//          console.log(`priority string is ${priority_string}`);
-//          console.log(`I have ${transform_class}`);
+//          console.log(`priority string is ${priorityString}`);
+//          console.log(`I have ${transformClass}`);
             this.transforms.push(
-                [priority_string, transform_class, null, {}],
+                [priorityString, transformClass, null, {}],
 );
             this.sorted = 0;
         });

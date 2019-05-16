@@ -29,12 +29,14 @@ class State {
         if (!this.nestedSmKwargs) {
             // console.log('I am bogus');
             throw new Error();
+/*
             this.nestedSmKwargs = {
                 stateClasses: [this.constructor],
                 initialState: this.constructor.name,
                 debug: this.debug,
                 debugFn: this.debugFn,
             };
+*/
         }
     }
 
@@ -137,6 +139,7 @@ class State {
         return [names, transitions];
     }
 
+    /* eslint-disable-next-line no-unused-vars */
     noMatch(context, transitions) {
         return [context, null, []];
     }
@@ -145,6 +148,7 @@ class State {
         return [context, []];
     }
 
+    /* eslint-disable-next-line no-unused-vars */
     eof(context) {
         return [];
     }

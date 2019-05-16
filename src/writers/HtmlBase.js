@@ -4,9 +4,12 @@ import * as nodes from '../nodes';
 import * as utils from '../utils';
 import { basename } from '../utils/paths';
 import { getLanguage } from '../languages';
+import { UnimplementedError } from '../Exceptions';
 
+/* eslint-disable-next-line no-unused-vars */
 const __docformat__ = 'reStructuredText';
 
+/* eslint-disable-next-line no-unused-vars */
 const __version__ = '';
 
 const defaultTemplate = `<%- head_prefix %>
@@ -20,73 +23,6 @@ const defaultTemplate = `<%- head_prefix %>
 `;
 
 const template = ejs.compile(defaultTemplate, {});
-
-/**
- * Class for writing HTML
- */
-class HTMLBaseWriter extends BaseWriter {
-    /**
-     * Create HTMLBaseWriter.
-     * @param {Object} args - arguments to function
-     */
-    constructor(args) {
-        super(args);
-        this.attr = {};
-        this.translatorClass = HTMLTranslator;
-    }
-
-    _init(args) {
-	super._init(args);
-	this.defaultTemplateContent = defaultTemplate;
-	this.template = template;
-	this.visitorAttributes = [
-            'headPrefix', 'head', 'stylesheet', 'bodyPrefix',
-            'bodyPreDocinfo', 'docinfo', 'body', 'bodySuffix',
-            'title', 'subtitle', 'header', 'footer', 'meta', 'fragment',
-            'htmlProlog', 'htmlHead', 'htmlTitle', 'htmlSubtitle',
-            'htmlBody'];
-    }
-
-
-    translate() {
-        this.visitor = new this.translatorClass(this.document);
-        const visitor = this.visitor;
-	if (!visitor) {
-	    throw new Error();
-	}
-        this.document.walkabout(visitor);
-        this.visitorAttributes.forEach((attr) => {
-            this[attr] = visitor[attr];
-	});
-        this.output = visitor.body.join('');// this.applyTemplate();
-        //        console.log(this.output);
-    }
-
-    applyTemplate() {
-        const templateContent = this.defaultTemplateContent; // = this.document.settings.templateContent;
-        /*        template_file = open(this.document.settings.template, 'rb')
-                  template = unicode(template_file.read(), 'utf-8')
-                  template_file.close()
-                  subs = this.interpolation_dict()
-                  return template % subs
-	*/
-	return template(this.templateVars());
-    }
-
-    templateVars() {
-	const vars = {};
-        const settings = this.document.settings;
-	this.visitorAttributes.forEach(attr => vars[attr] = (this[attr] || []).join('').trim());
-        vars.encoding = settings.output_encoding;
-        vars.version = __version__;
-	return vars;
-    }
-
-    assembleParts() {
-	super.assembleParts();
-	this.visitorAttributes.forEach(part => this.parts[part] = (this[part] || []).join(''));
-    }
-}
 
 /**
  * HTMLTranslator class
@@ -110,7 +46,10 @@ class HTMLTranslator extends nodes.NodeVisitor {
             */
         }
         this.head = this.meta.slice();
-        // fixme        this.stylesheet = utils.getStylesheetList(settings).map(this.stylesheetCall.bind(this));
+        /* fixme
+           this.stylesheet = utils.getStylesheetList(settings).
+           map(this.stylesheetCall.bind(this));
+        */
         this.bodyPrefix = ['</head>\n<body>\n'];
         this.bodyPreDocinfo = [];
         this.docinfo = [];
@@ -155,13 +94,13 @@ class HTMLTranslator extends nodes.NodeVisitor {
         if (!text) {
             text = '';
         }
-	let encoded = this.encode(text.replace(whitespace, ' '));
-	if (this.inMailto && this.settings.cloakEmailAddresses) {
-	    // Cloak at-signs ("%40") and periods with HTML entities.
+        let encoded = this.encode(text.replace(whitespace, ' '));
+        if (this.inMailto && this.settings.cloakEmailAddresses) {
+            // Cloak at-signs ("%40") and periods with HTML entities.
             encoded = encoded.replace('%40', '&#37;&#52;&#48;');
-	    encoded = encoded.replace('.', '&#46;');
-	}
-	return encoded;
+            encoded = encoded.replace('.', '&#46;');
+        }
+        return encoded;
     }
 
     /*
@@ -177,15 +116,17 @@ class HTMLTranslator extends nodes.NodeVisitor {
         const prefix = [];
         const atts = {};
         const ids = [];
-        Object.entries(attributes).forEach(([name, value]) => atts[name.toLowerCase()] = value);
+        Object.entries(attributes).forEach(([name, value]) => {
+            atts[name.toLowerCase()] = value;
+        });
         const classes = [];
         const languages = [];
         // unify class arguments and move language specification
         const c = (node.attributes && node.attributes.classes) || [];
-        //	console.log(c);
-        //	console.log(atts.class);
+        //      console.log(c);
+        //      console.log(atts.class);
         c.splice(c.length - 1, 0, ...utils.pySplit(atts.class || ''));
-        //	console.log(c);
+        //      console.log(c);
         c.forEach((cls) => {
             if (cls.substring(0, 8) === 'language-') {
                 languages.splice(0, 0, cls.substring(9));
@@ -229,17 +170,17 @@ class HTMLTranslator extends nodes.NodeVisitor {
         const attlist = { ...atts };
         // attlist.sort()
         const parts = [myTagname];
-	Object.entries(attlist).forEach(([name, value]) => {
+        Object.entries(attlist).forEach(([name, value]) => {
             // value=None was used for boolean attributes without
             // value, but this isn't supported by XHTML.
             //            assert value is not None
-	    if (Array.isArray(value)) {
+            if (Array.isArray(value)) {
                 parts.push(`${name.toLowerCase()}="${this.attVal(value.join(' '))}"`);
-	    } else {
+            } else {
                 parts.push(`${name.toLowerCase()}="${this.attVal(value.toString())}"`);
-	    }
-	});
-	const infix = empty ? ' /' : '';
+            }
+        });
+        const infix = empty ? ' /' : '';
         // return ''.join(prefix) + '<%s%s>' % (' '.join(parts), infix) + suffix
         const result = `${prefix.join('')}<${parts.join(' ')}${infix}>${suffix}`;
         const badStr = '[object Object]';
@@ -248,7 +189,9 @@ class HTMLTranslator extends nodes.NodeVisitor {
             if (prefix.join('').indexOf('[object Object]') !== -1) {
                 invalidVar = 'prefix';
             } else if (parts.join(' ').indexOf(badStr) !== -1) {
+                // implement fixme
             } else if (infix.indexOf(badStr) !== -1) {
+                // implement fixme
             } else if (suffix.indexOf(badStr) !== -1) {
                 invalidVar = 'suffix';
             }
@@ -261,7 +204,7 @@ class HTMLTranslator extends nodes.NodeVisitor {
      * Construct and return an XML-compatible empty tag.
      */
     emptytag(node, tagname, suffix = '\n', attributes) {
-        return self.starttag(node, tagname, suffix, true, attributes);
+        return this.starttag(node, tagname, suffix, true, attributes);
     }
 
 
@@ -269,6 +212,7 @@ class HTMLTranslator extends nodes.NodeVisitor {
         return text; // fixme
     }
 
+    /* eslint-disable-next-line camelcase */
     visit_section(node) {
         this.sectionLevel += 1;
         this.body.push(
@@ -276,11 +220,13 @@ class HTMLTranslator extends nodes.NodeVisitor {
         );
     }
 
+    /* eslint-disable-next-line camelcase,no-unused-vars */
     depart_section(node) {
         this.sectionLevel -= 1;
         this.body.push('</div>\n');
     }
 
+    /* eslint-disable-next-line camelcase */
     visit_Text(node) {
         const text = node.astext();
         let encoded = this.encode(text);
@@ -290,48 +236,58 @@ class HTMLTranslator extends nodes.NodeVisitor {
         this.body.push(encoded);
     }
 
+    /* eslint-disable-next-line camelcase,no-unused-vars */
     depart_Text(node) {
 
     }
 
+    /* eslint-disable-next-line camelcase */
     visit_abbreviation(node) {
         // @@@ implementation incomplete ("title" attribute)
         this.body.push(this.starttag(node, 'abbr', ''));
     }
 
+    /* eslint-disable-next-line camelcase,no-unused-vars */
     depart_abbreviation(node) {
         this.body.push('</abbr>');
     }
 
+    /* eslint-disable-next-line camelcase */
     visit_acronym(node) {
         // @@@ implementation incomplete ("title" attribute)
         this.body.push(this.starttag(node, 'acronym', ''));
     }
 
+    /* eslint-disable-next-line camelcase,no-unused-vars */
     depart_acronym(node) {
         this.body.push('</acronym>');
     }
 
-    visit_address(node) {
-        this.visitDocinfoItem(node, 'address', meta = false);
-        this.body.push(this.starttag(node, 'pre',
-                                     suffix = '', false, { CLASS: 'address' }));
-    }
+    /* eslint-disable-next-line camelcase */
+    /*
+      visit_address(node) {
+      this.visitDocinfoItem(node, 'address', meta = false);
+      this.body.push(this.starttag(node, 'pre',
+      suffix = '', false, { CLASS: 'address' }));
+      }
 
-    depart_address(node) {
-        this.body.push('\n</pre>\n');
-        this.departDocinfoItem();
-    }
+      depart_address(node) {
+      this.body.push('\n</pre>\n');
+      this.departDocinfoItem();
+      } */
 
+    /* eslint-disable-next-line camelcase */
     visit_admonition(node) {
         node.attributes.classes.splice(0, 0, 'admonition');
         this.body.push(this.starttag(node, 'div'));
     }
 
-    depart_admonition(node = None) {
+    /* eslint-disable-next-line camelcase,no-unused-vars */
+    depart_admonition(node) {
         this.body.push('</div>\n');
 
-        attribution_formats = {
+        /* eslint-disable-next-line no-unused-vars */
+        const attributionFormats = {
             dash: ['\u2014', ''],
             parentheses: ['(', ')'],
             parens: ['(', ')'],
@@ -339,6 +295,7 @@ class HTMLTranslator extends nodes.NodeVisitor {
         };
     }
 
+    /* eslint-disable-next-line camelcase */
     visit_attribution(node) {
         const [prefix, suffix] = this.attribution_formats[this.settings.attribution];
         this.context.push(suffix);
@@ -347,10 +304,12 @@ class HTMLTranslator extends nodes.NodeVisitor {
         );
     }
 
+    /* eslint-disable-next-line camelcase,no-unused-vars */
     depart_attribution(node) {
         this.body.push(`${this.context.pop()}</p>\n`);
     }
 
+    /* eslint-disable-next-line camelcase */
     visit_author(node) {
         if (!(node.parent instanceof nodes.authors)) {
             this.visitDocinfoItem(node, 'author');
@@ -358,6 +317,7 @@ class HTMLTranslator extends nodes.NodeVisitor {
         this.body.push('<p>');
     }
 
+    /* eslint-disable-next-line camelcase */
     depart_author(node) {
         this.body.push('</p>');
         if (!(node.parent instanceof nodes.authors)) {
@@ -367,18 +327,22 @@ class HTMLTranslator extends nodes.NodeVisitor {
         }
     }
 
+    /* eslint-disable-next-line camelcase */
     visit_authors(node) {
         this.visitDocinfoItem(node, 'authors');
     }
 
+    /* eslint-disable-next-line camelcase,no-unused-vars */
     depart_authors(node) {
         this.departDocinfoItem();
     }
 
+    /* eslint-disable-next-line camelcase */
     visit_block_quote(node) {
         this.body.push(this.starttag(node, 'blockquote'));
     }
 
+    /* eslint-disable-next-line camelcase,no-unused-vars */
     depart_block_quote(node) {
         this.body.push('</blockquote>\n');
     }
@@ -386,28 +350,32 @@ class HTMLTranslator extends nodes.NodeVisitor {
     /*
      * Check for a simple list that can be rendered compactly.
      */
-    checkSimpleList(node) {
-        const visitor = new SimpleListChecker(this.document);
-        try {
-            node.walk(visitor);
-        } catch (error) {
-            if (error instanceof nodes.NodeFound) {
-                return false;
-            }
-            throw error;
-        }
-        return true;
+    /* eslint-disable-next-line camelcase */
+    /*
+      checkSimpleList(node) {
+      const visitor = new SimpleListChecker(this.document);
+      try {
+      node.walk(visitor);
+      } catch (error) {
+      if (error instanceof nodes.NodeFound) {
+      return false;
+      }
+      throw error;
+      }
+      return true;
 
-        // Compact lists
-        // ------------
-        // Include definition lists and field lists (in addition to ordered
-        // and unordered lists) in the test if a list is "simple"  (cf. the
-    }
-    // html4css1.HTMLTranslator docstring and the SimpleListChecker class at
-    // the end of this file).
+      // Compact lists
+      // ------------
+      // Include definition lists and field lists (in addition to ordered
+      // and unordered lists) in the test if a list is "simple"  (cf. the
+      }
+      // html4css1.HTMLTranslator docstring and the SimpleListChecker class at
+      // the end of this file).
+      */
 
-    is_compactable(node) {
-        // print "is_compactable %s ?" % node.__class__,
+    /* eslint-disable-next-line camelcase */
+    isCompactable(node) {
+        // print "isCompactable %s ?" % node.__class__,
         // explicite class arguments have precedence
         if ('compact' in node.attributes.classes) {
             return true;
@@ -416,43 +384,33 @@ class HTMLTranslator extends nodes.NodeVisitor {
             return false;
         }
         // check config setting:
-        if ((node instanceof nodes.field_list || node instanceof nodes.definition_list) && !this.settings.compactFieldList) {
+        if ((node instanceof nodes.field_list
+             || node instanceof nodes.definition_list)
+            && !this.settings.compactFieldList) {
             // print "`compact-field-lists` is false"
             return false;
         }
-        if ((node instanceof nodes.enumerated_list || node instanceof nodes.bullet_list) && !this.settings.compactLists) {
+        if ((node instanceof nodes.enumerated_list
+             || node instanceof nodes.bullet_list)
+            && !this.settings.compactLists) {
             // print "`compact-lists` is false"
             return false;
         }
         // more special cases:
-        if ((this.topicClasses.length === 1 && this.topicClasses[0] === 'contents')) { // TODO: this.in_contents
+        if ((this.topicClasses.length === 1
+             && this.topicClasses[0] === 'contents')) { // TODO: this.in_contents
             return true;
         }
         // check the list items:
         return this.checkSimpleList(node);
     }
 
-    visit_bullet_list(node) {
-        const atts = {};
-        const oldCompactSimple = this.compactSimple;
-        this.compactParagraph = undefined;
-        this.compactSimple = this.isCompactable(node);
-        if (this.compactSimple && !oldCompactSimple) {
-            atts.class = 'simple';
-        }
-        this.body.push(`${this.starttag(node, 'ul', '', false, atts)}\n`);
-    }
-
-    depart_bullet_list(node) {
-        this.compactSimple = this.context.pop();
-        this.compactParagraph = this.compactSimple;
-        this.body.push('</ul>\n');
-    }
-
+    /* eslint-disable-next-line camelcase */
     visit_caption(node) {
         this.body.push(this.starttag(node, 'p', '', false, { CLASS: 'caption' }));
     }
 
+    /* eslint-disable-next-line camelcase,no-unused-vars */
     depart_caption(node) {
         this.body.push('</p>\n');
     }
@@ -462,6 +420,7 @@ class HTMLTranslator extends nodes.NodeVisitor {
     // Use definition list instead of table for bibliographic references.
     // Join adjacent citation entries.
 
+    /* eslint-disable-next-line camelcase,no-unused-vars */
     visit_citation(node) {
         if (!this.inFootnoteList) {
             this.body.push('<dl class="citation">\n');
@@ -469,6 +428,7 @@ class HTMLTranslator extends nodes.NodeVisitor {
         this.inFootnoteList = true;
     }
 
+    /* eslint-disable-next-line camelcase */
     depart_citation(node) {
         this.body.push('</dd>\n');
         if (!(node.nextNode({ descend: false, siblings: true }) instanceof nodes.citation)) {
@@ -477,6 +437,7 @@ class HTMLTranslator extends nodes.NodeVisitor {
         }
     }
 
+    /* eslint-disable-next-line camelcase */
     visit_citation_reference(node) {
         let href = '#';
         if ('refid' in node.attributes) {
@@ -492,6 +453,7 @@ class HTMLTranslator extends nodes.NodeVisitor {
     }
 
 
+    /* eslint-disable-next-line camelcase,no-unused-vars */
     depart_citation_reference(node) {
         this.body.push(']</a>');
 
@@ -500,35 +462,41 @@ class HTMLTranslator extends nodes.NodeVisitor {
         // don't insert classifier-delimiter here (done by CSS)
     }
 
+    /* eslint-disable-next-line camelcase */
     visit_classifier(node) {
         this.body.push(this.starttag(node, 'span', '', false, { CLASS: 'classifier' }));
     }
 
+    /* eslint-disable-next-line camelcase,no-unused-vars */
     depart_classifier(node) {
         this.body.push('</span>');
     }
 
+    /* eslint-disable-next-line camelcase */
     visit_colspec(node) {
         this.colSpecs.push(node);
         // "stubs" list is an attribute of the tgroup element:
         node.parent.stubs.push(node.attributes.stub);
     }
 
+    /* eslint-disable-next-line camelcase */
     depart_colspec(node) {
         // write out <colgroup> when all colspecs are processed
         if (node.nextNode({ descend: false, siblings: true }) instanceof nodes.colspec) {
             return;
         }
         if ('colwidths-auto' in node.parent.parent.attributes.classes
-           || ('colwidths-auto' in this.settings.tableStyle
-               && (!('colwidths-given' in node.parent.parent.attributes.classes)))) {
+            || ('colwidths-auto' in this.settings.tableStyle
+                && (!('colwidths-given' in node.parent.parent.attributes.classes)))) {
             return;
         }
-        const totalWidth = this.colspecs.map(node => node.attributes.colwidth).reduce((a, c) => a + c);
+        /* eslint-disable-next-line camelcase,no-unused-vars */
+        const totalWidth = this.colspecs.map(subNode => subNode.attributes.colwidth)
+              .reduce((a, c) => a + c);
         this.body.push(this.starttag(node, 'colgroup'));
-        this.colspecs.forEach((node) => {
-            colwidth = parseInt(node.attributes.colwidth, 10) * 100.0 / total_width + 0.5;
-            this.body.push(this.emptytag(node, 'col', { style: `width: ${colwidth}` }));
+        this.colspecs.forEach((subNode) => {
+            const colWidth = parseInt(subNode.attributes.colwidth, 10) * 100.0 / totalWidth + 0.5;
+            this.body.push(this.emptytag(subNode, 'col', { style: `width: ${colWidth}` }));
         });
         this.body.push('</colgroup>\n');
     }
@@ -556,53 +524,66 @@ class HTMLTranslator extends nodes.NodeVisitor {
       }
 
     */
+    /* eslint-disable-next-line camelcase */
     visit_container(node) {
         this.body.push(this.starttag(node, 'div', '\n', false, { CLASS: 'docutils container' }));
     }
 
+    /* eslint-disable-next-line camelcase,no-unused-vars */
     depart_container(node) {
-        this.body.push('</div>\n')
+        this.body.push('</div>\n');
     }
 
+    /* eslint-disable-next-line camelcase */
     visit_contact(node) {
-        this.visitDocinfoItem(node, 'contact', { meta: false })
+        this.visitDocinfoItem(node, 'contact', { meta: false });
     }
 
+    /* eslint-disable-next-line camelcase,no-unused-vars */
     depart_contact(node) {
-        this.departDocinfoItem()
+        this.departDocinfoItem();
     }
 
+    /* eslint-disable-next-line camelcase */
     visit_copyright(node) {
-        this.visitDocinfoItem(node, 'copyright')
+        this.visitDocinfoItem(node, 'copyright');
     }
 
+    /* eslint-disable-next-line camelcase,no-unused-vars */
     depart_copyright(node) {
-        this.departDocinfoItem()
+        this.departDocinfoItem();
     }
-    
+
+    /* eslint-disable-next-line camelcase */
     visit_date(node) {
-        this.visitDocinfoItem(node, 'date')
+        this.visitDocinfoItem(node, 'date');
     }
-    
+
+    /* eslint-disable-next-line camelcase,no-unused-vars */
     depart_date(node) {
-        this.departDocinfoItem()
+        this.departDocinfoItem();
     }
-    
+
+    /* eslint-disable-next-line camelcase,no-unused-vars */
     visit_decoration(node) {
     }
-    
+
+    /* eslint-disable-next-line camelcase,no-unused-vars */
     depart_decoration(node) {
     }
-    
+
+    /* eslint-disable-next-line camelcase */
     visit_definition(node) {
         this.body.push('</dt>\n');
         this.body.push(this.starttag(node, 'dd', ''));
     }
 
+    /* eslint-disable-next-line camelcase,no-unused-vars */
     depart_definition(node) {
         this.body.push('</dd>\n');
     }
 
+    /* eslint-disable-next-line camelcase */
     visit_definition_list(node) {
         if (node.attributes.classes == null) {
             node.attributes.classes = [];
@@ -614,10 +595,12 @@ class HTMLTranslator extends nodes.NodeVisitor {
         this.body.push(this.starttag(node, 'dl'));
     }
 
+    /* eslint-disable-next-line camelcase,no-unused-vars */
     depart_definition_list(node) {
         this.body.push('</dl>\n');
     }
 
+    /* eslint-disable-next-line camelcase */
     visit_definition_list_item(node) {
         // pass class arguments, ids and names to definition term:
         node.children[0].attributes.classes.splice(0, 0, ...(node.attributes.classes || []));
@@ -625,63 +608,74 @@ class HTMLTranslator extends nodes.NodeVisitor {
         node.children[0].attributes.names.splice(0, 0, ...(node.attributes.names || []));
     }
 
+    /* eslint-disable-next-line camelcase,no-unused-vars */
     depart_definition_list_item(node) {
     }
 
+    /* eslint-disable-next-line camelcase */
     visit_description(node) {
-        this.body.push(this.starttag(node, 'dd', ''))
+        this.body.push(this.starttag(node, 'dd', ''));
     }
 
+    /* eslint-disable-next-line camelcase,no-unused-vars */
     depart_description(node) {
-        this.body.push('</dd>\n')
+        this.body.push('</dd>\n');
     }
 
+    /* eslint-disable-next-line camelcase */
     visit_docinfo(node) {
         this.context.push(this.body.length);
-        const classes = 'docinfo'
+        let classes = 'docinfo';
         if (this.isCompactable(node)) {
-            classes += ' simple'
+            classes += ' simple';
         }
         this.body.push(this.starttag(node, 'dl', '\n', false, { CLASS: classes }));
     }
-    
-    depart_docinfo(node) {
-        this.body.push('</dl>\n')
-        start = this.context.pop()
-        this.docinfo = this.body.slice(start);
-        this.body = []
-      }
 
-    visitDocinfoItem(node, name, meta=true) {
-        if(meta) {
+    /* eslint-disable-next-line camelcase,no-unused-vars */
+    depart_docinfo(node) {
+        this.body.push('</dl>\n');
+        const start = this.context.pop();
+        this.docinfo = this.body.slice(start);
+        this.body = [];
+    }
+
+    visitDocinfoItem(node, name, meta = true) {
+        if (meta) {
             const metaTag = `<meta name="${name}" content="${this.attval(node.astext())}" />\n`;
-            this.addMeta(metaTag)
+            this.addMeta(metaTag);
         }
         this.body.push(`<dt class="${name}">${this.language.labels[name]}</dt>\n`);
         this.body.push(this.starttag(node, 'dd', '', false, { CLASS: name }));
-      }
+    }
 
-      departDocinfoItem() {
-          this.body.push('</dd>\n')
-      }
+    /* eslint-disable-next-line no-unused-vars */
+    departDocinfoItem() {
+        this.body.push('</dd>\n');
+    }
 
-      visit_doctest_block(node) {
-          this.body.push(this.starttag(node, 'pre', suffix='',
-                                       { CLASS: 'code javascript doctest' }));
-      }
-    
-      depart_doctest_block(node) {
-          this.body.push('\n</pre>\n');
-      }
+    /* eslint-disable-next-line camelcase */
+    visit_doctest_block(node) {
+        this.body.push(this.starttag(node, 'pre', '', false,
+                                     { CLASS: 'code javascript doctest' }));
+    }
 
+    /* eslint-disable-next-line camelcase,no-unused-vars */
+    depart_doctest_block(node) {
+        this.body.push('\n</pre>\n');
+    }
+
+    /* eslint-disable-next-line camelcase */
     visit_document(node) {
-        title = ((node.attributes.title || '') || basename(node.attributes['source']) || 'docutils document without title');
-        this.head.push(`<title>${this.encode(title)}</title>\n`);;
-      }
+        const title = ((node.attributes.title || '') || basename(node.attributes.source) || 'docutils document without title');
+        this.head.push(`<title>${this.encode(title)}</title>\n`);
+    }
 
+    /* eslint-disable-next-line camelcase,no-unused-vars */
     depart_document(node) {
         this.headPrefix.push(this.doctype);
     }
+
     /*
       this.headPrefixTemplate %
       {'lang': this.settings.language_code}])
@@ -707,14 +701,17 @@ class HTMLTranslator extends nodes.NodeVisitor {
       //        assert not this.context, 'len(context) = %s' % len(this.context)
       }
     */
+    /* eslint-disable-next-line camelcase */
     visit_emphasis(node) {
         this.body.push(this.starttag(node, 'em', ''));
     }
 
+    /* eslint-disable-next-line camelcase,no-unused-vars */
     depart_emphasis(node) {
         this.body.push('</em>');
     }
 
+    /* eslint-disable-next-line camelcase */
     visit_entry(node) {
         const atts = { class: [] };
         if (node.parent.parnet instanceof nodes.thead) {
@@ -747,10 +744,12 @@ class HTMLTranslator extends nodes.NodeVisitor {
         //     this.body.push('&//0160;') // no-break space
     }
 
+    /* eslint-disable-next-line camelcase,no-unused-vars */
     depart_entry(node) {
         this.body.push(this.context.pop());
     }
 
+    /* eslint-disable-next-line camelcase */
     /*
       visit_enumerated_list(node) {
       atts = {}
@@ -758,7 +757,7 @@ class HTMLTranslator extends nodes.NodeVisitor {
       atts['start'] = node.attributes['start']
       if 'enumtype' in node:
       atts['class'] = node.attributes['enumtype']
-      if this.is_compactable(node):
+      if this.isCompactable(node):
       atts['class'] = (atts.get('class', '') + ' simple').strip()
       this.body.push(this.starttag(node, 'ol', **atts))
       }
@@ -767,37 +766,44 @@ class HTMLTranslator extends nodes.NodeVisitor {
       this.body.push('</ol>\n')
       }
     */
+    /* eslint-disable-next-line camelcase */
     visit_field_list(node) {
         // Keep simple paragraphs in the field_body to enable CSS
         // rule to start body on new line if the label is too long
         let classes = 'field-list';
         if (this.isCompactable(node)) {
             classes += ' simple';
-	}
+        }
         this.body.push(this.starttag(node, 'dl', '\n', false, { CLASS: classes }));
     }
 
+    /* eslint-disable-next-line camelcase,no-unused-vars */
     depart_field_list(node) {
         this.body.push('</dl>\n');
     }
 
+    /* eslint-disable-next-line camelcase,no-unused-vars */
     visit_field(node) {
     }
 
+    /* eslint-disable-next-line camelcase,no-unused-vars */
     depart_field(node) {
     }
 
     // as field is ignored, pass class arguments to field-name and field-body:
 
+    /* eslint-disable-next-line camelcase */
     visit_field_name(node) {
         this.body.push(this.starttag(node, 'dt', '', false,
                                      { CLASS: node.parent.attributes.classes.join(' ') }));
     }
 
+    /* eslint-disable-next-line camelcase,no-unused-vars */
     depart_field_name(node) {
         this.body.push('</dt>\n');
     }
 
+    /* eslint-disable-next-line camelcase */
     visit_field_body(node) {
         this.body.push(this.starttag(node, 'dd', '', false,
                                      { CLASS: node.parent.attributes.classes.join(' ') }));
@@ -805,96 +811,99 @@ class HTMLTranslator extends nodes.NodeVisitor {
         // prevent misalignment of following content if the field is empty:
         if (!node.children.length) {
             this.body.push('<p></p>');
-	}
+        }
     }
 
+    /* eslint-disable-next-line camelcase,no-unused-vars */
     depart_field_body(node) {
         this.body.push('</dd>\n');
     }
 
-    /*    visit_figure(node) {
-          atts = {'class': 'figure'}
-          if node.get('width'):
-          atts['style'] = 'width: %s' % node.attributes['width']
-          if node.get('align'):
-          atts['class'] += " align-" + node.attributes['align']
-          this.body.push(this.starttag(node, 'div', **atts))
-          }
+    /* eslint-disable-next-line camelcase */
+    /*
+      visit_figure(node) {
+      atts = {'class': 'figure'}
+      if node.get('width'):
+      atts['style'] = 'width: %s' % node.attributes['width']
+      if node.get('align'):
+      atts['class'] += " align-" + node.attributes['align']
+      this.body.push(this.starttag(node, 'div', **atts))
+      }
 
-          depart_figure(node) {
-          this.body.push('</div>\n')
-          }
+      depart_figure(node) {
+      this.body.push('</div>\n')
+      }
 
-          // use HTML 5 <footer> element?
-          visit_footer(node) {
-          this.context.push(len(this.body))
-          }
+      // use HTML 5 <footer> element?
+      visit_footer(node) {
+      this.context.push(len(this.body))
+      }
 
-          depart_footer(node) {
-          start = this.context.pop()
-          footer = [this.starttag(node, 'div', { CLASS: 'footer' }),
-          '<hr class="footer" />\n']
-          footer.extend(this.body[start:])
-          footer.push('\n</div>\n')
-          this.footer.extend(footer)
-          this.body_suffix[:0] = footer
-          del this.body[start:]
+      depart_footer(node) {
+      start = this.context.pop()
+      footer = [this.starttag(node, 'div', { CLASS: 'footer' }),
+      '<hr class="footer" />\n']
+      footer.extend(this.body[start:])
+      footer.push('\n</div>\n')
+      this.footer.extend(footer)
+      this.body_suffix[:0] = footer
+      del this.body[start:]
 
-          // footnotes
-          // ---------
-          // use definition list instead of table for footnote text
+      // footnotes
+      // ---------
+      // use definition list instead of table for footnote text
 
-          // TODO: use the new HTML5 element <aside>? (Also for footnote text)
-          }
+      // TODO: use the new HTML5 element <aside>? (Also for footnote text)
+      }
     */
+    /* eslint-disable-next-line camelcase,no-unused-vars */
     visit_footnote(node) {
         if (!this.inFootnoteList) {
             const classes = `footnote ${this.settings.footnoteReferences}`;
             this.body.push(`<dl class="${classes}">\n`);
-	    this.inFootnoteList = true;
-	}
+            this.inFootnoteList = true;
+        }
     }
 
+    /* eslint-disable-next-line camelcase */
     depart_footnote(node) {
         this.body.push('</dd>\n');
         if (!(node.nextNode(undefined, false, false, true) instanceof nodes.footnote)) {
             this.body.push('</dl>\n');
-	    this.inFootnoteList = false;
-	}
+            this.inFootnoteList = false;
+        }
     }
 
     /* whoops this requires references transform!! */
+    /* eslint-disable-next-line camelcase */
     visit_footnote_reference(node) {
-	if (!node.attributes.refid) {
-	    console.log('warning, no refid ( implement transforms )');
-	}
+        if (!node.attributes.refid) {
+            /* eslint-disable-next-line no-console */
+            console.log('warning, no refid ( implement transforms )');
+        }
         const href = `#${node.attributes.refid || ''}`;
         const classes = `footnote-reference ${this.settings.footnoteReferences}`;
         this.body.push(this.starttag(node, 'a', '', // suffix,
-				     false,
-				     { CLASS: classes, href }));
+                                     false,
+                                     { CLASS: classes, href }));
     }
 
+    /* eslint-disable-next-line camelcase,no-unused-vars */
     depart_footnote_reference(node) {
         this.body.push('</a>');
     }
 
-    /*    // Docutils-generated text: put section numbers in a span for CSS styling:
-          visit_generated(node) {
-          if 'sectnum' in node.attributes['classes']:
-          // get section number (strip trailing no-break-spaces)
-          sectnum = node.astext().rstrip(u' ')
-          // print sectnum.encode('utf-8')
-          this.body.push('<span class="sectnum">%s</span> '
-          % this.encode(sectnum))
-          }
-          // Content already processed:
-          raise nodes.SkipNode
+    // Docutils-generated text: put section numbers in a span for CSS styling:
+    /* eslint-disable-next-line camelcase,no-unused-vars */
+    visit_generated(node) {
+        /* generating error */
+    }
 
-          depart_generated(node) {
-          }
-          pass
+    /* eslint-disable-next-line camelcase,no-unused-vars */
+    depart_generated(node) {
+    }
 
+/*
           visit_header(node) {
           this.context.push(len(this.body))
           }
@@ -990,8 +999,9 @@ class HTMLTranslator extends nodes.NodeVisitor {
           depart_inline(node) {
           this.body.push('</span>')
           }
-*/
+    */
     // footnote and citation labels:
+    /* eslint-disable-next-line camelcase */
     visit_label(node) {
         let classes;
         if (node.parent instanceof nodes.footnote) {
@@ -1011,11 +1021,12 @@ class HTMLTranslator extends nodes.NodeVisitor {
         }
     }
 
+    /* eslint-disable-next-line camelcase */
     depart_label(node) {
         let backrefs = [];
         if (this.settings.footnoteBacklinks) {
             backrefs = node.parent.attributes.backrefs;
-            if (backrefs.length == 1) {
+            if (backrefs.length === 1) {
                 this.body.push('</a>');
             }
         }
@@ -1027,42 +1038,43 @@ class HTMLTranslator extends nodes.NodeVisitor {
         this.body.push('</dt>\n<dd>');
     }
 
-/*
-          visit_legend(node) {
-          this.body.push(this.starttag(node, 'div', { CLASS: 'legend' }))
-          }
+    /*
+      visit_legend(node) {
+      this.body.push(this.starttag(node, 'div', { CLASS: 'legend' }))
+      }
 
-          depart_legend(node) {
-          this.body.push('</div>\n')
-          }
+      depart_legend(node) {
+      this.body.push('</div>\n')
+      }
 
-          visit_line(node) {
-          this.body.push(this.starttag(node, 'div', suffix='', { CLASS: 'line' }))
-          if not len(node):
-          this.body.push('<br />')
-          }
+      visit_line(node) {
+      this.body.push(this.starttag(node, 'div', suffix='', { CLASS: 'line' }))
+      if not len(node):
+      this.body.push('<br />')
+      }
 
-          depart_line(node) {
-          this.body.push('</div>\n')
-          }
+      depart_line(node) {
+      this.body.push('</div>\n')
+      }
 
-          visit_line_block(node) {
-          this.body.push(this.starttag(node, 'div', { CLASS: 'line-block' }))
-          }
+      visit_line_block(node) {
+      this.body.push(this.starttag(node, 'div', { CLASS: 'line-block' }))
+      }
 
-          depart_line_block(node) {
-          this.body.push('</div>\n')
-          }
+      depart_line_block(node) {
+      this.body.push('</div>\n')
+      }
 
-          visit_list_item(node) {
-          this.body.push(this.starttag(node, 'li', ''))
-          }
+      visit_list_item(node) {
+      this.body.push(this.starttag(node, 'li', ''))
+      }
 
-          depart_list_item(node) {
-          this.body.push('</li>\n')
-          }
+      depart_list_item(node) {
+      this.body.push('</li>\n')
+      }
     */
     // inline literal
+    /* eslint-disable-next-line camelcase */
     visit_literal(node) {
         // special case: "code" role
         const classes = node.attributes.classes || [];
@@ -1070,33 +1082,36 @@ class HTMLTranslator extends nodes.NodeVisitor {
             // filter 'code' from class arguments
             // fixme //node.attributes['classes'] = [cls for cls in classes if cls != 'code']
             return this.body.push(this.starttag(node, 'span', '', false, { CLASS: 'docutils literal' }));
-	}
+        }
+        /* eslint-disable-next-line no-unused-vars */
         let text = node.astext();
         // remove hard line breaks (except if in a parsed-literal block)
         if (!(node.parent instanceof nodes.literal_block)) {
             text = text.replace('\n', ' ');
-	}
+        }
         // Protect text like ``--an-option`` and the regular expression
         // ``[+]?(\d+(\.\d*)?|\.\d+)`` from bad line wrapping
-/* fixme
-	this.wordsAndSpaces.findall(text).forEach((token) => {
-	    if (token.trim() && this.inWordWrapPoint.search(token)) {
-		this.body.push(`<span class="pre">${this.encode(token)}</span>`);
-	    } else {
-		this.body.push(this.encode(token));
-	    }
-	});
-*/
+        /* fixme
+           this.wordsAndSpaces.findall(text).forEach((token) => {
+           if (token.trim() && this.inWordWrapPoint.search(token)) {
+           this.body.push(`<span class="pre">${this.encode(token)}</span>`);
+           } else {
+           this.body.push(this.encode(token));
+           }
+           });
+        */
         this.body.push('</span>');
-	// Content already processed:
-	throw new nodes.SkipNode();
+        // Content already processed:
+        throw new nodes.SkipNode();
     }
 
+    /* eslint-disable-next-line camelcase,no-unused-vars */
     depart_literal(node) {
         // skipped unless literal element is from "code" role:
         this.body.push('</code>');
     }
 
+    /* eslint-disable-next-line camelcase */
     visit_literal_block(node) {
         this.body.push(this.starttag(node, 'pre', '', false, { CLASS: 'literal-block' }));
         if ((node.attributes.classes || []).indexOf('code') !== -1) {
@@ -1104,6 +1119,7 @@ class HTMLTranslator extends nodes.NodeVisitor {
         }
     }
 
+    /* eslint-disable-next-line camelcase,no-unused-vars */
     depart_literal_block(node) {
         if ((node.attributes.classes || []).indexOf('code') !== -1) {
             this.body.push('</code>');
@@ -1115,7 +1131,8 @@ class HTMLTranslator extends nodes.NodeVisitor {
         // for the math-output: LaTeX and MathJax simply wrap the content,
         // HTML and MathML also convert the math_code.
         // HTML container
-        const math_tags = {// math_output: (block, inline, class-arguments)
+        /* eslint-disable-next-line no-unused-vars */
+        const mathTags = {// math_output: (block, inline, class-arguments)
             mathml: ['div', '', ''],
             html: ['div', 'span', 'formula'],
             mathjax: ['div', 'span', 'math'],
@@ -1123,6 +1140,7 @@ class HTMLTranslator extends nodes.NodeVisitor {
         };
     }
 
+    /* eslint-disable-next-line camelcase */
     /*
       visit_math(node, math_env='') {
       // If the method is called from visit_math_block(), math_env != ''.
@@ -1296,19 +1314,15 @@ class HTMLTranslator extends nodes.NodeVisitor {
 
       visit_option_list_item(node) {
       }
-      pass
 
       depart_option_list_item(node) {
       }
-      pass
 
       visit_option_string(node) {
       }
-      pass
 
       depart_option_string(node) {
       }
-      pass
 
       visit_organization(node) {
       this.visitDocinfoItem(node, 'organization')
@@ -1344,6 +1358,7 @@ class HTMLTranslator extends nodes.NodeVisitor {
       this.body.push('\n')
       }
     */
+    /* eslint-disable-next-line camelcase */
     visit_problematic(node) {
         if (typeof node.attributes.refid !== 'undefined') {
             this.body.push(`<a href="//${node.attributes.refid}">`);
@@ -1354,6 +1369,7 @@ class HTMLTranslator extends nodes.NodeVisitor {
         }
     }
 
+    /* eslint-disable-next-line camelcase,no-unused-vars */
     depart_problematic(node) {
         this.body.push('</span>');
         this.body.push(this.context.pop());
@@ -1372,35 +1388,37 @@ class HTMLTranslator extends nodes.NodeVisitor {
       raise nodes.SkipNode
       }
     */
+    /* eslint-disable-next-line camelcase */
     visit_reference(node) {
         const atts = { class: 'reference' };
         if ('refuri' in node.attributes) {
             atts.href = node.attributes.refuri;
             if (this.settings.cloakEmailAddresses
-		&& atts.href.substring(0, 6) === 'mailto:') {
-		atts.href = this.cloakMailto(atts.href);
-		this.in_mailto = true;
-	    }
+                && atts.href.substring(0, 6) === 'mailto:') {
+                atts.href = this.cloakMailto(atts.href);
+                this.in_mailto = true;
+            }
             atts.class += ' external';
-	} else {
+        } else {
             // assert 'refid' in node, \ 'References must have "refuri" or "refid" attribute.'
             atts.href = `#${node.attributes.refid}`;
             atts.class += ' internal';
-	}
+        }
 
         if (!(node.parent instanceof nodes.TextElement)) {
             // assert len(node) == 1 and isinstance(node.attributes[0], nodes.image)
             atts.class += ' image-reference';
-	}
+        }
         this.body.push(this.starttag(node, 'a', '', false, atts));
     }
 
+    /* eslint-disable-next-line camelcase */
     depart_reference(node) {
         this.body.push('</a>');
         if (!(node.parent instanceof nodes.TextElement)) {
             this.body.push('\n');
-	}
-	this.inMailto = false;
+        }
+        this.inMailto = false;
     }
 
     /*
@@ -1412,11 +1430,13 @@ class HTMLTranslator extends nodes.NodeVisitor {
       this.departDocinfoItem()
       }
     */
+    /* eslint-disable-next-line camelcase */
     visit_row(node) {
         this.body.push(this.starttag(node, 'tr', ''));
         node.column = 0;
     }
 
+    /* eslint-disable-next-line camelcase,no-unused-vars */
     depart_row(node) {
         this.body.push('</tr>\n');
     }
@@ -1446,13 +1466,13 @@ class HTMLTranslator extends nodes.NodeVisitor {
       visit_sidebar(node) {
       this.body.push(
       this.starttag(node, 'div', { CLASS: 'sidebar' }))
-      }
       this.in_sidebar = true
+      }
 
       depart_sidebar(node) {
       this.body.push('</div>\n')
-      }
       this.in_sidebar = false
+      }
 
       visit_status(node) {
       this.visitDocinfoItem(node, 'status', meta=false)
@@ -1463,10 +1483,12 @@ class HTMLTranslator extends nodes.NodeVisitor {
       }
 
     */
+    /* eslint-disable-next-line camelcase */
     visit_strong(node) {
         this.body.push(this.starttag(node, 'strong', ''));
     }
 
+    /* eslint-disable-next-line camelcase,no-unused-vars */
     depart_strong(node) {
         this.body.push('</strong>');
     }
@@ -1480,16 +1502,16 @@ class HTMLTranslator extends nodes.NodeVisitor {
       this.body.push('</sub>')
       }
 
-      visit_substitution_definition(node) {
-      }
       """Internal only."""
+      visit_substitution_definition(node) {
       raise nodes.SkipNode
+      }
 
       visit_substitution_reference(node) {
       this.unimplemented_visit(node)
       }
 
-      // h1–h6 elements must not be used to markup subheadings, subtitles,
+      // h1 h6 elements must not be used to markup subheadings, subtitles,
       // alternative titles and taglines unless intended to be the heading for a
       // new section or subsection.
       // -- http://www.w3.org/TR/html/sections.html//headings-and-sections
@@ -1511,8 +1533,8 @@ class HTMLTranslator extends nodes.NodeVisitor {
       this.in_document_title = 0
       this.body_pre_docinfo.extend(this.body)
       this.html_subtitle.extend(this.body)
-      }
       del this.body[:]
+      }
 
       visit_superscript(node) {
       this.body.push(this.starttag(node, 'sup', ''))
@@ -1523,6 +1545,7 @@ class HTMLTranslator extends nodes.NodeVisitor {
       }
 
     */
+    /* eslint-disable-next-line camelcase */
     visit_system_message(node) {
         this.body.push(this.starttag(node, 'div', '\n', false, { CLASS: 'system-message' }));
         this.body.push('<p class="system-message-title">');
@@ -1545,10 +1568,12 @@ class HTMLTranslator extends nodes.NodeVisitor {
         this.body.push(`System Message: ${node.attributes.type}/${node.attributes.level} (<span class="docutils literal">${this.encode(node.attributes.source)}</span>${line})${backrefText}</p>\n`);
     }
 
+    /* eslint-disable-next-line camelcase,no-unused-vars */
     depart_system_message(node) {
         this.body.push('</div>\n');
     }
 
+    /* eslint-disable-next-line camelcase */
     visit_table(node) {
         const atts = {};
         const classes = this.settings.tableStyle.split(',').map(cls => cls.replace(/^[ \t\n]*/, '').replace(/[ \t\n]$/, ''));
@@ -1562,6 +1587,7 @@ class HTMLTranslator extends nodes.NodeVisitor {
         this.body.push(tag);
     }
 
+    /* eslint-disable-next-line camelcase,no-unused-vars */
     depart_table(node) {
         this.body.push('</table>\n');
     }
@@ -1576,21 +1602,23 @@ class HTMLTranslator extends nodes.NodeVisitor {
       this.context.push('')
       }
 
-
       depart_target(node) {
       this.body.push(this.context.pop())
       }
 
     */
     // no hard-coded vertical alignment in table body
+    /* eslint-disable-next-line camelcase */
     visit_tbody(node) {
         this.body.push(this.starttag(node, 'tbody'));
     }
 
+    /* eslint-disable-next-line camelcase,no-unused-vars */
     depart_tbody(node) {
         this.body.push('</tbody>\n');
     }
 
+    /* eslint-disable-next-line camelcase */
     visit_term(node) {
         this.body.push(this.starttag(node, 'dt', ''));
     }
@@ -1598,69 +1626,85 @@ class HTMLTranslator extends nodes.NodeVisitor {
     /**
      * Leave the end tag to `this.visit_definition()`, in case there's a classifier.
      */
+    /* eslint-disable-next-line camelcase,no-unused-vars */
     depart_term(node) {
     }
 
+    /* eslint-disable-next-line camelcase */
     visit_tgroup(node) {
         this.colspecs = [];
         node.stubs = [];
     }
 
+    /* eslint-disable-next-line camelcase,no-unused-vars */
     depart_tgroup(node) {
     }
 
+    /* eslint-disable-next-line camelcase */
     visit_thead(node) {
         this.body.push(this.starttag(node, 'thead'));
     }
 
+    /* eslint-disable-next-line camelcase,no-unused-vars */
     depart_thead(node) {
         this.body.push('</thead>\n');
     }
 
+    /* eslint-disable-next-line camelcase */
     visit_title_reference(node) {
         this.body.push(this.starttag(node, 'cite', ''));
     }
 
+    /* eslint-disable-next-line camelcase,no-unused-vars */
     depart_title_reference(node) {
-        this.body.push('</cite>')
+        this.body.push('</cite>');
 
-      // TODO: use the new HTML5 element <aside>? (Also for footnote text)
+        // TODO: use the new HTML5 element <aside>? (Also for footnote text)
     }
 
+    /* eslint-disable-next-line camelcase */
     visit_topic(node) {
         this.body.push(this.starttag(node, 'div', '\n', false, { CLASS: 'topic' }));
-        this.topic.classes = node.attributes['classes'];
+        this.topic.classes = node.attributes.classes;
     }
     // TODO: replace with ::
     //   this.in_contents = 'contents' in node.attributes['classes']
 
+    /* eslint-disable-next-line camelcase,no-unused-vars */
     depart_topic(node) {
-        this.body.push('</div>\n')
-        this.topicClasses = []
+        this.body.push('</div>\n');
+        this.topicClasses = [];
         // TODO this.in_contents = false
     }
 
+    /* eslint-disable-next-line camelcase */
     visit_transition(node) {
         this.body.push(this.emptytag(node, 'hr', '\n', { CLASS: 'docutils' }));
     }
-    
+
+    /* eslint-disable-next-line camelcase,no-unused-vars */
     depart_transition(node) {
     }
-    
+
+    /* eslint-disable-next-line camelcase */
     visit_version(node) {
-        this.visitDocinfoItem(node, 'version', meta=false)
+        this.visitDocinfoItem(node, 'version', false);
     }
 
+    /* eslint-disable-next-line camelcase,no-unused-vars */
     depart_version(node) {
-        this.departDocinfoItem()
+        this.departDocinfoItem();
     }
 
+    /* eslint-disable-next-line camelcase,no-unused-vars */
     unimplemented_visit(node) {
-        throw new NotImplementedError(`visiting unimplemented node type: ${node.tagname}`);
+        throw new UnimplementedError(`visiting unimplemented node type: ${node.tagname}`);
     }
 
+    /* eslint-disable-next-line camelcase */
     visit_title(node) {
         // Only 6 section levels are supported by HTML.
+        /* eslint-disable-next-line no-unused-vars */
         const checkId = 0; // TODO: is this a bool (false) or a counter?
         let closeTag = '</p>\n';
         if (node.parent instanceof nodes.topic) {
@@ -1696,13 +1740,13 @@ class HTMLTranslator extends nodes.NodeVisitor {
                 this.starttag(node, `h${headerLevel}`, '', false, atts),
             );
             atts = {};
-            if (Object.prototype.hasOwnProperty(node, 'refid')) {
+            if (Object.prototype.hasOwnProperty.call(node, 'refid')) {
                 atts.class = 'toc-backref';
                 atts.href = `#${node.refid}`;
             }
             if (Object.keys(atts).length) {
                 this.body.push(this.starttag({}, 'a', '', atts));
-                closeTag = `</a></h${hLevel}>\n`;
+                closeTag = `</a></h${headerLevel}>\n`;
             } else {
                 closeTag = `</h${headerLevel}>\n`;
             }
@@ -1710,6 +1754,7 @@ class HTMLTranslator extends nodes.NodeVisitor {
         this.context.push(closeTag);
     }
 
+    /* eslint-disable-next-line camelcase,no-unused-vars */
     depart_title(node) {
         this.body.push(this.context.pop());
         if (this.inDocumentTitle) {
@@ -1721,18 +1766,7 @@ class HTMLTranslator extends nodes.NodeVisitor {
         }
     }
 
-    visit_block_quote(node) {
-        this.body.push(this.starttag(node, 'blockquote'));
-    }
-
-    depart_block_quote(node) {
-        this.body.push('</blockquote>\n');
-    }
-
-    isCompactable(node) {
-        return false;
-    }
-
+    /* eslint-disable-next-line camelcase */
     visit_bullet_list(node) {
         const atts = {};
         const oldCompactSimple = this.compactSimple;
@@ -1744,31 +1778,29 @@ class HTMLTranslator extends nodes.NodeVisitor {
         this.body.push(this.starttag(node, 'ul', '', false, atts));
     }
 
+    /* eslint-disable-next-line camelcase,no-unused-vars */
     depart_bullet_list(node) {
         this.compactSimple = this.context.pop();
         this.compactParagraph = this.compactSimple;
         this.body.push('</ul>\n');
     }
 
-    visit_document() {
-    }
-
-    depart_document() {
-    }
-
-
+    /* eslint-disable-next-line camelcase */
     visit_list_item(node) {
         this.body.push(this.starttag(node, 'li', ''));
     }
 
+    /* eslint-disable-next-line camelcase,no-unused-vars */
     depart_list_item(node) {
         this.body.push('</li>\n');
     }
 
+    /* eslint-disable-next-line camelcase */
     visit_paragraph(node) {
         this.body.push(this.starttag(node, 'p', ''));
     }
 
+    /* eslint-disable-next-line camelcase */
     depart_paragraph(node) {
         this.body.push('</p>');
         if (!((node.parent instanceof nodes.list_item
@@ -1778,13 +1810,87 @@ class HTMLTranslator extends nodes.NodeVisitor {
         }
     }
 
+    /* eslint-disable-next-line camelcase,no-unused-vars */
     passNode(node) {
-
     }
 
+    /* eslint-disable-next-line camelcase,no-unused-vars */
     ignoreNode(node) {
         throw new nodes.SkipNode();
     }
 }
+
+/**
+ * Class for writing HTML
+ */
+class HTMLBaseWriter extends BaseWriter {
+    /**
+     * Create HTMLBaseWriter.
+     * @param {Object} args - arguments to function
+     */
+    constructor(args) {
+        super(args);
+        this.attr = {};
+        this.translatorClass = HTMLTranslator;
+    }
+
+    _init(args) {
+        super._init(args);
+        this.defaultTemplateContent = defaultTemplate;
+        this.template = template;
+        this.visitorAttributes = [
+            'headPrefix', 'head', 'stylesheet', 'bodyPrefix',
+            'bodyPreDocinfo', 'docinfo', 'body', 'bodySuffix',
+            'title', 'subtitle', 'header', 'footer', 'meta', 'fragment',
+            'htmlProlog', 'htmlHead', 'htmlTitle', 'htmlSubtitle',
+            'htmlBody'];
+    }
+
+
+    translate() {
+        this.visitor = new this.translatorClass(this.document);
+        const visitor = this.visitor;
+        if (!visitor) {
+            throw new Error();
+        }
+        this.document.walkabout(visitor);
+        this.visitorAttributes.forEach((attr) => {
+            this[attr] = visitor[attr];
+        });
+        this.output = visitor.body.join('');// this.applyTemplate();
+        //        console.log(this.output);
+    }
+
+    applyTemplate() {
+        /* eslint-disable-next-line no-unused-vars */
+        const templateContent = this.defaultTemplateContent;
+        /*        template_file = open(this.document.settings.template, 'rb')
+                  template = unicode(template_file.read(), 'utf-8')
+                  template_file.close()
+                  subs = this.interpolation_dict()
+                  return template % subs
+        */
+        return template(this.templateVars());
+    }
+
+    templateVars() {
+        const vars = {};
+        const settings = this.document.settings;
+        this.visitorAttributes.forEach((attr) => {
+            vars[attr] = (this[attr] || [].join('').trim());
+        });
+        vars.encoding = settings.output_encoding;
+        vars.version = __version__;
+        return vars;
+    }
+
+    assembleParts() {
+        super.assembleParts();
+        this.visitorAttributes.forEach((part) => {
+            this.parts[part] = (this[part] || []).join('');
+        });
+    }
+}
+
 
 export default HTMLBaseWriter;

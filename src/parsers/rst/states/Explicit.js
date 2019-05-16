@@ -18,6 +18,7 @@ class Explicit extends SpecializedBody {
     explicit_construct(match) {
         // """Determine which explicit construct this is, parse & return it."""
         const errors = [];
+        /* eslint-disable-next-line no-restricted-syntax */
         for (const [method, pattern] of this.explicit.constructs) {
             const expmatch = pattern.exec(match.result.input);
             if (expmatch) {

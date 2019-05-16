@@ -1,10 +1,13 @@
 import * as nodes from '../../nodes';
-import { isIterable, getTrimFootnoteRefSpace, splitEscapedWhitespace } from '../../utils';
+import {
+ isIterable, getTrimFootnoteRefSpace, splitEscapedWhitespace, escape2null,
+} from '../../utils';
 import { matchChars } from '../../utils/punctuationChars';
 import roleInterface from './Roles';
 import { ApplicationError } from '../../Exceptions';
 import unescape from '../../utils/unescape';
 
+/* eslint-disable-next-line no-unused-vars */
 const __docformat__ = 'reStructuredText';
 
 const uric = '[-_.!~*\'()[\\];/:@&=+$,%a-zA-Z0-9\\x00]';
@@ -599,10 +602,7 @@ class Inliner {
         this.document = memo.document;
         this.language = memo.language;
         this.parent = parent;
-        //      console.log(new RegExp(this.patterns.initial[0]));
-        //      console.log(this.patterns.initial[0]);
-        //      console.log(text.constructor.name);
-        let remaining = text;// escape2null(text)
+        let remaining = escape2null(text);
         const processed = [];
         let unprocessed = [];
         const messages = [];

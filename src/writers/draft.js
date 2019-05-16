@@ -22,6 +22,7 @@ const blockMap = {
 
 class DraftTransform extends Transform {
     apply() {
+        /* eslint-disable-next-line no-console */
         console.log('transform draft');
     }
 }
@@ -65,6 +66,7 @@ class DraftTranslator extends GenericNodeVisitor {
             /* eslint-disable-next-line no-empty */
             if (typeof mappedStyle === 'undefined') {
             } else {
+        /* eslint-disable-next-line no-console */
                 console.log(`visiting inline style ${mappedStyle}`);
                 this.inlineStyles.push(mappedStyle);
             }
@@ -73,6 +75,7 @@ class DraftTranslator extends GenericNodeVisitor {
             if (typeof mappedType === 'undefined') {
                 mappedType = node.tagname.replace(/_/g, '-');
             }
+        /* eslint-disable-next-line no-console */
             console.log(`visiting block ${mappedType}`);
         }
         const me = [node.tagname, node.attlist(), []];
@@ -87,7 +90,9 @@ class DraftTranslator extends GenericNodeVisitor {
             /* eslint-disable-next-line no-empty */
             if (typeof mappedStyle === 'undefined') {
             } else {
+        /* eslint-disable-next-line no-console */
                 console.log(`departing inline style ${mappedStyle}`);
+        /* eslint-disable-next-line no-console */
                 console.log(`creating characterMetadata with ${this.inlineStyles}`);
                 const cmd = CharacterMetadata.create({ style: this.inlineStyles, entity: null });
                 this.inline.push(...Array(this.text.length).fill(cmd));
@@ -99,10 +104,12 @@ class DraftTranslator extends GenericNodeVisitor {
             if (typeof mappedType === 'undefined') {
                 mappedType = node.tagname.replace(/_/g, '-');
             }
+        /* eslint-disable-next-line no-console */
             console.log(`departing block ${mappedType}`);
             this.blocks.push(new ContentBlock({
  key: genKey(), type: mappedType, characterList: this.inline, text: this.text,
 }));
+        /* eslint-disable-next-line no-console */
             console.log('setting text to \'\'');
             this.text = '';
             this.inline = [];
@@ -126,9 +133,11 @@ class DraftTranslator extends GenericNodeVisitor {
     /* eslint-disable-next-line camelcase,no-unused-vars */
     depart_Text(node) {
         const text = node.astext();
+        /* eslint-disable-next-line no-console */
         console.log(`departing text: ${this.inlineStyles}`);
 //        const cmd = CharacterMetadata.create({ style: this.inlineStyles, entity: null });
 //        this.inline.push(Array(text.length).fill(cmd));
+        /* eslint-disable-next-line no-console */
         console.log(`adding '${text}' to '${this.text}'`);
         this.text += text;
     }

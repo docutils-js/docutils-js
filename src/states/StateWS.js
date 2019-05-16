@@ -46,6 +46,7 @@ class StateWS extends State {
     }
 
     indent(match, context, nextState) {
+        /* eslint-disable-next-line no-unused-vars */
         const [indented, indent, lineOffset, blankFinish] = this.stateMachine.getIndented({});
         const IndentSm = this.indentSm;
         // console.log('instantiating indentsm');
@@ -60,7 +61,9 @@ class StateWS extends State {
         return [context, nextState, results];
     }
 
+    /* eslint-disable-next-line no-unused-vars */
     knownIndent(match, context, nextState) {
+        /* eslint-disable-next-line no-unused-vars */
         const [indented, lineOffset, blankFinish] = this.stateMachine.getKnownIndented(
             match.end(),
 );
@@ -73,8 +76,14 @@ class StateWS extends State {
         return [context, nextState, results];
     }
 
+    /* eslint-disable-next-line no-unused-vars */
     firstKnownIndent(match, context, nextState) {
-        const [indented, lineOffset, blankFinish] = this.stateMachine.getFirstKnownIndented({ indent: match.result.index + match.result[0].length });
+        /* eslint-disable-next-line no-unused-vars */
+        const [indented, lineOffset, blankFinish] = this.stateMachine.getFirstKnownIndented(
+            {
+                indent: match.result.index + match.result[0].length,
+            },
+        );
         const KnownIndentSm = this.knownIndentSm;
         const sm = new KnownIndentSm({ debug: this.debug, ...this.knownIndentSmKwargs });
         const results = sm.run({ indented, inputOffset: lineOffset });

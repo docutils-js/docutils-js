@@ -444,7 +444,7 @@ class Body extends RSTState {
     }
 
     disallowedInsideSubstitutionDefinitions(node) {
-        if (((node.attributes && node.attributes.ids.length )|| node instanceof nodes.reference
+        if (((node.attributes && node.attributes.ids.length) || node instanceof nodes.reference
              || node instanceof nodes.footnote_reference) && node.attributes.auto) {
             return true;
         }
@@ -555,7 +555,9 @@ class Body extends RSTState {
     unknown_directive(typeName) {
         const lineno = this.stateMachine.absLineNumber();
         const [indented,
+/* eslint-disable-next-line no-unused-vars */
                indent,
+/* eslint-disable-next-line no-unused-vars */
                offset,
                blankFinish] = this.stateMachine
               .getFirstKnownIndented({ indent: 0, stripIndent: false });
@@ -610,6 +612,7 @@ class Body extends RSTState {
         const r2 = r
               .find(x => x[2] && x[0]);
         if (r2) {
+            /* eslint-disable-next-line no-unused-vars */
             const [method, pattern, expmatch] = r2;
             try {
                 return method(expmatch);
@@ -1443,7 +1446,7 @@ class Body extends RSTState {
 
     /* eslint-disable-next-line camelcase */
     malformed_table(block, detail = '', offset = 0) {
-        throw new Error(detail);
+//        throw new Error(detail);
         block.replace(this.doubleWidthPadChar, '');
         const data = block.join('\n');
         let message = 'Malformed table.';

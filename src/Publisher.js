@@ -4,6 +4,8 @@ import OptionParser from './OptParse';
 import * as readers from './Readers';
 import * as writers from './Writers';
 import SettingsSpec from './SettingsSpec';
+import Source from './Sources';
+/* eslint-disable-next-line no-unused-vars */
 import pojoTranslate from './fn/pojoTranslate';
 
 /**
@@ -20,40 +22,38 @@ class Publisher {
      * @param {Source} args.source - instance of Source
      * @param {function} args.sourceClass - class for source, mutually exclusive with souce paramter
      * @param {Destination} args.destination - where the output should be written
-     * @param {function} args.destinationClass - Class for destination, mutually exclusiv with destination paramter.
+     * @param {function} args.destinationClass - Class for destination, mutually
+     *                                           exclusive with destination paramter.
      * @param {object} args.settings - Settings for docutils engine.
      * @param {function} args.debugFn - Debug function.
      */
     constructor(args) {
-        let {
+        const {
  reader, parser, writer, source, sourceClass, destination,
               destinationClass, settings, debugFn,
 } = args;
-//      console.log(source);
         /* Terrible defaults ! */
-        if (!sourceClass) {
-            sourceClass = FileInput;
-        }
-        if (!destinationClass) {
-            destinationClass = FileOutput;
-        }
+        const sourceClass2 = sourceClass || FileInput;
+        const destinationClass2 = destinationClass || FileOutput;
+
         this.debugFn = debugFn;
         this.document = null;
         this.reader = reader;
         this.parser = parser;
         this.writer = writer;
         this.source = source;
-        if (sourceClass === undefined) {
+        if (sourceClass2 === undefined) {
             this.sourceClass = Source;
         } else {
-            this.sourceClass = sourceClass;
+            this.sourceClass = sourceClass2;
         }
 
         this.destination = destination;
-        if (destinationClass === undefined) {
-            this.destinationClass = Destination;
+        if (destinationClass2 === undefined) {
+            throw new Error();
+            // this.destinationClass = Destination;// ?
         } else {
-            this.destinationClass = destinationClass;
+            this.destinationClass = destinationClass2;
         }
         this.settings = settings;
     }
@@ -61,8 +61,8 @@ class Publisher {
     setReader(readerName, parser, parserName) {
         const ReaderClass = readers.getReaderClass(readerName);
         this.reader = new ReaderClass({
- parser, parserName, debug: this.debug, debugFn: this.debugFn,
-});
+            parser, parserName, debug: this.debug, debugFn: this.debugFn,
+        });
         this.parser = this.reader.parser;
     }
 
@@ -89,8 +89,8 @@ class Publisher {
     }
 
     setupOptionParser({
- usage, description, settingsSpec, configSection, defaults,
-}) {
+        usage, description, settingsSpec, configSection, defaults,
+    }) {
         if (configSection) {
             if (!settingsSpec) {
                 settingsSpec = new SettingsSpec();
@@ -102,27 +102,27 @@ class Publisher {
             }
         }
         const optionParser = new OptionParser({
- components: [this.parser, this.reader, this.writer, settingsSpec],
-                                               defaults,
-                                               readConfigFiles: true,
-                                               usage,
-description,
-});
-//      console.log(JSON.stringify(optionParser.settingsSpec));
+            components: [this.parser, this.reader, this.writer, settingsSpec],
+            defaults,
+            readConfigFiles: true,
+            usage,
+            description,
+        });
+        //      console.log(JSON.stringify(optionParser.settingsSpec));
         return optionParser;
     }
 
     processCommandLine({
-argv, usage, description, settingsSpec, configSection,
-                        settingsOverrides,
-}) {
+        argv, usage, description, settingsSpec, configSection,
+        settingsOverrides,
+    }) {
         const optionParser = this.setupOptionParser({
-usage,
-description,
-settingsSpec,
-                                               configSection,
-settingsOverrides,
-});
+            usage,
+            description,
+            settingsSpec,
+            configSection,
+            settingsOverrides,
+        });
         if (argv === undefined) {
             argv = process.argv.slice(2);
         }
@@ -187,16 +187,22 @@ encoding:
     }
 
     publish2(args) {
+        /* eslint-disable-next-line no-unused-vars */
         const {
-            argv, usage, description, settingsSpec, settingsOverrides, configSection, enableExitStatus,
+        /* eslint-disable-next-line no-unused-vars */
+            argv, usage, description, settingsSpec, settingsOverrides,
+        /* eslint-disable-next-line no-unused-vars */
+            configSection, enableExitStatus,
         } = args;
     }
 
     /* This doesnt seem to return anything ? */
     publish(args, cb) {
         const {
+            /* eslint-disable-next-line no-unused-vars */
  argv, usage, description, settingsSpec, settingsOverrides, configSection, enableExitStatus,
 } = args;
+        /* eslint-disable-next-line no-unused-vars */
         let exit;
         try {
             if (this.settings === undefined) {

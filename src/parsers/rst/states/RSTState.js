@@ -15,6 +15,7 @@ class RSTState extends StateWS {
             stateFactory: this.stateMachine.stateFactory.withStateClasses(this.stateClasses),
             initialState: 'Body',
             debug: args && args.stateMachine ? args.stateMachine.debug : false,
+            /* eslint-disable-next-line no-console */
             debugFn: args && args.stateMachine ? args.stateMachine.debugFn : console.log,
         };
     }
@@ -176,7 +177,12 @@ matchTitles,
 //        console.log(titleStyles);
         const mylevel = memo.sectionLevel;
         let level = 0;
-        level = titleStyles.indexOf(style) + 1;
+        level = titleStyles.findIndex(tStyle => (style.length === 1 ? tStyle.length === 1
+                                                 && tStyle[0] === style[0] : style.length === 2
+                                                 && tStyle.length === 2
+                                                 && tStyle[0] === style[0] && tStyle[1]
+            === style[1])) + 1;
+
         if (level === 0) {
             if (titleStyles.length === memo.sectionLevel) { // new subsection
                 titleStyles.push(style);
@@ -250,7 +256,7 @@ matchTitles: true,
     paragraph(lines, lineno) {
         const data = lines.join('\n').trimEnd();
         let text;
-        let literalnext;
+        let literalNext;
         if (/(?<!\\)(\\\\)*::$/.test(data)) {
             if (data.length === 2) {
                 return [[], 1];
@@ -260,16 +266,16 @@ matchTitles: true,
             } else {
                 text = data.substring(0, data.length - 1);
             }
-            literalnext = 1;
+            literalNext = 1;
         } else {
             text = data;
-            literalnext = 0;
+            literalNext = 0;
         }
         const r = this.inline_text(text, lineno);
         const [textnodes, messages] = r;
         const p = new nodes.paragraph(data, '', textnodes);
         [p.source, p.line] = this.stateMachine.getSourceAndLine(lineno);
-        return [[p, ...messages], literalnext];
+        return [[p, ...messages], literalNext];
     }
 
     /* eslint-disable-next-line camelcase */

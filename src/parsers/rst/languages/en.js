@@ -1,3 +1,4 @@
+/* eslint-disable-next-line no-unused-vars */
 const __docformat__ = 'reStructuredText';
 
 export const directives = {

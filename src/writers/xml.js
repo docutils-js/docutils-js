@@ -58,9 +58,11 @@ class XMLTranslator extends nodes.GenericNodeVisitor {
         this.output.push(node.starttag());
         this.level += 1;
         // fixme should probably pick this code up
+        /* eslint-disable-next-line no-constant-condition */
         if (false) { // node instanceof nodes.FixedTextElement || node instanceof nodes.literal) {
             this.fixedText += 1;
         } else {
+            /* eslint-disable-next-line no-restricted-syntax */
             for (const nt of this.simple_nodes) {
                 if (node instanceof nt) {
                     this.inSimple += 1;

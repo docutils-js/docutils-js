@@ -1,31 +1,36 @@
 /**
  * Docutils document tree element class library.
- * 
+ *
  * Classes in CamelCase are abstract base classes or auxiliary classes. The one
  * exception is `Text`, for a text (PCDATA) node; uppercase is used to
  * differentiate from element classes.  Classes in lower_case_with_underscores
  * are element classes, matching the XML element generic identifiers in the DTD_.
- * 
+ *
  * The position of each node (the level at which it can occur) is significant and
  * is represented by abstract base classes (`Root`, `Structural`, `Body`,
  * `Inline`, etc.).  Certain transformations will be easier because we can use
  * ``isinstance(node, base_class)`` to determine the position of the node in the
  * hierarchy.
- * 
+ *
  * .. _DTD: http://docutils.sourceforge.net/docs/ref/docutils.dtd
- * 
+ *
  */
 import xmlescape from 'xml-escape';
 import Transformer from './Transformer';
+/* eslint-disable-next-line no-unused-vars */
 import { InvalidArgumentsError, ApplicationError, UnimplementedError } from './Exceptions';
 import unescape from './utils/unescape';
 import { isIterable, checkDocumentArg } from './utils';
 
+/* eslint-disable-next-line no-unused-vars */
 const __docformat__ = 'reStructuredText';
 
 
+/* eslint-disable-next-line no-unused-vars */
 const _nonIdChars = /[^a-z0-9]+/ig;
+/* eslint-disable-next-line no-unused-vars */
 const _nonIdAtEnds = /^[-0-9]+|-+$/;
+/* eslint-disable-next-line no-unused-vars */
 const _nonIdTranslate = {
     0x00f8: 'o', // o with stroke
     0x0111: 'd', // d with stroke
@@ -61,6 +66,7 @@ const _nonIdTranslate = {
     0x024d: 'r', // r with stroke
     0x024f: 'y', // y with stroke
 };
+/* eslint-disable-next-line no-unused-vars */
 const _nonIdTranslateDigraphs = {
     0x00df: 'sz', // ligature sz
     0x00e6: 'ae', // ae
@@ -679,7 +685,7 @@ class Element extends Node {
           self.tagname = self.__class__.__name__
         */
     }
-    
+
     _init() {
         super._init();
         /* List attributes which are defined for every Element-derived class
@@ -1096,7 +1102,7 @@ class TextElement extends Element {
  * Document class
  *
  * To create a document, call {@link newDocument}.
- * @extends Element 
+ * @extends Element
  */
 class document extends Element {
     /** Private constructor */
@@ -2243,25 +2249,44 @@ export {
     Node, whitespaceNormalizeName, NodeVisitor, GenericNodeVisitor,
     SparseNodeVisitor, nodeToXml, Element, TextElement,
          Text, abbreviation, acronym, address, admonition, attention,
+/* eslint-disable-next-line camelcase */
          attribution, author, authors, block_quote, bullet_list, caption,
+/* eslint-disable-next-line camelcase */
          caution, citation, citation_reference, classifier, colspec, comment,
          compound, contact, container, copyright, danger, date, decoration,
+/* eslint-disable-next-line camelcase */
          definition, definition_list, definition_list_item, description,
+/* eslint-disable-next-line camelcase */
          docinfo, doctest_block, document, emphasis, entry, enumerated_list,
+/* eslint-disable-next-line camelcase */
          error, field, field_body, field_list, field_name, figure, footer,
+/* eslint-disable-next-line camelcase */
          footnote, footnote_reference, generated, header, hint, image,
+/* eslint-disable-next-line camelcase */
          important, inline, label, legend, line, line_block, list_item,
+/* eslint-disable-next-line camelcase */
          literal, literal_block, math, math_block, note, option,
+/* eslint-disable-next-line camelcase */
          option_argument, option_group, option_list, option_list_item,
+/* eslint-disable-next-line camelcase */
          option_string, organization, paragraph, pending, problematic, raw,
          reference, revision, row, rubric, section, sidebar, status, strong,
+/* eslint-disable-next-line camelcase */
          subscript, substitution_definition, substitution_reference, subtitle,
+/* eslint-disable-next-line camelcase */
          superscript, system_message, table, target, tbody, term, tgroup,
+/* eslint-disable-next-line camelcase */
          thead, tip, title, title_reference, topic, transition, version,
          warning,
 
-    SkipNode, Root, Titular, PreBibliographic, Bibliographic,
+    Root, Titular, PreBibliographic, Bibliographic,
     Decorative, Structural, Body, General, Sequential,
     Admonition, Special, Invisible, Part, Inline, Referential, Targetable, Labeled,
     _addNodeClassNames,
+
+    SkipChildren,
+    StopTraversal,
+    SkipNode,
+    SkipDeparture,
+    SkipSiblings,
 };

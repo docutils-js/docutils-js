@@ -1,6 +1,8 @@
 import * as nodes from '../nodes';
+/* eslint-disable-next-line no-unused-vars */
 import * as utils from '../utils';
 import Transform from '../Transform';
+/* eslint-disable-next-line no-unused-vars */
 import TransformError from '../TransformError';
 
 /**
@@ -137,12 +139,15 @@ export class DocInfo extends Transform {
     apply() {
     }
 
+    /* eslint-disable-next-line no-unused-vars */
     extractBibliographic(fieldList) {
     }
 
+    /* eslint-disable-next-line no-unused-vars */
     checkEmptyBiblioField(field, name) {
     }
 
+    /* eslint-disable-next-line no-unused-vars */
     checkCompoundBiblioField(field, name) {
     }
 
@@ -153,15 +158,19 @@ export class DocInfo extends Transform {
           (re.compile(r'\$' r'RCSfile: (.+),v \$', re.IGNORECASE), r'\1'),
           (re.compile(r'\$[a-zA-Z]+: (.+) \$'), r'\1'),]
     */
+    /* eslint-disable-next-line no-unused-vars */
     extractAuthors(field, name, docinfo) {
     }
 
+    /* eslint-disable-next-line no-unused-vars */
     authorsFromOneParagraph(field) {
     }
 
+    /* eslint-disable-next-line no-unused-vars */
     authorsFromBulletList(field) {
     }
 
+    /* eslint-disable-next-line no-unused-vars */
     authorsFromParagraphs(field) {
     }
 }

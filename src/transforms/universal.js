@@ -1,8 +1,10 @@
 import * as nodes from '../nodes';
 import * as utils from '../utils';
 import Transform from '../Transform';
+/* eslint-disable-next-line no-unused-vars */
 import TransformError from '../TransformError';
 
+/* eslint-disable-next-line import/prefer-default-export */
 export class Decorations extends Transform {
     apply() {
         const headerNodes = this.generateHeader();
@@ -37,7 +39,8 @@ export class Decorations extends Transform {
         if (settings.generator || settings.datestamp || settings.sourceLink || settings.sourceUrl) {
             const text = [];
             if ((settings.sourceLink && settings._source) || settings.sourceUrl) {
-                const source = settings.sourceUrl || utils.relativePath(settings._destination, settings._source);
+                const source = settings.sourceUrl
+                      || utils.relativePath(settings._destination, settings._source);
                 text.push(new nodes.reference('', 'View document source', [], { refuri: source }),
                           new nodes.Text('.\n'));
             }

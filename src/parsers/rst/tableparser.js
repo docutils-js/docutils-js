@@ -188,10 +188,12 @@ class GridTableParser extends TableParser {
             const [top, left] = corners.shift();
             if (top === this.bottom || left === this.right
                || top <= this.done[left]) {
+                /* eslint-disable-next-line no-continue */
                 continue;
             }
             const result = this.scan_cell(top, left);
             if (!result) {
+                /* eslint-disable-next-line no-continue */
                 continue;
             }
             const [bottom, right, rowseps, colseps] = result;
@@ -393,6 +395,7 @@ if (typeof right === 'undefined') {
         }
         // keep track of # of cells remaining; should reduce to zero
         let remaining = (rowseps.length - 1) * (colseps.length - 1);
+        /* eslint-disable-next-line no-restricted-syntax */
         for (const [top, left, bottom, right, block] of this.cells) {
             const rownum = rowindex[top];
             const colnum = colindex[left];
@@ -545,6 +548,7 @@ class SimpleTableParser extends TableParser {
 //        console.log(`parsing columns from ${line}, ${offset}`);
         const cols = [];
         let end = 0;
+        /* eslint-disable-next-line no-constant-condition */
         while (true) {
             const begin = line.indexOf('-', end);
 //            console.log(`looking for '-' begin is ${begin}`);
@@ -580,7 +584,7 @@ class SimpleTableParser extends TableParser {
     init_row(colspec, offset) {
         let i = 0;
         const cells = [];
-        /* eslint-disable-next-line no-unused-vars */
+        /* eslint-disable-next-line no-unused-vars,no-restricted-syntax */
         for (const [start, end] of colspec) {
             let morecols = 0;
             try {
@@ -665,6 +669,7 @@ class SimpleTableParser extends TableParser {
             const [start, end] = columns[i];
             const nextstart = columns[i + 1][0];
             let offset = 0;
+            /* eslint-disable-next-line no-restricted-syntax */
             for (const line of lines) {
                 if (i === lastcol && line.substring(end).trim()) {
                     text = line.substring(start).trimEnd();

@@ -19,11 +19,11 @@ class Text extends RSTState {
 
     /* eslint-disable-next-line no-unused-vars */
     blank(match, context, nextState) {
-        const [paragraph, literalnext] = this.paragraph(
+        const [paragraph, literalNext] = this.paragraph(
             context, this.stateMachine.absLineNumber() - 1,
 );
         this.parent.add(paragraph);
-        if (literalnext) {
+        if (literalNext) {
             this.parent.add(this.literal_block());
         }
 
@@ -132,12 +132,12 @@ srcline;
             }
         }
         const lines = [context, ...(block || [])];
-        const [pelems, literalnext] = this.paragraph(lines, startline);
+        const [pelems, literalNext] = this.paragraph(lines, startline);
         this.parent.add(pelems);
         if (msg) {
             this.parent.add(msg);
         }
-        if (literalnext) {
+        if (literalNext) {
             try {
                 this.stateMachine.nextLine();
             } catch (error) {

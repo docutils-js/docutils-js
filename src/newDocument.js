@@ -1,6 +1,7 @@
 import { document } from './nodes';
 import newReporter from './newReporter';
 
+/* eslint-disable-next-line no-unused-vars */
 const __docformat__ = 'reStructuredText';
 
 /**

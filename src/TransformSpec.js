@@ -1,3 +1,4 @@
+/* eslint-disable-next-line no-unused-vars */
 const __docformat__ = 'reStructuredText';
 
 /**
@@ -10,9 +11,10 @@ const __docformat__ = 'reStructuredText';
 class TransformSpec {
     constructor(args) {
         this.unknownReferenceResolvers = [];
-	this._init(args);
+        this._init(args);
     }
 
+    /* eslint-disable-next-line no-unused-vars */
     _init(...args) {
     }
 

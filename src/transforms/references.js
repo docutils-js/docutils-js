@@ -10,6 +10,7 @@ export class PropagateTargets extends Transform {
     }
 
     apply() {
+        /* eslint-disable-next-line no-unused-vars */
         this.document.traverse({ condition: nodes.target }).forEach((target) => {
             // console.log(`target is ${target}`);
         });

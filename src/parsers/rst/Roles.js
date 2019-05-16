@@ -83,7 +83,6 @@ function roleInterface(roleName, languageModule, lineno, reporter) {
                         msgText.append('No role entry for "%s" in module "%s".'
                                         % (roleName, languageModule.__name__))
             */
-
         }
     } else {
             canonicalname = DEFAULT_INTERPRETED_ROLE;

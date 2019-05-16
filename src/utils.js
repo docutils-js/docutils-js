@@ -1,5 +1,21 @@
 import { combining } from './utils/combining';
 
+export function findCombiningChars(text) {
+/* """Return indices of all combining chars in  Unicode string `text`.
+
+    >>> from docutils.utils import find_combining_chars
+    >>> find_combining_chars(u'A t ab le ')
+    [3, 6, 9]
+
+    """ */
+    return text.split('').map((c, i) => {
+        const r = combining[text.codePointAt(i)];
+        return [r, i];
+        /* eslint-disable-next-line no-unused-vars */
+    }).filter(([r, i]) => r).map(([r, i]) => i);
+}
+
+
 /* eslint-disable-next-line no-unused-vars */
 export function getTrimFootnoteRefSpace(settings) { // fixme
     /*    """
@@ -56,6 +72,7 @@ export const punctuation_chars = {
 };
 
 
+/* eslint-disable-next-line no-unused-vars */
 function _getCallerFile() {
     const originalFunc = Error.prepareStackTrace;
 
@@ -64,10 +81,11 @@ function _getCallerFile() {
     try {
         const err = new Error();
 
-        Error.prepareStackTrace = function (err, stack) { return stack; };
+        Error.prepareStackTrace = (error, stack) => stack;
 
         const x = err.stack.shift();
         const currentfile = x.getFileName();
+        /* eslint-disable-next-line no-unused-vars */
         const currentlineno = x.getLineNumber();
 //      process.stderr.write(`${currentfile} ${currentlineno}\n`);
 
@@ -75,10 +93,10 @@ function _getCallerFile() {
         const x2 = err.stack.shift();
         callerfile = x2.getFileName();
         callerlineno = x2.getLineNumber();
-
             if (currentfile !== callerfile) break;
             }
     } catch (e) {
+        /* eslint-disable-next-line no-console */
         console.log(e);
     }
 
@@ -91,6 +109,7 @@ export function escape2null(text) {
     // """Return a string with escape-backslashes converted to nulls."""
     const parts = [];
     let start = 0;
+    /* eslint-disable-next-line no-constant-condition */
     while (true) {
         const found = text.indexOf('\\', start);
         if (found === -1) {
@@ -111,6 +130,7 @@ export function splitEscapedWhitespace(text) {
     """ */
     const strings = text.split('\x00 ');
     const s = [];
+    /* eslint-disable-next-line no-restricted-syntax */
     for (const string of strings) {
         s.push(...string.split('\x00\n'));
     }
@@ -119,7 +139,7 @@ export function splitEscapedWhitespace(text) {
 
 export function columnIndicies(text) {
     const stringIndicies = new Array(text.length);
-    for (let i = 0; i < text.length; i++) {
+    for (let i = 0; i < text.length; i += 1) {
         stringIndicies[i] = i;
     }
     findCombiningChars(text).forEach((index) => {
@@ -145,20 +165,6 @@ export function columnIndicies(text) {
     return [i for i in string_indices if i is not None]
 }
 */
-export function findCombiningChars(text) {
-/* """Return indices of all combining chars in  Unicode string `text`.
-
-    >>> from docutils.utils import find_combining_chars
-    >>> find_combining_chars(u'A t ab le ')
-    [3, 6, 9]
-
-    """ */
-    return text.split('').map((c, i) => {
-        const r = combining[text.codePointAt(i)];
-        return [r, i];
-    }).filter(([r, i]) => r).map(([r, i]) => i);
-}
-
 export function escapeRegExp(string) {
   return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
 }
@@ -176,7 +182,7 @@ export function pySplit(text) {
 
 export function checkDocumentArg(document) {
     if (typeof document === 'undefined') {
-	throw new Error('undefined document');
+        throw new Error('undefined document');
     }
     return true;
 }

@@ -1,0 +1,13 @@
+<?js
+var data = obj;
+var self = this;
+?>
+
+<?js if (data.kind === 'package') { ?>
+<?js= data.name ?> <?js= data.version ?>
+
+<?js } ?>
+
+<?js if (data.readme) { ?>
+        <article><?js= data.readme ?></article>
+<?js } ?>

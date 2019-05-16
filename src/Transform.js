@@ -9,7 +9,7 @@ export default class Transform {
         this._init(document, startNode);
     }
 
+    /* eslint-disable-next-line no-unused-vars */
     _init(...args) {
-        // empty
     }
 }

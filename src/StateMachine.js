@@ -4,17 +4,13 @@ import { isIterable } from './utils';
 import {
  ApplicationError, EOFError, InvalidArgumentsError, UnimplementedError as Unimp,
 } from './Exceptions';
+import UnexpectedIndentationError from './UnexpectedIndentationError';
 import StateCorrection from './StateCorrection';
 import TransitionCorrection from './TransitionCorrection';
-
+import DuplicateStateError from './DuplicateStateError';
 import StringList from './StringList';
 
-/* function __getClass(object) {
-  return Object.prototype.toString.call(object)
-    .match(/^\[object\s(.*)\]$/)[1];
-} */
-
-export class StateMachine {
+class StateMachine {
     /*
         Initialize a `StateMachine` object; add state objects.
 
@@ -41,6 +37,7 @@ export class StateMachine {
         }
         if (debug && !debugFn) {
             // throw new Error("unexpected lack of debug function");
+            /* eslint-disable-next-line no-console */
             debugFn = console.log;
         }
         this.stateFactory = stateFactory;
@@ -141,8 +138,8 @@ export class StateMachine {
             }
 //          console.log(context);
             results.push(...result);
+            /* eslint-disable-next-line no-constant-condition */
             while (true) {
-                const doContinue = false;
                 try {
                     try {
                         this.nextLine();
@@ -205,6 +202,7 @@ export class StateMachine {
                               'state "%s", transition %s.'
                               % (state.__class__.__name__, transitions[0])) */
                         /* Cant continue, makes no sense? ??  */
+                        /* eslint-disable-next-line no-continue */
                         continue;
                     } else if (error instanceof StateCorrection) {
                         this.previousLine();
@@ -330,6 +328,7 @@ src;
     }
 
 
+    /* eslint-disable-next-line no-unused-vars */
     insertInput(inputLines, source) {
         throw new Unimp();
     }
@@ -358,27 +357,25 @@ src;
         if (this.debug) {
             this.debugFn(`\nStateMachine.check_line: state="${state.constructor.name}", transitions=${transitions}.`);
         }
-        // console.log(`checking line ${this.line}`);
         if (transitions === undefined) {
             transitions = state.transitionOrder;
         }
+        /* eslint-disable-next-line no-unused-vars */
         const stateCorrection = true;
-//      if(transitions.length === 0) {
-//          throw new Error("no transitions");
-//      }
 
-        //        console.log(transitions);
+        /* eslint-disable-next-line no-restricted-syntax */
         for (const name of transitions) {
-            const [pattern, method, nextState] = state.transitions[name]; // how is this initialized?
-            //      console.log(method);
-//          console.log(`checkLine: ${name} ${pattern} ${nextState}`);
+             // how is this initialized?
+            const [pattern, method, nextState] = state.transitions[name];
             const result = pattern.exec(this.line);
             if (result) {
                 if (this.debug) {
-                    this.debugFn(`\nStateMachine.checkLine: Matched transition '"${name}" in state "${state.constructor.name}`);
+                    this.debugFn(`\nStateMachine.checkLine: Matched transition '"${name}"`
+                                 + `in state "${state.constructor.name}`);
                 }
 //              console.log(`pattern match for ${name}`);
-                const r = method.bind(state)({ pattern, result, input: this.line }, context, nextState);
+                const r = method.bind(state)({ pattern, result, input: this.line },
+                                             context, nextState);
                 /* istanbul ignore if */
                 if (r === undefined) {
                         throw new Error();
@@ -404,7 +401,7 @@ src;
         }
         // console.log(`adding state ${stateName}`);
 
-        if (Object.hasOwnProperty(this.states, stateName)) {
+        if (Object.prototype.hasOwnProperty.call(this.states, stateName)) {
             throw new DuplicateStateError(stateName);
         }
         if (!stateName) {
@@ -439,6 +436,7 @@ src;
     }
 
     notifyObservers() {
+        /* eslint-disable-next-line no-restricted-syntax */
         for (const observer of this.observers) {
             /* istanbul ignore if */
             if (observer === undefined) {
@@ -454,6 +452,7 @@ src;
                 /* istanbul ignore if */
                 if (info === undefined) {
                     // throw new Error("undefined info");
+                    /* eslint-disable-next-line no-continue */
                     continue;
                 }
                 if (!isIterable(info)) {
@@ -461,6 +460,7 @@ src;
                 }
                 observer(...info);
             } catch (err) {
+            /* eslint-disable-next-line no-console */
                 console.log(err.stack);
             }
         }
@@ -470,6 +470,7 @@ src;
 
 function expandtabs(string) {
     let tabIndex;
+    /* eslint-disable-next-line no-cond-assign */
     while ((tabIndex = string.indexOf('\t')) !== -1) {
         string = string.substring(0, tabIndex) + Array(8 - (tabIndex % 8)).fill(' ').join('') + string.substring(tabIndex + 1);
     }
@@ -483,9 +484,10 @@ export function string2lines(astring, args) {
         args = {};
     }
 
+    /* eslint-disable-next-line no-unused-vars,prefer-const */
     let { tabWidth, convertWhitespace, whitespace } = args;
+    /* eslint-disable-next-line no-empty */
     if (whitespace === undefined) {
-        /* empty */
     }
     if (tabWidth === undefined) {
         tabWidth = 8;
@@ -496,3 +498,5 @@ export function string2lines(astring, args) {
     }
     return result.map(expandtabs);
 }
+
+export { StateMachine };
