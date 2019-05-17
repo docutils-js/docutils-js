@@ -1,0 +1,840 @@
+{
+   "footnote_reference" : {
+      "leaf" : true,
+      "name" : "footnote_reference",
+      "classTypes" : [
+         "General",
+         "Inline",
+         "Referential"
+      ]
+   },
+   "address" : {
+      "name" : "address",
+      "classTypes" : [
+         "Bibliographic"
+      ],
+      "leaf" : true
+   },
+   "literal_block" : {
+      "leaf" : true,
+      "name" : "literal_block",
+      "classTypes" : [
+         "General"
+      ]
+   },
+   "block_quote" : {
+      "leaf" : true,
+      "name" : "block_quote",
+      "classTypes" : [
+         "General"
+      ]
+   },
+   "field_list" : {
+      "leaf" : true,
+      "name" : "field_list",
+      "classTypes" : [
+         "Sequential"
+      ]
+   },
+   "reference" : {
+      "leaf" : true,
+      "name" : "reference",
+      "classTypes" : [
+         "General",
+         "Inline",
+         "Referential"
+      ]
+   },
+   "compound" : {
+      "leaf" : true,
+      "name" : "compound",
+      "classTypes" : [
+         "General"
+      ]
+   },
+   "citation_reference" : {
+      "name" : "citation_reference",
+      "classTypes" : [
+         "General",
+         "Inline",
+         "Referential"
+      ],
+      "leaf" : true
+   },
+   "classifier" : {
+      "leaf" : true,
+      "classTypes" : [
+         "Part"
+      ],
+      "name" : "classifier"
+   },
+   "substitution_reference" : {
+      "name" : "substitution_reference",
+      "classTypes" : [
+         "Inline"
+      ],
+      "leaf" : true
+   },
+   "option_list_item" : {
+      "classTypes" : [
+         "Part"
+      ],
+      "name" : "option_list_item",
+      "leaf" : true
+   },
+   "note" : {
+      "leaf" : true,
+      "classTypes" : [
+         "Admonition"
+      ],
+      "name" : "note"
+   },
+   "important" : {
+      "leaf" : true,
+      "classTypes" : [
+         "Admonition"
+      ],
+      "name" : "important"
+   },
+   "comment" : {
+      "leaf" : true,
+      "name" : "comment",
+      "classTypes" : [
+         "Special",
+         "Invisible",
+         "Inline",
+         "Targetable"
+      ]
+   },
+   "bullet_list" : {
+      "classTypes" : [
+         "Sequential"
+      ],
+      "name" : "bullet_list",
+      "leaf" : true
+   },
+   "table" : {
+      "classTypes" : [
+         "General"
+      ],
+      "name" : "table",
+      "leaf" : true
+   },
+   "container" : {
+      "leaf" : true,
+      "name" : "container",
+      "classTypes" : [
+         "General"
+      ]
+   },
+   "version" : {
+      "classTypes" : [
+         "Bibliographic"
+      ],
+      "name" : "version",
+      "leaf" : true
+   },
+   "hint" : {
+      "leaf" : true,
+      "classTypes" : [
+         "Admonition"
+      ],
+      "name" : "hint"
+   },
+   "revision" : {
+      "classTypes" : [
+         "Bibliographic"
+      ],
+      "name" : "revision",
+      "leaf" : true
+   },
+   "citation" : {
+      "classTypes" : [
+         "General",
+         "BackLinkable",
+         "Labeled",
+         "Targetable"
+      ],
+      "name" : "citation",
+      "leaf" : true
+   },
+   "subtitle" : {
+      "name" : "subtitle",
+      "classTypes" : [
+         "Titular",
+         "PreBibliographic"
+      ],
+      "leaf" : true
+   },
+   "line" : {
+      "leaf" : true,
+      "name" : "line",
+      "classTypes" : [
+         "Part"
+      ]
+   },
+   "emphasis" : {
+      "name" : "emphasis",
+      "classTypes" : [
+         "Inline"
+      ],
+      "leaf" : true
+   },
+   "footer" : {
+      "classTypes" : [
+         "Decorative"
+      ],
+      "name" : "footer",
+      "leaf" : true
+   },
+   "definition_list" : {
+      "classTypes" : [
+         "Sequential"
+      ],
+      "name" : "definition_list",
+      "leaf" : true
+   },
+   "footnote" : {
+      "leaf" : true,
+      "name" : "footnote",
+      "classTypes" : [
+         "General",
+         "BackLinkable",
+         "Labeled",
+         "Targetable"
+      ]
+   },
+   "author" : {
+      "name" : "author",
+      "classTypes" : [
+         "Bibliographic"
+      ],
+      "leaf" : true
+   },
+   "row" : {
+      "name" : "row",
+      "classTypes" : [
+         "Part"
+      ],
+      "leaf" : true
+   },
+   "figure" : {
+      "leaf" : true,
+      "classTypes" : [
+         "General"
+      ],
+      "name" : "figure"
+   },
+   "docinfo" : {
+      "classTypes" : [
+         "Bibliographic"
+      ],
+      "name" : "docinfo",
+      "leaf" : true
+   },
+   "copyright" : {
+      "classTypes" : [
+         "Bibliographic"
+      ],
+      "name" : "copyright",
+      "leaf" : true
+   },
+   "title_reference" : {
+      "classTypes" : [
+         "Inline"
+      ],
+      "name" : "title_reference",
+      "leaf" : true
+   },
+   "math_block" : {
+      "leaf" : true,
+      "name" : "math_block",
+      "classTypes" : [
+         "General"
+      ]
+   },
+   "acronym" : {
+      "leaf" : true,
+      "classTypes" : [
+         "Inline"
+      ],
+      "name" : "acronym"
+   },
+   "superscript" : {
+      "classTypes" : [
+         "Inline"
+      ],
+      "name" : "superscript",
+      "leaf" : true
+   },
+   "system_message" : {
+      "classTypes" : [
+         "Special",
+         "BackLinkable",
+         "PreBibliographic"
+      ],
+      "name" : "system_message",
+      "leaf" : true
+   },
+   "substitution_definition" : {
+      "leaf" : true,
+      "classTypes" : [
+         "Special",
+         "Invisible"
+      ],
+      "name" : "substitution_definition"
+   },
+   "error" : {
+      "leaf" : true,
+      "name" : "error",
+      "classTypes" : [
+         "Admonition"
+      ]
+   },
+   "option_group" : {
+      "leaf" : true,
+      "classTypes" : [
+         "Part"
+      ],
+      "name" : "option_group"
+   },
+   "danger" : {
+      "leaf" : true,
+      "name" : "danger",
+      "classTypes" : [
+         "Admonition"
+      ]
+   },
+   "target" : {
+      "name" : "target",
+      "classTypes" : [
+         "Special",
+         "Invisible",
+         "Inline",
+         "Targetable"
+      ],
+      "leaf" : true
+   },
+   "attention" : {
+      "leaf" : true,
+      "name" : "attention",
+      "classTypes" : [
+         "Admonition"
+      ]
+   },
+   "admonition" : {
+      "name" : "admonition",
+      "classTypes" : [
+         "Admonition"
+      ],
+      "leaf" : true
+   },
+   "topic" : {
+      "name" : "topic",
+      "classTypes" : [
+         "Structural"
+      ],
+      "leaf" : true
+   },
+   "paragraph" : {
+      "leaf" : true,
+      "classTypes" : [
+         "General"
+      ],
+      "name" : "paragraph"
+   },
+   "rubric" : {
+      "leaf" : true,
+      "name" : "rubric",
+      "classTypes" : [
+         "Titular"
+      ]
+   },
+   "label" : {
+      "leaf" : true,
+      "name" : "label",
+      "classTypes" : [
+         "Part"
+      ]
+   },
+   "Element" : {
+      "subClasses" : [
+         "header",
+         "footer",
+         "decoration",
+         "TextElement",
+         "document",
+         "docinfo",
+         "authors",
+         "section",
+         "topic",
+         "sidebar",
+         "transition",
+         "compound",
+         "container",
+         "bullet_list",
+         "enumerated_list",
+         "list_item",
+         "definition_list",
+         "definition_list_item",
+         "definition",
+         "field_list",
+         "field",
+         "field_body",
+         "option",
+         "option_group",
+         "option_list",
+         "option_list_item",
+         "description",
+         "line_block",
+         "block_quote",
+         "attention",
+         "caution",
+         "danger",
+         "error",
+         "important",
+         "note",
+         "tip",
+         "hint",
+         "warning",
+         "admonition",
+         "footnote",
+         "citation",
+         "figure",
+         "legend",
+         "table",
+         "tgroup",
+         "colspec",
+         "thead",
+         "tbody",
+         "row",
+         "entry",
+         "system_message",
+         "pending",
+         "image"
+      ],
+      "name" : "Element",
+      "classTypes" : [],
+      "leaf" : false
+   },
+   "subscript" : {
+      "classTypes" : [
+         "Inline"
+      ],
+      "name" : "subscript",
+      "leaf" : true
+   },
+   "document" : {
+      "leaf" : true,
+      "classTypes" : [
+         "Root",
+         "Structural"
+      ],
+      "name" : "document"
+   },
+   "field_name" : {
+      "classTypes" : [
+         "Part"
+      ],
+      "name" : "field_name",
+      "leaf" : true
+   },
+   "sidebar" : {
+      "name" : "sidebar",
+      "classTypes" : [
+         "Structural"
+      ],
+      "leaf" : true
+   },
+   "authors" : {
+      "leaf" : true,
+      "name" : "authors",
+      "classTypes" : [
+         "Bibliographic"
+      ]
+   },
+   "tip" : {
+      "leaf" : true,
+      "classTypes" : [
+         "Admonition"
+      ],
+      "name" : "tip"
+   },
+   "attribution" : {
+      "name" : "attribution",
+      "classTypes" : [
+         "Part"
+      ],
+      "leaf" : true
+   },
+   "generated" : {
+      "leaf" : true,
+      "name" : "generated",
+      "classTypes" : [
+         "Inline"
+      ]
+   },
+   "math" : {
+      "leaf" : true,
+      "classTypes" : [
+         "Inline"
+      ],
+      "name" : "math"
+   },
+   "option" : {
+      "classTypes" : [
+         "Part"
+      ],
+      "name" : "option",
+      "leaf" : true
+   },
+   "entry" : {
+      "classTypes" : [
+         "Part"
+      ],
+      "name" : "entry",
+      "leaf" : true
+   },
+   "legend" : {
+      "classTypes" : [
+         "Part"
+      ],
+      "name" : "legend",
+      "leaf" : true
+   },
+   "warning" : {
+      "leaf" : true,
+      "name" : "warning",
+      "classTypes" : [
+         "Admonition"
+      ]
+   },
+   "description" : {
+      "leaf" : true,
+      "classTypes" : [
+         "Part"
+      ],
+      "name" : "description"
+   },
+   "date" : {
+      "name" : "date",
+      "classTypes" : [
+         "Bibliographic"
+      ],
+      "leaf" : true
+   },
+   "list_item" : {
+      "name" : "list_item",
+      "classTypes" : [
+         "Part"
+      ],
+      "leaf" : true
+   },
+   "option_argument" : {
+      "name" : "option_argument",
+      "classTypes" : [
+         "Part"
+      ],
+      "leaf" : true
+   },
+   "tgroup" : {
+      "name" : "tgroup",
+      "classTypes" : [
+         "Part"
+      ],
+      "leaf" : true
+   },
+   "strong" : {
+      "leaf" : true,
+      "classTypes" : [
+         "Inline"
+      ],
+      "name" : "strong"
+   },
+   "literal" : {
+      "leaf" : true,
+      "name" : "literal",
+      "classTypes" : [
+         "Inline"
+      ]
+   },
+   "caution" : {
+      "leaf" : true,
+      "classTypes" : [
+         "Admonition"
+      ],
+      "name" : "caution"
+   },
+   "section" : {
+      "leaf" : true,
+      "classTypes" : [
+         "Structural"
+      ],
+      "name" : "section"
+   },
+   "image" : {
+      "leaf" : true,
+      "name" : "image",
+      "classTypes" : [
+         "General",
+         "Inline"
+      ]
+   },
+   "header" : {
+      "leaf" : true,
+      "name" : "header",
+      "classTypes" : [
+         "Decorative"
+      ]
+   },
+   "definition_list_item" : {
+      "leaf" : true,
+      "classTypes" : [
+         "Part"
+      ],
+      "name" : "definition_list_item"
+   },
+   "decoration" : {
+      "classTypes" : [
+         "Decorative"
+      ],
+      "name" : "decoration",
+      "leaf" : true
+   },
+   "Node" : {
+      "subClasses" : [
+         "Element",
+         "Text"
+      ],
+      "name" : "Node",
+      "classTypes" : [],
+      "leaf" : false
+   },
+   "field" : {
+      "name" : "field",
+      "classTypes" : [
+         "Part"
+      ],
+      "leaf" : true
+   },
+   "option_string" : {
+      "leaf" : true,
+      "classTypes" : [
+         "Part"
+      ],
+      "name" : "option_string"
+   },
+   "field_body" : {
+      "leaf" : true,
+      "classTypes" : [
+         "Part"
+      ],
+      "name" : "field_body"
+   },
+   "raw" : {
+      "name" : "raw",
+      "classTypes" : [
+         "Special",
+         "Inline",
+         "PreBibliographic"
+      ],
+      "leaf" : true
+   },
+   "doctest_block" : {
+      "leaf" : true,
+      "classTypes" : [
+         "General"
+      ],
+      "name" : "doctest_block"
+   },
+   "inline" : {
+      "name" : "inline",
+      "classTypes" : [
+         "Inline"
+      ],
+      "leaf" : true
+   },
+   "transition" : {
+      "leaf" : true,
+      "classTypes" : [
+         "Structural"
+      ],
+      "name" : "transition"
+   },
+   "thead" : {
+      "leaf" : true,
+      "name" : "thead",
+      "classTypes" : [
+         "Part"
+      ]
+   },
+   "status" : {
+      "classTypes" : [
+         "Bibliographic"
+      ],
+      "name" : "status",
+      "leaf" : true
+   },
+   "pending" : {
+      "leaf" : true,
+      "classTypes" : [],
+      "name" : "pending"
+   },
+   "colspec" : {
+      "leaf" : true,
+      "name" : "colspec",
+      "classTypes" : [
+         "Part"
+      ]
+   },
+   "tbody" : {
+      "leaf" : true,
+      "classTypes" : [
+         "Part"
+      ],
+      "name" : "tbody"
+   },
+   "title" : {
+      "leaf" : true,
+      "name" : "title",
+      "classTypes" : [
+         "Titular",
+         "PreBibliographic"
+      ]
+   },
+   "problematic" : {
+      "name" : "problematic",
+      "classTypes" : [
+         "Inline"
+      ],
+      "leaf" : true
+   },
+   "term" : {
+      "leaf" : true,
+      "classTypes" : [
+         "Part"
+      ],
+      "name" : "term"
+   },
+   "organization" : {
+      "leaf" : true,
+      "name" : "organization",
+      "classTypes" : [
+         "Bibliographic"
+      ]
+   },
+   "TextElement" : {
+      "classTypes" : [],
+      "name" : "TextElement",
+      "subClasses" : [
+         "FixedTextElement",
+         "title",
+         "subtitle",
+         "rubric",
+         "author",
+         "organization",
+         "contact",
+         "version",
+         "revision",
+         "status",
+         "date",
+         "copyright",
+         "paragraph",
+         "term",
+         "classifier",
+         "field_name",
+         "option_argument",
+         "option_string",
+         "line",
+         "attribution",
+         "substitution_definition",
+         "target",
+         "label",
+         "caption",
+         "emphasis",
+         "strong",
+         "literal",
+         "reference",
+         "footnote_reference",
+         "citation_reference",
+         "substitution_reference",
+         "title_reference",
+         "abbreviation",
+         "acronym",
+         "superscript",
+         "subscript",
+         "math",
+         "inline",
+         "problematic",
+         "generated"
+      ],
+      "leaf" : false
+   },
+   "caption" : {
+      "classTypes" : [
+         "Part"
+      ],
+      "name" : "caption",
+      "leaf" : true
+   },
+   "option_list" : {
+      "classTypes" : [
+         "Sequential"
+      ],
+      "name" : "option_list",
+      "leaf" : true
+   },
+   "abbreviation" : {
+      "name" : "abbreviation",
+      "classTypes" : [
+         "Inline"
+      ],
+      "leaf" : true
+   },
+   "Text" : {
+      "classTypes" : [],
+      "name" : "Text",
+      "leaf" : true
+   },
+   "contact" : {
+      "classTypes" : [
+         "Bibliographic"
+      ],
+      "name" : "contact",
+      "leaf" : true
+   },
+   "FixedTextElement" : {
+      "leaf" : false,
+      "subClasses" : [
+         "address",
+         "literal_block",
+         "doctest_block",
+         "math_block",
+         "comment",
+         "raw"
+      ],
+      "name" : "FixedTextElement",
+      "classTypes" : []
+   },
+   "line_block" : {
+      "leaf" : true,
+      "classTypes" : [
+         "General"
+      ],
+      "name" : "line_block"
+   },
+   "definition" : {
+      "leaf" : true,
+      "name" : "definition",
+      "classTypes" : [
+         "Part"
+      ]
+   },
+   "enumerated_list" : {
+      "classTypes" : [
+         "Sequential"
+      ],
+      "name" : "enumerated_list",
+      "leaf" : true
+   }
+}
