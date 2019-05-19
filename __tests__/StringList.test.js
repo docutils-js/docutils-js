@@ -6,18 +6,19 @@ import StringList from '../src/StringList';
 // @takes N arrays -- arguments *must* be arrays
 // @returns an array of X arrays of N elements, X being the product of the input arrays' lengths.
 
+/* eslint-disable-next-line no-unused-vars */
 function cartesianProduct(...arrays) {
-	function _inner(...args) {
-		if (arguments.length > 1) {
-			const arr2 = args.pop(); // arr of arrs of elems
-			const arr1 = args.pop(); // arr of elems
-			return _inner(...args,
-				arr1.map(e1 => arr2.map(e2 => [e1, ...e2]))
-				    .reduce((arr, e) => arr.concat(e), []));
-		}
-			return args[0];
-	}
-	return _inner(...arrays, [[]]);
+        function _inner(...args) {
+                if (arguments.length > 1) {
+                        const arr2 = args.pop(); // arr of arrs of elems
+                        const arr1 = args.pop(); // arr of elems
+                        return _inner(...args,
+                                arr1.map(e1 => arr2.map(e2 => [e1, ...e2]))
+                                    .reduce((arr, e) => arr.concat(e), []));
+                }
+                        return args[0];
+        }
+        return _inner(...arrays, [[]]);
 }
 /* trimLeft
 getTextBlock
@@ -31,8 +32,9 @@ viewlist: splice, slice, info, trimStart, trimEnd
 
 */
 
-const lines = [['test\n123\nlalala\n']];
-const lineArray = lines.map((lines, index) => [index.toString(), new StringList(string2lines(lines[0]))]);
+const testLines = [['test\n123\nlalala\n']];
+const lineArray = testLines.map((lines, index) => [index.toString(),
+                                               new StringList(string2lines(lines[0]))]);
 
 test.each(lineArray)('%s', (index, lines) => {
     const s = lines.slice(0, lines.length);

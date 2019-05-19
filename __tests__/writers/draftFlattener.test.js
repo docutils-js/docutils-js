@@ -1,6 +1,11 @@
+import * as fs from 'fs';
+import * as path from 'path';
 import { Publisher } from '../../src/Core';
 import { StringInput, StringOutput } from '../../src/io';
 import baseSettings from '../../src/baseSettings';
+import * as nodes from '../../src/nodes';
+
+jest.mock('../../src/io/Output');
 
 const currentLogLines = [];
 
@@ -17,16 +22,18 @@ const defaultArgs = {
     usage: '',
     description: '',
     enableExitStatus: true,
-    writerName: 'pojo',
+    writerName: 'draft',
 };
 
 const defaultSettings = { ...baseSettings };
 
 test('rst2pojo pipeline', () => {
+    const src = fs.readFileSync(path.join(__dirname, '../../testfiles/docs/index.txt'), { encoding: 'utf-8' });
+
     const settings = { ...defaultSettings };
     const args = { ...defaultArgs };
 
-/* eslint-disable-next-line no-unused-vars */
+    /* eslint-disable-next-line no-unused-vars */
     const debugFn = (msg) => {
 //      console.log(msg);
 //      currentLogLines.push(msg);
@@ -34,11 +41,7 @@ test('rst2pojo pipeline', () => {
 
     const { readerName, parserName, writerName } = args;
     const source = new StringInput({
- source: `Random test
-===========
-I like food.
-
-`,
+        source: src,
 });
 
     const destination = new StringOutput({});
@@ -52,7 +55,7 @@ I like food.
                 reject(error);
                 return;
             }
-            expect(JSON.parse(destination.destination)).toMatchSnapshot();
+            fs.writeFileSync(nodes.nodeToXml(destination.destination), 'out.xml', 'utf-8');
             currentLogLines.length = 0;
             resolve();
         });

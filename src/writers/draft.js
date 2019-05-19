@@ -144,7 +144,7 @@ class DraftTranslator extends GenericNodeVisitor {
 }
 
 
-export default class Writer extends BaseWriter {
+class Writer extends BaseWriter {
     constructor(args) {
         super(args);
         this.translatorClass = DraftTranslator;
@@ -169,3 +169,6 @@ Writer.settingsSpec = [
     '"Docutils-js Draft" Writer Options',
     null,
     []];
+
+export default Writer;
+export { DraftTranslator };

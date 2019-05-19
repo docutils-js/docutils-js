@@ -4,51 +4,51 @@ import StateWS from '../src/states/StateWS';
 
 class MockStateMachine {
     constructor(args) {
-	if (!args.hasOwnProperty('runResult')) {
-	    console.log(Object.keys(args));
-	    throw new Error();
-	}
-	this.runResult = args.runResult;
+        if (!Object.prototype.hasOwnProperty.call(args, 'runResult')) {
+            throw new Error();
+        }
+        this.runResult = args.runResult;
     }
 
     run({
+        /* eslint-disable-next-line no-unused-vars */
  inputLines, inputOffset, context, inputSource, initialState,
 }) {
-	return this.runResult;
+        return this.runResult;
     }
 }
 
 
 class State1 extends StateWS {
     _init() {
-	super._init();
-	this.indentSmKwargs = { runResult: [] };
-	// I think this needs stateclasses and ohter stuff ???
-	this.nestedSmKwargs = { runResult: [] };
-	this.indentSm = MockStateMachine;
-	this.nestedSm = MockStateMachine;
+        super._init();
+        this.indentSmKwargs = { runResult: [] };
+        // I think this needs stateclasses and ohter stuff ???
+        this.nestedSmKwargs = { runResult: [] };
+        this.indentSm = MockStateMachine;
+        this.nestedSm = MockStateMachine;
     }
 }
 
 class State2 extends StateWS {
     _init() {
-	super._init();
-	this.indentSmKwargs = { runResult: [] };
-	// I think this needs stateclasses and ohter stuff ???
-	this.nestedSmKwargs = { runResult: [] };
-	this.indentSm = MockStateMachine;
-	this.nestedSm = MockStateMachine;
+        super._init();
+        this.indentSmKwargs = { runResult: [] };
+        // I think this needs stateclasses and ohter stuff ???
+        this.nestedSmKwargs = { runResult: [] };
+        this.indentSm = MockStateMachine;
+        this.nestedSm = MockStateMachine;
     }
 }
 
 class State3 extends StateWS {
     _init() {
-	super._init();
-	this.indentSmKwargs = { runResult: [] };
-	// I think this needs stateclasses and ohter stuff ???
-	this.nestedSmKwargs = { runResult: [] };
-	this.indentSm = MockStateMachine;
-	this.nestedSm = MockStateMachine;
+        super._init();
+        this.indentSmKwargs = { runResult: [] };
+        // I think this needs stateclasses and ohter stuff ???
+        this.nestedSmKwargs = { runResult: [] };
+        this.indentSm = MockStateMachine;
+        this.nestedSm = MockStateMachine;
     }
 }
 
@@ -60,16 +60,16 @@ function createStateMachine() {
 
 test.skip.each([['test', 'test']])('%s', (name, raw) => {
     try {
-	const sot = createStateMachine();
-	const r = sot.run({
+        const sot = createStateMachine();
+        const r = sot.run({
  context: [],
-			    inputLines: new StringList(['test']),
+                            inputLines: new StringList(['test']),
 });
-	console.log(r);
+        console.log(r);
     } catch (error) {
-	console.log(error.stack);
-	console.log(error.message);
-	throw error;
+        console.log(error.stack);
+        console.log(error.message);
+        throw error;
     }
 });
 
@@ -80,11 +80,11 @@ test.skip('StateWS indent', () => {
     const offset = 0;
     const blankFinish = true;
     class TestIndentStateMachine extends MockStateMachine {
-	getIndented({
+        getIndented({
  start, untilBlank, stripIndent, blockIndent, firstIndent,
 }) {
-	    return [indented, indent, offset, blankFinish];
-	}
+            return [indented, indent, offset, blankFinish];
+        }
     }
 
     const magicArray = ['Magic array'];
@@ -92,18 +92,18 @@ test.skip('StateWS indent', () => {
     const indentResult = ['Indent'];
 
     const TestState = class extends StateWS {
-	_init() {
-	    super._init();
-	    console.log('settig indentSmKwargs');
-	    this.indentSmKwargs = { runResult: indentResult };
-	    this.nestedSmKwargs = { runResult: indentResult }; // I think this needs stateclasses and oter stuff ???
-	    this.indentSm = MockStateMachine;
-	    this.nestedSm = MockStateMachine;
-	}
+        _init() {
+            super._init();
+            console.log('settig indentSmKwargs');
+            this.indentSmKwargs = { runResult: indentResult };
+            this.nestedSmKwargs = { runResult: indentResult }; // I think this needs stateclasses and oter stuff ???
+            this.indentSm = MockStateMachine;
+            this.nestedSm = MockStateMachine;
+        }
     };
     const state = new TestState({
  stateMachine,
-				  debug: true,
+                                  debug: true,
 });
     let match; const
 context = [];

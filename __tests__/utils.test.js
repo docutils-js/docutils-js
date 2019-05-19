@@ -12,7 +12,7 @@ test('1', () => {
     const r = newReporter({}, { ...baseSettings });
 
 //    r.attachObserver(node => {
-//	console.log(node.children[0].children[0].astext());
+//      console.log(node.children[0].children[0].astext());
 //    })
     r.debug('hello');
 });

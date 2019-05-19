@@ -1,5 +1,5 @@
 import Body from '../../../../src/parsers/rst/states/Body';
-import { StringList } from '../../../../src/StateMachine';
+import StringList from '../../../../src/StringList';
 import RSTStateMachine from '../../../../src/parsers/rst/RSTStateMachine';
 import StateFactory from '../../../../src/parsers/rst/StateFactory';
 
@@ -9,9 +9,12 @@ jest.mock('../../../../src/parsers/rst/StateFactory');
 beforeEach(() => {
     RSTStateMachine.mockClear();
     StateFactory.mockClear();
+    /* eslint-disable-next-line no-unused-vars */
     RSTStateMachine.mockImplementation(({ indent, untilBlank, stripIndent }) => ({
-	    absLineNumber: () => 1,
-	    getFirstKnownIndented: (...args) => [new StringList('hello'), indent, 0, true],
+        absLineNumber: () => 1,
+        /* eslint-disable-next-line no-unused-vars */
+            getFirstKnownIndented: (...args) => [new StringList('hello'), indent, 0, true],
+        /* eslint-disable-next-line no-unused-vars */
             stateFactory: { withStateClasses: classes => new StateFactory() },
         }));
 });
@@ -19,18 +22,19 @@ beforeEach(() => {
 function createRSTStateMachine() {
     const sm = new RSTStateMachine({
  stateFactory: {},
-				     initialState: 'Body',
-				     debug: true,
-				     debugFn: console.log,
-				   });
+                                     initialState: 'Body',
+        debug: true,
+        /* eslint-disable-next-line no-console */
+                                     debugFn: console.log,
+                                   });
     return sm;
 }
 
 function createBody(optSm) {
     const stateMachine = optSm || createRSTStateMachine();
     const body = new Body({
-	stateMachine,
-	debug: true,
+        stateMachine,
+        debug: true,
     });
     return body;
 }
@@ -43,13 +47,15 @@ test('Body patterns', () => {
 
 test('Body constructor',
      () => {
-	 const body = createBody();
+         const body = createBody();
+         expect(body).toBeDefined();
      });
 
 
 // '\\.\\.[ ]+_(?![ ]|$)'
 // Regex for reference
-// new RegExp(`^(_|(?!_)(\`?)(?![ \`])(.+?)${nonWhitespaceEscapeBefore})(?<!(?<!\\x00):)${nonWhitespaceEscapeBefore}[ ]?:([ ]+|$)`),
+// new RegExp(`^(_|(?!_)(\`?)(?![ \`])(.+?)${nonWhitespaceEscapeBefore})
+// (?<!(?<!\\x00):)${nonWhitespaceEscapeBefore}[ ]?:([ ]+|$)`),
 test('hyperlink_target, no args', () => {
     const body = createBody();
     expect(() => body.hyperlink_target()).toThrow();
@@ -67,7 +73,8 @@ test('explicit hyperlink_target, with arg (malformed)', () => {
 
 test('explicit citation', () => {
     const hyperlinkSource = '.. [myCitation]';
-    const rgxp = new RegExp('\\.\\.[ ]+\\[(\w+)\\]([ ]+|$)');
+    // fix this in original source
+    const rgxp = new RegExp('\\.\\.[ ]+\\[(\\w+)\\]([ ]+|$)');
     const body = createBody();
     const match = rgxp.exec(hyperlinkSource);
     expect(() => body.citation(match)).toThrow();

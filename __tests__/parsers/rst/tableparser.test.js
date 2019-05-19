@@ -2,8 +2,10 @@ import { GridTableParser, SimpleTableParser } from '../../../src/parsers/rst/tab
 
 test('gridtableparser', () => {
     const g = new GridTableParser();
+    expect(g).toBeDefined();
 });
 
 test('simpletableparser', () => {
     const table = new SimpleTableParser();
+    expect(table).toBeDefined();
 });

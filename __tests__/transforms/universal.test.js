@@ -1,5 +1,5 @@
 import { Decorations } from '../../src/transforms/universal';
-import * as nodes from '../../src/nodes';
+// import * as nodes from '../../src/nodes';
 import { newDocument, baseSettings } from '../../src/index';
 
 test('Decorations.defaultPriority is 820', () => {

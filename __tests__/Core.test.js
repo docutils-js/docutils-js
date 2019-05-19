@@ -1,5 +1,4 @@
-import { Publisher, publishCmdLine, defaultDescription } from '../src/Core';
-import { Source } from '../src/Sources';
+import { Publisher } from '../src/Core';
 import { StringInput, StringOutput } from '../src/io';
 import * as nodes from '../src/nodes';
 import baseSettings from '../src/baseSettings';
@@ -28,23 +27,25 @@ test('full rst2xml pipeline with specific input', () => {
     const settings = { ...defaultSettings };
     const args = { ...defaultArgs };
 
-    const debugLog = [];
+    /* eslint-disable-next-line no-unused-vars */
     const debugFn = (msg) => {
 //        console.log(msg);
 //      currentLogLines.push(msg);
     };
 
     const { readerName, parserName, writerName } = args;
-    const source = new StringInput({ source: `.. _A ReStructuredText Primer: ../../user/rst/quickstart.html
+    const source = new StringInput({
+ source: `.. _A ReStructuredText Primer: ../../user/rst/quickstart.html
 .. _Quick reStructuredText: ../../user/rst/quickref.html
-` });
+`,
+});
         const destination = new StringOutput({});
     const pub = new Publisher({
  source, destination, settings, debug: true, debugFn,
 });
     pub.setComponents(readerName, parserName, writerName);
     return new Promise((resolve, reject) => {
-        pub.publish({}, (error, ...args) => {
+        pub.publish({}, (error) => {
             if (error) {
                 reject(error);
                 return;
@@ -291,13 +292,13 @@ footnote 2.
     ['escaping 1', '*escape* ``with`` "\\"'],
     ['escaping 2', '\\*escape* \\``with`` "\\\\"'],
 
-         ])('%s', (...inputAry) => {
+])('%s', (...inputAry) => {
+    /* eslint-disable-next-line no-unused-vars */
              const [a, raw, opts] = inputAry;
              const myOpts = opts || {};
 
               const settings = { ...defaultSettings };
               const args = { ...defaultArgs };
-              const debugLog = [];
               const debugFn = (msg) => {
                   currentLogLines.push(msg);
               };
@@ -311,23 +312,26 @@ footnote 2.
 });
               pub.setComponents(readerName, parserName, writerName);
               return new Promise((resolve, reject) => {
-                  /* {argv, usage, description, settingsSpec, settingsOverrides, configSection, enableExitStatus } */
-		  const fn = () => pub.publish({}, (error, ...args) => {
+                  /* {argv, usage, description, settingsSpec,
+settingsOverrides, configSection, enableExitStatus } */
+                  const fn = () => pub.publish({}, (error) => {
                       if (error) {
-			  if (myOpts.expectError) {
-			      resolve();
-			  } else {
+                          if (myOpts.expectError) {
+                              resolve();
+                          } else {
                               reject(error);
-			  }
+                          }
                           return;
                       }
                       const document = pub.document;
 
                       const Visitor = class extends nodes.GenericNodeVisitor {
+                          /* eslint-disable-next-line camelcase,no-unused-vars */
                           default_departure(node) {
                               /**/
                           }
 
+                          /* eslint-disable-next-line camelcase */
                           default_visit(node) {
                               if (node.attributes && node.attributes.refuri) {
 //                                console.log(node.attributes.refuri);
@@ -345,6 +349,6 @@ footnote 2.
                       currentLogLines.length = 0;
                       resolve();
                   });
-		  fn();
+                  fn();
               });
           });

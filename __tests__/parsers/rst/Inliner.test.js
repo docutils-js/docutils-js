@@ -1,34 +1,18 @@
-import xmlescape from 'xml-escape';
 import Inliner from '../../../src/parsers/rst/Inliner';
 import newReporter from '../../../src/newReporter';
 import newDocument from '../../../src/newDocument';
-import { Element } from '../../../src/nodes';
 import baseSettings from '../../../src/baseSettings';
-import XmlWriter from '../../../src/writers/xml';
-import { StringOutput } from '../../../src/io';
 import { nodeToXml } from '../../../src/nodes';
 
 const currentLogLines = [];
 
-const xmlWriter = new XmlWriter({});
-
 afterEach(() => {
     if (currentLogLines.length) {
-        currentLogLines.map(line => console.log(line));
+        /* eslint-disable-next-line no-unused-vars */
+        currentLogLines.forEach((line) => {});
         currentLogLines.length = 0;
     }
 });
-
-function dumpNodes(nodes) {
-    for (const node in nodes) {
-        if (Array.isArray(node)) {
-            dumpNodes(node);
-            continue;
-        }
-        console.log(node.tagname);
-        dumpNodes(nodes.children);
-    }
-}
 
 test('inliner 1', () => {
     const inliner = new Inliner();

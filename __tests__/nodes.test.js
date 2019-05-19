@@ -1,11 +1,7 @@
-import { DOMParser, DOMImplementation, XMLSerializer } from 'xmldom';
+import { /* DOMParser, DOMImplementation, */ XMLSerializer } from 'xmldom';
 import * as nodes from '../src/nodes';
 import newDocument from '../src/newDocument';
 import baseSettings from '../src/baseSettings';
-
-const jsdom = require('jsdom');
-
-const { JSDOM } = jsdom;
 
 function createNodeVisitor() {
     return new nodes.NodeVisitor({ reporter: { debug: () => {} } });
@@ -30,10 +26,9 @@ test('problematic', () => {
 test('setId', () => {
     const d = newDocument({}, baseSettings);
     const p = new nodes.paragraph('test', 'test', [], {});
-    const id = d.setId(p);
+    d.setId(p);
 });
 test('paragraph text unescaped', () => {
-    const d = newDocument({}, baseSettings);
     const text = 'escape <me>';
     const p = new nodes.paragraph(text, text, [], {});
     expect(nodes.nodeToXml(p)).toEqual(expect.stringContaining('<'));
@@ -41,10 +36,10 @@ test('paragraph text unescaped', () => {
 
 test('NodeVisitor.constructor', () => {
     const visitor = createNodeVisitor();
+    expect(visitor).toBeDefined();
 });
 
 test('_domNode', () => {
-    const dom = new JSDOM();
     const p = new nodes.paragraph('test', 'test', [], {});
     const domParser = new DOMParser({});
     const doc = domParser.parseFromString('<document/>');

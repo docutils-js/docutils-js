@@ -8,7 +8,9 @@ jest.mock('../../../../src/parsers/rst/StateFactory');
 beforeAll(() => {
     RSTStateMachine.mockClear();
     StateFactory.mockClear();
+        /* eslint-disable-next-line no-unused-vars */
     RSTStateMachine.mockImplementation((...cargs) => ({
+        /* eslint-disable-next-line no-unused-vars */
             stateFactory: { withStateClasses: classes => new StateFactory() },
         }));
 });
@@ -16,6 +18,7 @@ beforeAll(() => {
 test('RSTState.constructor', () => {
     const rstState = new RSTState({
  stateMachine: new RSTStateMachine(),
-				    debug: true,
-});
+                                    debug: true,
+    });
+    expect(rstState).toBeDefined();
 });

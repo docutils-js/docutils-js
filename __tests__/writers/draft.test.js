@@ -1,6 +1,9 @@
-import { Publisher } from '../../src/Core';
+import { Publisher }
+from '../../src/Core';
 import { StringInput, StringOutput } from '../../src/io';
 import baseSettings from '../../src/baseSettings';
+import * as nodes from '../../src/nodes';
+import DraftWriter, { DraftTranslator } from '../../src/writers/draft';
 
 const currentLogLines = [];
 
@@ -17,7 +20,7 @@ const defaultArgs = {
     usage: '',
     description: '',
     enableExitStatus: true,
-    writerName: 'pojo',
+    writerName: 'draft',
 };
 
 const defaultSettings = { ...baseSettings };
@@ -57,4 +60,14 @@ I like food.
             resolve();
         });
     });
+});
+
+test.only('node', () => {
+    const node = new nodes.paragraph('', '', [new nodes.Text('hello '), new nodes.emphasis('', 'test')], {});
+    /* eslint-disable-next-line no-unused-vars */
+    const writer = new DraftWriter();
+    node.reporter = { warning: () => {}, error: () => {}, debug: () => { } };
+    const visitor = new DraftTranslator(node);
+
+    node.walkabout(visitor);
 });

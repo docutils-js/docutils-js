@@ -1,4 +1,4 @@
-import { nodes, newDocument, baseSettings } from '../src/index';
+import { newDocument, baseSettings } from '../src/index';
 
 test('newDocument', () => {
     const document = newDocument({ sourcePath: '<undefined>' }, baseSettings);

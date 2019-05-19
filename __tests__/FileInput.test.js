@@ -3,13 +3,13 @@ import { FileInput } from '../src/io';
 function createFileInput(args) {
     let myArgs;
     if (typeof args === 'undefined') {
-	myArgs = {
+        myArgs = {
  source: undefined, sourcePath: undefined, encoding: 'utf-8', errorHandler: undefined, autoClose: undefined, mode: undefined,
 };
     } else {
-	myArgs = args;
+        myArgs = args;
     }
-    return new FileInput(args);
+    return new FileInput(myArgs);
 }
 
 test('FileInput.constructor no-args', () => {
