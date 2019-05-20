@@ -1,0 +1,8 @@
+Configuration settings:
+`footnote_references <footnote_references setting_>`_.
+
+.. _footnote: ../doctree.html#footnote
+.. _label: ../doctree.html#label
+.. _footnote_references setting:
+   ../../user/config.html#footnote-references-html4css1-writer
+

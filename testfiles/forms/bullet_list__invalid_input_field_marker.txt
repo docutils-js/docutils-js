@@ -1,0 +1,2 @@
+* bullet
+:Hello: foo

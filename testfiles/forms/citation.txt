@@ -1,0 +1,3 @@
+Hello [Goober]_
+
+.. [Goober] Citation.

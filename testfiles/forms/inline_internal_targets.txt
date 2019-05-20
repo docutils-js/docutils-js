@@ -1,0 +1,5 @@
+* bullet list
+
+  .. _`second item`:
+
+* second item, with hyperlink target.

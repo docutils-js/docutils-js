@@ -1,0 +1,2 @@
+.. _A ReStructuredText Primer: ../../user/rst/quickstart.html
+.. _Quick reStructuredText: ../../user/rst/quickref.html
