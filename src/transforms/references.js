@@ -45,16 +45,14 @@ class AnonymousHyperlinks extends Transform {
     apply() {
         const anonymousRefs = [];
         const anonymousTargets = [];
-        this.document.traverse({ condition: nodes.reference }).forEach(node => {
-            if(this.node.attributes.anonymous) {
+        this.document.traverse({ condition: nodes.reference }).forEach((node) => {
+            if (this.node.attributes.anonymous) {
                 anonymousRefs.push(node);
             }
         });
     }
-            
 }
 AnonymousHyperlinks.defaultPriority = 440;
-
 
 
 /*

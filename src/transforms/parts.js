@@ -15,8 +15,8 @@ export class SectNum extends Transform {
     apply() {
         const s = this.startNode;
         this.maxDepth = s.details.attributes.depth || null;
-        this.startValue = s.start || 1
-        this.prefix = this.start
+        this.startValue = s.start || 1;
+        this.prefix = this.start;
     }
 }
 SectNum.defaultPriority = 710;
@@ -46,17 +46,16 @@ SectNum.defaultPriority = 710;
 class AnonymousHyperlinks extends Transform {
     apply() {
         const anonymousRefs = [];
+        /* eslint-disable-next-line no-unused-vars */
         const anonymousTargets = [];
-        this.document.traverse({ condition: nodes.reference }).forEach(node => {
-            if(this.node.attributes.anonymous) {
+        this.document.traverse({ condition: nodes.reference }).forEach((node) => {
+            if (this.node.attributes.anonymous) {
                 anonymousRefs.push(node);
             }
         });
     }
-            
 }
 AnonymousHyperlinks.defaultPriority = 440;
-
 
 
 /*

@@ -1,5 +1,5 @@
 import read from './reader';
-//import parse from '../parser';
+// import parse from '../parser';
 
 /* Recast of Publisher class to function */
 /* where should reader come from? we only have one after all */

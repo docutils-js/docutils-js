@@ -72,13 +72,14 @@ Decorations.defaultPriority = 820;
 class Messages extends Transform {
     apply() {
         const unfiltered = this.document.transformMessages;
-        if(unfiltered = null) {
+        if (unfiltered == null) {
             throw new Error('need transformmessages');
         }
-        const threshold = this.document.reporter.reportLevel
-        const messages = unfiltered.filter(msg => msg.attributes.level >= threshold && msg.parent == null);
-        if(messages.length) {
-            const section = new nodes.section('', '', [], { classes: 'system-messages'});
+        const threshold = this.document.reporter.reportLevel;
+        const messages = unfiltered.filter(msg => msg.attributes.level
+                                           >= threshold && msg.parent == null);
+        if (messages.length) {
+            const section = new nodes.section('', '', [], { classes: 'system-messages' });
             // @@@ get this from the language module?
             section.children.push(new nodes.title('', 'Docutils System Messages'),
                                     ...messages);
@@ -94,7 +95,7 @@ Messages.defaultPriority = 860;
 class FilterMessages extends Transform {
     apply() {
         this.document.traverse(nodes.system_message).forEach((node, i) => {
-            if(node.attributes.level < this.document.reporter.reportLevel) {
+            if (node.attributes.level < this.document.reporter.reportLevel) {
                 node.parent.children.pop(i);
             }
         });
@@ -111,4 +112,6 @@ class TestMessages extends Transform {
 }
 TestMessages.defaultPriority = 880;
 
-export { Decorations, Messages, FilterMessages, TestMessages };
+export {
+ Decorations, Messages, FilterMessages, TestMessages,
+};
