@@ -1,6 +1,7 @@
 import * as _fallbackLanguageModule from './languages/en';
 import * as images from './directives/images';
 import * as parts from './directives/parts';
+import ApplicationError from '../../Exceptions';
 
 const dirMap = { images, parts };
 
@@ -56,7 +57,7 @@ const directiveRegistry = {
 
 const _directives = {};
 
-export function directive(directiveName, languageModule, document) {
+ function directive(directiveName, languageModule, document) {
     const normName = directiveName.toLowerCase();
     const messages = [];
     const msgText = [];
@@ -94,7 +95,7 @@ export function directive(directiveName, languageModule, document) {
  Raise ``ValueError`` if no argument is found.
  */
 /* eslint-disable-next-line */
-export function class_option(argument) {
+function class_option(argument) {
 /*
     if argument is None:
         raise ValueError('argument required but none supplied')
@@ -109,3 +110,27 @@ export function class_option(argument) {
     */
     return [];
 }
+/*
+ * Directive option utility function, supplied to enable options whose
+ * argument must be a member of a finite set of possible values (must be
+ * lower case).  A custom conversion function must be written to use it.  For
+ * example::
+ * 
+ *     from docutils.parsers.rst import directives
+ * 
+ *     def yesno(argument):
+ *         return directives.choice(argument, ('yes', 'no'))
+ * 
+ * Raise ``ValueError`` if no argument is found or if the argument's value is
+ * not valid (not an entry in the supplied list).
+ */
+function choice(argument, values) {
+    const value = argument.toLowerCase().trim();
+    if(values.indexOf(value) !== -1) {
+        return value;
+    } else {
+        throw new ApplicationError("Invalid value ${argument}");
+    }
+}
+
+export { choice, directive, class_option };

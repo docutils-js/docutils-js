@@ -11,7 +11,7 @@ test('1', () => {
     const p = new Parser({});
     const document = newDocument({ sourcePath: '' }, baseSettings);
     p.parse('* a bullet point', document);
-    expect(nodes.nodeToXml(document)).toMatchSnapshot();
+    expect(nodes.formatXml(nodeToXmldocument)).toMatchSnapshot();
 });
 
 test('rst parser no input', () => {
@@ -24,5 +24,5 @@ test('readme rst', () => {
     const p = new Parser({});
     const document = newDocument({ sourcePath: '' }, baseSettings);
     p.parse(ReadmeRst, document);
-    expect(nodes.nodeToXml(document)).toMatchSnapshot();
+    expect(nodes.formatXml(nodeToXml(document)).toMatchSnapshot();
 });

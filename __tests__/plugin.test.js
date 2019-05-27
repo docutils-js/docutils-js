@@ -1,6 +1,6 @@
 import { handlers } from '../plugins/restructuredtext';
 
-test('', () => {
+test.skip('', () => {
     global.env = { conf: { } };
     const doclet = { description: 'test' };
     handlers.newDoclet({ doclet });

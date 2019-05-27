@@ -3,21 +3,23 @@ import * as nodes from '../nodes';
 
 export const __docformat__ = 'reStructuredText';
 
-export class PropagateTargets extends Transform {
-    _init(...args) {
-        super._init(...args);
-        this.defaultPriority = 260;
-    }
+/*
+ * Automatically assigns numbers to the titles of document sections.
 
+ * It is possible to limit the maximum section level for which the numbers
+ * are added.  For those sections that are auto-numbered, the "autonum"
+ * attribute is set, informing the contents table generator that a different
+ * form of the TOC should be used.
+ */
+export class SectNum extends Transform {
     apply() {
-        /* eslint-disable-next-line no-unused-vars */
-        this.document.traverse({ condition: nodes.target }).forEach((target) => {
-            // console.log(`target is ${target}`);
-        });
+        const s = this.startNode;
+        this.maxDepth = s.details.attributes.depth || null;
+        this.startValue = s.start || 1
+        this.prefix = this.start
     }
 }
-
-PropagateTargets.defaultPriority = 260;
+SectNum.defaultPriority = 710;
 
 /**
     Link anonymous references to targets.  Given::

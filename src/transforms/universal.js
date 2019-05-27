@@ -5,7 +5,7 @@ import Transform from '../Transform';
 import TransformError from '../TransformError';
 
 /* eslint-disable-next-line import/prefer-default-export */
-export class Decorations extends Transform {
+class Decorations extends Transform {
     apply() {
         const headerNodes = this.generateHeader();
         if (headerNodes && headerNodes.length) {
@@ -64,3 +64,51 @@ export class Decorations extends Transform {
     }
 }
 Decorations.defaultPriority = 820;
+
+/**
+ * Place any system messages generated after parsing into a dedicated section
+ * of the document.
+ */
+class Messages extends Transform {
+    apply() {
+        const unfiltered = this.document.transformMessages;
+        if(unfiltered = null) {
+            throw new Error('need transformmessages');
+        }
+        const threshold = this.document.reporter.reportLevel
+        const messages = unfiltered.filter(msg => msg.attributes.level >= threshold && msg.parent == null);
+        if(messages.length) {
+            const section = new nodes.section('', '', [], { classes: 'system-messages'});
+            // @@@ get this from the language module?
+            section.children.push(new nodes.title('', 'Docutils System Messages'),
+                                    ...messages);
+            const m = this.document.transformMessages;
+            m.splice(0, m.length);
+            this.document.children.push(section);
+        }
+    }
+}
+Messages.defaultPriority = 860;
+
+/** Remove system messages below verbosity threshold. */
+class FilterMessages extends Transform {
+    apply() {
+        this.document.traverse(nodes.system_message).forEach((node, i) => {
+            if(node.attributes.level < this.document.reporter.reportLevel) {
+                node.parent.children.pop(i);
+            }
+        });
+    }
+}
+FilterMessages.defaultPriority = 870;
+
+/**
+ * Append all post-parse system messages to the end of the document.
+ * Used for testing purposes.
+ * @todo
+ */
+class TestMessages extends Transform {
+}
+TestMessages.defaultPriority = 880;
+
+export { Decorations, Messages, FilterMessages, TestMessages };

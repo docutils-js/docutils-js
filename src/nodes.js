@@ -438,6 +438,11 @@ class Node {
         return undefined;
     }
 
+    hasClassType(classType) {
+        return this.classTypes.findIndex(c => c.prototype instanceof classType
+                                         || c === classType) !== -1;
+    }
+
     isInline() {
         return this.classTypes.findIndex(c => c.prototype instanceof Inline || c === Inline) !== -1;
     }
@@ -1511,7 +1516,7 @@ class copyright extends TextElement {
 
 
 class section extends Element {
-/* eslint-disable-next-line no-useless-constructor */
+    /* eslint-disable-next-line no-useless-constructor */
     constructor(...args) {
         super(...args);
         this.classTypes = [Structural];
@@ -2003,7 +2008,9 @@ class entry extends Element {
 /* eslint-disable-next-line camelcase */
 class system_message extends Element {
     constructor(message, children, attributes) {
-        super(attributes.rawsource || '', message ? [new paragraph('', message), ...children] : children, attributes);
+        super((attributes.rawsource || ''),
+              (message ? [new paragraph('', message), ...children] : children),
+              attributes);
         setupBacklinkable(this);
         this.classTypes = [Special, BackLinkable, PreBibliographic];
     }
@@ -2044,6 +2051,7 @@ class pending extends Element {
         /** Detail data (dictionary) required by the pending operation. */
         this.details = details || {};
     }
+
 /*
     def pformat(self, indent='    ', level=0):
         internals = [
@@ -2079,6 +2087,25 @@ class pending extends Element {
         return obj
 
 */
+    deepcopy() {
+    }
+
+    setClass() {
+    }
+
+    /** Note that this Element has been referenced by its name
+        `name` or id `id`. */
+    noteReferencedBy(name, id) {
+        this.referenced = 1;
+        const byName = this.attributes.expect_referenced_by_name[name];
+        const byId = this.attributes.expect_referenced_by_name[id];
+        if (byName != null) {
+            byName.referenced = 1;
+        }
+        if (byId != null) {
+            byId.referenced = 1;
+        }
+    }
 }
 
 class raw extends FixedTextElement {

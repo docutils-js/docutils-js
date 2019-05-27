@@ -1,3 +1,4 @@
+import formatXml from 'xml-formatter';
 import Inliner from '../../../src/parsers/rst/Inliner';
 import newReporter from '../../../src/newReporter';
 import newDocument from '../../../src/newDocument';
@@ -28,8 +29,8 @@ test('inliner 1', () => {
 
     const result = inliner.parse('`test`:foo:', { lineno: 1, memo, parent: document });
     const [nodes, messages] = result;
-    expect(nodes.map(n => nodeToXml(n)).join('')).toMatchSnapshot();
-    expect(messages.map(n => nodeToXml(n)).join('')).toMatchSnapshot();
+    expect(nodes.map(n => formatXml(nodeToXml(n))).join('')).toMatchSnapshot();
+    expect(messages.map(n => formatXml(nodeToXml(n))).join('')).toMatchSnapshot();
 });
 
 test.each([['Interpreted text', '`test`:foo:'],
@@ -52,6 +53,6 @@ test.each([['Interpreted text', '`test`:foo:'],
 
     const result = inliner.parse(a, { lineno: 1, memo, parent: document });
               const [nodes, messages] = result;
-              expect(nodes.map(n => nodeToXml(n)).join('')).toMatchSnapshot();
-              expect(messages.map(n => nodeToXml(n)).join('')).toMatchSnapshot();
+              expect(nodes.map(n => formatXml(nodeToXml(n))).join('')).toMatchSnapshot();
+              expect(messages.map(n => formatXml(nodeToXml(n))).join('')).toMatchSnapshot();
 });

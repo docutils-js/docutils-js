@@ -27,7 +27,7 @@ const defaultArgs = {
 
 const defaultSettings = { ...baseSettings };
 
-test('rst2pojo pipeline', () => {
+test.skip('rst2pojo pipeline', () => {
     const src = fs.readFileSync(path.join(__dirname, '../../testfiles/docs/index.txt'), { encoding: 'utf-8' });
 
     const settings = { ...defaultSettings };
@@ -55,7 +55,7 @@ test('rst2pojo pipeline', () => {
                 reject(error);
                 return;
             }
-            fs.writeFileSync(nodes.nodeToXml(destination.destination), 'out.xml', 'utf-8');
+            fs.writeFileSync(nodes.formatXml(nodeToXmldestination.destination), 'out.xml', 'utf-8');
             currentLogLines.length = 0;
             resolve();
         });
