@@ -34,7 +34,7 @@ module.exports = function (grunt) {
             dist: {
                 cwd: 'src',
                 expand: true,
-                src: ['**/*.js'],
+                src: ['**/*.ts'],
                 dest: 'lib',
             },
             watch: {
