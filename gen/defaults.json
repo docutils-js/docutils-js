@@ -1,0 +1,50 @@
+{
+  "standaloneReader": {
+    "doctitleXform": 1,
+    "docinfoXform": 1
+  },
+  "xmlWriter": {
+    "xmlDeclaration": 1,
+    "doctypeDeclaration": 1
+  },
+  "rstParser": {
+    "pepBaseUrl": "http://www.python.org/dev/peps/",
+    "pepFileUrlTemplate": "pep-%04d",
+    "rfcBaseUrl": "http://tools.ietf.org/html/",
+    "tabWidth": 8,
+    "syntaxHighlight": "long",
+    "smartQuotes": false,
+    "characterLevelInlineMarkup": false
+  },
+  "frontend": {
+    "exitStatusLevel": 5,
+    "inputEncodingErrorHandler": "strict",
+    "outputEncoding": "utf-8",
+    "outputEncodingErrorHandler": "strict",
+    "errorEncoding": "UTF-8",
+    "errorEncodingErrorHandler": "backslashreplace",
+    "languageCode": "en",
+    "recordDependencies": null,
+    "idPrefix": "",
+    "autoIdPrefix": "id"
+  },
+  "html4css1": {
+    "template": "/usr/share/docutils/writers/html4css1/template.txt",
+    "stylesheetPath": [
+      "html4css1.css"
+    ],
+    "stylesheetDirs": [
+      ".",
+      "/usr/share/docutils/writers/html4css1",
+      "/usr/share/docutils/writers/html5_polyglot"
+    ],
+    "initialHeaderLevel": "1",
+    "fieldNameLimit": 14,
+    "optionLimit": 14,
+    "footnoteReferences": "brackets",
+    "attribution": "dash",
+    "tableStyle": "",
+    "mathOutput": "HTML math.css",
+    "xmlDeclaration": 1
+  }
+}
