@@ -1,10 +1,14 @@
-import * as languages from './languages';
+import getLanguage from './languages';
+import { IDocument, INode } from './nodeInterface';
 
 export default class Transform {
+    document: IDocument;
+    startNode: INode;
+    language: any;
     constructor(document, startNode) {
         this.document = document;
         this.startNode = startNode;
-        this.language = languages.getLanguage(document.settings.languageCode,
+        this.language = getLanguage(document.settings.languageCode,
                                               document.reporter);
         this._init(document, startNode);
     }

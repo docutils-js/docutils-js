@@ -1,1 +1,5 @@
-exports.getLanguage = () => { };
+function getLanguage(a, b) {
+}
+
+export default getLanguage;
+

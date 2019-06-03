@@ -1,10 +1,23 @@
-import leftPad from 'left-pad';
 import { ApplicationError } from './Exceptions';
+import Transform from './Transform';
+import { IDocument } from './nodeInterface';
+
+function leftPad(num, len, pad) {
+  return pad.repeat(len - num.toString().length) + num.toString();
+}
 
 /**
  * Transformer class responsible for transforming document output
  */
 class Transformer {
+    transforms: any[];
+    unknownReferenceResolvers: any[];
+    document: IDocument;
+    applied: any[];
+    sorted: number;
+    components: any;
+    serialno: number;
+    
     /**
      * Create transformer class
      * @param {nodes.document} document - document to transform

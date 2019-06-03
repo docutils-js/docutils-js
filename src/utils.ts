@@ -7,8 +7,9 @@ import { combining } from './utils/combining';
     [3, 6, 9]
 
     */
-function findCombiningChars(text) {
+function findCombiningChars(text: string) {
     return text.split('').map((c, i) => {
+        // @ts-ignore
         const r = combining[text.codePointAt(i)];
         return [r, i];
         /* eslint-disable-next-line no-unused-vars */
@@ -36,10 +37,10 @@ export function getTrimFootnoteRefSpace(settings) { // fixme
         return settings.trim_footnote_reference_space
 */
 
-function columnWidth(text) { // fixme
+function columnWidth(text: string) { // fixme
     return text.length;
 }
-export function isIterable(obj) {
+export function isIterable(obj: any) {
     // checks for null and undefined
     /* instanbul ignore if */
   if (obj == null) {
@@ -72,38 +73,6 @@ export const punctuation_chars = {
 };
 
 
-/* eslint-disable-next-line no-unused-vars */
-function _getCallerFile() {
-    const originalFunc = Error.prepareStackTrace;
-
-        let callerfile;
-                let callerlineno;
-    try {
-        const err = new Error();
-
-        Error.prepareStackTrace = (error, stack) => stack;
-
-        const x = err.stack.shift();
-        const currentfile = x.getFileName();
-        /* eslint-disable-next-line no-unused-vars */
-        const currentlineno = x.getLineNumber();
-//      process.stderr.write(`${currentfile} ${currentlineno}\n`);
-
-        while (err.stack.length) {
-        const x2 = err.stack.shift();
-        callerfile = x2.getFileName();
-        callerlineno = x2.getLineNumber();
-            if (currentfile !== callerfile) break;
-            }
-    } catch (e) {
-        /* eslint-disable-next-line no-console */
-        console.log(e);
-    }
-
-    Error.prepareStackTrace = originalFunc;
-
-    return [callerfile, callerlineno];
-}
 
 /* Return a string with escape-backslashes converted to nulls. */
 function escape2null(text) {

@@ -1,10 +1,10 @@
 // babel.config.js
 module.exports = {
     "ignore": ["**/.#*"],
-  presets: [
+    presets: [
+        ['@babel/typescript'],
     [
         '@babel/env',
-        '@babel/typescript',
       {
         targets: {
           node: '10',

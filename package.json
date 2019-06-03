@@ -6,8 +6,8 @@
   "author": "Kay McCormick <kay@kaymccormick.com>",
   "license": "MIT",
   "scripts": {
-    "test": "jest",
-    "compile": "babel -d lib/ src/ && cp src/*.css lib || true"
+      "test": "jest",
+      "compile": "tsc src/nodes"
   },
   "devDependencies": {
     "@babel/cli": "^7.2.3",
@@ -17,6 +17,8 @@
     "@babel/plugin-proposal-object-rest-spread": "^7.4.4",
     "@babel/preset-env": "^7.3.1",
     "@babel/preset-typescript": "^7.3.3",
+    "@typescript-eslint/parser": "^1.9.0",
+    "ast-types": "^0.13.1",
     "babel-jest": "^24.7.1",
     "babel-register": "^6.26.0",
     "eslint": "^5.16.0",
@@ -37,6 +39,7 @@
     "micromatch": "^4.0.2",
     "nyc": "^13.3.0",
     "prettier": "^1.16.4",
+    "tslint": "^5.17.0",
     "typescript": "^3.5.1",
     "xpath": "^0.0.27"
   },
@@ -49,6 +52,7 @@
   },
   "dependencies": {
     "@babel/polyfill": "^7.4.0",
+    "@types/node": "^12.0.4",
     "draft-js": "^0.10.5",
     "ejs": "^2.6.1",
     "left-pad": "^1.3.0",

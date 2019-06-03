@@ -36,6 +36,8 @@ export const InvalidArgumentError = InvalidArgumentsError;
 
 
 export class SystemMessage extends Error {
+msg: string;
+level: number;
     constructor(msg, level, ...params) {
         super(...params);
         this.message = msg.astext();
@@ -49,6 +51,7 @@ export class SystemMessage extends Error {
 }
 
 export class ApplicationError extends Error {
+    error: Error;
     constructor(...params) {
         super(...params);
         const [message, kwargs] = params; // eslint-disable-line no-unused-vars

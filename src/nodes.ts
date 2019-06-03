@@ -21,6 +21,7 @@ import Transformer from './Transformer';
 import { InvalidArgumentsError, ApplicationError, UnimplementedError } from './Exceptions';
 import unescape from './utils/unescape';
 import { isIterable, checkDocumentArg } from './utils';
+import { IDocument, IElement, INode, ITextElement, IAttributes } from './nodeInterface';
 
 /* eslint-disable-next-line no-unused-vars */
 const __docformat__ = 'reStructuredText';
@@ -223,6 +224,8 @@ const SkipSiblings = class {};
  *     1995.
  */
 class NodeVisitor {
+    document: IDocument;
+    optional: any[];
     /**
       * Create a NodeVisitor.
       * @param {nodes.document} document - document to visit
@@ -312,6 +315,8 @@ class SparseNodeVisitor extends NodeVisitor {
  *  be overridden for default behavior.
  */
 class GenericNodeVisitor extends NodeVisitor {
+    static nodeClassNames = [];
+
     constructor(document) {
         super(document);
         // document this/
@@ -339,6 +344,8 @@ class Resolvable {
 }
 
 class BackLinkable {
+    backrefs: any[];
+
     addBackref(refid) {
         this.backrefs.push(refid);
     }
@@ -405,7 +412,20 @@ class Labeled { }
  *
  * The base class for all docutils nodes.
  */
-class Node {
+class Node implements INode {
+tagname: string;
+parent: INode;
+document: IDocument;
+source: string;
+line: number;
+classTypes: any[];
+children: INode[];
+
+_domNode(domroot: any): any;
+
+astext(): string;
+
+
     /**
       * Create a node
       */
@@ -521,7 +541,7 @@ class Node {
         return stop;
     }
 
-    _fastTraverse(cls) {
+    _fastTraverse(cls: any) {
         // Specialized traverse() that only supports instance checks.
         const result = [];
         if (this instanceof cls) {
@@ -591,7 +611,7 @@ ascend: false,
             });
         }
         if (siblings || ascend) {
-            let node = this;
+            let node: INode = this;
             while (node != null && node.parent != null) {
                 const index = node.parent.children.indexOf(node);
                 node.parent.children.slice(index + 1).forEach((sibling) => {
@@ -649,7 +669,14 @@ ascend: false,
  *
  * @extends module:nodes~Node
  */
-class Element extends Node {
+class Element extends Node implements IElement {
+    nodeName: any;
+attributes: IAttributes;
+listAttributes: string[];
+localAttributes: string[];
+knownAttributes: string[];
+basicAttributes: string[];
+childTextSeparator: string;
     /**
      * Create element.
      * @classdesc Abstracts a docutils Element.
@@ -678,7 +705,9 @@ class Element extends Node {
                 if (!isIterable(value)) {
                     throw new Error();
                 }
-                this.attributes[att] = [...value];
+                // @ts-ignore
+                const a: any[] = value;
+                this.attributes[att] = [...a];
             } else {
                 this.attributes[att] = value;
             }
@@ -721,7 +750,7 @@ class Element extends Node {
     }
 
 
-    _domNode(domroot) {
+    _domNode(domroot: any): any {
         const element = domroot.createElement(this.tagname);
         Object.entries(this.attlist()).forEach(([attribute, value]) => {
             let myVal;
@@ -747,7 +776,7 @@ class Element extends Node {
     }
 
 
-    astext() {
+    astext(): string {
         return this.children.map(x => x.astext()).join(this.childTextSeparator);
     }
 

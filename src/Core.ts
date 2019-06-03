@@ -14,7 +14,6 @@ export function publish(args) {
         readerName: defaults.defaultReaderName,
         parserName: defaults.defaultParserName,
         usage: defaultUsage,
-        description: defaultDescription,
         enableExitStatus: defaults.defaultEnableExitStatus,
 };
     const myArgs = { ..._defaults, ...args };
