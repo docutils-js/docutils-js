@@ -1,3 +1,5 @@
+import {ITransformSpec} from "./types";
+
 /* eslint-disable-next-line no-unused-vars */
 const __docformat__ = 'reStructuredText';
 
@@ -8,7 +10,7 @@ const __docformat__ = 'reStructuredText';
  * TransformSpec subclass objects used by `docutils.transforms.Transformer`.
  */
 
-class TransformSpec {
+class TransformSpec implements ITransformSpec {
     constructor(args) {
         this.unknownReferenceResolvers = [];
         this._init(args);
@@ -29,5 +31,7 @@ class TransformSpec {
     toString() {
         return `TransformSpec<${this.constructor.name}>`;
     }
+
+    unknownReferenceResolvers: any[];
 }
 export default TransformSpec;
