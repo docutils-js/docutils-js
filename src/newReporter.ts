@@ -1,7 +1,8 @@
 import Reporter from './Reporter';
 import { ApplicationError } from './Exceptions';
+import {Settings} from '../gen/Settings';
 
-export default function newReporter({ sourcePath }, settings) {
+export default function newReporter({ sourcePath }, settings: Settings) {
     const keys = ['reportLevel', 'haltLevel', 'warningStream', 'debug',
                   'errorEncoding', 'errorEncodingErrorHandler'];
     const missingKeys = keys.filter(key => !Object.prototype.hasOwnProperty.call(settings, key));

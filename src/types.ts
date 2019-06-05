@@ -50,11 +50,11 @@ export interface IReporter {
 setConditions(): void;
 
 systemMessage(level: number, message: string, children: Element[], attributes: IAttributes);
-notifyObservers(message: string);
-attachObserver(observer: any);
-debug(...args): void;
-info(...args): void;
-warning(...args): void;
-error(...args): void;
-severe(...args): void;
+notifyObservers(message: string): void;
+attachObserver(observer: any): void;
+debug(...args: any[]): void;
+info(...args: any[]): void;
+warning(...args: any[]): void;
+error(...args: any[]): void;
+severe(...args: any[]): void;
 }

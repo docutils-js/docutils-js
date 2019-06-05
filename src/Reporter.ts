@@ -1,6 +1,7 @@
 import * as nodes from './nodes';
 import { isIterable } from './utils';
 import { UnimplementedError as Unimp, SystemMessage } from './Exceptions';
+import {IReporter} from "./types";
 
 /**
     Return the "source" and "line" attributes from the `node` given or from
@@ -17,9 +18,24 @@ function getSourceLine(node) {
     return [undefined, undefined];
 }
 
-class Reporter {
-    constructor(source, reportLevel, haltLevel, stream, debug, encoding,
-                errorHandler = 'backslashreplace') {
+class Reporter implements IReporter {
+    private source: string;
+    private observers: any[];
+    private maxLevel: number;
+    private debugLevel: number;
+    private DEBUG_LEVEL: number;
+    private INFO_LEVEL: number;
+    private WARNING_LEVEL: number;
+    private ERROR_LEVEL: number;
+    private SEVERE_LEVEL: number;
+    private debugFlag: boolean;
+    private reportLevel: number;
+    private haltLevel: number;
+    private errorHandler: string;
+    private stream: any;
+    private encoding: string;
+    constructor(source: string, reportLevel: number, haltLevel?: number, stream?: any, debug?: boolean, encoding?: string,
+                errorHandler:string = 'backslashreplace') {
         if (haltLevel === undefined) {
             haltLevel = 4;
         }
@@ -41,7 +57,7 @@ class Reporter {
     }
 
     setConditions() {
-        throw new Unimp();
+        throw new Unimp('');
     }
 
     /* need better system for arguments!! */
@@ -100,30 +116,42 @@ class Reporter {
         this.observers.forEach(o => o(message));
     }
 
+    // @ts-ignore
     attachObserver(observer) {
+        // @ts-ignore
         this.observers.push(observer);
     }
 
+    // @ts-ignore
     debug(...args) {
         if (this.debugFlag) {
+            // @ts-ignore
             return this.systemMessage(this.debugLevel, ...args);
         }
         return undefined;
     }
 
+    // @ts-ignore
     info(...args) {
+        // @ts-ignore
         return this.systemMessage(this.INFO_LEVEL, ...args);
     }
 
+    // @ts-ignore
     warning(...args) {
+        // @ts-ignore
         return this.systemMessage(this.WARNING_LEVEL, ...args);
     }
 
+    // @ts-ignore
     error(...args) {
+        // @ts-ignore
         return this.systemMessage(this.ERROR_LEVEL, ...args);
     }
 
+    // @ts-ignore
     severe(...args) {
+        // @ts-ignore
         return this.systemMessage(this.SEVERE_LEVEL, ...args);
     }
 }

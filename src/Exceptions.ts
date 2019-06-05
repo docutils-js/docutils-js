@@ -1,4 +1,5 @@
 export class UnimplementedError extends Error {
+    // @ts-ignore
     constructor(message, ...params) {
         super(...params);
         /* instanbul ignore else */
