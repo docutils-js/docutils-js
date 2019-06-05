@@ -3,7 +3,7 @@ import SpecializedText from './SpecializedText';
 class Definition extends SpecializedText {
     /* eslint-disable-next-line no-unused-vars */
     eof(context) {
-        this.stateMachine.previousLine(2);
+        this.rstStateMachine.previousLine(2);
         return [];
     }
 

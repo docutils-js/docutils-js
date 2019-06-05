@@ -1,7 +1,7 @@
-import { StateMachine } from './StateMachine';
+import {StateMachine} from './StateMachine';
 
 class StateMachineWS extends StateMachine {
-    getIndented({ untilBlank, stripIndent }) {
+    getIndented(labeled: { untilBlank?: boolean, stripIndent?: boolean }) {
         /* istanbul ignore if */
         if (typeof stripIndent === 'undefined') {
             stripIndent = true;
@@ -41,8 +41,9 @@ class StateMachineWS extends StateMachine {
         return [indented, offset, blankFinish];
     }
 
-    getFirstKnownIndented({
- indent, untilBlank, stripIndent, stripTop,
+    getFirstKnownIndented(labeled: {
+ indent: number, untilBlank?: boolean, stripIndent?: boolean,
+        stripTop?: boolean,
 }) {
         let indented;
         let blankFinish;

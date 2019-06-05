@@ -1,16 +1,18 @@
 import UnknownStateError from './UnknownStateError';
 import ErrorOutput from './ErrorOutput';
-import { isIterable } from './utils';
-import {
- ApplicationError, EOFError, InvalidArgumentsError, UnimplementedError as Unimp,
-} from './Exceptions';
+import {isIterable} from './utils';
+import {ApplicationError, EOFError, InvalidArgumentsError, UnimplementedError as Unimp,} from './Exceptions';
 import UnexpectedIndentationError from './UnexpectedIndentationError';
 import StateCorrection from './StateCorrection';
 import TransitionCorrection from './TransitionCorrection';
 import DuplicateStateError from './DuplicateStateError';
 import StringList from './StringList';
+import {IStateFactory, IStateMachine} from "./types";
 
-class StateMachine {
+class StateMachine implements IStateMachine {
+    public memo: any;
+    protected states: any;
+    public inputLines: StringList;
     /*
         Initialize a `StateMachine` object; add state objects.
 
@@ -21,8 +23,15 @@ class StateMachine {
         - `debug`: a boolean; produce verbose output if true (nonzero).
         */
 
-    constructor({
-        stateFactory, initialState, debug, debugFn,
+    stateFactory: IStateFactory;
+
+    lineOffset: number;
+
+    line: string;
+    inputOffset: number;
+
+    constructor(args: {
+        stateFactory: IStateFactory, initialState: string; debug?: boolean, debugFn?: any,
 }) {
         /* Perform some sanity checking on arguments */
 //        /* istanbul ignore if */
@@ -76,8 +85,8 @@ class StateMachine {
 
     /* Faithful to python implementation. */
     run({
- inputLines, inputOffset, context, inputSource, initialState,
-}) {
+            inputLines, inputOffset, context, inputSource, initialState,
+        }) {
         /*
         Run the state machine on `input_lines`. Return results (a list).
 
@@ -151,7 +160,7 @@ class StateMachine {
 
                             const rinfo = this.inputLines.info(
                                 this.lineOffset,
-);
+                            );
                             if (!isIterable(rinfo)) {
                                 /* istanbul ignore if */
                                 throw new Error();
@@ -212,12 +221,12 @@ class StateMachine {
                         } else {
                             transitions = [error.args[1]];
                         }
-                    /*                    if self.debug:
-                        print >>self._stderr, (
-                              '\nStateMachine.run: StateCorrection to state '
-                              '"%s", transition %s.'
-                              % (next_state, transitions[0]))
-                    */
+                        /*                    if self.debug:
+                            print >>self._stderr, (
+                                  '\nStateMachine.run: StateCorrection to state '
+                                  '"%s", transition %s.'
+                                  % (next_state, transitions[0]))
+                        */
                     } else {
                         throw error;
                     }
@@ -234,11 +243,11 @@ class StateMachine {
     }
 
     /**
-      *         Return current state object; set it first if
-      *         `next_state` given.  Parameter `next_state`: a string,
-      *         the name of the next state.  Exception:
-      *         `UnknownStateError` raised if `next_state` unknown.
-      */
+     *         Return current state object; set it first if
+     *         `next_state` given.  Parameter `next_state`: a string,
+     *         the name of the next state.  Exception:
+     *         `UnknownStateError` raised if `next_state` unknown.
+     */
     getState(nextState) {
         if (nextState) {
             if (this.debug && nextState !== this.currentState) {
@@ -298,23 +307,26 @@ class StateMachine {
         return this.line;
     }
 
-    getSource(lineOffset) {
+    getSource(lineOffset: number): string {
         return this.inputLines.source(lineOffset - this.inputOffset);
     }
 
-    absLineOffset() {
+    absLineOffset(): number {
         return this.lineOffset + this.inputOffset;
     }
 
-    absLineNumber() {
+    absLineNumber(): number {
         return this.lineOffset + this.inputOffset + 1;
     }
 
-    getSourceAndLine(lineno) {
-        let offset; let srcoffset; let srcline; let
-src;
+    getSourceAndLine(lineno?: number) {
+        let offset;
+        let srcoffset;
+        let srcline;
+        let
+            src;
         if (lineno === undefined) {
-            offset = this.lineOffet;
+            offset = this.lineOffset;
         } else {
             offset = lineno - this.inputOffset - 1;
         }
@@ -337,7 +349,7 @@ src;
         let block;
         try {
             block = this.inputLines.getTextBlock(this.lineOffset,
-                                                 flushLeft);
+                flushLeft);
             this.nextLine(block.length - 1);
             return block;
         } catch (error) {
@@ -365,20 +377,20 @@ src;
 
         /* eslint-disable-next-line no-restricted-syntax */
         for (const name of transitions) {
-             // how is this initialized?
+            // how is this initialized?
             const [pattern, method, nextState] = state.transitions[name];
             const result = pattern.exec(this.line);
             if (result) {
                 if (this.debug) {
                     this.debugFn(`\nStateMachine.checkLine: Matched transition '"${name}"`
-                                 + `in state "${state.constructor.name}`);
+                        + `in state "${state.constructor.name}`);
                 }
 //              console.log(`pattern match for ${name}`);
-                const r = method.bind(state)({ pattern, result, input: this.line },
-                                             context, nextState);
+                const r = method.bind(state)({pattern, result, input: this.line},
+                    context, nextState);
                 /* istanbul ignore if */
                 if (r === undefined) {
-                        throw new Error();
+                    throw new Error();
                 }
 //              console.log(`return is >>> `);
 //              console.log(r);
@@ -460,7 +472,7 @@ src;
                 }
                 observer(...info);
             } catch (err) {
-            /* eslint-disable-next-line no-console */
+                /* eslint-disable-next-line no-console */
                 console.log(err.stack);
             }
         }

@@ -7,7 +7,7 @@
   "license": "MIT",
   "scripts": {
     "test": "jest",
-    "compile": "tsc src/nodes src/Reporter"
+    "compile": "tsc src/parsers/rst/states/RSTState"
   },
   "devDependencies": {
     "@babel/cli": "^7.2.3",

@@ -26,8 +26,8 @@ class StringList extends ViewList {
             }
             if (flushLeft && (line.substring(0, 1) === ' ')) {
                 const [source, offset] = this.info(end);
-                throw new UnexpectedIndentationError(this.slice(start, end),
-                                                     source, offset + 1);
+                throw new UnexpectedIndentationError('fixme',/*this.slice(start, end),
+                                                     source, offset + 1*/);
             }
             end += 1;
         }
@@ -88,10 +88,8 @@ class StringList extends ViewList {
         return [block, indent || 0, blankFinish];
     }
 
-    get2dBlock(top, left, bottom, right, stripIndent) {
-        if (typeof stripIndent === 'undefined') {
-            stripIndent = true;
-        }
+    get2dBlock(top: number, left: number, bottom: number, right: number, stripIndent: boolean = true) {
+
         const block = this.slice(top, bottom);
         let indent = right;
         for (let i = 0; i < block.length; i += 1) {

@@ -10,6 +10,7 @@ import { ApplicationError, UnimplementedError as Unimp } from '../../../Exceptio
 import TransitionCorrection from '../../../TransitionCorrection';
 import * as directives from '../directives';
 import UnexpectedIndentationError from '../../../UnexpectedIndentationError';
+import RSTStateMachine from "../RSTStateMachine";
 
 const fullyNormalizeName = nodes.fullyNormalizeName;
 
@@ -33,9 +34,9 @@ function _UpperromanToInt() {
 }
 
 class Body extends RSTState {
-    constructor(args) {
-        super(args);
-        const pats = { };
+    constructor(stateMachine: RSTStateMachine, args) {
+        super(stateMachine, args);
+        const pats: any = { };
 
         pats.nonalphanum7bit = '[!-/:-@[-`{-~]';
         pats.alpha = '[a-zA-Z]';
@@ -45,8 +46,8 @@ class Body extends RSTState {
         this.pats = pats;
     }
 
-    _init(args) {
-        super._init(args);
+    _init() {
+        super._init();
         //      this.doubleWidthPadChar = tableparser.TableParser.doubleWidthPadChar
 
         const enum_ = { };
@@ -146,9 +147,9 @@ class Body extends RSTState {
     }
 
     footnote(match) {
-        const [src, srcline] = this.stateMachine.getSourceAndLine();
+        const [src, srcline] = this.rstStateMachine.getSourceAndLine();
         /* eslint-disable-next-line no-unused-vars */
-        const [indented, indent, offset, blankFinish] = this.stateMachine.getFirstKnownIndented(
+        const [indented, indent, offset, blankFinish] = this.rstStateMachine.getFirstKnownIndented(
             { indent: match.index + match[0].length },
 
         );
@@ -188,9 +189,9 @@ class Body extends RSTState {
     }
 
     citation(match) {
-        const [src, srcline] = this.stateMachine.getSourceAndLine();
+        const [src, srcline] = this.rstStateMachine.getSourceAndLine();
         /* eslint-disable-next-line no-unused-vars */
-        const [indented, indent, offset, blankFinish] = this.stateMachine.getFirstKnownIndented({
+        const [indented, indent, offset, blankFinish] = this.rstStateMachine.getFirstKnownIndented({
             indent: match.index + match[0].length,
         });
         const label = match[1];
@@ -213,9 +214,9 @@ class Body extends RSTState {
     /* eslint-disable-next-line camelcase */
     hyperlink_target(match) {
         const pattern = this.explicit.patterns.target;
-        const lineno = this.stateMachine.absLineNumber();
+        const lineno = this.rstStateMachine.absLineNumber();
         /* eslint-disable-next-line no-unused-vars */
-        const [block, indent, offset, blankFinish] = this.stateMachine.getFirstKnownIndented(
+        const [block, indent, offset, blankFinish] = this.rstStateMachine.getFirstKnownIndented(
             {
                 indent: match.index + match[0].length,
                 untilBlank: true,
@@ -332,13 +333,13 @@ class Body extends RSTState {
     substitution_def(match) {
         const pattern = this.explicit.patterns.substitution;
         /* eslint-disable-next-line no-unused-vars */
-        const [src, srcline] = this.stateMachine.getSourceAndLine();
+        const [src, srcline] = this.rstStateMachine.getSourceAndLine();
         const matchEnd = match.index + match[0].length;
         let myBlankFinish;
         /* eslint-disable-next-line no-unused-vars */
         const [block, indent,
                /* eslint-disable-next-line no-unused-vars */
-               offset, blankFinish] = this.stateMachine.getFirstKnownIndented(
+               offset, blankFinish] = this.rstStateMachine.getFirstKnownIndented(
                    { indent: matchEnd, stripIndent: false },
                );
 
@@ -495,17 +496,17 @@ class Body extends RSTState {
                   from docutils.parsers.rst import convert_directive_function
                   directive = convert_directive_function(directive)
         */
-        const lineno = this.stateMachine.absLineNumber();
-        const initialLineOffset = this.stateMachine.lineOffset;
+        const lineno = this.rstStateMachine.absLineNumber();
+        const initialLineOffset = this.rstStateMachine.lineOffset;
         /* eslint-disable-next-line no-unused-vars */
-        const [indented, indent, lineOffset, blankFinish] = this.stateMachine.getFirstKnownIndented(
+        const [indented, indent, lineOffset, blankFinish] = this.rstStateMachine.getFirstKnownIndented(
             {
                 indent: match.index + match[0].length,
                 stripTop: 0,
             },
         );
-        const blockText = this.stateMachine.inputLines.slice(
-            initialLineOffset, this.stateMachine.lineOffset + 1,
+        const blockText = this.rstStateMachine.inputLines.slice(
+            initialLineOffset, this.rstStateMachine.lineOffset + 1,
         );
         let args; let options; let content; let
         contentOffset;
@@ -546,12 +547,12 @@ class Body extends RSTState {
                   % (typeName, i, result[i]))
         */
         return [result,
-                blankFinish || this.stateMachine.isNextLineBlank()];
+                blankFinish || this.rstStateMachine.isNextLineBlank()];
     }
 
     /* eslint-disable-next-line camelcase */
     unknown_directive(typeName) {
-        const lineno = this.stateMachine.absLineNumber();
+        const lineno = this.rstStateMachine.absLineNumber();
         const [indented,
 /* eslint-disable-next-line no-unused-vars */
                indent,
@@ -570,13 +571,13 @@ class Body extends RSTState {
     comment(match) {
         const matchEnd = match.result.index + match.result[0].length;
         if (!match.result.input.substring(matchEnd).trim()
-            && this.stateMachine.isNextLineBlank()) { // # an empty comment?
+            && this.rstStateMachine.isNextLineBlank()) { // # an empty comment?
             return [[new nodes.comment()], 1]; // "A tiny but practical wart."
         }
         const [indented,
                /* eslint-disable-next-line no-unused-vars */
                indent, offset,
-               blankFinish] = this.stateMachine.getFirstKnownIndented(
+               blankFinish] = this.rstStateMachine.getFirstKnownIndented(
                    { indent: matchEnd },
                );
         while (indented && indented.length && !indented[indented.length - 1].trim()) {
@@ -616,7 +617,7 @@ class Body extends RSTState {
                 return method(expmatch);
             } catch (error) {
                 if (error instanceof MarkupError) {
-                    const lineno = this.stateMachine.absLineNumber();
+                    const lineno = this.rstStateMachine.absLineNumber();
                     const message = error.args ? error.args.join(' ') : '';
                     errors.push(this.reporter.warning(message, [], { line: lineno }));
                 } else {
@@ -635,15 +636,15 @@ class Body extends RSTState {
            */
     /* eslint-disable-next-line camelcase */
     explicit_list(blankFinish) {
-        const offset = this.stateMachine.lineOffset + 1; // next line
+        const offset = this.rstStateMachine.lineOffset + 1; // next line
         const [newlineOffset, blankFinish1] = this.nestedListParse(
-            this.stateMachine.inputLines.slice(offset),
+            this.rstStateMachine.inputLines.slice(offset),
             {
-                inputOffset: this.stateMachine.absLineOffset() + 1,
+                inputOffset: this.rstStateMachine.absLineOffset() + 1,
                 node: this.parent,
                 initialState: 'Explicit',
                 blankFinish,
-                matchTitles: this.stateMachine.matchTitles,
+                matchTitles: this.rstStateMachine.matchTitles,
             },
         );
         this.gotoLine(newlineOffset);
@@ -662,9 +663,9 @@ class Body extends RSTState {
 
     /* eslint-disable-next-line camelcase */
     anonymous_target(match) {
-        const lineno = this.stateMachine.absLineNumber();
+        const lineno = this.rstStateMachine.absLineNumber();
         /* eslint-disable-next-line no-unused-vars */
-        const [block, indent, offset, blankFinish] = this.stateMachine.getFirstKnownIndented({
+        const [block, indent, offset, blankFinish] = this.rstStateMachine.getFirstKnownIndented({
             indent: match.result.index + match.result[0].length,
             untilBlank: true,
         });
@@ -679,7 +680,7 @@ class Body extends RSTState {
 
     indent(match, context, nextState) {
         /* eslint-disable-next-line no-unused-vars */
-        const [indented, indent, lineOffset, blankFinish] = this.stateMachine.getIndented({});
+        const [indented, indent, lineOffset, blankFinish] = this.rstStateMachine.getIndented({});
         /* istanbul ignore if */
         if (indented === undefined) {
             throw new Error();
@@ -800,11 +801,11 @@ class Body extends RSTState {
         const [listitem, blankFinish1] = this.list_item(match.match.index + match.match[0].length);
         let blankFinish = blankFinish1;
         enumlist.add(listitem);
-        const offset = this.stateMachine.lineOffset + 1; // next line
+        const offset = this.rstStateMachine.lineOffset + 1; // next line
         const [newlineOffset, blankFinish2] = this.nestedListParse(
-            this.stateMachine.inputLines.slice(offset),
+            this.rstStateMachine.inputLines.slice(offset),
             {
-                inputOffset: this.stateMachine.absLineOffset() + 1,
+                inputOffset: this.rstStateMachine.absLineOffset() + 1,
                 node: enumlist,
                 initialState: 'EnumeratedList',
                 blankFinish,
@@ -826,10 +827,10 @@ class Body extends RSTState {
     /* eslint-disable-next-line camelcase */
     parse_attribution(indented, lineOffset) {
         const text = indented.join('\n').trimRight();
-        const lineno = this.stateMachine.absLineNumber() + lineOffset;
+        const lineno = this.rstStateMachine.absLineNumber() + lineOffset;
         const [textnodes, messages] = this.inline_text(text, lineno);
         const anode = new nodes.attribution(text, '', textnodes);
-        const [source, line] = this.stateMachine.getSourceAndLine(lineno);
+        const [source, line] = this.rstStateMachine.getSourceAndLine(lineno);
         anode.source = source;
         anode.line = line;
         return [anode, messages];
@@ -839,7 +840,7 @@ class Body extends RSTState {
         //      console.log(`in bullet`);
         const bulletlist = new nodes.bullet_list();
         [bulletlist.source,
-         bulletlist.line] = this.stateMachine.getSourceAndLine();
+         bulletlist.line] = this.rstStateMachine.getSourceAndLine();
         //      console.log(`${bulletlist.source} ${bulletlist.line}`);
         /* istanbul ignore if */
         if (!this.parent) {
@@ -859,10 +860,10 @@ class Body extends RSTState {
         }
 
         bulletlist.append(i);
-        const offset = this.stateMachine.lineOffset + 1;
+        const offset = this.rstStateMachine.lineOffset + 1;
         const [newLineOffset, blankFinish2] = this.nestedListParse(
-            this.stateMachine.inputLines.slice(offset), {
-                inputOffset: this.stateMachine.absLineOffset() + 1,
+            this.rstStateMachine.inputLines.slice(offset), {
+                inputOffset: this.rstStateMachine.absLineOffset() + 1,
                 node: bulletlist,
                 initialState: 'BulletList',
                 blankFinish,
@@ -887,12 +888,12 @@ class Body extends RSTState {
         let indented; let lineOffset; let blankFinish;
         /* eslint-disable-next-line no-unused-vars */
         let outIndent;
-        if (this.stateMachine.line.length > indent) {
+        if (this.rstStateMachine.line.length > indent) {
             //          console.log(`get known indentd`);
-            [indented, lineOffset, blankFinish] = this.stateMachine.getKnownIndented({ indent });
+            [indented, lineOffset, blankFinish] = this.rstStateMachine.getKnownIndented({ indent });
         } else {
             [indented, outIndent, lineOffset, blankFinish] = (
-                this.stateMachine.getFirstKnownIndented({ indent }));
+                this.rstStateMachine.getFirstKnownIndented({ indent }));
         }
         const listitem = new nodes.list_item(indented.join('\n'));
         if (indented) {
@@ -912,11 +913,11 @@ class Body extends RSTState {
         const [field, blankFinish1] = this.field(match);
         let blankFinish = blankFinish1;
         fieldList.add(field);
-        const offset = this.stateMachine.lineOffset + 1;
+        const offset = this.rstStateMachine.lineOffset + 1;
         const [newlineOffset, blankFinish2] = this.nestedListParse(
-            this.stateMachine.inputLines.slice(offset),
+            this.rstStateMachine.inputLines.slice(offset),
             {
-                inputOffset: this.stateMachine.absLineOffset() + 1,
+                inputOffset: this.rstStateMachine.absLineOffset() + 1,
                 node: fieldList,
                 initialState: 'FieldList',
                 blankFinish,
@@ -932,10 +933,10 @@ class Body extends RSTState {
 
     field(match) {
         const name = this.parse_field_marker(match);
-        const [src, srcline] = this.stateMachine.getSourceAndLine();
-        const lineno = this.stateMachine.absLineNumber();
+        const [src, srcline] = this.rstStateMachine.getSourceAndLine();
+        const lineno = this.rstStateMachine.absLineNumber();
         /* eslint-disable-next-line no-unused-vars */
-        const [indented, indent, lineOffset, blankFinish] = this.stateMachine.getFirstKnownIndented(
+        const [indented, indent, lineOffset, blankFinish] = this.rstStateMachine.getFirstKnownIndented(
             { indent: match.result.index + match.result[0].length },
         );
         const fieldNode = new nodes.field();
@@ -971,7 +972,7 @@ class Body extends RSTState {
     option_marker(match, context, nextState) {
         const optionlist = new nodes.option_list();
         /* eslint-disable-next-line no-unused-vars */// fixme
-        const [source, line] = this.stateMachine.getSourceAndLine();
+        const [source, line] = this.rstStateMachine.getSourceAndLine();
         let listitem;
         let blankFinish;
         try {
@@ -984,7 +985,7 @@ class Body extends RSTState {
                 const [indented,
                        /* eslint-disable-next-line no-unused-vars */
                        indent,
-                       lineOffset, blankFinish2] = this.stateMachine.getFirstKnownIndented(
+                       lineOffset, blankFinish2] = this.rstStateMachine.getFirstKnownIndented(
                            { indent: match.result.index + match.result[0].length },
                        );
                 blankFinish = blankFinish2;
@@ -999,11 +1000,11 @@ class Body extends RSTState {
         }
         this.parent.add(optionlist);
         optionlist.add(listitem);
-        const offset = this.stateMachine.lineOffset + 1; // next line
+        const offset = this.rstStateMachine.lineOffset + 1; // next line
         const [newlineOffset, blankFinish3] = this.nestedListParse(
-            this.stateMachine.inputLines.slice(offset),
+            this.rstStateMachine.inputLines.slice(offset),
             {
-                inputOffset: this.stateMachine.absLineOffset() + 1,
+                inputOffset: this.rstStateMachine.absLineOffset() + 1,
                 node: optionlist,
                 initialState: 'OptionList',
                 blankFinish,
@@ -1019,13 +1020,13 @@ class Body extends RSTState {
 
     /* eslint-disable-next-line camelcase */
     option_list_item(match) {
-        const offset = this.stateMachine.absLineOffset();
+        const offset = this.rstStateMachine.absLineOffset();
         const options = this.parse_option_marker(match);
         const [indented,
                /* eslint-disable-next-line no-unused-vars */
                indent,
                lineOffset,
-               blankFinish] = this.stateMachine.getFirstKnownIndented(
+               blankFinish] = this.rstStateMachine.getFirstKnownIndented(
                    { indent: match.result.index + match.result[0].length },
                );
         if (!indented || !indented.length) { //  not an option list item
@@ -1092,7 +1093,7 @@ class Body extends RSTState {
     }
 
     doctest(match, context, nextState) {
-        const data = this.stateMachine.getTextBlock().join('\n');
+        const data = this.rstStateMachine.getTextBlock().join('\n');
         // TODO: prepend class value ['pycon'] (Python Console)
         // parse with `directives.body.CodeBlock` (returns literal-block
         // with class "code" and syntax highlight markup).
@@ -1105,17 +1106,17 @@ class Body extends RSTState {
     line_block(match, context, nextState) {
         const block = new nodes.line_block();
         this.parent.add(block);
-        const lineno = this.stateMachine.absLineNumber();
+        const lineno = this.rstStateMachine.absLineNumber();
         const [line, messages, blankFinish1] = this.line_block_line(match, lineno);
         let blankFinish = blankFinish1;
         block.add(line);
         this.parent.add(messages);
         if (!blankFinish) {
-            const offset = this.stateMachine.lineOffset + 1; // next line
+            const offset = this.rstStateMachine.lineOffset + 1; // next line
             const [newLineOffset, blankFinish2] = this.nestedListParse(
-                this.stateMachine.inputLines.slice(offset),
+                this.rstStateMachine.inputLines.slice(offset),
                 {
-                    inputOffset: this.stateMachine.absLineOffset() + 1,
+                    inputOffset: this.rstStateMachine.absLineOffset() + 1,
                     node: block,
                     initialState: 'LineBlock',
                     blankFinish: 0,
@@ -1144,7 +1145,7 @@ class Body extends RSTState {
     line_block_line(match, lineno) {
         /* eslint-disable-next-line no-unused-vars */
         const [indented, indent, lineOffset, blankFinish] = this
-              .stateMachine.getFirstKnownIndented(
+              .rstStateMachine.getFirstKnownIndented(
                   {
                       indent: match.result.index + match.result[0].length,
                       untilBlank: true,
@@ -1231,7 +1232,7 @@ class Body extends RSTState {
         if (!blankFinish) {
             const msg = this.reporter.warning(
                 'Blank line required after table.', [],
-                { line: this.stateMachine.absLineNumber() + 1 },
+                { line: this.rstStateMachine.absLineNumber() + 1 },
             );
             this.parent.add(msg);
         }
@@ -1250,7 +1251,7 @@ class Body extends RSTState {
             try {
                 const parser = new parserClass();
                 const tabledata = parser.parse(block);
-                const tableline = (this.stateMachine.absLineNumber() - block.length + 1);
+                const tableline = (this.rstStateMachine.absLineNumber() - block.length + 1);
                 const table = this.build_table(tabledata, tableline);
                 nodelist = [table, ...messages];
             } catch (error) {
@@ -1273,7 +1274,7 @@ class Body extends RSTState {
         let block;
         let blankFinish = 1;
         try {
-            block = this.stateMachine.getTextBlock(0, true);
+            block = this.rstStateMachine.getTextBlock(0, true);
         } catch (error) {
             if (error instanceof UnexpectedIndentationError) {
                 const [block2, src, srcline] = error.args;
@@ -1296,7 +1297,7 @@ class Body extends RSTState {
             block[i] = block[i].trim();
             if (block[i][0] !== '+' && block[i][0] !== '|') { // check left edge
                 blankFinish = 0;
-                this.stateMachine.previousLine(block.length - i);
+                this.rstStateMachine.previousLine(block.length - i);
                 block.splice(i, block.length - i);
                 break;
             }
@@ -1308,7 +1309,7 @@ class Body extends RSTState {
             for (let i = block.length - 2; i >= 1; i -= 1) { // fixme test
                 // for i in range(len(block) - 2, 1, -1):
                 if (this.grid_table_top_pat.test(block[i])) {
-                    this.stateMachine.previousLine(block.length - i + 1);
+                    this.rstStateMachine.previousLine(block.length - i + 1);
                     block.splice(i + 1, block.length - (i + 1));
                     myBreak = true;
                     break;
@@ -1331,8 +1332,8 @@ class Body extends RSTState {
 
     /* eslint-disable-next-line camelcase */
     isolate_simple_table() {
-        const start = this.stateMachine.lineOffset;
-        const lines = this.stateMachine.inputLines;
+        const start = this.rstStateMachine.lineOffset;
+        const lines = this.rstStateMachine.inputLines;
         const limit = lines.length - 1;
         const toplen = lines[start].trim().length;
         const patternMatch = RegExps.simpleTableBorderPat.exec.bind(RegExps.simpleTableBorderPat);
@@ -1346,7 +1347,7 @@ class Body extends RSTState {
             const match = patternMatch(line);
             if (match) {
                 if (line.trim().length !== toplen) {
-                    this.stateMachine.nextLine(i - start);
+                    this.rstStateMachine.nextLine(i - start);
                     const messages = this.malformed_table(
                         lines.slice(start, i + 1),
                         'Bottom/header table border does not match top border.',
@@ -1368,11 +1369,11 @@ class Body extends RSTState {
             let extra;
             if (found) {
                 extra = ' or no blank line after table bottom';
-                this.stateMachine.nextLine(foundAt - start);
+                this.rstStateMachine.nextLine(foundAt - start);
                 block = lines.slice(start, foundAt + 1);
             } else {
                 extra = '';
-                this.stateMachine.next_line(i - start - 1);
+                this.rstStateMachine.next_line(i - start - 1);
                 block = lines.slice(start);
             }
             const messages = this.malformed_table(
@@ -1380,7 +1381,7 @@ class Body extends RSTState {
             );
             return [[], messages, !extra];
         }
-        this.stateMachine.nextLine(end - start);
+        this.rstStateMachine.nextLine(end - start);
         block = lines.slice(start, end + 1);
         // for East Asian chars:
         block.padDoubleWidth(this.doubleWidthPadChar);
@@ -1393,7 +1394,7 @@ class Body extends RSTState {
         block.replace(this.doubleWidthPadChar, '');
         const data = block.join('\n');
         let message = 'Malformed table.';
-        const startline = this.stateMachine.absLineNumber() - block.length + 1;
+        const startline = this.rstStateMachine.absLineNumber() - block.length + 1;
         if (detail) {
             message += `\n${detail}`;
         }
@@ -1459,7 +1460,7 @@ class Body extends RSTState {
     }
 
     line(match, context, nextState) {
-        if (this.stateMachine.matchTitles) {
+        if (this.rstStateMachine.matchTitles) {
             return [[match.input], 'Line', []];
         } if (match.match.input.trim() === '::') {
             throw new TransitionCorrection('text');
@@ -1467,16 +1468,16 @@ class Body extends RSTState {
             const msg = this.reporter.info(
                 'Unexpected possible title overline or transition.\n'
                     + "Treating it as ordinary text because it's so short.",
-                { line: this.stateMachine.absLineNumber() },
+                { line: this.rstStateMachine.absLineNumber() },
             );
             this.parent.add(msg);
             throw new TransitionCorrection('text');
         } else {
-            const blocktext = this.stateMachine.line;
+            const blocktext = this.rstStateMachine.line;
             const msg = this.reporter.severe(
                 'Unexpected section title or transition.',
                 [nodes.literal_block(blocktext, blocktext)],
-                { line: this.stateMachine.absLineNumber() },
+                { line: this.rstStateMachine.absLineNumber() },
             );
             this.parent.add(msg);
             return [[], nextState, []];

@@ -1,9 +1,40 @@
 import StateWS from '../../../states/StateWS';
 import NestedStateMachine from '../NestedStateMachine';
 import * as nodes from '../../../nodes';
-import { EOFError, InvalidArgumentsError } from '../../../Exceptions';
+import {EOFError, InvalidArgumentsError} from '../../../Exceptions';
+import {Document, IElement, INode} from "../../../types";
+import StringList from "../../../StringList";
+import Inliner from "../Inliner";
+import RSTStateMachine from "../RSTStateMachine";
+
+export interface CommonParseArgs {
+    inputLines: StringList;
+    inputOffset: number;
+    node: INode;
+    matchTitles?: boolean;
+}
+
+export interface NestedParseArgs extends CommonParseArgs, StateMachineClassArgs {
+    initialState?: any;
+    blankFinish?: boolean;
+    blankFinishState?: string;
+    extraSettings?: any; }
+
+interface StateMachineClassArgs {
+    stateMachineClass?: any;
+    stateMachineKwargs?: any;
+}
 
 class RSTState extends StateWS {
+    public memo: any;
+    private inliner: Inliner;
+    protected parent: IElement;
+
+    protected rstStateMachine: RSTStateMachine;
+    private document: Document;
+    private nestedSmCache: any[];
+    protected stateClasses: string[];
+
     _init(args = {}) {
         super._init(args);
         this.nestedSm = NestedStateMachine;
@@ -12,30 +43,30 @@ class RSTState extends StateWS {
 
         this.nestedSmKwargs = {
 //            stateClasses: this.stateClasses,
-            stateFactory: this.stateMachine.stateFactory.withStateClasses(this.stateClasses),
+            stateFactory: this.rstStateMachine.stateFactory.withStateClasses(this.stateClasses),
             initialState: 'Body',
-            debug: args && args.stateMachine ? args.stateMachine.debug : false,
+            debug: args && args.stateMachine ? args.rstStateMachine.debug : false,
             /* eslint-disable-next-line no-console */
-            debugFn: args && args.stateMachine ? args.stateMachine.debugFn : console.log,
+            debugFn: args && args.stateMachine ? args.rstStateMachine.debugFn : console.log,
         };
     }
 
     runtimeInit() {
         super.runtimeInit();
-        const { memo } = this.stateMachine;
+        const {memo} = this.rstStateMachine;
         this.memo = memo;
         this.reporter = memo.reporter;
         this.inliner = memo.inliner;
         this.document = memo.document;
-        this.parent = this.stateMachine.node;
+        this.parent = this.rstStateMachine.node;
         if (!this.reporter.getSourceAndLine) {
-            this.reporter.getSourceAndLine = this.stateMachine.getSourceAndLine;
+            this.reporter.getSourceAndLine = this.rstStateMachine.getSourceAndLine;
         }
     }
 
     gotoLine(absLineOffset) {
         try {
-            this.stateMachine.gotoLine(absLineOffset);
+            this.rstStateMachine.gotoLine(absLineOffset);
         } catch (ex) {
             /* test for eof error? */
         }
@@ -43,7 +74,7 @@ class RSTState extends StateWS {
 
     /* istanbul ignore next */
     noMatch(context, transitions) {
-        this.reporter.severe(`Internal error: no transition pattern match.  State: "${this.constructor.name}"; transitions: ${transitions}; context: ${context}; current line: ${this.stateMachine.line}.`);
+        this.reporter.severe(`Internal error: no transition pattern match.  State: "${this.constructor.name}"; transitions: ${transitions}; context: ${context}; current line: ${this.rstStateMachine.line}.`);
         return [context, null, []];
     }
 
@@ -51,25 +82,26 @@ class RSTState extends StateWS {
         return [[], []];
     }
 
-    nestedParse(block, {
- inputOffset, node, matchTitles, stateMachineClass, stateMachineKwargs,
-}) {
+    // eslint-disable-next-line no-unused-vars
+    nestedParse(args: NestedParseArgs) {
         /* istanbul ignore if */
         if (!this.memo || !this.memo.document) {
             throw new Error('need memo');
         }
         /* istanbul ignore if */
+        const block = args.inputLines;
         if (!block) {
             throw new Error('need block');
         }
 
+        const mCopy = { ...args };
         let useDefault = 0;
-        if (!stateMachineClass) {
-            stateMachineClass = this.nestedSm;
+        if (!mCopy.stateMachineClass) {
+            mCopy.stateMachineClass = this.nestedSm;
             useDefault += 1;
         }
-        if (!stateMachineKwargs) {
-            stateMachineKwargs = this.nestedSmKwargs;
+        if (!mCopy.stateMachineKwargs) {
+            mCopy.stateMachineKwargs = this.nestedSmKwargs;
             useDefault += 1;
         }
         const blockLength = block.length;
@@ -88,21 +120,21 @@ class RSTState extends StateWS {
 //          if(!stateMachineKwargs.document) {
 //              throw new Error("expectinf document")
             //          }
-            if (!stateMachineKwargs.stateFactory) {
+            if (!mCopy.stateMachineKwargs.stateFactory) {
                 throw new Error('need statefactory');
             }
-            stateMachine = new stateMachineClass({
+            stateMachine = new mCopy.stateMachineClass({
 
  debug: this.debug,
-                                                  ...stateMachineKwargs,
+                                                  ...mCopy.stateMachineKwargs,
 });
         }
         stateMachine.run({
  inputLines: block,
-inputOffset,
+inputOffset: mCopy.inputOffset,
 memo: this.memo,
-                          node,
-matchTitles,
+                node:          mCopy.node,
+matchTitles: mCopy.matchTitles,
 });
         if (useDefault === 2) {
             this.nestedSmCache.push(stateMachine);
@@ -111,54 +143,49 @@ matchTitles,
         }
         const newOffset = stateMachine.absLineOffset();
         if (block.parent && (block.length - blockLength) !== 0) {
-            this.stateMachine.nextLine(block.length - blockLength);
+            this.rstStateMachine.nextLine(block.length - blockLength);
         }
         return newOffset;
     }
 
-    nestedListParse(block, {
- inputOffset, node, initialState,
-                     blankFinish, blankFinishState, extraSettings,
-                     matchTitles,
-                     stateMachineClass,
-                     stateMachineKwargs,
-    }) {
+    nestedListParse(block: StringList, args: NestedParseArgs) {
+        const myargs: NestedParseArgs = { ...args };
         /* istanbul ignore next */
-        if (extraSettings == null) {
-                extraSettings = {};
+        if (myargs.extraSettings == null) {
+                myargs.extraSettings = {};
         }
-        if (!stateMachineClass) {
-            stateMachineClass = this.nestedSm;
+        if (!myargs.stateMachineClass) {
+            myargs.stateMachineClass = this.nestedSm;
         }
-        if (!stateMachineKwargs) {
-            stateMachineKwargs = { ...this.nestedSmKwargs };
+        if (!myargs.stateMachineKwargs) {
+            myargs.stateMachineKwargs = { ...this.nestedSmKwargs };
         }
-        stateMachineKwargs.initialState = initialState;
-        const stateMachine = new stateMachineClass({
-            stateFactory: this.stateMachine.stateFactory,
+        myargs.stateMachineKwargs.initialState = myargs.initialState;
+        const stateMachine = new myargs.stateMachineClass({
+            stateFactory: this.rstStateMachine.stateFactory,
  debug: this.debug,
-                                                    ...stateMachineKwargs,
+                                                    ...myargs.stateMachineKwargs,
 });
-        if (!blankFinishState) {
-            blankFinishState = initialState;
+        if (!myargs.blankFinishState) {
+            myargs.blankFinishState = myargs.initialState;
         }
         /* istanbul ignore if */
-        if (!(blankFinishState in stateMachine.states)) {
-            throw new InvalidArgumentsError(`invalid state ${blankFinishState}`);
+        if (!(myargs.blankFinishState in stateMachine.states)) {
+            throw new InvalidArgumentsError(`invalid state ${myargs.blankFinishState}`);
         }
 
-        stateMachine.states[blankFinishState].blankFinish = blankFinish;
-        Object.keys(extraSettings).forEach((key) => {
-            stateMachine.states[initialState][key] = extraSettings[key];
+        stateMachine.states[myargs.blankFinishState].blankFinish = myargs.blankFinish;
+        Object.keys(myargs.extraSettings).forEach((key) => {
+            stateMachine.states[myargs.initialState][key] = myargs.extraSettings[key];
         });
         stateMachine.run({
  inputLines: block,
-inputOffset,
+inputOffset: myargs.inputOffset,
 memo: this.memo,
-                          node,
-matchTitles,
+        node: myargs.node,
+matchTitles: myargs.matchTitles,
 });
-        blankFinish = stateMachine.states[blankFinishState].blankFinish;
+        const {blankFinish} = stateMachine.states[myargs.blankFinishState];
         stateMachine.unlink();
         return [stateMachine.absLineOffset(), blankFinish];
     }
@@ -197,7 +224,7 @@ matchTitles,
                 memo.sectionBubbleUpKludge = true;
             }
             // back up 2 lines for underline title, 3 for overline title
-            this.stateMachine.previousLine(style.length + 1);
+            this.rstStateMachine.previousLine(style.length + 1);
             throw new EOFError(); // let parent section re-evaluate
         }
 
@@ -231,14 +258,15 @@ matchTitles,
         sectionNode.add(messages);
         sectionNode.add(titleMessages);
         this.document.noteImplicitTarget(sectionNode, sectionNode);
-        const offset = this.stateMachine.lineOffset + 1;
-        const absoffset = this.stateMachine.absLineOffset() + 1;
+        const offset = this.rstStateMachine.lineOffset + 1;
+        const absoffset = this.rstStateMachine.absLineOffset() + 1;
         const newabsoffset = this.nestedParse(
-            this.stateMachine.inputLines.slice(offset), {
+            {
+                inputLines: this.rstStateMachine.inputLines.slice(offset),
  inputOffset: absoffset,
                                                          node: sectionNode,
 matchTitles: true,
-},
+}
 );
         this.gotoLine(newabsoffset);
         if (memo.sectionLevel <= mylevel) {
@@ -248,12 +276,12 @@ matchTitles: true,
             memo.sectionLevel = mylevel;
     }
 
-    unindentWarning(nodeName) {
-        const lineno = this.stateMachine.absLineNumber() + 1;
+    unindentWarning(nodeName: string): INode {
+        const lineno = this.rstStateMachine.absLineNumber() + 1;
         return this.reporter.warning(`${nodeName} ends without a blank line; unexpected unindent.`, { line: lineno });
     }
 
-    paragraph(lines, lineno) {
+    paragraph(lines, lineno: number) {
         const data = lines.join('\n').trimEnd();
         let text;
         let literalNext;
@@ -274,7 +302,7 @@ matchTitles: true,
         const r = this.inline_text(text, lineno);
         const [textnodes, messages] = r;
         const p = new nodes.paragraph(data, '', textnodes);
-        [p.source, p.line] = this.stateMachine.getSourceAndLine(lineno);
+        [p.source, p.line] = this.rstStateMachine.getSourceAndLine(lineno);
         return [[p, ...messages], literalNext];
     }
 

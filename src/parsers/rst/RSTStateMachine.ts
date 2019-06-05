@@ -1,12 +1,17 @@
 import StateMachineWS from '../../StateMachineWS';
 import Inliner from './Inliner';
 import * as languages from '../../languages';
+import {IElement, INode} from "../../types";
+import StringList from "../../StringList";
+import {document} from "../../nodes";
+import {CommonParseArgs} from "./states/RSTState";
 
 
 class RSTStateMachine extends StateMachineWS {
-    run({
- inputLines, document, inputOffset, matchTitles, inliner,
-    }) {
+    matchTitles: boolean;
+    node: IElement;
+    run(args: CommonParseArgs) {
+
         /* istanbul ignore if */
         if (inputOffset === undefined) {
             inputOffset = 0;
@@ -32,15 +37,15 @@ class RSTStateMachine extends StateMachineWS {
             reporter: document.reporter,
             language: this.language,
             titleStyles: [],
-                      sectionLevel: 0,
-                      sectionBubbleUpKludge: false,
-                      inliner,
-};
+            sectionLevel: 0,
+            sectionBubbleUpKludge: false,
+            inliner,
+        };
         this.document = document;
         this.attachObserver(document.noteSource.bind(document));
         this.reporter = this.memo.reporter;
         this.node = document;
-        const results = super.run({ inputLines, inputOffset, inputSource: document.source });
+        const results = super.run({inputLines, inputOffset, inputSource: document.source});
         /* istanbul ignore if */
         if (results.length !== 0) {
             throw new Error('should be empty array return from statemachine.run');

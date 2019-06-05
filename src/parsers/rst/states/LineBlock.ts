@@ -9,7 +9,7 @@ class LineBlock extends SpecializedBody {
     /** New line of line block. */
     /* eslint-disable-next-line camelcase,no-unused-vars */
     line_block(match, context, nextState) {
-        const lineno = this.stateMachine.absLineNumber();
+        const lineno = this.rstStateMachine.absLineNumber();
         const [line, messages, blankFinish] = this.line_block_line(match, lineno);
         this.parent.add(line);
         this.parent.parent.add(messages);

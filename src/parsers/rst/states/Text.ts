@@ -1,15 +1,17 @@
 import RSTState from './RSTState';
-import { columnWidth, isIterable } from '../../../utils';
+import {columnWidth, isIterable} from '../../../utils';
+import unescape from '../../../utils/unescape';
 import * as nodes from '../../../nodes';
 import * as RegExps from '../RegExps';
 import TransitionCorrection from '../../../TransitionCorrection';
 import UnexpectedIndentationError from '../../../UnexpectedIndentationError';
-import { EOFError } from '../../../Exceptions';
-
+import {EOFError} from '../../../Exceptions';
+import {INode} from "../../../types";
+import State from "../../../states/State";
 
 class Text extends RSTState {
-    _init(args) {
-        super._init(args);
+    _init() {
+        super._init();
         this.patterns = {
  underline: '([!-/:-@[-`{-~])\\1* *$',
                          text: '',
@@ -20,7 +22,7 @@ class Text extends RSTState {
     /* eslint-disable-next-line no-unused-vars */
     blank(match, context, nextState) {
         const [paragraph, literalNext] = this.paragraph(
-            context, this.stateMachine.absLineNumber() - 1,
+        context, this.rstStateMachine.absLineNumber() - 1,
 );
         this.parent.add(paragraph);
         if (literalNext) {
@@ -45,12 +47,12 @@ class Text extends RSTState {
         let blankFinish = blankFinish1;
         definitionlist.add(definitionlistitem);
         this.parent.add(definitionlist);
-        const offset = this.stateMachine.lineOffset + 1;
+        const offset = this.rstStateMachine.lineOffset + 1;
         const [newlineOffset, blankFinish2] = this.nestedListParse(
-            this.stateMachine.inputLines.slice(offset),
+            this.rstStateMachine.inputLines.slice(offset),
             {
- inputOffset: this.stateMachine.absLineOffset() + 1,
-              node: definitionlist,
+ inputOffset: this.rstStateMachine.absLineOffset() + 1,
+              node: definitionlist as INode,
 initialState: 'DefinitionList',
               blankFinish,
 blankFinishState: 'Definition',
@@ -69,14 +71,14 @@ blankFinishState: 'Definition',
         if (!Array.isArray(context)) {
             throw new Error('Context should be array');
         }
-        const lineno = this.stateMachine.absLineNumber();
+        const lineno = this.rstStateMachine.absLineNumber();
         const title = context[0].trimRight();
         const underline = match.result.input.trimRight();
         const source = `${title}\n${underline}`;
         const messages = [];
         if (columnWidth(title) > underline.length) {
             if (underline.length < 4) {
-                if (this.stateMachine.matchTitles) {
+                if (this.rstStateMachine.matchTitles) {
                     const msg = this.reporter.info(
                         'Possible title underline, too short for the title.\n'
                         + "Treating it as ordinary text because it's so short.", [], { line: lineno },
@@ -85,7 +87,7 @@ blankFinishState: 'Definition',
                     throw new TransitionCorrection('text');
                 }
             } else {
-                const blocktext = `${context[0]}\n${this.stateMachine.line}`;
+                const blocktext = `${context[0]}\n${this.rstStateMachine.line}`;
                 const msg = this.reporter.warning(
                     'Title underline too short.',
                     [new nodes.literal_block(blocktext, blocktext)], { line: lineno },
@@ -93,10 +95,10 @@ blankFinishState: 'Definition',
                 messages.push(msg);
             }
         }
-        if (!this.stateMachine.matchTitles) {
-            const blocktext = `${context[0]}\n${this.stateMachine.line}`;
+        if (!this.rstStateMachine.matchTitles) {
+            const blocktext = `${context[0]}\n${this.rstStateMachine.line}`;
             // We need get_source_and_line() here to report correctly
-            const [src, srcline] = this.stateMachine.getSourceAndLine();
+            const [src, srcline] = this.rstStateMachine.getSourceAndLine();
             const msg = this.reporter.severe(
                 'Unexpected section title.',
                 [new nodes.literal_block(blocktext, blocktext)], { source: src, line: srcline },
@@ -114,12 +116,12 @@ blankFinishState: 'Definition',
         return [[], nextState, []];
     }
 
-    text(match, context, nextState) {
-        const startline = this.stateMachine.absLineNumber() - 1;
+    text(match: any, context: string[], nextState: State): any[] {
+        const startline = this.rstStateMachine.absLineNumber() - 1;
         let block;
         let msg;
         try {
-            block = this.stateMachine.getTextBlock(undefined, true);
+            block = this.rstStateMachine.getTextBlock(true);
         } catch (error) {
             if (error instanceof UnexpectedIndentationError) {
                 let src; let
@@ -139,7 +141,7 @@ srcline;
         }
         if (literalNext) {
             try {
-                this.stateMachine.nextLine();
+                this.rstStateMachine.nextLine();
             } catch (error) {
                 if (error instanceof EOFError) {
                     /* do nothing */
@@ -154,9 +156,9 @@ srcline;
 
     /** Return a list of nodes. */
     /* eslint-disable-next-line camelcase,no-unused-vars */
-    literal_block(match, context, nextState) {
+    literal_block() {
         /* eslint-disable-next-line no-unused-vars */
-        const [indented, indent, offset, blankFinish] = this.stateMachine.getIndented({});
+        const [indented, indent, offset, blankFinish] = this.rstStateMachine.getIndented({});
         while (indented && indented.length && !indented[indented.length - 1].trim()) {
             indented.trimEnd();
         }
@@ -165,10 +167,10 @@ srcline;
         }
         const data = indented.join('\n');
         const literalBlock = new nodes.literal_block(data, data);
-            const [source, line] = this.stateMachine.getSourceAndLine(offset + 1);
+            const [source, line] = this.rstStateMachine.getSourceAndLine(offset + 1);
         literalBlock.source = source;
         literalBlock.line = line;
-        const nodelist = [literalBlock];
+        const nodelist: INode[] = [literalBlock];
         if (!blankFinish) {
             nodelist.push(this.unindentWarning('Literal block'));
         }
@@ -176,18 +178,19 @@ srcline;
     }
 
     /* eslint-disable-next-line camelcase,no-unused-vars */
-    quoted_literal_block(match, context, nextState) {
-        const absLineOffset = this.stateMachine.absLineOffset();
-        const offset = this.stateMachine.lineOffset;
+    quoted_literal_block() {
+        const absLineOffset = this.rstStateMachine.absLineOffset();
+        const offset = this.rstStateMachine.lineOffset;
         const parentNode = new nodes.Element();
+        // @ts-ignore
         const newAbsOffset = this.nestedParse(
-            this.stateMachine.inputLines.slice(offset),
+            this.rstStateMachine.inputLines.slice(offset),
             {
  inputOffset: absLineOffset,
               node: parentNode,
               matchTitles: false,
                 stateMachineKwargs: {
-                    stateFactory: this.stateMachine.stateFactory.withStateClasses(['QuotedLiteralBlock']),
+                    stateFactory: this.rstStateMachine.stateFactory.withStateClasses(['QuotedLiteralBlock']),
                     initialState: 'QuotedLiteralBlock',
 },
 },
@@ -199,13 +202,13 @@ srcline;
     /* eslint-disable-next-line camelcase */
     definition_list_item(termline) {
         /* eslint-disable-next-line no-unused-vars */
-        const [indented, indent, lineOffset, blankFinish] = this.stateMachine.getIndented({});
+        const [indented, indent, lineOffset, blankFinish] = this.rstStateMachine.getIndented({});
         const itemnode = new nodes.definition_list_item(
             [...termline, ...indented].join('\b'),
 );
-        const lineno = this.stateMachine.absLineNumber() - 1;
+        const lineno = this.rstStateMachine.absLineNumber() - 1;
         [itemnode.source,
-         itemnode.line] = this.stateMachine.getSourceAndLine(lineno);
+         itemnode.line] = this.rstStateMachine.getSourceAndLine(lineno);
         const [termlist, messages] = this.term(termline, lineno);
         itemnode.add(termlist);
         const definition = new nodes.definition('', messages);
@@ -217,6 +220,7 @@ srcline;
                 { line: lineno + 1 },
 ));
         }
+        // @ts-ignore
         this.nestedParse(indented, { inputOffset: lineOffset, node: definition });
         return [itemnode, blankFinish];
     }
@@ -225,7 +229,7 @@ srcline;
         const [textNodes, messages] = this.inline_text(lines[0], lineno);
         const termNode = new nodes.term(lines[0]);
    //     [termNode.source,
-    //     termNode.line] = this.stateMachine.getSourceAndLine(lineno)
+    //     termNode.line] = this.rstStateMachine.getSourceAndLine(lineno)
         const nodeList = [termNode];
         textNodes.forEach((node) => {
             if (node instanceof nodes.Text) {
@@ -235,7 +239,7 @@ srcline;
                 } else {
                     const text = parts[0].trimRight();
                     const textnode = new nodes.Text(unescape(text, true));
-                    nodeList[nodeList.length - 1].add(textnode);
+                    nodeList[nodeList.length - 1].add(textnode as INode);
                     parts.slice(1).forEach((part) => {
                         nodeList.push(
                             new nodes.classifier(unescape(part, false), part),
@@ -249,6 +253,6 @@ srcline;
         return [nodeList, messages];
     }
 }
-Text.stateName = 'Text';
-Text.constructor.stateName = 'Text';
+//Text.stateName = 'Text';
+//Text.constructor.stateName = 'Text';
 export default Text;

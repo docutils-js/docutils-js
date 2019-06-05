@@ -2,8 +2,8 @@ import StateMachineWS from '../../StateMachineWS';
 
 class NestedStateMachine extends StateMachineWS {
     run({
- inputLines, inputOffset, memo, node, matchTitles,
-    }) {
+            inputLines, inputOffset, memo, node, matchTitles,
+        }) {
         /* istanbul ignore if */
         if (!inputLines) {
             throw new Error('need inputlines');
@@ -26,7 +26,7 @@ class NestedStateMachine extends StateMachineWS {
         this.reporter = memo.reporter;
         this.language = memo.language;
         this.node = node;
-        const results = super.run({ inputLines, inputOffset });
+        const results = super.run({inputLines, inputOffset});
         /* istanbul ignore if */
         if (results === undefined) {
             throw new Error();

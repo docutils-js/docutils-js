@@ -1,29 +1,34 @@
 import Text from './Text';
 import { EOFError } from '../../../Exceptions';
+import State from "../../../states/State";
 
 class SpecializedText extends Text {
-    _init(args) {
-        super._init(args);
+    _init() {
+        super._init();
     }
 
     /* istanbul ignore next */
+    // @ts-ignore
     blank() {
         this.invalidInput();
     }
 
     /* istanbul ignore next */
+    // @ts-ignore
     underline() {
         this.invalidInput();
     }
 
     /* istanbul ignore next */
-    indent() {
+    indent(match: any, context: string[], nextState: State): any[] {
         this.invalidInput();
+        return [];
     }
 
     /* istanbul ignore next */
-    text() {
-    this.invalidInput();
+    text(match: any, context: string[], nextState: State): any[] {
+        this.invalidInput();
+        return [];
     }
 
     /* istanbul ignore next */
@@ -37,6 +42,6 @@ class SpecializedText extends Text {
     }
 }
 
-SpecializedText.stateName = 'SpecializedText';
-SpecializedText.constructor.stateName = 'SpecializedText';
+//SpecializedText.stateName = 'SpecializedText';
+//SpecializedText.constructor.stateName = 'SpecializedText';
 export default SpecializedText;

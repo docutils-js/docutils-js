@@ -2,88 +2,114 @@ import Body from './Body';
 import { EOFError } from '../../../Exceptions';
 
 class SpecializedBody extends Body {
-    _init(args) {
-        super._init(args);
+    _init() {
+        super._init();
     }
 
     /* istanbul ignore next */
+    // @ts-ignore
     indent() {
+        // @ts-ignore
         this.invalid_input();
     }
 
     /* istanbul ignore next */
+    // @ts-ignore
     bullet() {
+        // @ts-ignore
         this.invalid_input();
     }
 
     /* istanbul ignore next */
+    // @ts-ignore
     enumerator() {
+        // @ts-ignore
         this.invalid_input();
     }
 
     /* istanbul ignore next */
     /* eslint-disable-next-line camelcase,no-unused-vars */
+    // @ts-ignore
     field_marker() {
+        // @ts-ignore
         this.invalid_input();
     }
 
     /* istanbul ignore next */
     /* eslint-disable-next-line camelcase,no-unused-vars */
+    // @ts-ignore
     option_marker() {
+        // @ts-ignore
         this.invalid_input();
     }
 
     /* istanbul ignore next */
+    // @ts-ignore
     doctest() {
+        // @ts-ignore
         this.invalid_input();
     }
 
     /* istanbul ignore next */
     /* eslint-disable-next-line camelcase,no-unused-vars */
+    // @ts-ignore
     line_block() {
+        // @ts-ignore
         this.invalid_input();
     }
 
     /* istanbul ignore next */
     /* eslint-disable-next-line camelcase,no-unused-vars */
+    // @ts-ignore
     grid_table_top() {
+        // @ts-ignore
         this.invalid_input();
     }
 
     /* istanbul ignore next */
     /* eslint-disable-next-line camelcase,no-unused-vars */
+    // @ts-ignore
     simple_table_top() {
+        // @ts-ignore
         this.invalid_input();
     }
 
     /* istanbul ignore next */
     /* eslint-disable-next-line camelcase,no-unused-vars */
+    // @ts-ignore
     explicit_markup() {
+        // @ts-ignore
         this.invalid_input();
     }
 
     /* istanbul ignore next */
+    // @ts-ignore
     anonymous() {
+        // @ts-ignore
         this.invalid_input();
     }
 
     /* istanbul ignore next */
+    // @ts-ignore
     line() {
+        // @ts-ignore
         this.invalid_input();
     }
 
     /* istanbul ignore next */
+    // @ts-ignore
     text() {
+        // @ts-ignore
         this.invalid_input();
     }
 
     /* istanbul ignore next */
     /* eslint-disable-next-line camelcase,no-unused-vars */
     invalid_input(match, context, nextState) {
-        this.stateMachine.previousLine();
+        this.rstStateMachine.previousLine();
         throw new EOFError();
     }
 }
-SpecializedBody.stateName = 'SpecializedBody';
-SpecializedBody.constructor.stateName = 'SpecializedBody';
+//SpecializedBody.stateName = 'SpecializedBody';
+//SpecializedBody.constructor.stateName = 'SpecializedBody';
 export default SpecializedBody;

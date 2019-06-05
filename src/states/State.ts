@@ -1,13 +1,30 @@
-import { InvalidArgumentsError } from '../Exceptions';
+import {InvalidArgumentsError} from '../Exceptions';
 import UnknownTransitionError from '../UnknownTransitionError';
 import DuplicateTransitionError from '../DuplicateTransitionError';
+import {IReporter, IState, IStateMachine} from "../types";
+import {StateMachine} from "../StateMachine";
+import StateMachineWS from "../StateMachineWS";
 
-class State {
-    constructor(args = {}) {
-        const { stateMachine, debug } = args;
+class State implements IState {
+    protected knownIndentSm: any;
+    protected debug: boolean;
+    protected knownIndentSmKwargs: any;
+    protected indentSmKwargs: any;
+    protected patterns: any;
+
+    protected indentSm: StateMachine;
+    protected nestedSmKwargs: any;
+    protected transitionOrder: string[];
+    protected transitions: any;
+    protected initialTransitions: any[];
+    protected nestedSm: any;
+    protected reporter: IReporter;
+    private stateMachine: StateMachine;
+
+    constructor(stateMachine: StateMachine, args: { debug?: boolean}) {
         this.stateMachine = stateMachine;
-        this.debug = debug;
-        this._init(args);
+        this.debug = args.debug;
+        this._init();
         this.transitionOrder = [];
         this.transitions = {};
         // this.patterns = {}
@@ -82,12 +99,12 @@ class State {
         this.transitions[name] = transition;
     }
 
-    removeTransition(name) {
+    removeTransition(name: string) {
         delete this.transitions[name];
         this.transitionOrder.splice(this.transitionOrder.indexOf(name), 1);
     }
 
-    makeTransition(name, nextState) {
+    makeTransition(name: string, nextState?) {
         if (name == null) {
             throw new InvalidArgumentsError('need transition name');
         }
@@ -131,7 +148,7 @@ class State {
                 transitions[namestate] = this.makeTransition(namestate);
                 names.push(namestate);
             } else {
-                transitions[namestate[0]] = this.makeTransition(...namestate);
+                transitions[namestate[0]] = this.makeTransition(namestate[0], namestate[1]);
                 names.push(namestate[0]);
             }
         });

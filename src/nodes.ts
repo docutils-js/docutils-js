@@ -22,11 +22,10 @@ import { InvalidArgumentsError, ApplicationError, UnimplementedError } from './E
 import unescape from './utils/unescape';
 import { isIterable, checkDocumentArg } from './utils';
 import {
-  IDocument, IElement, INode, ITextElement, IAttributes,
-    HasIndent
-} from './nodeInterface';
+  Document, IElement, INode, ITextElement, IAttributes,
+    HasIndent, IReporter
+} from './types';
 import {Settings} from "../gen/Settings";
-import {IReporter} from "./types";
 
 /* eslint-disable-next-line no-unused-vars */
 const __docformat__ = 'reStructuredText';
@@ -229,7 +228,7 @@ const SkipSiblings = class {};
  *     1995.
  */
 class NodeVisitor {
-    document: IDocument;
+    document: Document;
 
     optional: any[];
 
@@ -420,13 +419,15 @@ class Labeled { }
  * The base class for all docutils nodes.
  */
 abstract class Node implements INode {
+  currentSource: string;
+  currentLine: number;
   rawsource: any;
 
 tagname: string;
 
 parent: INode;
 
-document: IDocument;
+document: Document;
 
 source: string;
 
@@ -434,7 +435,7 @@ line: number;
 
 classTypes: any[];
 
-children: Node[];
+children: INode[];
   attributes: IAttributes;
 
 /**
@@ -631,7 +632,7 @@ asDOM(dom: any): any {
         });
       }
       if (siblings || ascend) {
-        let node: INode = this;
+        let node: INode = this as INode;
         while (node != null && node.parent != null) {
           const index = node.parent.children.indexOf(node);
           node.parent.children.slice(index + 1).forEach((sibling) => {
@@ -652,6 +653,9 @@ asDOM(dom: any): any {
       }
       return r;
     }
+
+  add(iNodes: INode[] | INode): void {
+  }
 }
 
 /*
@@ -841,11 +845,7 @@ class Element extends Node implements IElement {
     }
 
 
-    add(item, ...args) {
-      /* istanbul ignore if */
-      if (args.length !== 0) {
-        throw new Error('');
-      }
+    add(item: INode[] | INode) {
       if (Array.isArray(item)) {
         this.extend(...item);
       } else {
@@ -974,11 +974,11 @@ class Element extends Node implements IElement {
       return `${indent.repeat(level)}${this.starttag()}\n${this.children.map(c => c.pformat(indent, level + 1)).join('')}`;
     }
 
-    copy(): Element {
+    copy(): INode {
       return null;
     }
 
-    deepcopy(): Element {
+    deepcopy(): INode {
       return null;
     }
 
@@ -1236,10 +1236,14 @@ class Text extends Node {
   toSource() {
     return this.toString();
   }
+
+  add(iNodes: INode[] | INode): void {
+    throw new UnimplementedError('');
+  }
 }
 
 class TextElement extends Element implements ITextElement {
-  constructor(rawsource: any, text: string, children: Element[], attributes: IAttributes) {
+  constructor(rawsource: any, text: string, children: INode[], attributes: IAttributes) {
     const cAry = children || [];
     /* istanbul ignore if */
     if (Array.isArray(text)) {
@@ -1260,8 +1264,6 @@ interface ITransformer {
  * @extends Element
  */
 class document extends Element {
-  currentSource: string;
-  currentLine: number;
   settings: Settings;
   reporter: IReporter;
 
@@ -1566,7 +1568,7 @@ class document extends Element {
       if (index === undefined) {
         this.children.push(this.decoration);
       } else {
-        this.children.splice(index, 0, this.decoration);
+        this.children.splice(index, 0, this.decoration as Node);
       }
     }
     return this.decoration;
@@ -2368,7 +2370,7 @@ class pending extends Element {
   constructor(transform: any,
   details: any,
               rawsource = '',
-children: Element[],
+children: INode[],
 attributes: IAttributes) {
     super(rawsource, children, attributes);
     /** The `docutils.transforms.Transform` class implementing the pending

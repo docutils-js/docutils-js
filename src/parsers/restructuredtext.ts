@@ -50,7 +50,8 @@ class Parser extends BaseParser {
 },
 );
 //      console.log(`initial state is ${this.initialState}`);
-        this.stateMachine.run({ inputLines, document, inliner: this.inliner });
+        this.stateMachine.run({ inputLines, document,
+            inliner: this.inliner });
         this.finishParse();
     }
 }

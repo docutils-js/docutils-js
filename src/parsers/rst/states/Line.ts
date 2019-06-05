@@ -23,7 +23,7 @@ class Line extends SpecializedText {
             this.stateCorrection(context);
         }
         if (this.eofcheck) {
-            const lineno = this.stateMachine.absLineNumber() - 1;
+            const lineno = this.rstStateMachine.absLineNumber() - 1;
             const transition = new nodes.transition(context[0]);
             transition.line = lineno;
             this.parent.add(transition);
@@ -35,7 +35,7 @@ class Line extends SpecializedText {
     /** Transition marker. */
     /* eslint-disable-next-line no-unused-vars */
     blank(match, context, nextState) {
-        const [src, srcline] = this.stateMachine.getSourceAndLine();
+        const [src, srcline] = this.rstStateMachine.getSourceAndLine();
         const marker = context[0].trim();
         if (marker.length < 4) {
             this.stateCorrection(context);
@@ -50,12 +50,12 @@ class Line extends SpecializedText {
     /** Potential over- & underlined title. */
     /* eslint-disable-next-line no-unused-vars */
     text(match, context, nextState) {
-        const lineno = this.stateMachine.absLineNumber() - 1;
+        const lineno = this.rstStateMachine.absLineNumber() - 1;
         let overline = context[0];
         let title = match.result.input;
         let underline = '';
         try {
-            underline = this.stateMachine.nextLine();
+            underline = this.rstStateMachine.nextLine();
         } catch (error) {
             if (error instanceof EOFError) {
                 const blocktext = `${overline}\n${title}`;
@@ -131,8 +131,8 @@ class Line extends SpecializedText {
     /* eslint-disable-next-line no-unused-vars */
     underline(match, context, nextState) {
         const overline = context[0];
-        const blocktext = `${overline}\n${this.stateMachine.line}`;
-        const lineno = this.stateMachine.absLineNumber() - 1;
+        const blocktext = `${overline}\n${this.rstStateMachine.line}`;
+        const lineno = this.rstStateMachine.absLineNumber() - 1;
         if (overline.trimEnd().length < 4) {
             this.shortOverline(context, blocktext, lineno, 1);
         }
@@ -156,7 +156,7 @@ class Line extends SpecializedText {
     }
 
     stateCorrection(context, lines = 1) {
-        this.stateMachine.previousLine(lines);
+        this.rstStateMachine.previousLine(lines);
         context.length = 0;
         throw new StateCorrection('Body', 'text');
     }

@@ -5,7 +5,13 @@
 import { ApplicationError } from './Exceptions';
 
 class ViewList extends Array {
-    constructor(initlist, source, items, parent, parentOffset) {
+    protected items: any[];
+
+    protected parentOffset: number;
+
+    public parent: ViewList;
+
+    constructor(initlist: any[], source: string, items: any[], parent: any, parentOffset: number) {
         super(...initlist);
         this.items = [];
         this.parent = parent;
@@ -54,6 +60,7 @@ class ViewList extends Array {
         this.length = this.length - num;
         this.push(...elems);
 //        console.log(`returning ${JSON.stringify(returnAry)}`);
+        // @ts-ignore
         return new this.constructor(returnAry);
     }
 
@@ -64,6 +71,7 @@ class ViewList extends Array {
         for (let i = start; i < myEnd; i += 1) {
             initList.push(this[i]);
         }
+        // @ts-ignore
         return new this.constructor(initList);
     }
 

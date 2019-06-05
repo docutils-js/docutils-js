@@ -15,6 +15,7 @@ and produce a well-formed data structure suitable for building a CALS table.
 
 import { DataError } from '../../Exceptions';
 import { stripCombiningChars } from '../../utils';
+import StringList from "../../StringList";
 
 /**
  Raise if there is any problem with table markup.
@@ -23,7 +24,8 @@ import { stripCombiningChars } from '../../utils';
  from the table's start line.
  */
 class TableMarkupError extends DataError {
-    constructor(message, offset) {
+    private offset?: number;
+    constructor(message: string, offset?: number) {
         super(message);
         this.offset = offset;
     }
@@ -32,16 +34,19 @@ class TableMarkupError extends DataError {
 /**
  Abstract superclass for the common parts of the syntax-specific parsers.
  */
-class TableParser {
-constructor(...args) {
-        this._init(...args);
+abstract class TableParser {
+    protected doubleWidthPadChar: string;
+
+    protected block: StringList;
+    protected headBodySep: number;
+    protected headBodySeparatorPat: RegExp;
+
+    constructor() {
+        this._init();
     }
 
     /* eslint-disable-next-line no-unused-vars */
-    _init(...args) {
-        /** Matches the row separator between head rows and body rows. */
-        this.headbodyseparatorpat = undefined;
-
+    _init() {
         /** Padding character for East Asian double-width text. */
         this.doubleWidthPadChar = '\x00';
     }
@@ -62,6 +67,8 @@ constructor(...args) {
         const structure = this.structure_from_cells();
         return structure;
     }
+
+    abstract parse_table(): void;
 
     /**
      Look for a head/body row separator line; store the line index.
@@ -86,11 +93,18 @@ constructor(...args) {
             throw new TableMarkupError('The head/body row separator may not be the first or last line of the table.', i);
         }
     }
+
+    abstract structure_from_cells();
+
+    abstract setup(block: StringList);
+
 }
 
 /* eslint-disable-next-line camelcase */
-function update_dict_of_lists(master, newdata) {
-    Object.entries(newdata).forEach(([key, values]) => {
+function update_dict_of_lists(master: any, newdata: any) {
+    Object.entries(newdata).forEach((d) => {
+        const key: string = d[0];
+        const values: any[] = d[1] as any[];
         if (master[key]) {
             master[key].push(...values);
         } else {
@@ -152,7 +166,13 @@ function update_dict_of_lists(master, newdata) {
     */
 
 class GridTableParser extends TableParser {
-    _init() {
+        private cells: number[][];
+        private colseps: any;
+        private rowseps: any;
+        private done: number[];
+        private bottom: number;
+        private right: number;
+        _init() {
         super._init();
         this.headBodySeparatorPat = new RegExp('\\+=[=+]+=\\+ *$');
     }
@@ -369,18 +389,19 @@ if (typeof right === 'undefined') {
         */
     /* eslint-disable-next-line camelcase */
     structure_from_cells() {
-        const rowseps = Object.keys(this.rowseps); // .keys()   # list of row boundaries
+        const rowseps: number[] = Object.keys(this.rowseps).map(parseInt); // .keys()   # list of row boundaries
         rowseps.sort((a, b) => a - b);
 
-        const rowindex = {};
+        const rowindex: any = {};
         for (let i = 0; i < rowseps.length; i += 1) {
             rowindex[rowseps[i]] = i; // row boundary -> row number mapping
         }
-        const colseps = Object.keys(this.colseps); // list of column boundaries
+        const colseps: number[] = Object.keys(this.colseps).map(parseInt); // list of column boundaries
         rowseps.sort((a, b) => a - b);
-        const colindex = {};
+        const colindex: any = {};
         for (let i = 0; i < colseps.length; i += 1) {
-            colindex[colseps[i]] = i; // column boundary -> col number map
+            const x: number = colseps[i];
+            colindex[x] = i; // column boundary -> col number map
         }
         const colspecs = [];
         for (let i = 1; i < colseps.length; i += 1) {
@@ -474,8 +495,15 @@ following data structure, whose interpretation is the same as for
        (0, 0, 12, [''])]])
 */
 class SimpleTableParser extends TableParser {
-    _init(...args) {
-        super._init(...args);
+    private table: any[];
+    private spanPat: RegExp;
+    private columns: any[];
+    private border_end: any;
+    private colseps: any;
+    private rowseps: any;
+    private done: number[];
+    _init() {
+        super._init();
         this.headBodySeparatorPat = /=[ =]*$/;
         this.spanPat = /-[ -]*$/;
     }
@@ -539,7 +567,7 @@ class SimpleTableParser extends TableParser {
 
 /**     Given a column span underline, return a list of (begin, end) pairs. */
     /* eslint-disable-next-line camelcase */
-    parse_columns(line, offset) {
+    parse_columns(line: string, offset: number) {
 //        console.log(`parsing columns from ${line}, ${offset}`);
         const cols = [];
         let end = 0;
@@ -566,7 +594,7 @@ class SimpleTableParser extends TableParser {
             }
 
             if (cols[cols.length - 1][1] !== this.border_end) {
-                throw new TableMarkupError(`[${cols[cols.length - 1][1]} - ${this.border_end}] Column span incomplete in table line ${offset + 1}.`, { offset });
+                throw new TableMarkupError(`[${cols[cols.length - 1][1]} - ${this.border_end}] Column span incomplete in table line ${offset + 1}.`, offset);
             }
             // Allow for an unbounded rightmost column:
             cols[cols.length - 1] = [cols[cols.length - 1][0],
@@ -576,7 +604,7 @@ class SimpleTableParser extends TableParser {
     }
 
     /* eslint-disable-next-line camelcase */
-    init_row(colspec, offset) {
+    init_row(colspec: number[][], offset: number) {
         let i = 0;
         const cells = [];
         /* eslint-disable-next-line no-unused-vars,no-restricted-syntax */
@@ -614,7 +642,7 @@ class SimpleTableParser extends TableParser {
         adjust for insignificant whitespace.
          */
     /* eslint-disable-next-line camelcase */
-    parse_row(lines, start, spanline) {
+    parse_row(lines: StringList, start: number, spanline?: any[]) {
         if (!((lines && lines.length) || spanline)) {
             // # No new row, just blank lines.
             return;
@@ -623,7 +651,7 @@ class SimpleTableParser extends TableParser {
         /* eslint-disable-next-line no-unused-vars */
         let spanOffset;
         if (spanline) {
-            columns = this.parse_columns(...spanline);
+            columns = this.parse_columns(spanline[0], spanline[1]);
             spanOffset = spanline[1];
         } else {
             columns = this.columns.slice();
@@ -676,7 +704,7 @@ class SimpleTableParser extends TableParser {
                 } else if (line.substring(end, nextstart).trim()) {
                     throw new TableMarkupError(
                         `Text in column margin in table line ${firstLine + offset + 1}.`,
-                        { offset: firstLine + offset },
+                        firstLine + offset,
 );
                 }
                 offset += 1;

@@ -32,7 +32,7 @@ class QuotedLiteralBlock extends RSTState {
 
     eof(context) {
         if (context.length) {
-            const [src, srcline] = this.stateMachine.getSourceAndLine(
+            const [src, srcline] = this.rstStateMachine.getSourceAndLine(
                 this.initial_lineno,
 );
             const text = context.join('\n');
@@ -43,10 +43,10 @@ class QuotedLiteralBlock extends RSTState {
         } else {
             this.parent.add(this.reporter.warning(
                 'Literal block expected; none found.', [],
-                { line: this.stateMachine.absLineNumber() },
+                { line: this.rstStateMachine.absLineNumber() },
 ));
             // # src not available, because statemachine.input_lines is empty
-            this.stateMachine.previousLine();
+            this.rstStateMachine.previousLine();
         }
         this.parent.add(this.messages);
         return [];
@@ -58,9 +58,9 @@ class QuotedLiteralBlock extends RSTState {
 //                         'be empty!')
         this.messages.push(
             this.reporter.error('Unexpected indentation.', [],
-                                { line: this.stateMachine.absLineNumber() }),
+                                { line: this.rstStateMachine.absLineNumber() }),
 );
-        this.stateMachine.previousLine();
+        this.rstStateMachine.previousLine();
         throw new EOFError();
     }
 
@@ -74,7 +74,7 @@ class QuotedLiteralBlock extends RSTState {
         this.addTransition('quoted',
                            [pattern, this.quoted.bind(this),
                             this.constructor.name]);
-        this.initial_lineno = this.stateMachine.absLineNumber();
+        this.initial_lineno = this.rstStateMachine.absLineNumber();
         return [[match.result.input], nextState, []];
     }
 
@@ -89,9 +89,9 @@ class QuotedLiteralBlock extends RSTState {
         if (context.length) {
             this.messages.push(
                 this.reporter.error('Inconsistent literal block quoting.',
-                                    [], { line: this.stateMachine.absLineNumber() }),
+                                    [], { line: this.rstStateMachine.absLineNumber() }),
 );
-            this.stateMachine.previousLine();
+            this.rstStateMachine.previousLine();
         }
         throw new EOFError();
     }

@@ -1,7 +1,7 @@
 import { ApplicationError } from './Exceptions';
 import Transform from './Transform';
-import { IDocument } from './nodeInterface';
 import {document} from "./nodes";
+import {Document} from "./types";
 
 function leftPad(num, len, pad) {
   return pad.repeat(len - num.toString().length) + num.toString();
@@ -13,7 +13,7 @@ function leftPad(num, len, pad) {
 class Transformer {
     transforms: any[];
     unknownReferenceResolvers: any[];
-    document: IDocument;
+    document: Document;
     applied: any[];
     sorted: number;
     components: any;

@@ -5,6 +5,7 @@ import * as RegExps from '../RegExps';
 
 /** Parser for the contents of a substitution_definition element. */
 class SubstitutionDef extends Body {
+    private blankFinish: boolean;
     _init() {
         super._init();
         this.patterns = {
@@ -18,7 +19,7 @@ class SubstitutionDef extends Body {
     /* eslint-disable-next-line camelcase,no-unused-vars */
     literal_block(match, context, nextState) {
         /* eslint-disable-next-line no-unused-vars */
-        const [indented, indent, offset, blankFinish] = this.stateMachine.getIndented({});
+        const [indented, indent, offset, blankFinish] = this.rstStateMachine.getIndented({});
         while (indented && indented.length && !indented[indented.length - 1].trim()) {
             indented.trimEnd();
         }
@@ -27,10 +28,10 @@ class SubstitutionDef extends Body {
         }
         const data = indented.join('\n');
         const literalBlock = new nodes.literal_block(data, data);
-            const [source, line] = this.stateMachine.getSourceAndLine(offset + 1);
+            const [source, line] = this.rstStateMachine.getSourceAndLine(offset + 1);
         literalBlock.source = source;
         literalBlock.line = line;
-        const nodelist = [literalBlock];
+        const nodelist: any[] = [literalBlock];
         if (!blankFinish) {
             nodelist.push(this.unindentWarning('Literal block'));
         }
@@ -38,18 +39,18 @@ class SubstitutionDef extends Body {
     }
 
     /* eslint-disable-next-line camelcase,no-unused-vars */
-    quoted_literal_block(match, context, nextState) {
-        const absLineOffset = this.stateMachine.absLineOffset();
-        const offset = this.stateMachine.lineOffset;
+    quoted_literal_block() {
+        const absLineOffset = this.rstStateMachine.absLineOffset();
+        const offset = this.rstStateMachine.lineOffset;
         const parentNode = new nodes.Element();
         const newAbsOffset = this.nestedParse(
-            this.stateMachine.inputLines.slice(offset),
+            this.rstStateMachine.inputLines.slice(offset),
             {
  inputOffset: absLineOffset,
               node: parentNode,
               matchTitles: false,
                 stateMachineKwargs: {
-                    stateFactory: this.stateMachine.stateFactory.withStateClasses(['QuotedLiteralBlock']),
+                    stateFactory: this.rstStateMachine.stateFactory.withStateClasses(['QuotedLiteralBlock']),
                     initialState: 'QuotedLiteralBlock',
 },
 },
@@ -65,20 +66,20 @@ class SubstitutionDef extends Body {
             { alt: this.parent.attributes.names[0] },
 );
         this.parent.add(nodelist);
-        if (!this.stateMachine.atEof()) {
+        if (!this.rstStateMachine.atEof()) {
             this.blankFinish = blankFinish;
         }
         throw new EOFError();
     }
 
     /* eslint-disable-next-line no-unused-vars */
-    text(match, context, nextState) {
-        if (!this.stateMachine.atEof()) {
-            this.blankFinish = this.stateMachine.isNextLineBlank();
+    text(match: any, context: string[], nextState: any): any[] {
+        if (!this.rstStateMachine.atEof()) {
+            this.blankFinish = this.rstStateMachine.isNextLineBlank();
         }
         throw new EOFError();
     }
 }
-SubstitutionDef.stateName = 'SubstitutionDef';
-SubstitutionDef.constructor.stateName = 'SubstitutionDef';
+//SubstitutionDef.stateName = 'SubstitutionDef';
+//SubstitutionDef.constructor.stateName = 'SubstitutionDef';
 export default SubstitutionDef;
