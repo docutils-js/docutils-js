@@ -1,6 +1,7 @@
 import { ApplicationError } from './Exceptions';
 import Transform from './Transform';
 import { IDocument } from './nodeInterface';
+import {document} from "./nodes";
 
 function leftPad(num, len, pad) {
   return pad.repeat(len - num.toString().length) + num.toString();
@@ -17,15 +18,15 @@ class Transformer {
     sorted: number;
     components: any;
     serialno: number;
-    
+
     /**
      * Create transformer class
-     * @param {nodes.document} document - document to transform
+     * @param {nodes.myDoc} myDoc - document to transform
      */
-    constructor(document) {
+    constructor(myDoc: document) {
         this.transforms = [];
         this.unknownReferenceResolvers = [];
-        this.document = document;
+        this.document = myDoc;
         this.applied = [];
         this.sorted = 0;
         this.components = {};
@@ -152,6 +153,10 @@ class Transformer {
         this.serialno += 1;
         const p = class_[priority];
         return `${leftPad(p, 3, '0')}-${leftPad(this.serialno, 3, '0')}`;
+    }
+
+    addPending(pending: any, priority: any) {
+        // fixme implement
     }
 }
 

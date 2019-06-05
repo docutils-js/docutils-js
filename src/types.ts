@@ -1,9 +1,12 @@
 /**
  * Runtime transform specification base class.
- * 
+ *
  * TransformSpec subclass objects used by `docutils.transforms.Transformer`.
  */
-interface ITransformSpec {
+import {Element} from "./nodes";
+import {IAttributes} from "./nodeInterface";
+
+export interface TransformSpec {
   /**
    * List of functions to try to resolve unknown references.  Unknown
    * references have a 'refname' attribute which doesn't correspond to any
@@ -32,7 +35,7 @@ interface ITransformSpec {
   getTransforms(): any[];
 }
 
-interface IComponent extends TransformSpec {
+export interface Component extends TransformSpec {
   componentType: string;
   supported: string[];
   /** Is `format` supported by this component?
@@ -43,3 +46,15 @@ interface IComponent extends TransformSpec {
   supports(format: string): boolean;
 }
 
+export interface IReporter {
+setConditions(): void;
+
+systemMessage(level: number, message: string, children: Element[], attributes: IAttributes);
+notifyObservers(message: string);
+attachObserver(observer: any);
+debug(...args): void;
+info(...args): void;
+warning(...args): void;
+error(...args): void;
+severe(...args): void;
+}

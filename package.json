@@ -6,8 +6,8 @@
   "author": "Kay McCormick <kay@kaymccormick.com>",
   "license": "MIT",
   "scripts": {
-      "test": "jest",
-      "compile": "tsc src/nodes"
+    "test": "jest",
+    "compile": "tsc src/nodes"
   },
   "devDependencies": {
     "@babel/cli": "^7.2.3",
@@ -35,10 +35,13 @@
     "jest": "^24.7.1",
     "jest-cli": "^24.7.1",
     "jest-junit": "^6.3.0",
+    "jscodeshift": "^0.6.4",
     "jsdoc": "^3.6.1",
     "micromatch": "^4.0.2",
     "nyc": "^13.3.0",
     "prettier": "^1.16.4",
+    "recast": "^0.18.1",
+    "ts-morph": "^2.3.0",
     "tslint": "^5.17.0",
     "typescript": "^3.5.1",
     "xpath": "^0.0.27"
