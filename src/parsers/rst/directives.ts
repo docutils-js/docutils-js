@@ -1,7 +1,7 @@
 import * as _fallbackLanguageModule from './languages/en';
 import * as images from './directives/images';
 import * as parts from './directives/parts';
-import ApplicationError from '../../Exceptions';
+import { ApplicationError } from '../../Exceptions';
 
 const dirMap = { images, parts };
 

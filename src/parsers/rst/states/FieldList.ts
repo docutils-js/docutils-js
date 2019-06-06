@@ -4,6 +4,7 @@ import SpecializedBody from './SpecializedBody';
 class FieldList extends SpecializedBody {
     /** Field list field. */
     /* eslint-disable-next-line camelcase */
+    // @ts-ignore
     field_marker(match, context, nextState) {
         const [field, blankFinish] = this.field(match);
         this.parent.add(field);
@@ -11,6 +12,6 @@ class FieldList extends SpecializedBody {
         return [[], nextState, []];
     }
 }
-FieldList.stateName = 'FieldList';
-FieldList.constructor.stateName = 'FieldList';
+//FieldList.stateName = 'FieldList';
+//FieldList.constructor.stateName = 'FieldList';
 export default FieldList;

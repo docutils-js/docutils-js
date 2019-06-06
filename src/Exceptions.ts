@@ -1,12 +1,12 @@
 export class UnimplementedError extends Error {
     // @ts-ignore
-    constructor(message, ...params) {
+    constructor(message?: string, ...params) {
         super(...params);
         /* instanbul ignore else */
         if (Error.captureStackTrace) {
             Error.captureStackTrace(this, UnimplementedError);
         }
-        this.message = message;
+        this.message = message || '';
     }
 }
 
@@ -53,6 +53,7 @@ level: number;
 
 export class ApplicationError extends Error {
     error: Error;
+    args?: any[];
     constructor(...params) {
         super(...params);
         const [message, kwargs] = params; // eslint-disable-line no-unused-vars

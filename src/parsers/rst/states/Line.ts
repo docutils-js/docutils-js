@@ -3,18 +3,24 @@ import { columnWidth } from '../../../utils';
 import { EOFError } from '../../../Exceptions';
 import * as nodes from '../../../nodes';
 import StateCorrection from '../../../StateCorrection';
+import {RSTStateArgs} from "./RSTState";
+import RSTStateMachine from "../RSTStateMachine";
 
 
 class Line extends SpecializedText {
-    _init(args) {
-        super._init(args);
+    private eofcheck: number;
+    _init(stateMachine: RSTStateMachine, args: RSTStateArgs) {
+        super._init(stateMachine, args);
         this.eofcheck = 1;
     }
 
+    // @ts-ignore
     indent(...args) {
+        // @ts-ignore
         return this.text(...args);
     }
 
+    // @ts-ignore
     eof(context) {
         const marker = context[0].trim();
         if (this.memo.sectionBubbleUpKludge) {
@@ -34,6 +40,7 @@ class Line extends SpecializedText {
 
     /** Transition marker. */
     /* eslint-disable-next-line no-unused-vars */
+    // @ts-ignore
     blank(match, context, nextState) {
         const [src, srcline] = this.rstStateMachine.getSourceAndLine();
         const marker = context[0].trim();
@@ -75,8 +82,8 @@ class Line extends SpecializedText {
             }
         }
         const source = [overline, title, underline].join('\n');
-        overline = overline.trimEnd();
-        underline = underline.trimEnd();
+        overline = overline.trimRight();
+        underline = underline.trimRight();
         if (!this.transitions.underline[0].test(underline)) {
             const blocktext = `${overline}\n${title}\n${underline}`;
             if (overline.trimEnd().length < 4) {
@@ -129,6 +136,7 @@ class Line extends SpecializedText {
     }
 
     /* eslint-disable-next-line no-unused-vars */
+    // @ts-ignore
     underline(match, context, nextState) {
         const overline = context[0];
         const blocktext = `${overline}\n${this.rstStateMachine.line}`;
@@ -161,6 +169,6 @@ class Line extends SpecializedText {
         throw new StateCorrection('Body', 'text');
     }
 }
-Line.stateName = 'Line';
-Line.constructor.stateName = 'Line';
+//Line.stateName = 'Line';
+//Line.constructor.stateName = 'Line';
 export default Line;

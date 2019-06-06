@@ -1,9 +1,11 @@
 import StateMachineWS from '../../StateMachineWS';
+import {StateMachineRunArgs} from "../../types";
 
 class NestedStateMachine extends StateMachineWS {
-    run({
-            inputLines, inputOffset, memo, node, matchTitles,
-        }) {
+    run(args: StateMachineRunArgs) {
+    const {
+    inputLines, inputOffset, memo, node, matchTitles,
+} = args;
         /* istanbul ignore if */
         if (!inputLines) {
             throw new Error('need inputlines');

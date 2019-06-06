@@ -1,5 +1,6 @@
 import State from './State';
 import StateMachineWS from "../StateMachineWS";
+import {RSTStateArgs} from "../parsers/rst/states/RSTState";
 
 class StateWS extends State {
     private wsPatterns: any;
@@ -26,8 +27,8 @@ class StateWS extends State {
         }
     }
 
-    _init() {
-        super._init();
+    _init(stateMachine: any, args: any) {
+        super._init(stateMachine, args);
         this.indentSm = null;
         this.indentSmKwargs = null;
         this.knownIndentSm = null;

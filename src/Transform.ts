@@ -1,4 +1,4 @@
-import getLanguage from './languages';
+import { getLanguage } from './languages';
 import {Document, INode} from "./types";
 
 

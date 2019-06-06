@@ -2,6 +2,7 @@ import SpecializedText from './SpecializedText';
 
 class Definition extends SpecializedText {
     /* eslint-disable-next-line no-unused-vars */
+    // @ts-ignore
     eof(context) {
         this.rstStateMachine.previousLine(2);
         return [];
@@ -15,6 +16,6 @@ class Definition extends SpecializedText {
         return [[], 'DefinitionList', []];
     }
 }
-Definition.stateName = 'Definition';
-Definition.constructor.stateName = 'Definition';
+//Definition.stateName = 'Definition';
+//Definition.constructor.stateName = 'Definition';
 export default Definition;

@@ -15,7 +15,9 @@ function setClasses(options) {
 }
 
 class GenericRole {
-    constructor(roleName, nodeClass) {
+    private name: string;
+    private nodeClass: any;
+    constructor(roleName: string, nodeClass: any) {
         this.name = roleName;
         this.nodeClass = nodeClass;
     }
@@ -104,7 +106,7 @@ const normname = roleName.toLowerCase();
     // Collect any messages that we generated.
     if (msgText.length) {
         const message = reporter.info(msgText.join('\n'), [], { line: lineno });
-        messages.append(message);
+        messages.push(message);
     }
 
     // # Look the role up in the registry, and return it.

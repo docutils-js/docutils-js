@@ -8,17 +8,27 @@ import Inliner from "../Inliner";
 import RSTStateMachine from "../RSTStateMachine";
 
 export interface CommonParseArgs {
-    inputLines: StringList;
-    inputOffset: number;
-    node: INode;
+    inputLines?: StringList;
+    inputOffset?: number;
+    node?: INode;
     matchTitles?: boolean;
 }
 
+export interface RSTStateArgs {
+    stateClasses?: string[];
+    debug?: boolean;
+}
+
+export interface RSTParseArgs extends CommonParseArgs {
+    inliner: Inliner,
+    document: Document,
+}
 export interface NestedParseArgs extends CommonParseArgs, StateMachineClassArgs {
     initialState?: any;
     blankFinish?: boolean;
     blankFinishState?: string;
-    extraSettings?: any; }
+    extraSettings?: any;
+}
 
 interface StateMachineClassArgs {
     stateMachineClass?: any;
@@ -26,28 +36,34 @@ interface StateMachineClassArgs {
 }
 
 class RSTState extends StateWS {
+    public explicit: any
     public memo: any;
-    private inliner: Inliner;
+    public inliner: Inliner;
     protected parent: IElement;
 
     protected rstStateMachine: RSTStateMachine;
-    private document: Document;
+    public document: Document;
     private nestedSmCache: any[];
-    protected stateClasses: string[];
+    protected stateClasses?: string[];
+    public messages: any[];
 
-    _init(args = {}) {
-        super._init(args);
+    public blankFinish?: boolean;
+
+    public doubleWidthPadChar: string;
+
+    // fixme this whole thing needs rework
+    _init(stateMachine: RSTStateMachine, args: RSTStateArgs) {
+        super._init(stateMachine, args);
         this.nestedSm = NestedStateMachine;
         this.nestedSmCache = [];
         this.stateClasses = args.stateClasses;
 
         this.nestedSmKwargs = {
-//            stateClasses: this.stateClasses,
-            stateFactory: this.rstStateMachine.stateFactory.withStateClasses(this.stateClasses),
+           stateFactory: this.rstStateMachine.stateFactory.withStateClasses(this.stateClasses),
             initialState: 'Body',
-            debug: args && args.stateMachine ? args.rstStateMachine.debug : false,
+            debug: args && stateMachine ? stateMachine.debug : false,
             /* eslint-disable-next-line no-console */
-            debugFn: args && args.stateMachine ? args.rstStateMachine.debugFn : console.log,
+            debugFn: args && stateMachine ? stateMachine.debugFn : console.log,
         };
     }
 
@@ -94,7 +110,7 @@ class RSTState extends StateWS {
             throw new Error('need block');
         }
 
-        const mCopy = { ...args };
+        const mCopy = {...args};
         let useDefault = 0;
         if (!mCopy.stateMachineClass) {
             mCopy.stateMachineClass = this.nestedSm;
@@ -113,7 +129,7 @@ class RSTState extends StateWS {
 
         if (!stateMachine) {
             // check things ?
-        /* istanbul ignore if */
+            /* istanbul ignore if */
 //            if (!stateMachineKwargs.stateClasses) {
 //                throw new InvalidArgumentsError('stateClasses');
 //            }
@@ -125,17 +141,17 @@ class RSTState extends StateWS {
             }
             stateMachine = new mCopy.stateMachineClass({
 
- debug: this.debug,
-                                                  ...mCopy.stateMachineKwargs,
-});
+                debug: this.debug,
+                ...mCopy.stateMachineKwargs,
+            });
         }
         stateMachine.run({
- inputLines: block,
-inputOffset: mCopy.inputOffset,
-memo: this.memo,
-                node:          mCopy.node,
-matchTitles: mCopy.matchTitles,
-});
+            inputLines: block,
+            inputOffset: mCopy.inputOffset,
+            memo: this.memo,
+            node: mCopy.node,
+            matchTitles: mCopy.matchTitles,
+        });
         if (useDefault === 2) {
             this.nestedSmCache.push(stateMachine);
         } else {
@@ -149,23 +165,23 @@ matchTitles: mCopy.matchTitles,
     }
 
     nestedListParse(block: StringList, args: NestedParseArgs) {
-        const myargs: NestedParseArgs = { ...args };
+        const myargs: NestedParseArgs = {...args};
         /* istanbul ignore next */
         if (myargs.extraSettings == null) {
-                myargs.extraSettings = {};
+            myargs.extraSettings = {};
         }
         if (!myargs.stateMachineClass) {
             myargs.stateMachineClass = this.nestedSm;
         }
         if (!myargs.stateMachineKwargs) {
-            myargs.stateMachineKwargs = { ...this.nestedSmKwargs };
+            myargs.stateMachineKwargs = {...this.nestedSmKwargs};
         }
         myargs.stateMachineKwargs.initialState = myargs.initialState;
         const stateMachine = new myargs.stateMachineClass({
             stateFactory: this.rstStateMachine.stateFactory,
- debug: this.debug,
-                                                    ...myargs.stateMachineKwargs,
-});
+            debug: this.debug,
+            ...myargs.stateMachineKwargs,
+        });
         if (!myargs.blankFinishState) {
             myargs.blankFinishState = myargs.initialState;
         }
@@ -179,35 +195,35 @@ matchTitles: mCopy.matchTitles,
             stateMachine.states[myargs.initialState][key] = myargs.extraSettings[key];
         });
         stateMachine.run({
- inputLines: block,
-inputOffset: myargs.inputOffset,
-memo: this.memo,
-        node: myargs.node,
-matchTitles: myargs.matchTitles,
-});
+            inputLines: block,
+            inputOffset: myargs.inputOffset,
+            memo: this.memo,
+            node: myargs.node,
+            matchTitles: myargs.matchTitles,
+        });
         const {blankFinish} = stateMachine.states[myargs.blankFinishState];
         stateMachine.unlink();
         return [stateMachine.absLineOffset(), blankFinish];
     }
 
     section({
- title, source, style, lineno, messages,
-}) {
-        if (this.checkSubsection({ source, style, lineno })) {
-            this.newSubsection({ title, lineno, messages });
+                title, source, style, lineno, messages,
+            }) {
+        if (this.checkSubsection({source, style, lineno})) {
+            this.newSubsection({title, lineno, messages});
         }
     }
 
-    checkSubsection({ source, style, lineno }) {
-        const { memo } = this;
+    checkSubsection({source, style, lineno}) {
+        const {memo} = this;
         const titleStyles = memo.titleStyles;
 //        console.log(titleStyles);
         const mylevel = memo.sectionLevel;
         let level = 0;
         level = titleStyles.findIndex(tStyle => (style.length === 1 ? tStyle.length === 1
-                                                 && tStyle[0] === style[0] : style.length === 2
-                                                 && tStyle.length === 2
-                                                 && tStyle[0] === style[0] && tStyle[1]
+            && tStyle[0] === style[0] : style.length === 2
+            && tStyle.length === 2
+            && tStyle[0] === style[0] && tStyle[1]
             === style[1])) + 1;
 
         if (level === 0) {
@@ -215,8 +231,8 @@ matchTitles: myargs.matchTitles,
                 titleStyles.push(style);
                 return 1;
             }
-                this.parent.add(this.title_inconsistent(source, lineno));
-                return null;
+            this.parent.add(this.title_inconsistent(source, lineno));
+            return null;
         }
         if (level <= mylevel) { //            // sibling or supersection
             memo.sectionLevel = level; // bubble up to parent section
@@ -231,21 +247,21 @@ matchTitles: myargs.matchTitles,
         if (level === mylevel + 1) { // immediate subsection
             return 1;
         }
-            this.parent.add(this.title_inconsistent(source, lineno));
-            return undefined;
+        this.parent.add(this.title_inconsistent(source, lineno));
+        return undefined;
     }
 
     /* eslint-disable-next-line camelcase */
     title_inconsistent(sourcetext, lineno) {
         const error = this.reporter.severe(
-            'Title level inconsistent:', [new nodes.literal_block('', sourcetext)], { line: lineno },
-);
+            'Title level inconsistent:', [new nodes.literal_block('', sourcetext)], {line: lineno},
+        );
         return error;
     }
 
 
-    newSubsection({ title, lineno, messages }) {
-        const { memo } = this;
+    newSubsection({title, lineno, messages}) {
+        const {memo} = this;
         const mylevel = memo.sectionLevel;
         memo.sectionLevel += 1;
         const sectionNode = new nodes.section();
@@ -263,22 +279,22 @@ matchTitles: myargs.matchTitles,
         const newabsoffset = this.nestedParse(
             {
                 inputLines: this.rstStateMachine.inputLines.slice(offset),
- inputOffset: absoffset,
-                                                         node: sectionNode,
-matchTitles: true,
-}
-);
+                inputOffset: absoffset,
+                node: sectionNode as INode,
+                matchTitles: true,
+            }
+        );
         this.gotoLine(newabsoffset);
         if (memo.sectionLevel <= mylevel) {
             throw new EOFError();
         }
 
-            memo.sectionLevel = mylevel;
+        memo.sectionLevel = mylevel;
     }
 
     unindentWarning(nodeName: string): INode {
         const lineno = this.rstStateMachine.absLineNumber() + 1;
-        return this.reporter.warning(`${nodeName} ends without a blank line; unexpected unindent.`, { line: lineno });
+        return this.reporter.warning(`${nodeName} ends without a blank line; unexpected unindent.`, {line: lineno});
     }
 
     paragraph(lines, lineno: number) {
@@ -308,7 +324,7 @@ matchTitles: true,
 
     /* eslint-disable-next-line camelcase */
     inline_text(text, lineno) {
-        const r = this.inliner.parse(text, { lineno, memo: this.memo, parent: this.parent });
+        const r = this.inliner.parse(text, {lineno, memo: this.memo, parent: this.parent});
         return r;
     }
 }

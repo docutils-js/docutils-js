@@ -22,6 +22,6 @@ class ExtensionOptions extends FieldList {
     }
 }
 
-ExtensionOptions.stateName = 'ExtensionOptions';
-ExtensionOptions.constructor.stateName = 'ExtensionOptions';
+//ExtensionOptions.stateName = 'ExtensionOptions';
+//ExtensionOptions//.constructor.stateName = 'ExtensionOptions';
 export default ExtensionOptions;

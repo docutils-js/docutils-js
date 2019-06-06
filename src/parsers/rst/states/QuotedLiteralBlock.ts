@@ -1,8 +1,9 @@
-import RSTState from './RSTState';
+import RSTState, {RSTStateArgs} from './RSTState';
 import * as RegExps from '../RegExps';
 import { escapeRegExp } from '../../../utils';
 import * as nodes from '../../../nodes';
 import { EOFError } from '../../../Exceptions';
+import RSTStateMachine from "../RSTStateMachine";
 
 /**
     Nested parse handler for quoted (unindented) literal blocks.
@@ -10,8 +11,9 @@ import { EOFError } from '../../../Exceptions';
     Special-purpose.  Not for inclusion in `state_classes`.
 */
 class QuotedLiteralBlock extends RSTState {
-    _init() {
-        super._init();
+    private initial_lineno: number;
+    _init(stateMachine: RSTStateMachine, args: RSTStateArgs) {
+        super._init(stateMachine, args);
         this.patterns = {
  initial_quoted: `(${RegExps.nonalphanum7bit})`,
                 text: '',
@@ -53,7 +55,7 @@ class QuotedLiteralBlock extends RSTState {
     }
 
     /* eslint-disable-next-line no-unused-vars */
-    indent(match, context, nextState) {
+    indent(match: any, context: any[], nextState: any): any[] {
 //        assert context, ('QuotedLiteralBlock.indent: context should not '
 //                         'be empty!')
         this.messages.push(
@@ -96,6 +98,6 @@ class QuotedLiteralBlock extends RSTState {
         throw new EOFError();
     }
 }
-QuotedLiteralBlock.stateName = 'QuotedLiteralBlock';
-QuotedLiteralBlock.constructor.stateName = 'QuotedLiteralBlock';
+//QuotedLiteralBlock.stateName = 'QuotedLiteralBlock';
+//QuotedLiteralBlock.constructor.stateName = 'QuotedLiteralBlock';
 export default QuotedLiteralBlock;

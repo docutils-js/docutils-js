@@ -419,6 +419,9 @@ class Labeled { }
  * The base class for all docutils nodes.
  */
 abstract class Node implements INode {
+  names: any[];
+  refname: string;
+  refid: string;
   currentSource: string;
   currentLine: number;
   rawsource: any;
@@ -573,9 +576,11 @@ asDOM(dom: any): any {
         if (typeof child === 'undefined') {
           throw new Error('child is undefined');
         }
+        // @ts-ignore
         if (typeof child._fastTraverse === 'undefined') {
           throw new Error(`${child} does not have _fastTraverse`);
         }
+        // @ts-ignore
         result.push(...child._fastTraverse(cls));
       });
       return result;
@@ -586,6 +591,7 @@ asDOM(dom: any): any {
       const result = [];
       result.push(this);
       this.children.forEach((child) => {
+        // @ts-ignore
         result.push(...child._allTraverse());
       });
       return result;
@@ -810,6 +816,7 @@ class Element extends Node implements IElement {
       const element = domroot.createElement(this.tagname);
       const l = this.attlist();
       Object.keys(l).forEach((attribute) => {
+        // @ts-ignore
         const value: any | any[] = l[attribute];
         let myVal: string;
         if (isIterable(value)) {
@@ -820,6 +827,7 @@ class Element extends Node implements IElement {
         element.setAttribute(attribute, myVal);
       });
       this.children.forEach((child) => {
+        // @ts-ignore
         element.appendChild(child._domNode(domroot));
       });
       return element;
@@ -1243,7 +1251,7 @@ class Text extends Node {
 }
 
 class TextElement extends Element implements ITextElement {
-  constructor(rawsource: any, text: string, children: INode[], attributes: IAttributes) {
+  constructor(rawsource?: any, text?: string, children?: INode[], attributes?: IAttributes) {
     const cAry = children || [];
     /* istanbul ignore if */
     if (Array.isArray(text)) {
@@ -1263,7 +1271,7 @@ interface ITransformer {
  * To create a document, call {@link newDocument}.
  * @extends Element
  */
-class document extends Element {
+class document extends Element implements Document {
   settings: Settings;
   reporter: IReporter;
 
@@ -1325,7 +1333,7 @@ class document extends Element {
     this.document = this;
   }
 
-  setId(node: Node, msgnode?: Element) {
+  setId(node: INode, msgnode?: INode) {
     let msg;
     let id;
     node.attributes.ids.forEach((myId) => {
@@ -1429,21 +1437,21 @@ class document extends Element {
     }
   }
 
-  hasName(name) {
+  hasName(name: string) {
     return Object.keys(this.nameIds).includes(name);
   }
 
-  noteImplicitTarget(target, msgnode) {
+  noteImplicitTarget(target: INode, msgnode: INode) {
     const id = this.setId(target, msgnode);
     this.setNameIdMap(target, id, msgnode);
   }
 
-  noteExplicitTarget(target, msgnode) {
+  noteExplicitTarget(target: INode, msgnode: INode) {
     const id = this.setId(target, msgnode);
     this.setNameIdMap(target, id, msgnode, true);
   }
 
-  noteRefname(node) {
+  noteRefname(node: INode) {
     const a = [node];
     if (this.refNames[node.refname]) {
       this.refNames[node.refname].push(node);
@@ -1452,7 +1460,7 @@ class document extends Element {
     }
   }
 
-  noteRefId(node) {
+  noteRefId(node: INode) {
     const a = [node];
     if (this.refIds[node.refid]) {
       this.refIds[node.refid].push(node);
@@ -1461,14 +1469,15 @@ class document extends Element {
     }
   }
 
-  noteIndirectTarget(target) {
+  noteIndirectTarget(target: INode) {
     this.indirectTargets.push(target);
+    // check this fix me
     if (target.names) {
       this.noteRefname(target);
     }
   }
 
-  noteAnonymousTarget(target) {
+  noteAnonymousTarget(target: INode) {
     this.setId(target);
   }
 
@@ -1826,6 +1835,10 @@ class bullet_list extends Element {
 
 /* eslint-disable-next-line camelcase */
 class enumerated_list extends Element {
+  start?: number;
+  suffix?: string;
+  prefix?: string;
+  enumtype: any;
 /* eslint-disable-next-line no-useless-constructor */
   // @ts-ignore
   constructor(...args) {
@@ -2201,6 +2214,7 @@ class substitution_definition extends TextElement {
   }
 }
 class target extends TextElement {
+  indirectReferenceName: string;
 /* eslint-disable-next-line no-useless-constructor */
   // @ts-ignore
   constructor(...args) {

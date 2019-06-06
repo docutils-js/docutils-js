@@ -1,13 +1,19 @@
 import ViewList from './ViewList';
-import { columnIndicies } from './utils';
+import {columnIndicies} from './utils';
 import UnexpectedIndentationError from './UnexpectedIndentationError';
+import {GetIndentedArgs} from "./types";
 
 class StringList extends ViewList {
-    trimLeft(trimLength, start = 0, end) {
-        if (end === undefined) {
-            end = this.length;
+    constructor(initlist: string[], source?: string, items?: any[], parent?: any, parentOffset?: number) {
+        super(initlist, source, items, parent, parentOffset);
+    }
+
+    trimLeft(trimLength: number, start = 0, end: number) {
+        let localEnd = end;
+        if (localEnd === undefined) {
+            localEnd = this.length;
         }
-        for (let i = start; i < Math.min(end, this.length); i += 1) {
+        for (let i = start; i < Math.min(localEnd, this.length); i += 1) {
             /* istanbul ignore if */
             if (typeof this[i] === 'undefined') {
                 throw new Error(`${i} ${this.length}`);
@@ -34,16 +40,16 @@ class StringList extends ViewList {
         return this.slice(start, end);
     }
 
-    getIndented({
- start, untilBlank, stripIndent, blockIndent, firstIndent,
-}) {
-        if (start == null) {
-                start = 0;
+    getIndented(args: GetIndentedArgs) {
+const {  start, untilBlank, stripIndent, blockIndent, firstIndent } = args;
+const cArgs = { ... args };
+        if (cArgs.start == null) {
+                cArgs.start = 0;
         }
         let indent = blockIndent;
         let end = start;
         if (blockIndent != null && firstIndent == null) {
-            firstIndent = blockIndent;
+            cArgs.firstIndent = blockIndent;
         }
         if (firstIndent != null) {
             end += 1;

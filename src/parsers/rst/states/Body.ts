@@ -1,4 +1,4 @@
-import RSTState from './RSTState';
+import RSTState, {RSTStateArgs} from './RSTState';
 import * as RegExps from '../RegExps';
 import * as nodes from '../../../nodes';
 import MarkupError from '../MarkupError';
@@ -34,6 +34,11 @@ function _UpperromanToInt() {
 }
 
 class Body extends RSTState {
+    private gridTableTopPat: RegExp;
+    private enum: any;
+    private attribution_pattern: any;
+    private simpleTableTopPat: RegExp;
+    private pats: any;
     constructor(stateMachine: RSTStateMachine, args) {
         super(stateMachine, args);
         const pats: any = { };
@@ -46,11 +51,12 @@ class Body extends RSTState {
         this.pats = pats;
     }
 
-    _init() {
-        super._init();
+    _init(stateMachine: RSTStateMachine, args: RSTStateArgs) {
+        super._init(stateMachine, args);
         //      this.doubleWidthPadChar = tableparser.TableParser.doubleWidthPadChar
 
         const enum_ = { };
+        // @ts-ignore
         enum_.formatinfo = {
             parens: {
                 prefix: '\\(', suffix: '\\)', start: 1, end: 1,
@@ -62,9 +68,12 @@ class Body extends RSTState {
                 prefix: '', suffix: '\\.', start: 0, end: -1,
             },
         };
+        // @ts-ignore
         enum_.formats = Object.keys(enum_.formatinfo);
+        // @ts-ignore
         enum_.sequences = ['arabic', 'loweralpha', 'upperalpha',
                            'lowerroman', 'upperroman'];
+        // @ts-ignore
         enum_.sequencepats = {
             arabic: '[0-9]+',
             loweralpha: '[a-z]',
@@ -72,6 +81,7 @@ class Body extends RSTState {
             lowerroman: '[ivxlcdm]+',
             upperroman: '[IVXLCDM]+',
         };
+        // @ts-ignore
         enum_.converters = {
             arabic: parseInt,
             loweralpha: _LoweralphaToInt,
@@ -81,8 +91,11 @@ class Body extends RSTState {
             upperroman: _UpperromanToInt,
         };
 
+        // @ts-ignore
         enum_.sequenceregexps = {};
+        // @ts-ignore
         enum_.sequences.forEach((sequence) => {
+            // @ts-ignore
             enum_.sequenceregexps[sequence] = new RegExp(`${enum_.sequencepats[sequence]}$`);
         });
         this.enum = enum_;
@@ -90,7 +103,7 @@ class Body extends RSTState {
         this.gridTableTopPat = new RegExp('\\+-[-+]+-\\+ *$');
         this.simpleTableTopPat = new RegExp('=+( +=+)+ *$');
 
-        const pats = {};
+        const pats: any = {};
         pats.nonalphanum7bit = '[!-/:-@[-`{-~]';
         pats.alpha = '[a-zA-Z]';
         pats.alphanum = '[a-zA-Z0-9]';
@@ -102,11 +115,17 @@ class Body extends RSTState {
         pats.longopt = `(--|/)${pats.optname}([ =]${pats.optarg})?`;
         pats.option = `(${pats.shortopt}|${pats.longopt})`;
 
+        // @ts-ignore
         enum_.formats.forEach((format) => {
+            // @ts-ignore
             pats[format] = `(${
+                // @ts-ignore
+
                 [enum_.formatinfo[format].prefix,
-                 pats.enum,
-                 enum_.formatinfo[format].suffix].join('')})`;
+// @ts-ignore
+                pats.enum,
+                // @ts-ignore
+                enum_.formatinfo[format].suffix].join('')})`;
         });
 
         this.patterns = {
@@ -183,7 +202,7 @@ class Body extends RSTState {
 
         /* istanbul ignore else */
         if (indented && indented.length) {
-            this.nestedParse(indented, { inputOffset: offset, node: footnote });
+            this.nestedParse( { inputLines: indented, inputOffset: offset, node: footnote });
         }
         return [[footnote], blankFinish];
     }
@@ -206,7 +225,7 @@ class Body extends RSTState {
         this.document.noteExplicitTarget(citation, citation);
         /* istanbul ignore else */
         if (indented && indented.length) {
-            this.nestedParse(indented, { inputOffset: offset, node: citation });
+            this.nestedParse( { inputLines: indented, inputOffset: offset, node: citation });
         }
         return [[citation], blankFinish];
     }
@@ -384,7 +403,7 @@ class Body extends RSTState {
         if (!block.length) {
             const msg = this.reporter.warning(
                 `Substitution definition "${subname}" missing contents.`,
-                nodes.literal_block(blockText, blockText),
+                new nodes.literal_block(blockText, blockText),
                 { source: src, line: srcline },
             );
             return [[msg], myBlankFinish];
@@ -414,6 +433,7 @@ class Body extends RSTState {
                 i += 1;
             }
         });
+        // @ts-ignore
         const result = substitutionNode.traverse(nodes.Element).map((node) => {
             if (this.disallowedInsideSubstitutionDefinitions(node)) {
                 const pformat = new nodes.literal_block('', node.pformat().trimEnd());
@@ -502,7 +522,7 @@ class Body extends RSTState {
         const [indented, indent, lineOffset, blankFinish] = this.rstStateMachine.getFirstKnownIndented(
             {
                 indent: match.index + match[0].length,
-                stripTop: 0,
+                stripTop: false,
             },
         );
         const blockText = this.rstStateMachine.inputLines.slice(
@@ -527,13 +547,13 @@ class Body extends RSTState {
         }
         const directiveInstance = new directive(
             typeName, args, options, content, lineno,
-            contentOffset, blockText, this, this.stateMachine,
+            contentOffset, blockText, this, this.rstStateMachine,
         );
         let result;
         try {
             result = directiveInstance.run();
         } catch (error) {
-            const msgNode = this.reporter.system_message(
+            const msgNode = this.reporter.systemMessage(
                 error.level, error.msg, [], { line: lineno },
             );
             msgNode.add(new nodes.literal_block(blockText, blockText));
@@ -558,7 +578,7 @@ class Body extends RSTState {
                indent,
 /* eslint-disable-next-line no-unused-vars */
                offset,
-               blankFinish] = this.stateMachine
+               blankFinish] = this.rstStateMachine
               .getFirstKnownIndented({ indent: 0, stripIndent: false });
         const text = indented.join('\n');
         const error = this.reporter.error(
@@ -708,12 +728,13 @@ class Body extends RSTState {
                    newLineOffset] = this.split_attribution(indented, lineOffset);
             const blockquote = new nodes.block_quote();
             indented = outIndented;
-            this.nestedParse(blockquoteLines, { inputOffset: lineOffset, node: blockquote });
+            this.nestedParse( { inputLines: blockquoteLines, inputOffset: lineOffset, node: blockquote });
             elements.push(blockquote);
             if (attributionLines) { // fixme
                 const [attribution, messages] = this.parse_attribution(attributionLines,
                                                                        attributionOffset);
                 blockquote.add(attribution);
+                // @ts-ignore
                 elements.push(...messages);
             }
             lineOffset = newLineOffset;
@@ -780,9 +801,9 @@ class Body extends RSTState {
     enumerator(match, context, nextState) {
         const [format, sequence, text, ordinal] = this.parseEnumerator(match);
         if (!this.isEnumeratedListItem(ordinal, sequence, format)) {
-            throw TransitionCorrection('text');
+            throw new TransitionCorrection('text');
         }
-        const enumlist = nodes.enumerated_list();
+        const enumlist = new nodes.enumerated_list();
         this.parent.add(enumlist);
         if (sequence === '#') {
             enumlist.enumtype = 'arabic';
@@ -819,7 +840,7 @@ class Body extends RSTState {
         blankFinish = blankFinish2;
         this.gotoLine(newlineOffset);
         if (!blankFinish) {
-            this.parent.add(this.unindent_warning('Enumerated list'));
+            this.parent.add(this.unindentWarning('Enumerated list'));
         }
         return [[], nextState, []];
     }
@@ -898,7 +919,8 @@ class Body extends RSTState {
         const listitem = new nodes.list_item(indented.join('\n'));
         if (indented) {
             //          console.log('xnested parse');
-            this.nestedParse(indented, {
+            this.nestedParse( {
+                inputLines: indented,
                 inputOffset: lineOffset,
                 node: listitem,
             });
@@ -964,7 +986,7 @@ class Body extends RSTState {
 
     /* eslint-disable-next-line camelcase */
     parse_field_body(indented, offset, node) {
-        this.nestedParse(indented, { inputOffset: offset, node });
+        this.nestedParse({ inputLines: indented, inputOffset: offset, node });
     }
 
     /** Option list item. */
@@ -1038,7 +1060,8 @@ class Body extends RSTState {
         const optionListItem = new nodes.option_list_item('', [optionGroup,
                                                                description]);
         if (indented && indented.length) {
-            this.nestedParse(indented, {
+            this.nestedParse({
+                inputLines: indented,
                 inputOffset: lineOffset,
                 node: description,
             });
@@ -1119,7 +1142,7 @@ class Body extends RSTState {
                     inputOffset: this.rstStateMachine.absLineOffset() + 1,
                     node: block,
                     initialState: 'LineBlock',
-                    blankFinish: 0,
+                    blankFinish: false,
                 },
             );
             blankFinish = blankFinish2;
@@ -1132,8 +1155,8 @@ class Body extends RSTState {
             ));
         }
         if (block.children.length) {
-            if (block.children[0].indent == null) {
-                block.children[0].indent = 0;
+            if (block.children[0].attributes.indent == null) {
+                block.children[0].attributes.indent = 0;
             }
             this.nest_line_block_lines(block);
         }
@@ -1197,7 +1220,7 @@ class Body extends RSTState {
                 newItems.push(item);
             }
         }
-        if (newBlock.length) {
+        if (newBlock.children.length) {
             this.nest_line_block_segment(newBlock);
             newItems.push(newBlock);
         }
@@ -1274,12 +1297,12 @@ class Body extends RSTState {
         let block;
         let blankFinish = 1;
         try {
-            block = this.rstStateMachine.getTextBlock(0, true);
+            block = this.rstStateMachine.getTextBlock(true);
         } catch (error) {
             if (error instanceof UnexpectedIndentationError) {
                 const [block2, src, srcline] = error.args;
                 block = block2;
-                messages.add(this.reporter.error('Unexpected indentation.', [],
+                messages.push(this.reporter.error('Unexpected indentation.', [],
                                                  { source: src, line: srcline }));
                 blankFinish = 0;
             }
@@ -1308,7 +1331,7 @@ class Body extends RSTState {
             let myBreak = false;
             for (let i = block.length - 2; i >= 1; i -= 1) { // fixme test
                 // for i in range(len(block) - 2, 1, -1):
-                if (this.grid_table_top_pat.test(block[i])) {
+                if (this.gridTableTopPat.test(block[i])) {
                     this.rstStateMachine.previousLine(block.length - i + 1);
                     block.splice(i + 1, block.length - (i + 1));
                     myBreak = true;
@@ -1373,7 +1396,7 @@ class Body extends RSTState {
                 block = lines.slice(start, foundAt + 1);
             } else {
                 extra = '';
-                this.rstStateMachine.next_line(i - start - 1);
+                this.rstStateMachine.nextLine(i - start - 1);
                 block = lines.slice(start);
             }
             const messages = this.malformed_table(
@@ -1407,7 +1430,8 @@ class Body extends RSTState {
     }
 
     /* eslint-disable-next-line camelcase */
-    build_table(tabledata, tableline, stubColumns = 0, widths) {
+    // @ts-ignore
+    build_table(tabledata, tableline, stubColumns = 0, widths?) {
         const [colwidths, headRows, bodyrows] = tabledata;
         const table = new nodes.table();
         if (widths === 'auto') {
@@ -1439,18 +1463,21 @@ class Body extends RSTState {
 
     buildTableRow(rowdata, tableline) {
         const row = new nodes.row('', [], {});
+        // @ts-ignore
         rowdata.filter(x => x).forEach(([morerows, morecols, offset, cellblock]) => {
             const attributes = {};
             if (morerows) {
+                // @ts-ignore
                 attributes.morerows = morerows;
             }
             if (morecols) {
+                // @ts-ignore
                 attributes.morecols = morecols;
             }
             const entry = new nodes.entry('', [], attributes);
             row.add(entry);
             if (cellblock.join('')) {
-                this.nestedParse(cellblock, {
+                this.nestedParse( {inputLines: cellblock,
                     inputOffset: tableline + offset,
                     node: entry,
                 });
@@ -1476,7 +1503,7 @@ class Body extends RSTState {
             const blocktext = this.rstStateMachine.line;
             const msg = this.reporter.severe(
                 'Unexpected section title or transition.',
-                [nodes.literal_block(blocktext, blocktext)],
+                [new nodes.literal_block(blocktext, blocktext)],
                 { line: this.rstStateMachine.absLineNumber() },
             );
             this.parent.add(msg);
@@ -1494,7 +1521,19 @@ class Body extends RSTState {
 
         return [[match.input], 'Text', []];
     }
+
+    private isEnumeratedListItem(ordinal, sequence, format) {
+        return false;
+    }
+
+    private parseEnumerator(match: any): any[] {
+return [];
+    }
+
+    private parse_directive_block(indented: null | number, lineOffset: null | number, directive: any, option_presets: any) {
+        return [];
+    }
 }
-Body.stateName = 'Body';
-Body.constructor.stateName = 'Body';
+//Body.stateName = 'Body';
+//Body.constructor.stateName = 'Body';
 export default Body;

@@ -6,6 +6,7 @@ import { matchChars } from '../../utils/punctuationChars';
 import roleInterface from './Roles';
 import { ApplicationError } from '../../Exceptions';
 import unescape from '../../utils/unescape';
+import {Document} from "../../types";
 
 /* eslint-disable-next-line no-unused-vars */
 const __docformat__ = 'reStructuredText';
@@ -61,6 +62,7 @@ function buildRegexp(definition, compile = true) {
         const fakeTuple3 = Array.isArray(part) ? part[0] : undefined;
         if (fakeTuple3 === 1) {
             const [regexp, subGroupNames] = buildRegexp(part, null);
+            // @ts-ignore
             groupNames.push(null, ...subGroupNames);
             partStrings.push(regexp);
         } else if (fakeTuple3 === 2) {
@@ -95,6 +97,21 @@ function buildRegexp(definition, compile = true) {
  *
  */
 class Inliner {
+    private language: any;
+    private dispatch: any;
+    private implicitDispatch: any[];
+    private nonWhitespaceAfter: string = '';
+    private nonWhitespaceBefore: string;
+    private nonWhitespaceEscapeBefore: string;
+    private nonUnescapedWhitespaceEscapeBefore: string;
+    private patterns: any;
+    private reporter: any;
+    private parent: any;
+    private document: Document;
+    private simplename: string = '';
+    private parts: any[];
+    private startStringPrefix: string;
+    private endStringSuffix: string;
     /**
      * Create Inliner instance
      */
@@ -158,7 +175,7 @@ class Inliner {
                         referenceNode.attributes.anonymous = 1;
                     } else {
                         referenceNode.attributes.refname = nodes.fullyNormalizeName(subrefText);
-                        this.document.note_refname(referenceNode);
+                        this.document.noteRefname(referenceNode);
                     }
                     referenceNode.add(subrefNode);
                     inlines[0] = referenceNode;
@@ -581,7 +598,8 @@ class Inliner {
             };
     }
 
-    parse(text, { lineno, memo, parent }) {
+    parse(text: string, args: { lineno: number, memo: any, parent: any }) {
+        const { lineno, memo, parent } = args;
         this.reporter = memo.reporter;
         this.document = memo.document;
         this.language = memo.language;
@@ -594,7 +612,7 @@ class Inliner {
             const match = this.patterns.initial[0].exec(remaining);
             //          console.log(match);
             if (match) {
-                const rr = {};
+                const rr: any = {};
 
                 this.patterns.initial[1].forEach((x, index) => {
                     if (x != null) {
@@ -677,7 +695,7 @@ class Inliner {
     }
     } */
 
-    interpreted(rawsource, text, role, lineno) {
+    interpreted(rawsource: string, text: string, role: string, lineno: number ) {
         const [roleFn, messages] = roleInterface(role, this.language, lineno, this.reporter);
         if (roleFn) {
             const [theNodes, messages2] = roleFn.invoke(role, rawsource, text, lineno, this);

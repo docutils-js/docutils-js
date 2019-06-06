@@ -2,12 +2,13 @@ import Body from './Body';
 import { EOFError } from '../../../Exceptions';
 import * as nodes from '../../../nodes';
 import * as RegExps from '../RegExps';
+import {RSTStateArgs} from "./RSTState";
+import RSTStateMachine from "../RSTStateMachine";
 
 /** Parser for the contents of a substitution_definition element. */
 class SubstitutionDef extends Body {
-    private blankFinish: boolean;
-    _init() {
-        super._init();
+    _init(stateMachine: RSTStateMachine, args: RSTStateArgs) {
+        super._init(stateMachine, args);
         this.patterns = {
             embedded_directive: new RegExp(`(${RegExps.simplename})::( +|$)`),
             text: '',
@@ -44,8 +45,9 @@ class SubstitutionDef extends Body {
         const offset = this.rstStateMachine.lineOffset;
         const parentNode = new nodes.Element();
         const newAbsOffset = this.nestedParse(
-            this.rstStateMachine.inputLines.slice(offset),
+
             {
+                inputLines: this.rstStateMachine.inputLines.slice(offset),
  inputOffset: absLineOffset,
               node: parentNode,
               matchTitles: false,

@@ -1,5 +1,4 @@
-function getLanguage(a, b) {
-}
+export function getLanguage(languageCode: any, reporter: any) {
 
-export default getLanguage;
+}
 

@@ -24,7 +24,7 @@ import StringList from "../../StringList";
  from the table's start line.
  */
 class TableMarkupError extends DataError {
-    private offset?: number;
+    offset?: number;
     constructor(message: string, offset?: number) {
         super(message);
         this.offset = offset;

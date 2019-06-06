@@ -1,9 +1,11 @@
 import Body from './Body';
 import { EOFError } from '../../../Exceptions';
+import {RSTStateArgs} from "./RSTState";
+import RSTStateMachine from "../RSTStateMachine";
 
 class SpecializedBody extends Body {
-    _init() {
-        super._init();
+    _init(stateMachine: RSTStateMachine, args: RSTStateArgs) {
+        super._init(stateMachine, args);
     }
 
     /* istanbul ignore next */
@@ -105,7 +107,7 @@ class SpecializedBody extends Body {
 
     /* istanbul ignore next */
     /* eslint-disable-next-line camelcase,no-unused-vars */
-    invalid_input(match, context, nextState) {
+    invalid_input(match: any, context: any[], nextState: any): any[] {
         this.rstStateMachine.previousLine();
         throw new EOFError();
     }

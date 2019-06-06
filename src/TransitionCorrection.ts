@@ -1,4 +1,5 @@
 export default class TransitionCorrection extends Error {
+    public args: any[];
     constructor(...args) {
         super(...args);
         this.args = args;

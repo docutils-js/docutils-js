@@ -3,8 +3,10 @@ import MarkupError from '../MarkupError';
 
 /** Second and subsequent option_list option_list_items. */
 class OptionList extends SpecializedBody {
+    private blankFinish?: boolean;
     /** Option list item. */
     /* eslint-disable-next-line */
+    // @ts-ignore
     option_marker(match, context, nextState) {
         let optionListItem;
         let blankFinish;
@@ -12,6 +14,7 @@ class OptionList extends SpecializedBody {
             [optionListItem, blankFinish] = this.option_list_item(match);
         } catch (error) {
             if (error instanceof MarkupError) {
+                // @ts-ignore
                 this.invalid_input();
             }
             throw error;
@@ -22,6 +25,6 @@ class OptionList extends SpecializedBody {
     }
 }
 
-OptionList.stateName = 'OptionList';
-OptionList.constructor.stateName = 'OptionList';
+//OptionList.stateName = 'OptionList';
+//OptionList.constructor.stateName = 'OptionList';
 export default OptionList;

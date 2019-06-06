@@ -11,7 +11,7 @@ class ViewList extends Array {
 
     public parent: ViewList;
 
-    constructor(initlist: any[], source: string, items: any[], parent: any, parentOffset: number) {
+    constructor(initlist: any[], source?: string, items?: any[], parent?: any, parentOffset?: number) {
         super(...initlist);
         this.items = [];
         this.parent = parent;

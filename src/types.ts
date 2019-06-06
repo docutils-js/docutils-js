@@ -3,7 +3,10 @@
  *
  * TransformSpec subclass objects used by `docutils.transforms.Transformer`.
  */
-import {Element, system_message} from "./nodes";
+import {citation, Element, footnote, reference} from "./nodes";
+import {Settings} from "../gen/Settings";
+import StringList from "./StringList";
+import State from "./states/State";
 
 export interface SourceLocation {
    currentSource: string;
@@ -15,6 +18,10 @@ export interface HasIndent {
 }
 
 export interface INode extends SourceLocation {
+    names: any[];
+    refname: any;
+    refid: any;
+    rawsource: string;
     /** Back-reference to the Node immediately containing this Node. */
     parent: INode;
     /** The `document` node at the root of the tree containing this Node. */
@@ -23,6 +30,8 @@ export interface INode extends SourceLocation {
     source: string;
     /** The line number (1-based) of the beginning of this Node in `source`. */
     line: number;
+
+    attributes: IAttributes;
 
     asDOM(dom: any): any;
     /**
@@ -70,6 +79,8 @@ export interface INode extends SourceLocation {
     astext(): string;
 
     add(iNodes: INode[] | INode): void;
+
+    isInline(): boolean;
 }
 
 export interface IAttributes {
@@ -78,7 +89,6 @@ export interface IAttributes {
 
 export interface IElement extends INode {
     nodeName: any;
-    attributes: IAttributes;
     listAttributes: string[];
 }
 
@@ -86,13 +96,43 @@ export interface ITextElement extends IElement {
 }
 
 export interface Document extends IElement {
+    noteSource: any;
     reporter: any;
-    settings: any;
+    settings: Settings;
 
     // eslint-disable-next-line camelcase
-    noteTransformMessage(message: system_message): void;
+    noteTransformMessage(message: any): void;
     noteImplicitTarget(target: any, msgnode: any): void;
 
+    noteRefname(ref: reference): any;
+
+    noteExplicitTarget(target: any, parent: any): any;
+
+    noteIndirectTarget(target: any): any;
+
+    setId(p: INode, msgnode?: IElement): any;
+
+    noteFootnoteRef(refnode: any): any;
+
+    noteSymbolFootnoteRef(refnode: any): any;
+
+    noteCitationRef(refnode: any): void;
+
+    noteAutofootnoteRef(refnode: any): void;
+
+    noteSubstitutionRef(subrefNode: any, subrefText: any): void;
+
+    noteSubstitutionDef(substitutionNode: any, subname: any, parent: IElement): void;
+
+    noteAnonymousTarget(target: any): void;
+
+    noteCitation(c: citation): void;
+
+    noteFootnote(f: footnote): void;
+
+    noteSymbolFootnote(f: footnote): void;
+
+    noteAutofootnote(f: footnote): void;
 }
 
 export interface TransformSpec {
@@ -152,9 +192,12 @@ severe(...args: any[]): INode;
 export interface IStateFactory {
 
     withStateClasses(strings: string[]): IStateFactory;
+
+    createState(stateName: any, param2: any): State;
+
+    getStateClasses(): string[];
 }
 export interface IStateMachine {
-    constructor(args: any): void;
 
     unlink(): void;
 
@@ -226,4 +269,27 @@ export interface IState {
     makeTransition(name: string, nextState?): any[];
 
     makeTransitions(nameList): (any[] | {})[];
+}
+
+export interface StateMachineRunArgs {
+    inputLines: StringList | string| string[];
+    inputOffset: number;
+    context?: any[];
+    inputSource?: string;
+    initialState?: string;
+    memo?: any;
+    node?: INode;
+    matchTitles?: boolean;
+    document?: Document;
+    inliner?: any;
+}
+
+export interface GetIndentedArgs {
+    start?: any;
+    untilBlank?: boolean;
+    stripIndent?: boolean;
+    blockIndent?: number;
+    firstIndent?: number;
+    indent?: number;
+    stripTop?: boolean;
 }

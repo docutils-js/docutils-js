@@ -2,8 +2,10 @@ import SpecializedBody from './SpecializedBody';
 import MarkupError from '../MarkupError';
 /** Second and subsequent explicit markup construct. */
 class Explicit extends SpecializedBody {
+    private explicit: any;
     /** Footnotes, hyperlink targets, directives, comments. */
     /* eslint-disable-next-line camelcase */
+    // @ts-ignore
     explicit_markup(match, context, nextState) {
         const [nodelist, blankFinish] = this.explicit_construct(match);
         this.parent.add(nodelist);
@@ -26,7 +28,7 @@ class Explicit extends SpecializedBody {
                 } catch (error) {
                     if (error instanceof MarkupError) {
                         const lineno = this.rstStateMachine.absLineNumber();
-                        const message = ' '.join(error.args);
+                        const message = error.args.join(' ');
                         errors.push(this.reporter.warning(message, [], { line: lineno }));
                         break;
                     }
@@ -39,6 +41,7 @@ class Explicit extends SpecializedBody {
     }
 
     /** Anonymous hyperlink targets. */
+    // @ts-ignore
     anonymous(match, context, nextState) {
         const [nodelist, blankFinish] = this.anonymous_target(match);
         this.parent.add(nodelist);
@@ -46,10 +49,12 @@ class Explicit extends SpecializedBody {
         return [[], nextState, []];
     }
 
-    blank() {
+    // @ts-ignore
+    blank = () => {
+        // @ts-ignore
         this.invalid_input();
-    }
+    };
 }
-Explicit.stateName = 'Explicit';
-Explicit.constructor.stateName = 'Explicit';
+//Explicit.stateName = 'Explicit';
+//Explicit.constructor.stateName = 'Explicit';
 export default Explicit;

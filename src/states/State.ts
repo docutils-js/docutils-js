@@ -4,6 +4,7 @@ import DuplicateTransitionError from '../DuplicateTransitionError';
 import {IReporter, IState, IStateMachine} from "../types";
 import {StateMachine} from "../StateMachine";
 import StateMachineWS from "../StateMachineWS";
+import {RSTStateArgs} from "../parsers/rst/states/RSTState";
 
 class State implements IState {
     protected knownIndentSm: any;
@@ -24,7 +25,7 @@ class State implements IState {
     constructor(stateMachine: StateMachine, args: { debug?: boolean}) {
         this.stateMachine = stateMachine;
         this.debug = args.debug;
-        this._init();
+        this._init(stateMachine, args);
         this.transitionOrder = [];
         this.transitions = {};
         // this.patterns = {}
@@ -57,7 +58,8 @@ class State implements IState {
         }
     }
 
-    _init() {
+    // eslint-disable-next-line no-unused-vars
+    _init(stateMachine: StateMachine, args: RSTStateArgs) {
             /* empty */
         this.patterns = {};
         this.initialTransitions = null;

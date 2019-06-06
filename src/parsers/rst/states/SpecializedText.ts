@@ -1,10 +1,12 @@
 import Text from './Text';
 import { EOFError } from '../../../Exceptions';
 import State from "../../../states/State";
+import {RSTStateArgs} from "./RSTState";
+import RSTStateMachine from "../RSTStateMachine";
 
 class SpecializedText extends Text {
-    _init() {
-        super._init();
+    _init(stateMachine: RSTStateMachine, args: RSTStateArgs) {
+        super._init(stateMachine, args);
     }
 
     /* istanbul ignore next */

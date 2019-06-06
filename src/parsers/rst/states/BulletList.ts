@@ -2,8 +2,10 @@ import SpecializedBody from './SpecializedBody';
 
 
 class BulletList extends SpecializedBody {
+    // @ts-ignore
     bullet(match, context, nextState) {
         if (match.result.input[0] !== this.parent.attributes.bullet) {
+            // @ts-ignore
             this.invalid_input();
         }
         const [listitem, blankFinish] = this.list_item(match.result.index + match.result[0].length);
@@ -13,6 +15,6 @@ class BulletList extends SpecializedBody {
     }
 }
 
-BulletList.stateName = 'BulletList';
-BulletList.constructor.stateName = 'BulletList';
+//BulletList.stateName = 'BulletList';
+//BulletList.constructor.stateName = 'BulletList';
 export default BulletList;

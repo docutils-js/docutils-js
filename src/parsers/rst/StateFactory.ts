@@ -1,6 +1,7 @@
 import * as RSTStates from './RSTStates';
+import {IStateFactory} from "../../types";
 
-class StateFactory {
+class StateFactory implements IStateFactory {
     constructor(args) {
         this.args = args;
         if (args && args.stateClasses) {
@@ -97,8 +98,8 @@ class StateFactory {
         return this.createState('Text');
     }
 
-    createState(stateName,
- stateMachine) {
+    createState(stateName: string,
+ stateMachine?) {
         if (typeof stateName === 'undefined') {
             throw new Error('Need argument stateName');
         }

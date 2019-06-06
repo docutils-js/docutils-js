@@ -1,37 +1,37 @@
 import StateMachineWS from '../../StateMachineWS';
 import Inliner from './Inliner';
 import * as languages from '../../languages';
-import {IElement, INode} from "../../types";
-import StringList from "../../StringList";
-import {document} from "../../nodes";
-import {CommonParseArgs} from "./states/RSTState";
+import {IElement, StateMachineRunArgs} from "../../types";
 
 
 class RSTStateMachine extends StateMachineWS {
-    matchTitles: boolean;
+    matchTitles?: boolean;
     node: IElement;
-    run(args: CommonParseArgs) {
-
+    debugFn: any;
+    debug: boolean;
+    run(args: StateMachineRunArgs) {
+        const cArgs = { ... args };
         /* istanbul ignore if */
-        if (inputOffset === undefined) {
-            inputOffset = 0;
+        if (cArgs.inputOffset === undefined) {
+            cArgs.inputOffset = 0;
         }
         /* istanbul ignore if */
-        if (!document) {
+        if (!cArgs.document) {
             throw new Error('need document');
         }
 
+        const document = cArgs.document;
         /* istanbul ignore next */
-        if (matchTitles === undefined) {
-            matchTitles = true;
+        if (cArgs.matchTitles === undefined) {
+            cArgs.matchTitles = true;
         }
-        this.language = languages.getLanguage(document.settings.languageCode);
-        this.matchTitles = matchTitles;
+        this.language = languages.getLanguage(document.settings.languageCode, document.reporter);
+        this.matchTitles = cArgs.matchTitles;
         /* istanbul ignore next */
-        if (inliner === undefined) {
-            inliner = new Inliner();
+        if (cArgs.inliner === undefined) {
+            cArgs.inliner = new Inliner();
         }
-        inliner.initCustomizations(document.settings);
+        cArgs.inliner.initCustomizations(document.settings);
         this.memo = {
             document,
             reporter: document.reporter,
@@ -39,19 +39,22 @@ class RSTStateMachine extends StateMachineWS {
             titleStyles: [],
             sectionLevel: 0,
             sectionBubbleUpKludge: false,
-            inliner,
+            inliner: cArgs.inliner,
         };
         this.document = document;
         this.attachObserver(document.noteSource.bind(document));
         this.reporter = this.memo.reporter;
         this.node = document;
-        const results = super.run({inputLines, inputOffset, inputSource: document.source});
+        const superArgs: StateMachineRunArgs =  {inputLines: cArgs.inputLines, inputOffset: cArgs.inputOffset, inputSource: this.document.source};
+        const results = super.run(superArgs);
+
         /* istanbul ignore if */
         if (results.length !== 0) {
             throw new Error('should be empty array return from statemachine.run');
         }
         this.node = undefined;
         this.memo = undefined;
+        return [];
     }
 }
 

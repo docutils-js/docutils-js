@@ -1,4 +1,4 @@
-import RSTState from './RSTState';
+import RSTState, {RSTStateArgs} from './RSTState';
 import {columnWidth, isIterable} from '../../../utils';
 import unescape from '../../../utils/unescape';
 import * as nodes from '../../../nodes';
@@ -8,10 +8,11 @@ import UnexpectedIndentationError from '../../../UnexpectedIndentationError';
 import {EOFError} from '../../../Exceptions';
 import {INode} from "../../../types";
 import State from "../../../states/State";
+import RSTStateMachine from "../RSTStateMachine";
 
 class Text extends RSTState {
-    _init() {
-        super._init();
+    _init(stateMachine: RSTStateMachine, args: RSTStateArgs) {
+        super._init(stateMachine, args);
         this.patterns = {
  underline: '([!-/:-@[-`{-~])\\1* *$',
                          text: '',
@@ -184,8 +185,8 @@ srcline;
         const parentNode = new nodes.Element();
         // @ts-ignore
         const newAbsOffset = this.nestedParse(
-            this.rstStateMachine.inputLines.slice(offset),
             {
+            inputLines: this.rstStateMachine.inputLines.slice(offset),
  inputOffset: absLineOffset,
               node: parentNode,
               matchTitles: false,
