@@ -281,7 +281,7 @@ export interface IState {
 
 export interface StateMachineRunArgs {
     inputLines: StringList | string| string[];
-    inputOffset: number;
+    inputOffset?: number;
     context?: any[];
     inputSource?: string;
     initialState?: string;

@@ -5,8 +5,9 @@ import Output from './io/Output';
 import { ApplicationError } from './Exceptions';
 
 export class StringInput extends Input {
-    constructor(...args) {
-        super(...args);
+
+    constructor(source: any, sourcePath: any, encoding: any, errorHandler: any) {
+        super({source, sourcePath, encoding, errorHandler});
         this.sourcePath = '<string>';
     }
 
@@ -16,9 +17,10 @@ export class StringInput extends Input {
 }
 
 export class StringOutput extends Output {
-    constructor(...args) {
-        super(...args);
+    constructor(destination, destinationPath, encoding, errorHandler) {
+        super(destination, destinationPath, encoding, errorHandler);
         this.defaultDestinationPath = '<string>';
+
     }
 
     write(data) {
@@ -32,6 +34,8 @@ export class StringOutput extends Output {
 }
 
 export class FileInput extends Input {
+    private _stderr: ErrorOutput;
+    private autoClose: any;
     /* ew, too much logic for a constructor, with side effects etc! */
     constructor(args) {
         super(args);
@@ -77,7 +81,7 @@ export class FileInput extends Input {
 
     /* Read and decode a single file and return the data (Unicode string).
      */
-    read(cb) {
+    read(cb?: any) {
         setTimeout(() => {
         let data;
         try {
@@ -98,9 +102,9 @@ export class FileInput extends Input {
         }, 100);
     }
 
-    readLines() {
-        return this.read().splitlines(true);
-    }
+    // readLines() {
+    //     return this.read().splitlines(true);
+    // }
 
     close() {
         if (this.source !== process.stdin) {

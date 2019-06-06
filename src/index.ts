@@ -1,5 +1,5 @@
 /* eslint-disable-next-line import/prefer-default-export */
-import parse from './parser';
+import parse from './parse';
 import { StringOutput } from './io';
 import StandaloneReader from './readers/standalone';
 import newDocument from './newDocument';

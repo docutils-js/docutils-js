@@ -164,7 +164,6 @@ class DraftTranslator extends GenericNodeVisitor {
 class Writer extends BaseWriter {
     private visitor: any;
     private translatorClass: any;
-    private output: any[] | any;
     constructor(args) {
         super(args);
         this.translatorClass = DraftTranslator;

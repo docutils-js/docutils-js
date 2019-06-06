@@ -13,6 +13,7 @@ this.document = undefined;
 
 function getTransforms() {
     const s = baseReaderTransforms;
+    // @ts-ignore
     const r = [...s, references.PropagateTargets,
                frontmatter.DocTitle,
                frontmatter.SectionSubTitle,

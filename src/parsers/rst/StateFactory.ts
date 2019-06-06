@@ -2,6 +2,8 @@ import * as RSTStates from './RSTStates';
 import {IStateFactory} from "../../types";
 
 class StateFactory implements IStateFactory {
+    private stateClasses: any[];
+    private args: any | undefined;
     constructor(args?: any) {
         this.args = args;
         if (args && args.stateClasses) {

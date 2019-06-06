@@ -4,6 +4,7 @@ import * as standalone from './readers/standalone';
 
 export class ReReader extends Reader {
     getTransforms() {
+        // @ts-ignore
         return Component.getTransforms.bind(this)();
     }
 }

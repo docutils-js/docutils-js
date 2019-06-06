@@ -1117,7 +1117,6 @@ class RSTTranslator extends GenericNodeVisitor {
  * Writer class for POJOWriter
  */
 class RSTWriter extends BaseWriter {
-    private output: string[];
     private visitor: any;
     private translatorClass: any;
     /**

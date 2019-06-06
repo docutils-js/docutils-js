@@ -77,7 +77,7 @@ export class DocTitle extends TitlePromoter {
         if (!('title' in this.document.attributes)) {
             if (this.document.settings.title != null) {
                 this.document.attributes.title = this.document.settings.title;
-            } else if (this.document.chidren.length && this.document.children[0] instanceof nodes.title) {
+            } else if (this.document.children.length && this.document.children[0] instanceof nodes.title) {
                 this.document.attributes.title = this.document.children[0].astext();
             }
         }

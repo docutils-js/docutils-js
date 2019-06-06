@@ -4,6 +4,9 @@ import RSTStateMachine from './rst/RSTStateMachine';
 import StateFactory from './rst/StateFactory';
 
 class Parser extends BaseParser {
+    private inliner: any;
+    private initialState: string;
+    private stateMachine: RSTStateMachine;
     constructor(args) {
         super(args);
         this.configSection = 'restructuredtext parser';
@@ -44,6 +47,7 @@ class Parser extends BaseParser {
             inliner: this.inliner });
         this.finishParse();
     }
+
 }
 
 export default Parser;

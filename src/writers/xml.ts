@@ -123,7 +123,6 @@ class XMLTranslator extends nodes.GenericNodeVisitor {
 export default class Writer extends BaseWriter {
     private visitor: any;
     private translatorClass: any;
-    private output: any;
     constructor(args) {
         super(args);
         this.translatorClass = XMLTranslator;

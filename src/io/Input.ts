@@ -1,6 +1,12 @@
 import TransformSpec from '../TransformSpec';
 
-class Input extends TransformSpec {
+abstract class Input extends TransformSpec {
+    private successfulEncoding: any;
+    private defaultSourcePath: any;
+    private encoding: any;
+    private errorHandler: any;
+    protected sourcePath: any;
+    protected source: any;
     constructor({
  source, sourcePath, encoding, errorHandler,
 }) {
@@ -16,9 +22,7 @@ class Input extends TransformSpec {
     }
 
     /* istanbul ignore method */
-    async read() {
-        throw new Error('not implemented');
-    }
+    abstract read(cb?: any);
 
     /* istanbul ignore method */
     decode(data) {

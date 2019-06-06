@@ -1,8 +1,13 @@
 import TransformSpec from '../TransformSpec';
 
 class Output extends TransformSpec {
+    protected defaultDestinationPath: any;
+    private destinationPath: any;
+    private encoding: any;
+    protected destination: any;
+    private errorHandler: string;
     constructor(destination, destinationPath, encoding, errorHandler) {
-        super({});
+        super();
         this.encoding = encoding;
         this.errorHandler = errorHandler || 'strict';
         this.destination = destination;
@@ -27,7 +32,7 @@ class Output extends TransformSpec {
         return `Output<${this.constructor.name}>`;
     }
 }
-Output.componentType = 'Output';
-Output.defaultDestinationPath = null;
+//Output.componentType = 'Output';
+//Output.defaultDestinationPath = null;
 
 export default Output;

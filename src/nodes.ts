@@ -1276,7 +1276,7 @@ class document extends Element implements Document {
   reporter: IReporter;
 
   decoration?: decoration;
-  private transformMessages: string[];
+   transformMessages: string[];
   private parseMessages: string[];
   private transformer: Transformer;
   private substitutionDefs: any;
@@ -1292,7 +1292,7 @@ class document extends Element implements Document {
   private autofootnotes: any[];
   private refIds: any;
   private refNames: any;
-  private nameIds: object;
+  nameIds: any;
   private ids: any;
   private nameTypes: any;
   private idStart: number;

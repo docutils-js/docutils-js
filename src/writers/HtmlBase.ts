@@ -1894,19 +1894,18 @@ class HTMLBaseWriter extends BaseWriter {
     private attr: any;
     private translatorClass: any;
     private template: any;
-    private output: string;
     /**
      * Create HTMLBaseWriter.
      * @param {Object} args - arguments to function
      */
-    constructor(args) {
+    constructor(args?: any) {
         super(args);
         this.attr = {};
         this.translatorClass = HTMLTranslator;
     }
 
-    _init(args) {
-        super._init(args);
+    _init() {
+        super._init();
         this.defaultTemplateContent = defaultTemplate;
         this.template = template;
         this.visitorAttributes = [

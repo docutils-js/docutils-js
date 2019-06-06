@@ -8,7 +8,6 @@ const __docformat__ = 'reStructuredText';
  * Writer class for POJOWriter
  */
 class NoOpWriter extends BaseWriter {
-    private output: Document;
     /**
      * Translate the document to plain old javascript object
      */

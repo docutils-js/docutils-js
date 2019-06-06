@@ -1,4 +1,6 @@
 /* eslint-disable-next-line no-unused-vars */
+import SettingsSpec from "./SettingsSpec";
+
 const __docformat__ = 'reStructuredText';
 
 /**
@@ -8,22 +10,19 @@ const __docformat__ = 'reStructuredText';
  * TransformSpec subclass objects used by `docutils.transforms.Transformer`.
  */
 
-class TransformSpec {
+class TransformSpec extends SettingsSpec {
     private unknownReferenceResolvers: any[];
-    constructor(args) {
+    constructor() {
+        super();
         this.unknownReferenceResolvers = [];
-        this._init(args);
-    }
-
-    /* eslint-disable-next-line no-unused-vars */
-    _init(...args) {
     }
 
     /**
      * Get the transforms associated with the instance.
      * @returns {Array} array of Transform classes (not instances)
      */
-    getTransforms() {
+    // eslint-disable-next-line class-methods-use-this
+    getTransforms(): any[] {
         return [];
     }
 

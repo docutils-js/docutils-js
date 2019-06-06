@@ -29,7 +29,7 @@ class Reporter implements IReporter {
     private ERROR_LEVEL: number;
     private SEVERE_LEVEL: number;
     private debugFlag: boolean;
-    private reportLevel: number;
+    reportLevel: number;
     private haltLevel: number;
     private errorHandler: string;
     private stream: any;

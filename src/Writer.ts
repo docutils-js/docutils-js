@@ -1,5 +1,5 @@
 import Component from './Component';
-import languages from './languages';
+import { getLanguage }from './languages';
 import {Document} from "./types";
 
 const __version__ = '';
@@ -12,18 +12,19 @@ export default class Writer extends Component {
     public document: Document;
     private language: any;
     private destination: any;
+    protected output: any | any[];
     /*
      * @constructor
      *
      */
-    constructor(args) {
-        super(args);
+    constructor(args?: any) {
+        super();
         this.parts = {};
     }
 
     write(document: Document, destination: any) {
         this.document = document;
-        this.language = languages.getLanguage(document.settings.languageCode,
+        this.language = getLanguage(document.settings.languageCode,
                                              document.reporter);
         this.destination = destination;
         this.translate();

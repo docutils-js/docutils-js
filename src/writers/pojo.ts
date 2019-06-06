@@ -82,12 +82,11 @@ class POJOTranslator extends GenericNodeVisitor {
 class POJOWriter extends BaseWriter {
     private visitor: any;
     private translatorClass: any;
-    private output: any;
     /**
       * Create POJOWriter
       * @param {Object} args - Arguments, none right now
       */
-    constructor(args) {
+    constructor(args?: any) {
         super(args);
         this.translatorClass = POJOTranslator;
     }
