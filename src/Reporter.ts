@@ -154,6 +154,10 @@ class Reporter implements IReporter {
         // @ts-ignore
         return this.systemMessage(this.SEVERE_LEVEL, ...args);
     }
+
+    getSourceAndLine: (lineno?: number) => any[];
+
+
 }
 export default Reporter;
 export { getSourceLine };

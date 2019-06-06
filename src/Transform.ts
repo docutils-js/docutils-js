@@ -6,6 +6,7 @@ export default class Transform {
     document: Document;
     startNode: INode;
     language: any;
+    static defaultPriority: number;
     constructor(document: Document, startNode?: INode) {
         this.document = document;
         this.startNode = startNode;

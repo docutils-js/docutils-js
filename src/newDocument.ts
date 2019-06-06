@@ -26,7 +26,7 @@ const __docformat__ = 'reStructuredText';
  */
 function newDocument({ sourcePath }, settings) {
     const reporter = newReporter({ sourcePath }, settings);
-    const attrs = {};
+    const attrs: any = {};
     if (typeof sourcePath !== 'undefined') {
         attrs.source = sourcePath;
     }

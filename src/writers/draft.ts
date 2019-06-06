@@ -2,6 +2,9 @@ import { genKey, ContentBlock, CharacterMetadata } from 'draft-js';
 import {
  __version__, Writer as BaseWriter, Transform, nodes,
 } from '../index';
+import {INode} from "../types";
+import {FormatCodeSettings} from "ts-morph";
+import {Settings} from "../../gen/Settings";
 
 const GenericNodeVisitor = nodes.GenericNodeVisitor;
 
@@ -29,6 +32,20 @@ class DraftTransform extends Transform {
 DraftTransform.defaultPriority = 950;
 
 class DraftTranslator extends GenericNodeVisitor {
+    private text: string;
+    private inlineStyles: any[];
+    private ancestors: any[];
+    private generator: string;
+    private warn: OmitThisParameter<(...args: any[]) => INode>;
+    private error: OmitThisParameter<(...args: any[]) => INode>;
+    private inline: any[];
+    private settings: Settings;
+    private level: number;
+    private blocks: any[];
+    private inSimple: number;
+    private output: any;
+    private fixedText: number;
+    private root: any | undefined;
     constructor(document) {
         super(document);
         this.ancestors = [];
@@ -145,6 +162,9 @@ class DraftTranslator extends GenericNodeVisitor {
 
 
 class Writer extends BaseWriter {
+    private visitor: any;
+    private translatorClass: any;
+    private output: any[] | any;
     constructor(args) {
         super(args);
         this.translatorClass = DraftTranslator;
@@ -164,11 +184,11 @@ class Writer extends BaseWriter {
         this.output = visitor.blocks;
     }
 }
-
-Writer.settingsSpec = [
-    '"Docutils-js Draft" Writer Options',
-    null,
-    []];
+//
+// Writer.settingsSpec = [
+//     '"Docutils-js Draft" Writer Options',
+//     null,
+//     []];
 
 export default Writer;
 export { DraftTranslator };

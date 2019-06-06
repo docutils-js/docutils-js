@@ -8,6 +8,9 @@ import {Settings} from "../gen/Settings";
 import StringList from "./StringList";
 import State from "./states/State";
 
+export interface ISettings {
+    getSettings(name): any;
+}
 export interface SourceLocation {
    currentSource: string;
    currentLine: number;
@@ -18,7 +21,7 @@ export interface HasIndent {
 }
 
 export interface INode extends SourceLocation {
-    names: any[];
+        names: any[];
     refname: any;
     refid: any;
     rawsource: string;
@@ -74,7 +77,7 @@ export interface INode extends SourceLocation {
     classTypes: any[];
     children: INode[];
 
-    traverse(args: { condition: any, includeSelf: boolean, descend: boolean, siblings: boolean, ascend: boolean });
+    traverse(args: { condition?: any, includeSelf?: boolean, descend?: boolean, siblings?: boolean, ascend?: boolean });
 
     astext(): string;
 
@@ -96,8 +99,10 @@ export interface ITextElement extends IElement {
 }
 
 export interface Document extends IElement {
+    transformMessages: any[];
+    nameIds: any;
     noteSource: any;
-    reporter: any;
+    reporter: IReporter;
     settings: Settings;
 
     // eslint-disable-next-line camelcase
@@ -133,6 +138,8 @@ export interface Document extends IElement {
     noteSymbolFootnote(f: footnote): void;
 
     noteAutofootnote(f: footnote): void;
+
+    getDecoration(): any;
 }
 
 export interface TransformSpec {
@@ -176,6 +183,7 @@ export interface Component extends TransformSpec {
 }
 
 export interface IReporter {
+    reportLevel: number;
     getSourceAndLine: (lineno?: number) => any[];
 setConditions(): void;
 

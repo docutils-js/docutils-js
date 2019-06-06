@@ -94,7 +94,7 @@ Messages.defaultPriority = 860;
 /** Remove system messages below verbosity threshold. */
 class FilterMessages extends Transform {
     apply() {
-        this.document.traverse(nodes.system_message).forEach((node, i) => {
+        this.document.traverse({ condition: nodes.system_message}).forEach((node, i) => {
             if (node.attributes.level < this.document.reporter.reportLevel) {
                 node.parent.children.pop(i);
             }

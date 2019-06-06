@@ -1299,8 +1299,8 @@ class document extends Element implements Document {
   private autofootnoteStart: number;
   private symbolFootnoteStart: number;
   /** Private constructor */
-  constructor(settings, reporter) {
-    super('', [], {});
+  constructor(settings, reporter, rawsource?: any, children?: INode[], attributes?: IAttributes) {
+    super(rawsource, children, attributes);
     this.classTypes = [Root, Structural];
     this.tagname = 'document';
     this.currentSource = undefined;

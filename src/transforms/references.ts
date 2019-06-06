@@ -6,7 +6,7 @@ export const __docformat__ = 'reStructuredText';
 export class PropagateTargets extends Transform {
     _init(...args) {
         super._init(...args);
-        this.defaultPriority = 260;
+        //this.defaultPriority = 260;
     }
 
     apply() {
@@ -46,7 +46,7 @@ class AnonymousHyperlinks extends Transform {
         const anonymousRefs = [];
         const anonymousTargets = [];
         this.document.traverse({ condition: nodes.reference }).forEach((node) => {
-            if (this.node.attributes.anonymous) {
+            if (node.attributes.anonymous) {
                 anonymousRefs.push(node);
             }
         });

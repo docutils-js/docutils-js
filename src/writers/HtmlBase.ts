@@ -5,6 +5,8 @@ import * as utils from '../utils';
 import { basename } from '../utils/paths';
 import { getLanguage } from '../languages';
 import { UnimplementedError } from '../Exceptions';
+import {Settings} from "../../gen/Settings";
+import {Document} from "../types";
 
 /* eslint-disable-next-line no-unused-vars */
 const __docformat__ = 'reStructuredText';
@@ -28,7 +30,50 @@ const template = ejs.compile(defaultTemplate, {});
  * HTMLTranslator class
  */
 class HTMLTranslator extends nodes.NodeVisitor {
-    constructor(document) {
+    private body: string[];
+    private settings: Settings;
+    private language: any;
+    private meta: string[];
+    private headPrefix: string[];
+    private htmlProlog: string[];
+    private compactSimple: boolean;
+    private context: string[];
+    private compactParagraph: boolean;
+    private bodyPreDocinfo: string[];
+    private inDocumentTitle: number;
+    private htmlTitle: string[];
+    private title: string[];
+    private sectionLevel: number;
+    private initialHeaderLevel: number;
+    private topicClasses: string[];
+    private topic: any;
+    private colspecs: any[];
+    private inMailto: boolean;
+    private inFootnoteList: boolean;
+    private doctype: string;
+    private head: string[];
+    private docinfo: string[];
+    private attribution_formats: any;
+    private mathHeader: any[];
+    private authorInAuthors: boolean;
+    private htmlBody: any[];
+    private htmlSubtitle: any[];
+    private htmlHead: any[];
+    private footer: any[];
+    private subtitle: any[];
+    private header: any[];
+    private inSidebar: boolean;
+    private compactFieldList: boolean;
+    private inDocinfo: boolean;
+    private contentType: string;
+    private langAttribute: string;
+    private mathOutput: any[];
+    private mathOutputOptions: any[];
+    private fragment: any[];
+    private bodySuffix: string[];
+    private bodyPrefix: string[];
+
+    constructor(document: Document) {
         super(document);
         this.settings = document.settings;
         const settings = this.settings;
@@ -37,7 +82,7 @@ class HTMLTranslator extends nodes.NodeVisitor {
         this.meta = [];// fixme: this.meta = [this.generator % docutils.__version__]
         this.headPrefix = [];
         this.htmlProlog = [];
-        if (settings.xmlDeclaration) {
+        if (settings.htmlWriter.xmlDeclaration) {
             /*            this.head_prefix.append(this.xml_declaration
                           % settings.output_encoding)
                           # this.content_type = ""
@@ -57,14 +102,14 @@ class HTMLTranslator extends nodes.NodeVisitor {
         this.fragment = [];
         this.bodySuffix = ['</body>\n</html\n'];
         this.sectionLevel = 0;
-        this.initialHeaderLevel = parseInt(settings.initialHeaderLevel, 10);
-        this.mathOutput = utils.pySplit(settings.mathOutput || '');
+        this.initialHeaderLevel = parseInt(settings.htmlWriter.initialHeaderLevel, 10);
+        this.mathOutput = utils.pySplit(settings.htmlWriter.mathOutput || '');
         this.mathOutputOptions = this.mathOutput.slice(1, this.mathOutput.length - 1);
         this.mathOutput = this.mathOutput[0].toLowerCase();
         this.context = [];
 
         this.topicClasses = [];
-        this.colSpecs = [];
+        this.colspecs = [];
         this.compactParagraph = true;
         this.compactSimple = false;
         this.compactFieldList = false;
@@ -79,7 +124,7 @@ class HTMLTranslator extends nodes.NodeVisitor {
         this.htmlTitle = [];
         this.htmlSubtitle = [];
         this.htmlBody = [];
-        this.inmDocumentTitle = 0;
+        this.inDocumentTitle = 0;
         this.inMailto = false;
         this.authorInAuthors = false;
         this.mathHeader = [];
@@ -95,7 +140,7 @@ class HTMLTranslator extends nodes.NodeVisitor {
             text = '';
         }
         let encoded = this.encode(text.replace(whitespace, ' '));
-        if (this.inMailto && this.settings.cloakEmailAddresses) {
+        if (this.inMailto && this.settings.htmlWriter.cloakEmailAddresses) {
             // Cloak at-signs ("%40") and periods with HTML entities.
             encoded = encoded.replace('%40', '&#37;&#52;&#48;');
             encoded = encoded.replace('.', '&#46;');
@@ -114,7 +159,7 @@ class HTMLTranslator extends nodes.NodeVisitor {
 
         const myTagname = tagname.toLowerCase();
         const prefix = [];
-        const atts = {};
+        const atts: any = {};
         const ids = [];
         Object.entries(attributes).forEach(([name, value]) => {
             atts[name.toLowerCase()] = value;
@@ -230,7 +275,7 @@ class HTMLTranslator extends nodes.NodeVisitor {
     visit_Text(node) {
         const text = node.astext();
         let encoded = this.encode(text);
-        if (this.inMailto && this.settings.cloakEmailAddresses) {
+        if (this.inMailto && this.settings.htmlWriter.cloakEmailAddresses) {
             encoded = this.cloakEmail(encoded);
         }
         this.body.push(encoded);
@@ -297,7 +342,7 @@ class HTMLTranslator extends nodes.NodeVisitor {
 
     /* eslint-disable-next-line camelcase */
     visit_attribution(node) {
-        const [prefix, suffix] = this.attribution_formats[this.settings.attribution];
+        const [prefix, suffix] = this.attribution_formats[this.settings.htmlWriter.attribution];
         this.context.push(suffix);
         this.body.push(
             this.starttag(node, 'p', prefix, false, { CLASS: 'attribution' }),
@@ -386,13 +431,13 @@ class HTMLTranslator extends nodes.NodeVisitor {
         // check config setting:
         if ((node instanceof nodes.field_list
              || node instanceof nodes.definition_list)
-            && !this.settings.compactFieldList) {
+            && !this.settings.htmlWriter.compactFieldLists) {
             // print "`compact-field-lists` is false"
             return false;
         }
         if ((node instanceof nodes.enumerated_list
              || node instanceof nodes.bullet_list)
-            && !this.settings.compactLists) {
+            && !this.settings.htmlWriter.compactLists) {
             // print "`compact-lists` is false"
             return false;
         }
@@ -474,7 +519,7 @@ class HTMLTranslator extends nodes.NodeVisitor {
 
     /* eslint-disable-next-line camelcase */
     visit_colspec(node) {
-        this.colSpecs.push(node);
+        this.colspecs.push(node);
         // "stubs" list is an attribute of the tgroup element:
         node.parent.stubs.push(node.attributes.stub);
     }
@@ -486,7 +531,7 @@ class HTMLTranslator extends nodes.NodeVisitor {
             return;
         }
         if ('colwidths-auto' in node.parent.parent.attributes.classes
-            || ('colwidths-auto' in this.settings.tableStyle
+            || ('colwidths-auto' in this.settings.htmlWriter.tableStyle
                 && (!('colwidths-given' in node.parent.parent.attributes.classes)))) {
             return;
         }
@@ -496,7 +541,7 @@ class HTMLTranslator extends nodes.NodeVisitor {
         this.body.push(this.starttag(node, 'colgroup'));
         this.colspecs.forEach((subNode) => {
             const colWidth = parseInt(subNode.attributes.colwidth, 10) * 100.0 / totalWidth + 0.5;
-            this.body.push(this.emptytag(subNode, 'col', { style: `width: ${colWidth}` }));
+            this.body.push(this.emptytag(subNode, 'col', '', { style: `width: ${colWidth}` }));
         });
         this.body.push('</colgroup>\n');
     }
@@ -536,7 +581,7 @@ class HTMLTranslator extends nodes.NodeVisitor {
 
     /* eslint-disable-next-line camelcase */
     visit_contact(node) {
-        this.visitDocinfoItem(node, 'contact', { meta: false });
+        this.visitDocinfoItem(node, 'contact', false);
     }
 
     /* eslint-disable-next-line camelcase,no-unused-vars */
@@ -624,7 +669,7 @@ class HTMLTranslator extends nodes.NodeVisitor {
 
     /* eslint-disable-next-line camelcase */
     visit_docinfo(node) {
-        this.context.push(this.body.length);
+        this.context.push(this.body.length.toString());
         let classes = 'docinfo';
         if (this.isCompactable(node)) {
             classes += ' simple';
@@ -636,13 +681,13 @@ class HTMLTranslator extends nodes.NodeVisitor {
     depart_docinfo(node) {
         this.body.push('</dl>\n');
         const start = this.context.pop();
-        this.docinfo = this.body.slice(start);
+        this.docinfo = this.body.slice(parseInt(start, 10));
         this.body = [];
     }
 
     visitDocinfoItem(node, name, meta = true) {
         if (meta) {
-            const metaTag = `<meta name="${name}" content="${this.attval(node.astext())}" />\n`;
+            const metaTag = `<meta name="${name}" content="${this.attVal(node.astext())}" />\n`;
             this.addMeta(metaTag);
         }
         this.body.push(`<dt class="${name}">${this.language.labels[name]}</dt>\n`);
@@ -713,7 +758,7 @@ class HTMLTranslator extends nodes.NodeVisitor {
 
     /* eslint-disable-next-line camelcase */
     visit_entry(node) {
-        const atts = { class: [] };
+        const atts: any = { class: [] };
         if (node.parent.parnet instanceof nodes.thead) {
             atts.class.push('head');
         }
@@ -859,7 +904,7 @@ class HTMLTranslator extends nodes.NodeVisitor {
     /* eslint-disable-next-line camelcase,no-unused-vars */
     visit_footnote(node) {
         if (!this.inFootnoteList) {
-            const classes = `footnote ${this.settings.footnoteReferences}`;
+            const classes = `footnote ${this.settings.htmlWriter.footnoteReferences}`;
             this.body.push(`<dl class="${classes}">\n`);
             this.inFootnoteList = true;
         }
@@ -882,7 +927,7 @@ class HTMLTranslator extends nodes.NodeVisitor {
             console.log('warning, no refid ( implement transforms )');
         }
         const href = `#${node.attributes.refid || ''}`;
-        const classes = `footnote-reference ${this.settings.footnoteReferences}`;
+        const classes = `footnote-reference ${this.settings.htmlWriter.footnoteReferences}`;
         this.body.push(this.starttag(node, 'a', '', // suffix,
                                      false,
                                      { CLASS: classes, href }));
@@ -1005,7 +1050,7 @@ class HTMLTranslator extends nodes.NodeVisitor {
     visit_label(node) {
         let classes;
         if (node.parent instanceof nodes.footnote) {
-            classes = this.settings.footnoteReferences;
+            classes = this.settings.htmlWriter.footnoteReferences;
         } else {
             classes = 'brackets';
         }
@@ -1390,13 +1435,13 @@ class HTMLTranslator extends nodes.NodeVisitor {
     */
     /* eslint-disable-next-line camelcase */
     visit_reference(node) {
-        const atts = { class: 'reference' };
+        const atts: any = { class: 'reference' };
         if ('refuri' in node.attributes) {
             atts.href = node.attributes.refuri;
-            if (this.settings.cloakEmailAddresses
+            if (this.settings.htmlWriter.cloakEmailAddresses
                 && atts.href.substring(0, 6) === 'mailto:') {
                 atts.href = this.cloakMailto(atts.href);
-                this.in_mailto = true;
+                this.inMailto = true;
             }
             atts.class += ' external';
         } else {
@@ -1578,8 +1623,8 @@ class HTMLTranslator extends nodes.NodeVisitor {
 
     /* eslint-disable-next-line camelcase */
     visit_table(node) {
-        const atts = {};
-        const classes = this.settings.tableStyle.split(',').map(cls => cls.replace(/^[ \t\n]*/, '').replace(/[ \t\n]$/, ''));
+        const atts: any = {};
+        const classes = this.settings.htmlWriter.tableStyle.split(',').map(cls => cls.replace(/^[ \t\n]*/, '').replace(/[ \t\n]$/, ''));
         if ('align' in node.attributes) {
             classes.push(`align-${node.attributes.align}`);
         }
@@ -1712,15 +1757,15 @@ class HTMLTranslator extends nodes.NodeVisitor {
         let closeTag = '</p>\n';
         if (node.parent instanceof nodes.topic) {
             this.body.push(
-                this.starttag(node, 'p', '', { CLASS: 'topic-title first' }),
+                this.starttag(node, 'p', '', false, { CLASS: 'topic-title first' }),
             );
         } else if (node.parent instanceof nodes.sidebar) {
             this.body.push(
-                this.starttag(node, 'p', '', { CLASS: 'sidebar-title' }),
+                this.starttag(node, 'p', '',false, { CLASS: 'sidebar-title' }),
             );
         } else if (node.parent.isAdmonition()) {
             this.body.push(
-                this.starttag(node, 'p', '', { CLASS: 'admonition-title' }),
+                this.starttag(node, 'p', '', false, { CLASS: 'admonition-title' }),
             );
         } else if (node.parent instanceof nodes.table) {
             this.body.push(
@@ -1734,7 +1779,7 @@ class HTMLTranslator extends nodes.NodeVisitor {
         } else {
             // assert isinstance(node.parent, nodes.section)
             const headerLevel = this.sectionLevel + this.initialHeaderLevel - 1;
-            let atts = {};
+            let atts: any = {};
             if (node.parent.children.length >= 2
                 && node.parent.children[1] instanceof nodes.subtitle) {
                 atts.CLASS = 'with-subtitle';
@@ -1748,7 +1793,7 @@ class HTMLTranslator extends nodes.NodeVisitor {
                 atts.href = `#${node.refid}`;
             }
             if (Object.keys(atts).length) {
-                this.body.push(this.starttag({}, 'a', '', atts));
+                this.body.push(this.starttag({}, 'a', '', false, atts));
                 closeTag = `</a></h${headerLevel}>\n`;
             } else {
                 closeTag = `</h${headerLevel}>\n`;
@@ -1771,7 +1816,7 @@ class HTMLTranslator extends nodes.NodeVisitor {
 
     /* eslint-disable-next-line camelcase */
     visit_bullet_list(node) {
-        const atts = {};
+        const atts: any = {};
         const oldCompactSimple = this.compactSimple;
         this.compactParagraph = undefined;
         this.compactSimple = this.isCompactable(node);
@@ -1783,7 +1828,7 @@ class HTMLTranslator extends nodes.NodeVisitor {
 
     /* eslint-disable-next-line camelcase,no-unused-vars */
     depart_bullet_list(node) {
-        this.compactSimple = this.context.pop();
+        this.compactSimple = this.context.pop().length > 0;
         this.compactParagraph = this.compactSimple;
         this.body.push('</ul>\n');
     }
@@ -1821,12 +1866,35 @@ class HTMLTranslator extends nodes.NodeVisitor {
     ignoreNode(node) {
         throw new nodes.SkipNode();
     }
+
+    private cloakMailto(href: any) {
+
+    }
+
+    private addMeta(metaTag: string) {
+
+    }
+
+    private checkSimpleList(node: any) {
+        return undefined;
+    }
+
+    private cloakEmail(encoded: any) {
+
+    }
 }
 
 /**
  * Class for writing HTML
  */
 class HTMLBaseWriter extends BaseWriter {
+    private visitorAttributes: any[];
+    private defaultTemplateContent: any;
+    private visitor: any;
+    private attr: any;
+    private translatorClass: any;
+    private template: any;
+    private output: string;
     /**
      * Create HTMLBaseWriter.
      * @param {Object} args - arguments to function
@@ -1877,12 +1945,12 @@ class HTMLBaseWriter extends BaseWriter {
     }
 
     templateVars() {
-        const vars = {};
+        const vars: any = {};
         const settings = this.document.settings;
         this.visitorAttributes.forEach((attr) => {
             vars[attr] = (this[attr] || [].join('').trim());
         });
-        vars.encoding = settings.output_encoding;
+        vars.encoding = settings.outputEncoding;
         vars.version = __version__;
         return vars;
     }

@@ -12,9 +12,15 @@ export const __docformat__ = 'reStructuredText';
  * form of the TOC should be used.
  */
 export class SectNum extends Transform {
+    private start: number;
+    private maxDepth: number;
+    private startValue: number;
+    private prefix: number;
     apply() {
         const s = this.startNode;
+        // @ts-ignore
         this.maxDepth = s.details.attributes.depth || null;
+        // @ts-ignore
         this.startValue = s.start || 1;
         this.prefix = this.start;
     }
@@ -49,7 +55,7 @@ class AnonymousHyperlinks extends Transform {
         /* eslint-disable-next-line no-unused-vars */
         const anonymousTargets = [];
         this.document.traverse({ condition: nodes.reference }).forEach((node) => {
-            if (this.node.attributes.anonymous) {
+            if (node.attributes.anonymous) {
                 anonymousRefs.push(node);
             }
         });

@@ -13,16 +13,6 @@ class Parser extends BaseParser {
         } else {
             this.initialState = 'Body';
         }
-//      //      console.log(`setting initial state to ${this.initialState}`);
-        //      console.log(`stateClasses: ${stateClasses
-        // .map(x => x ? (x.constructor ? x.constructor.name : x.toString()) : 'undefined')
-            // .join(', ')}`);
-//        this.stateClasses = stateClasses;
-//        if (!this.stateClasses) {
-//            throw new Error('probably need this');
-//        }
-//      console.log('state classes');
-//      console.log(this.stateClasses);
 
         this.inliner = args.inliner;
     }

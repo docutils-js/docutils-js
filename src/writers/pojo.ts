@@ -1,5 +1,7 @@
 import BaseWriter from '../Writer';
 import { GenericNodeVisitor } from '../nodes';
+import {INode} from "../types";
+import {Settings} from "../../gen/Settings";
 
 const __version__ = '';
 /* eslint-disable-next-line no-unused-vars */
@@ -9,6 +11,16 @@ const __docformat__ = 'reStructuredText';
  * Translator class for Pojo writer
  */
 class POJOTranslator extends GenericNodeVisitor {
+    private level: number;
+    private ancestors: any[];
+    private generator: string;
+    private warn: OmitThisParameter<(...args: any[]) => INode>;
+    private error: OmitThisParameter<(...args: any[]) => INode>;
+    private inSimple: number;
+    private output: any;
+    private settings: Settings;
+    private fixedText: number;
+    private root: any | undefined;
     /**
       * Create a POJOTranslator
       * @param {nodes.document} document - the document to translate
@@ -68,6 +80,9 @@ class POJOTranslator extends GenericNodeVisitor {
  * Writer class for POJOWriter
  */
 class POJOWriter extends BaseWriter {
+    private visitor: any;
+    private translatorClass: any;
+    private output: any;
     /**
       * Create POJOWriter
       * @param {Object} args - Arguments, none right now
@@ -88,9 +103,11 @@ class POJOWriter extends BaseWriter {
         this.output = visitor.root;
     }
 }
-
+/*
 POJOWriter.settingsSpec = [
     '"Docutils-js POJO" Writer Options',
     null,
     []];
+
+ */
 export default POJOWriter;

@@ -491,4 +491,9 @@ export interface DocutilsReadersStandaloneReader {
 }
 
 export interface Settings extends DocutilsCoreOptionParser, DocutilsFrontendOptionParser, DocutilsParsersRstParser,
-    DocutilsReadersStandaloneReader { }
+    DocutilsReadersStandaloneReader {
+    _destination: string;
+    _source: string;
+    xmlWriter: DocutilsWritersDocutilsXmlWriter
+    htmlWriter: DocutilsWritersHtml4Css1Writer;
+}

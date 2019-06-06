@@ -1,6 +1,8 @@
 import BaseWriter from '../Writer';
 import { GenericNodeVisitor, SkipChildren } from '../nodes';
 import { defaultSections } from './rstConfig';
+import {Settings} from "../../gen/Settings";
+import {INode} from "../types";
 
 /* eslint-disable-next-line no-console */
 console.log = process.stderr.write;
@@ -14,6 +16,19 @@ const __docformat__ = 'reStructuredText';
  * Translator class for Pojo writer
  */
 class RSTTranslator extends GenericNodeVisitor {
+    private lines: string[];
+    private indent: number;
+    private curLine: string;
+    private sectionNum: number;
+    private ancestors: any[];
+    private level: number;
+    private root: any | undefined;
+    private output: any;
+    private settings: Settings;
+    private warn: OmitThisParameter<(...args: any[]) => INode>;
+    private inSimple: number;
+    private fixedText: number;
+    private error: OmitThisParameter<(...args: any[]) => INode>;
     /**
      * Create a RSTTranslator
      * @param {nodes.document} document - the document to translate
@@ -1079,7 +1094,7 @@ class RSTTranslator extends GenericNodeVisitor {
         this.default_departure(node);
     }
 
-    newLine(allowBlankLine) {
+    newLine(allowBlankLine: boolean = false) {
         if (this.curLine || allowBlankLine) {
             this.lines.push(this.curLine);
         }
@@ -1101,7 +1116,10 @@ class RSTTranslator extends GenericNodeVisitor {
 /**
  * Writer class for POJOWriter
  */
-class POJOWriter extends BaseWriter {
+class RSTWriter extends BaseWriter {
+    private output: string[];
+    private visitor: any;
+    private translatorClass: any;
     /**
      * Create POJOWriter
      * @param {Object} args - Arguments, none right now
@@ -1123,8 +1141,10 @@ class POJOWriter extends BaseWriter {
     }
 }
 
-POJOWriter.settingsSpec = [
+/*POJOWriter.settingsSpec = [
     '"Docutils-js POJO" Writer Options',
     null,
     []];
-export default POJOWriter;
+
+ */
+export default RSTWriter;

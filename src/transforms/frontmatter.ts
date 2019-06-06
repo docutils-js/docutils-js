@@ -71,14 +71,13 @@ export class DocTitle extends TitlePromoter {
     /* Not sure how to set default priority */
     _init(...args) {
         super._init(...args);
-        this.defaultPriority = 320;
     }
 
     setMetadata() {
         if (!('title' in this.document.attributes)) {
             if (this.document.settings.title != null) {
                 this.document.attributes.title = this.document.settings.title;
-            } else if (this.document.length && this.document.children[0] instanceof nodes.title) {
+            } else if (this.document.chidren.length && this.document.children[0] instanceof nodes.title) {
                 this.document.attributes.title = this.document.children[0].astext();
             }
         }
@@ -98,8 +97,7 @@ DocTitle.defaultPriority = 320;
 export class SectionSubTitle extends TitlePromoter {
     _init(...args) {
         super._init(...args);
-        this.defaultPriority = 350;
-    }
+        }
 
     apply() {
         if (this.document.settings.sectsubtitleXform || typeof this.document.settings.sectsubtitleXform === 'undefined') {
@@ -117,9 +115,9 @@ export class SectionSubTitle extends TitlePromoter {
 SectionSubTitle.defaultPriority = 350;
 
 export class DocInfo extends Transform {
+    private biblioNodes: any;
     _init(...args) {
         super._init(...args);
-        this.defaultPriority = 340;
         this.biblioNodes = {
  author: nodes.author,
                              authors: nodes.authors,
