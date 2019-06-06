@@ -17,6 +17,7 @@
     "@babel/plugin-proposal-object-rest-spread": "^7.4.4",
     "@babel/preset-env": "^7.3.1",
     "@babel/preset-typescript": "^7.3.3",
+    "@types/jest": "^24.0.13",
     "@typescript-eslint/parser": "^1.9.0",
     "ast-types": "^0.13.1",
     "babel-jest": "^24.7.1",
@@ -41,6 +42,7 @@
     "nyc": "^13.3.0",
     "prettier": "^1.16.4",
     "recast": "^0.18.1",
+    "ts-jest": "^24.0.2",
     "ts-morph": "^2.3.0",
     "tslint": "^5.17.0",
     "typescript": "^3.5.1",
@@ -67,5 +69,8 @@
     "xml-escape": "^1.1.0",
     "xml-formatter": "^1.1.0",
     "xmldom": "^0.1.27"
-  }
+  },
+    "jest": {
+        "preset": "ts-jest"
+    }
 }

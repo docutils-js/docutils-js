@@ -363,7 +363,16 @@ class StateMachine implements IStateMachine {
 
     /* eslint-disable-next-line no-unused-vars */
     insertInput(inputLines, source) {
-      throw new Unimp();
+        // self.input_lines.insert(self.line_offset + 1, '',
+        //     source='internal padding after '+source,
+        //     offset=len(input_lines))
+        // self.input_lines.insert(self.line_offset + 1, '',
+        //     source='internal padding before '+source,
+        //     offset=-1)
+        // self.input_lines.insert(self.line_offset + 2,
+        //     StringList(input_lines, source))
+
+        throw new Unimp();
     }
 
     getTextBlock(flushLeft = false) {
