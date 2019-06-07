@@ -48,7 +48,7 @@ const { StateWS } = statemachine;
         const lineno = this.stateMachine.absLineNumber() - 1
 //        if len(overline.rstrip()) < 4:
 //            this.shortOverline(context, blocktext, lineno, 1)
-        const msg = this.reporter.error(
+        const msg = this.reporter!..error(
               'Invalid section title or transition marker.',
             [new nodes.literal_block(blocktext, blocktext)],
             { line: lineno })

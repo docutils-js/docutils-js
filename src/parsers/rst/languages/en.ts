@@ -1,7 +1,7 @@
 /* eslint-disable-next-line no-unused-vars */
 const __docformat__ = 'reStructuredText';
 
-export const directives = {
+export const directives: any = {
       // language-dependent: fixed
       attention: 'attention',
       caution: 'caution',

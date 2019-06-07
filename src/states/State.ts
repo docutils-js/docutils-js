@@ -13,18 +13,18 @@ class State implements IState {
     protected indentSmKwargs: any;
     protected patterns: any;
 
-    protected indentSm: StateMachine;
+    protected indentSm?: StateMachine;
     protected nestedSmKwargs: any;
     protected transitionOrder: string[];
     protected transitions: any;
-    protected initialTransitions: any[];
+    protected initialTransitions?: string[] | string[][];
     protected nestedSm: any;
-    protected reporter: IReporter;
-    private stateMachine: StateMachine;
+    protected reporter?: IReporter;
+    private stateMachine?: StateMachine;
 
     constructor(stateMachine: StateMachine, args: { debug?: boolean}) {
         this.stateMachine = stateMachine;
-        this.debug = args.debug;
+        this.debug = args.debug!;
         this._init(stateMachine, args);
         this.transitionOrder = [];
         this.transitions = {};
@@ -62,7 +62,7 @@ class State implements IState {
     _init(stateMachine: StateMachine, args: RSTStateArgs) {
             /* empty */
         this.patterns = {};
-        this.initialTransitions = null;
+        this.initialTransitions = undefined;
         this.nestedSm = null;
     }
 
@@ -77,11 +77,11 @@ class State implements IState {
     addInitialTransitions() {
         if (this.initialTransitions) {
             const [names, transitions] = this.makeTransitions(this.initialTransitions);
-            this.addTransitions(names, transitions);
+            this.addTransitions(names as any[], transitions);
         }
     }
 
-    addTransitions(names, transitions) {
+    addTransitions(names: any[], transitions: any) {
         names.forEach(((name) => {
             if (name in this.transitions) {
                 throw new DuplicateTransitionError(name);
@@ -91,12 +91,12 @@ class State implements IState {
             }
         }));
         this.transitionOrder.splice(0, 0, ...names);
-        Object.keys(transitions).forEach((key) => {
+        Object.keys(transitions).forEach((key: string) => {
             this.transitions[key] = transitions[key];
         });
     }
 
-    addTransition(name, transition) {
+    addTransition(name: any, transition: any) {
         this.transitionOrder.splice(0, 0, name);
         this.transitions[name] = transition;
     }
@@ -106,7 +106,7 @@ class State implements IState {
         this.transitionOrder.splice(this.transitionOrder.indexOf(name), 1);
     }
 
-    makeTransition(name: string, nextState?) {
+    makeTransition(name: string, nextState?: any) {
         if (name == null) {
             throw new InvalidArgumentsError('need transition name');
         }
@@ -122,18 +122,20 @@ class State implements IState {
                 throw error;
             }
         }
+        // @ts-ignore
         if (typeof (this[name]) !== 'function') {
             throw new Error(`cant find method ${name} on ${this.constructor.name}`);
         }
 
+        // @ts-ignore
         const method = this[name];
 
         return [pattern, method, nextState];
     }
 
-    makeTransitions(nameList) {
-        const names = [];
-        const transitions = {};
+    makeTransitions(nameList: any[]) {
+        const names: any[] = [];
+        const transitions: any = {};
         /* istanbul ignore if */
         if (!Array.isArray(nameList)) {
             // console.log('warning, not an array');
@@ -141,13 +143,13 @@ class State implements IState {
         }
 
         /* check what happens with throw inside here */
-        nameList.forEach((namestate) => {
+        nameList.forEach((namestate: any | any[]) => {
             if (namestate == null) {
                 /* istanbul ignore if */
                 throw new InvalidArgumentsError('nameList contains null');
             }
             if (!Array.isArray(namestate)) {
-                transitions[namestate] = this.makeTransition(namestate);
+                transitions[namestate.toString()] = this.makeTransition(namestate);
                 names.push(namestate);
             } else {
                 transitions[namestate[0]] = this.makeTransition(namestate[0], namestate[1]);
@@ -159,20 +161,20 @@ class State implements IState {
     }
 
     /* eslint-disable-next-line no-unused-vars */
-    noMatch(context, transitions) {
+    noMatch(context: any[], transitions: any): any[] {
         return [context, null, []];
     }
 
-    bof(context) {
+    bof(context: any[]): any[] {
         return [context, []];
     }
 
     /* eslint-disable-next-line no-unused-vars */
-    eof(context) {
+    eof(context: any): any[] {
         return [];
     }
 
-    nop(match, context, nextState) {
+    nop(match: any, context: any[], nextState: any): any[] {
         return [context, nextState, []];
     }
 }

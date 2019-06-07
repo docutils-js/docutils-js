@@ -8,8 +8,8 @@ const __docformat__ = 'reStructuredText';
  * @extends TransformSpec
  */
 class Component extends TransformSpec {
-    supported: string[];
-    componentType: string;
+    supported: string[] = [];
+    componentType: string = '';
     toString() {
         return `Component<${this.constructor.name}>`;
     }

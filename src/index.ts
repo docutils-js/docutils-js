@@ -3,11 +3,10 @@ import parse from './parse';
 import { StringOutput } from './io';
 import StandaloneReader from './readers/standalone';
 import newDocument from './newDocument';
-import baseSettings from './baseSettings';
 import * as nodes from './nodes';
 import Writer from './Writer';
 import Transform from './Transform';
-import * as defaults from './defaults';
+import * as defaults from '../gen/defaults';
 import pojoTranslate from './fn/pojoTranslate';
 import htmlTranslate from './fn/htmlTranslate';
 
@@ -17,7 +16,7 @@ const __docformat__ = 'reStructuredText';
 export const __version__ = '0.14js';
 
 export {
-    parse, StringOutput, StandaloneReader, newDocument, baseSettings,
+    parse, StringOutput, StandaloneReader, newDocument,
     nodes, Writer, Transform, defaults, pojoTranslate,
     htmlTranslate,
 };

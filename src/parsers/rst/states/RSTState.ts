@@ -38,25 +38,30 @@ interface StateMachineClassArgs {
 class RSTState extends StateWS {
     public explicit: any
     public memo: any;
-    public inliner: Inliner;
-    protected parent: IElement;
+    public inliner?: Inliner;
+    protected parent?: IElement;
 
     protected rstStateMachine: RSTStateMachine;
-    public document: Document;
-    private nestedSmCache: any[];
+    public document?: Document;
+    private nestedSmCache: any[] = [];
     protected stateClasses?: string[];
-    public messages: any[];
+    public messages: INode[] = [];
 
     public blankFinish?: boolean;
 
-    public doubleWidthPadChar: string;
+    public doubleWidthPadChar: string = '';
 
-    // fixme this whole thing needs rework
+    constructor(stateMachine: RSTStateMachine, args: any) {
+        super(stateMachine, args);
+        this.rstStateMachine = stateMachine;
+    }
+
+// fixme this whole thing needs rework
     _init(stateMachine: RSTStateMachine, args: RSTStateArgs) {
         super._init(stateMachine, args);
         this.nestedSm = NestedStateMachine;
         this.nestedSmCache = [];
-        this.stateClasses = args.stateClasses;
+        this.stateClasses = args.stateClasses || [];
 
         this.nestedSmKwargs = {
            stateFactory: this.rstStateMachine.stateFactory.withStateClasses(this.stateClasses),
@@ -75,12 +80,12 @@ class RSTState extends StateWS {
         this.inliner = memo.inliner;
         this.document = memo.document;
         this.parent = this.rstStateMachine.node;
-        if (!this.reporter.getSourceAndLine) {
-            this.reporter.getSourceAndLine = this.rstStateMachine.getSourceAndLine;
+        if (!this.reporter!.getSourceAndLine) {
+            this.reporter!.getSourceAndLine = this.rstStateMachine.getSourceAndLine;
         }
     }
 
-    gotoLine(absLineOffset) {
+    gotoLine(absLineOffset: number) {
         try {
             this.rstStateMachine.gotoLine(absLineOffset);
         } catch (ex) {
@@ -89,8 +94,8 @@ class RSTState extends StateWS {
     }
 
     /* istanbul ignore next */
-    noMatch(context, transitions) {
-        this.reporter.severe(`Internal error: no transition pattern match.  State: "${this.constructor.name}"; transitions: ${transitions}; context: ${context}; current line: ${this.rstStateMachine.line}.`);
+    noMatch(context: any[], transitions: any[]) {
+        this.reporter!.severe(`Internal error: no transition pattern match.  State: "${this.constructor.name}"; transitions: ${transitions}; context: ${context}; current line: ${this.rstStateMachine.line}.`);
         return [context, null, []];
     }
 
@@ -186,11 +191,11 @@ class RSTState extends StateWS {
             myargs.blankFinishState = myargs.initialState;
         }
         /* istanbul ignore if */
-        if (!(myargs.blankFinishState in stateMachine.states)) {
+        if (!(myargs.blankFinishState! in stateMachine.states)) {
             throw new InvalidArgumentsError(`invalid state ${myargs.blankFinishState}`);
         }
 
-        stateMachine.states[myargs.blankFinishState].blankFinish = myargs.blankFinish;
+        stateMachine.states[myargs.blankFinishState!].blankFinish = myargs.blankFinish;
         Object.keys(myargs.extraSettings).forEach((key) => {
             stateMachine.states[myargs.initialState][key] = myargs.extraSettings[key];
         });
@@ -201,22 +206,24 @@ class RSTState extends StateWS {
             node: myargs.node,
             matchTitles: myargs.matchTitles,
         });
-        const {blankFinish} = stateMachine.states[myargs.blankFinishState];
+        const {blankFinish} = stateMachine.states[myargs.blankFinishState!];
         stateMachine.unlink();
         return [stateMachine.absLineOffset(), blankFinish];
     }
 
-    section({
-                title, source, style, lineno, messages,
+    section(args: {
+                title: string, source: string, style : any | any[], lineno: number, messages: any | any[],
             }) {
+        const { source, style, title, lineno, messages } = args;
         if (this.checkSubsection({source, style, lineno})) {
             this.newSubsection({title, lineno, messages});
         }
     }
 
-    checkSubsection({source, style, lineno}) {
+    checkSubsection(args: { source: string, style: any | any[], lineno: number}) {
+        const { source, style, lineno } = args;
         const {memo} = this;
-        const titleStyles = memo.titleStyles;
+        const titleStyles: any[] = memo.titleStyles;
 //        console.log(titleStyles);
         const mylevel = memo.sectionLevel;
         let level = 0;
@@ -231,7 +238,7 @@ class RSTState extends StateWS {
                 titleStyles.push(style);
                 return 1;
             }
-            this.parent.add(this.title_inconsistent(source, lineno));
+            this.parent!.add(this.title_inconsistent(source, lineno));
             return null;
         }
         if (level <= mylevel) { //            // sibling or supersection
@@ -247,25 +254,26 @@ class RSTState extends StateWS {
         if (level === mylevel + 1) { // immediate subsection
             return 1;
         }
-        this.parent.add(this.title_inconsistent(source, lineno));
+        this.parent!.add(this.title_inconsistent(source, lineno));
         return undefined;
     }
 
     /* eslint-disable-next-line camelcase */
-    title_inconsistent(sourcetext, lineno) {
-        const error = this.reporter.severe(
+    title_inconsistent(sourcetext: string, lineno: number) {
+        const error = this.reporter!.severe(
             'Title level inconsistent:', [new nodes.literal_block('', sourcetext)], {line: lineno},
         );
         return error;
     }
 
 
-    newSubsection({title, lineno, messages}) {
+    newSubsection(args: {title: string, lineno: number, messages: any | any[]}) {
+        const { title, lineno, messages} = args;
         const {memo} = this;
         const mylevel = memo.sectionLevel;
         memo.sectionLevel += 1;
         const sectionNode = new nodes.section();
-        this.parent.add(sectionNode);
+        this.parent!.add(sectionNode);
         const [textNodes, titleMessages] = this.inline_text(title, lineno);
         const titleNode = new nodes.title(title, '', textNodes);
         const name = nodes.fullyNormalizeName(titleNode.astext());
@@ -273,7 +281,7 @@ class RSTState extends StateWS {
         sectionNode.add(titleNode);
         sectionNode.add(messages);
         sectionNode.add(titleMessages);
-        this.document.noteImplicitTarget(sectionNode, sectionNode);
+        this.document!.noteImplicitTarget(sectionNode, sectionNode);
         const offset = this.rstStateMachine.lineOffset + 1;
         const absoffset = this.rstStateMachine.absLineOffset() + 1;
         const newabsoffset = this.nestedParse(
@@ -294,11 +302,11 @@ class RSTState extends StateWS {
 
     unindentWarning(nodeName: string): INode {
         const lineno = this.rstStateMachine.absLineNumber() + 1;
-        return this.reporter.warning(`${nodeName} ends without a blank line; unexpected unindent.`, {line: lineno});
+        return this.reporter!.warning(`${nodeName} ends without a blank line; unexpected unindent.`, {line: lineno});
     }
 
-    paragraph(lines, lineno: number) {
-        const data = lines.join('\n').trimEnd();
+    paragraph(lines: string[], lineno: number): any[] {
+        const data = lines.join('\n').trimRight();
         let text;
         let literalNext;
         if (/(?<!\\)(\\\\)*::$/.test(data)) {
@@ -323,8 +331,8 @@ class RSTState extends StateWS {
     }
 
     /* eslint-disable-next-line camelcase */
-    inline_text(text, lineno) {
-        const r = this.inliner.parse(text, {lineno, memo: this.memo, parent: this.parent});
+    inline_text(text: string, lineno: number) {
+        const r = this.inliner!.parse(text, {lineno, memo: this.memo, parent: this.parent!});
         return r;
     }
 }

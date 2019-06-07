@@ -7,6 +7,15 @@ import {citation, Element, footnote, reference} from "./nodes";
 import {Settings} from "../gen/Settings";
 import State from "./states/State";
 import StringList from "./StringList";
+import Inliner from "./parsers/rst/Inliner";
+
+export interface ParserArgs
+{
+    inliner?: Inliner;
+    rfc2822?: boolean;
+    debug?: boolean,
+    debugFn?: any
+}
 
 export interface ISettings {
     getSettings(name: string): any;
@@ -22,14 +31,15 @@ export interface HasIndent {
 }
 
 export interface INode extends SourceLocation {
+    referenced: boolean;
     names: any[];
-    refname: any;
-    refid: any;
+    refname?: string;
+    refid?: string;
     rawsource: string;
     /** Back-reference to the Node immediately containing this Node. */
-    parent: INode;
+    parent?: INode;
     /** The `document` node at the root of the tree containing this Node. */
-    document: Document;
+    document?: Document;
     /** Path or description of the input source which generated this Node. */
     source: string;
     /** The line number (1-based) of the beginning of this Node in `source`. */
@@ -89,6 +99,42 @@ export interface INode extends SourceLocation {
     add(iNodes: INode[] | INode): void;
 
     isInline(): boolean;
+
+    starttag(quoteattr?: any): string;
+
+    endtag(): string;
+
+    emptytag(): string;
+
+    addBackref(prbid: any): void;
+
+    /**
+     Updates all attributes from node or dictionary `dict_`.
+
+     Appends the basic attributes ('ids', 'names', 'classes',
+     'dupnames', but not 'source') and then, for all other attributes in
+     dict_, updates the same attribute in self.  When attributes with the
+     same identifier appear in both self and dict_ whose values aren't each
+     lists and replace is True, the values in self are replaced with the
+     values in dict_; if the values from self and dict_ for the given
+     identifier are both of list type, then the two lists are concatenated
+     and the result stored in self; otherwise, the values in self are
+     preserved.  When and_source is True, the 'source' attribute is
+     included in the copy.
+
+     NOTE: When replace is False, and self contains a 'source' attribute,
+     'source' is not replaced even when dict_ has a 'source'
+     attribute, though it may still be merged into a list depending
+     on the value of update_fun.
+     */
+    updateAllAttsConcatenating(dict_: any, replace:  boolean,
+                               andSource: boolean): void;
+
+    nextNode(args: TraverseArgs): INode | undefined | null;
+
+    getCustomAttr(attrName: string): any[] | any | undefined| null;
+
+    isAdmonition(): any;
 }
 
 export interface IAttributes {
@@ -98,6 +144,8 @@ export interface IAttributes {
 export interface IElement extends INode {
     nodeName: any;
     listAttributes: string[];
+    firstChildNotMatchingClass(childClass: any | any[], start?: number, end?: number): number | undefined;
+    attlist(): IAttributes;
 }
 
 export interface ITextElement extends IElement {
@@ -192,7 +240,9 @@ export interface Component extends TransformSpec {
 
 export interface IReporter {
     reportLevel: number;
-    getSourceAndLine: (lineno?: number) => any[];
+    getSourceAndLine?: (lineno?: number) => any[];
+
+    debugFlag?: boolean;
 
     setConditions(): void;
 
@@ -246,7 +296,7 @@ export interface IStateMachine {
 
     previousLine(n: number): any;
 
-    gotoLine(lineOffset: number): string;
+    gotoLine(lineOffset: number): string | undefined;
 
     getSource(lineOffset: number): any;
 
@@ -256,23 +306,23 @@ export interface IStateMachine {
 
     getSourceAndLine(lineno: number): any[];
 
-    insertInput(inputLines, source): void;
+    insertInput(inputLines: any, source: any): void;
 
-    getTextBlock(flushLeft): any;
+    getTextBlock(flushLeft: boolean): any;
 
-    checkLine(context, state, transitions): any[] | any;
+    checkLine(context: any[], state: any, transitions: any): any[] | any;
 
-    addState(stateClass): void;
+    addState(stateClass: any): void;
 
-    addStates(stateClasses): void;
+    addStates(stateClasses: any[]): void;
 
     runtimeInit(): void;
 
     error(): void;
 
-    attachObserver(observer): void;
+    attachObserver(observer: any): void;
 
-    detachObserver(observer): void;
+    detachObserver(observer: any): void;
 
     notifyObservers(): void;
 }
@@ -284,15 +334,15 @@ export interface IState {
 
     addInitialTransitions(): void;
 
-    addTransitions(names, transitions): void;
+    addTransitions(names: any[], transitions: any[]): void;
 
-    addTransition(name, transition): void;
+    addTransition(name: any[], transition: any): void;
 
-    removeTransition(name): void;
+    removeTransition(name: any): void;
 
-    makeTransition(name: string, nextState?): any[];
+    makeTransition(name: string, nextState?: any): any[];
 
-    makeTransitions(nameList): (any[] | {})[];
+    makeTransitions(nameList: any[]): (any[] | {})[];
 }
 
 export interface StateMachineRunArgs {
@@ -317,3 +367,13 @@ export interface GetIndentedArgs {
     indent?: number;
     stripTop?: boolean;
 }
+
+export interface TraverseArgs {
+    condition?: any;
+    includeSelf?: boolean;
+    descend?: boolean;
+    siblings?: boolean;
+    ascend?: boolean;
+}
+
+

@@ -1,14 +1,14 @@
 import * as nodes from './nodes';
-import { isIterable } from './utils';
-import { UnimplementedError as Unimp, SystemMessage } from './Exceptions';
-import {IReporter} from "./types";
+import {isIterable} from './utils';
+import {SystemMessage, UnimplementedError as Unimp} from './Exceptions';
+import {INode, IReporter} from "./types";
 
 /**
     Return the "source" and "line" attributes from the `node` given or from
     its closest ancestor.
  */
-function getSourceLine(node) {
-    let myNode = node;
+function getSourceLine(node: INode) {
+    let myNode: INode | undefined = node;
     while (myNode) {
         if (myNode.source || myNode.line) {
             return [myNode.source, myNode.line];
@@ -22,18 +22,18 @@ class Reporter implements IReporter {
     private source: string;
     private observers: any[];
     private maxLevel: number;
-    private debugLevel: number;
+    private debugLevel: number = 0;
     private DEBUG_LEVEL: number;
     private INFO_LEVEL: number;
     private WARNING_LEVEL: number;
     private ERROR_LEVEL: number;
     private SEVERE_LEVEL: number;
-    private debugFlag: boolean;
+    debugFlag?: boolean;
     reportLevel: number;
     private haltLevel: number;
     private errorHandler: string;
     private stream: any;
-    private encoding: string;
+    private encoding?: string;
     constructor(source: string, reportLevel: number, haltLevel?: number, stream?: any, debug?: boolean, encoding?: string,
                 errorHandler:string = 'backslashreplace') {
         if (haltLevel === undefined) {
@@ -61,7 +61,8 @@ class Reporter implements IReporter {
     }
 
     /* need better system for arguments!! */
-    systemMessage(level, message, children, kwargs) {
+    systemMessage(level: number, message: string | Error,
+    children?: INode[], kwargs?: any) {
         if (typeof children === 'undefined') {
             children = [];
         }
@@ -79,7 +80,7 @@ class Reporter implements IReporter {
         }
 
         const attributes = { ...kwargs };
-        if ('base_node' in kwargs) {
+        if ('base_node' in kwargs) { //fixme
             const [source, line] = getSourceLine(kwargs.base_node);
             delete attributes.base_node;
             if (source && !attributes.source) {
@@ -112,7 +113,7 @@ class Reporter implements IReporter {
         return msg;
     }
 
-    notifyObservers(message) {
+    notifyObservers(message: any) {
         this.observers.forEach(o => o(message));
     }
 
@@ -155,7 +156,7 @@ class Reporter implements IReporter {
         return this.systemMessage(this.SEVERE_LEVEL, ...args);
     }
 
-    getSourceAndLine: (lineno?: number) => any[];
+    getSourceAndLine?: (lineno?: number) => any[];
 
 
 }

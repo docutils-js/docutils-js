@@ -1,6 +1,6 @@
 class UnknownTransitionError extends Error {
     private transition: any;
-    constructor(transition, ...params) {
+    constructor(transition: any | any[], ...params: any[]) {
         super(...params);
         if (Error.captureStackTrace) {
             Error.captureStackTrace(this, UnknownTransitionError);

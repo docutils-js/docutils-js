@@ -6,7 +6,7 @@ class Output extends TransformSpec {
     private encoding: any;
     protected destination: any;
     private errorHandler: string;
-    constructor(destination, destinationPath, encoding, errorHandler) {
+    constructor(destination: any, destinationPath: string, encoding: string, errorHandler: string) {
         super();
         this.encoding = encoding;
         this.errorHandler = errorHandler || 'strict';
@@ -19,11 +19,11 @@ class Output extends TransformSpec {
 
     /* istanbul ignore method */
     /* eslint-disable-next-line no-unused-vars */
-    write(data) {
+    write(data: string): void {
     }
 
     /* istanbul ignore method */
-    encode(data) {
+    encode(data: string): string {
         return data; // fixme?
     }
 

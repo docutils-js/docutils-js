@@ -4,13 +4,14 @@ import * as utils from '../utils';
 import Transform from '../Transform';
 /* eslint-disable-next-line no-unused-vars */
 import TransformError from '../TransformError';
+import {Document, IElement, INode} from "../types";
 
 /**
  * TitlePromoter transform.
  * Base class for other transforms which promote section names to title and subtitle
  */
 class TitlePromoter extends Transform {
-    promoteTitle(node) {
+    promoteTitle(node: INode) {
         if (!(node instanceof nodes.Element)) {
             throw new TypeError('node must be of Element-derived type.');
         }
@@ -20,22 +21,28 @@ class TitlePromoter extends Transform {
             return undefined;
         }
         node.updateAllAttsConcatenating(section, true, true);
+        // @ts-ignore
         const newChildren = [...section.children.slice(0, 1),
-                             ...node.children.slice(0, index),
-                             ...section.children.slice(1)];
+            // @ts-ignore
+
+            ...node.children.slice(0, index),
+// @ts-ignore
+            ...section.children.slice(1)];
         node.children = newChildren;
         // assert isinstance(node[0], nodes.title)
         return 1;
     }
 
-    promoteSubtitle(node) {
+    promoteSubtitle(node: IElement) {
         // console.log('promoteSubtitle');
         // Type check
-        const [subsection, index] = this.candidateIndex(node);
+        const x = this.candidateIndex(node);
+        const subsection: IElement = x[0];
+        const index: number = x[1];
         if (index == null) {
             return undefined;
         }
-        const subtitle = new nodes.subtitle();
+        const subtitle: IElement = new nodes.subtitle();
 
         // Transfer the subsection's attributes to the new subtitle
         // NOTE: Change second parameter to False to NOT replace
@@ -47,7 +54,7 @@ class TitlePromoter extends Transform {
 
         // Transfer the contents of the subsection's title to the
         // subtitle:
-        subtitle.children = subsection.children[0].children.slice();
+        subtitle.children = subsection!.children[0].children.slice();
         node.children = [node.children[0], // title
          subtitle,
         // everything that was before the section:
@@ -57,7 +64,7 @@ class TitlePromoter extends Transform {
         return 1;
     }
 
-    candidateIndex(node) {
+    candidateIndex(node: IElement): any[] {
         const index = node.firstChildNotMatchingClass(nodes.PreBibliographic);
         if (index == null || node.children.length > (index + 1)
             || !(node.children[index] instanceof nodes.section)) {
@@ -68,15 +75,12 @@ class TitlePromoter extends Transform {
 }
 
 export class DocTitle extends TitlePromoter {
-    /* Not sure how to set default priority */
-    _init(...args) {
-        super._init(...args);
-    }
 
     setMetadata() {
         if (!('title' in this.document.attributes)) {
-            if (this.document.settings.title != null) {
-                this.document.attributes.title = this.document.settings.title;
+            let title = this.document.settings.docutilsCoreOptionParser!.title;
+            if (title != null) {
+                this.document.attributes.title = title;
             } else if (this.document.children.length && this.document.children[0] instanceof nodes.title) {
                 this.document.attributes.title = this.document.children[0].astext();
             }
@@ -84,7 +88,7 @@ export class DocTitle extends TitlePromoter {
     }
 
     apply() {
-        if (this.document.settings.doctitleXform || typeof this.document.settings.doctitleXform === 'undefined') {
+        if (this.document.settings.docutilsReadersStandaloneReader!.doctitleXform || typeof this.document.settings.docutilsReadersStandaloneReader!.doctitleXform === 'undefined') {
             if (this.promoteTitle(this.document)) {
                 this.promoteSubtitle(this.document);
             }
@@ -95,12 +99,10 @@ export class DocTitle extends TitlePromoter {
 DocTitle.defaultPriority = 320;
 
 export class SectionSubTitle extends TitlePromoter {
-    _init(...args) {
-        super._init(...args);
-        }
 
     apply() {
-        if (this.document.settings.sectsubtitleXform || typeof this.document.settings.sectsubtitleXform === 'undefined') {
+        let reader = this.document.settings.docutilsWritersOdfOdtReader;
+        if (!reader || (reader.sectsubtitleXform || typeof reader.sectsubtitleXform === 'undefined')) {
             this.document.traverse({ condition: nodes.section }).forEach((section) => {
             // On our way through the node tree, we are deleting
             // sections, but we call self.promote_subtitle for those
@@ -116,8 +118,10 @@ SectionSubTitle.defaultPriority = 350;
 
 export class DocInfo extends Transform {
     private biblioNodes: any;
-    _init(...args) {
-        super._init(...args);
+
+    protected _init(document: Document, startNode: INode | undefined) {
+        super._init(document, startNode);
+
         this.biblioNodes = {
  author: nodes.author,
                              authors: nodes.authors,
@@ -138,14 +142,17 @@ export class DocInfo extends Transform {
     }
 
     /* eslint-disable-next-line no-unused-vars */
+    // @ts-ignore
     extractBibliographic(fieldList) {
     }
 
     /* eslint-disable-next-line no-unused-vars */
+    // @ts-ignore
     checkEmptyBiblioField(field, name) {
     }
 
     /* eslint-disable-next-line no-unused-vars */
+    // @ts-ignore
     checkCompoundBiblioField(field, name) {
     }
 
@@ -157,18 +164,22 @@ export class DocInfo extends Transform {
           (re.compile(r'\$[a-zA-Z]+: (.+) \$'), r'\1'),]
     */
     /* eslint-disable-next-line no-unused-vars */
+    // @ts-ignore
     extractAuthors(field, name, docinfo) {
     }
 
     /* eslint-disable-next-line no-unused-vars */
+    // @ts-ignore
     authorsFromOneParagraph(field) {
     }
 
     /* eslint-disable-next-line no-unused-vars */
+    // @ts-ignore
     authorsFromBulletList(field) {
     }
 
     /* eslint-disable-next-line no-unused-vars */
+    // @ts-ignore
     authorsFromParagraphs(field) {
     }
 }

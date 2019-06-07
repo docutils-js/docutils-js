@@ -2,7 +2,7 @@ const { builders, namedTypes } = require('ast-types');
 const camelcase = require('camelcase');
 const fs = require('fs');
 const b = builders;
-const spec = require('./gen/newSettingsSpec');
+const spec = require('../gen/newSettingsSpec');
 const lines = [];
 const defaultLines = [];
 const defaults = {};
@@ -28,7 +28,7 @@ Object.keys(spec).forEach(compName =>  {
     lines.push(`}\n`);
 });
 let settingsSource = lines.join('\n') + '\n';
-settingsSource += `interface Settings {\n${ifaces.map((i) => (i + ' ' + camelcase(i) + ';\n')).join('')}\n}\n`;
+settingsSource += `interface Settings {\n${ifaces.map((i) => (camelcase(i) + '?: ' + i + ';\n')).join('')}\n}\n`;
 fs.writeFileSync('Settings.ts', settingsSource, 'utf-8');
 
 process.stdout.write(defaultLines.join('\n') + '\n');

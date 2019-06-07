@@ -19,7 +19,7 @@ class OptionList extends SpecializedBody {
             }
             throw error;
         }
-        this.parent.add(optionListItem);
+        this.parent!.add(optionListItem);
         this.blankFinish = blankFinish;
         return [[], nextState, []];
     }

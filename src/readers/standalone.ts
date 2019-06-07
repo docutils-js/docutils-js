@@ -14,7 +14,7 @@ import * as frontmatter from '../transforms/frontmatter';
 
 export const __docformat__ = 'reStructuredText';
 export default class Reader extends BaseReader {
-    constructor(args) {
+    constructor(args: any) {
         super(args);
 
         /** Contexts this reader supports. */

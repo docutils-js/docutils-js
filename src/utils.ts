@@ -1,4 +1,6 @@
 import { combining } from './utils/combining';
+import {Settings} from "../gen/Settings";
+import {Document} from "./types";
 
 /** Return indices of all combining chars in  Unicode string `text`.
 
@@ -26,7 +28,7 @@ function findCombiningChars(text: string) {
     footnote reference style is 'superscript'.
     */
 /* eslint-disable-next-line no-unused-vars */
-export function getTrimFootnoteRefSpace(settings) { // fixme
+export function getTrimFootnoteRefSpace(settings: Settings) { // fixme
     return false;
 }
 /*
@@ -75,7 +77,7 @@ export const punctuation_chars = {
 
 
 /* Return a string with escape-backslashes converted to nulls. */
-function escape2null(text) {
+function escape2null(text: string) {
     const parts = [];
     let start = 0;
     /* eslint-disable-next-line no-constant-condition */
@@ -96,7 +98,7 @@ function escape2null(text) {
     Split `text` on escaped whitespace (null+space or null+newline).
     Return a list of strings.
      */
-function splitEscapedWhitespace(text) {
+function splitEscapedWhitespace(text: string) {
     const strings = text.split('\x00 ');
     const s = [];
     /* eslint-disable-next-line no-restricted-syntax */
@@ -112,7 +114,7 @@ function splitEscapedWhitespace(text) {
     >>> from docutils.utils import column_indices
     >>> column_indices(u'A t ab le ')
     [0, 1, 2, 4, 5, 7, 8] */
-function columnIndicies(text) {
+function columnIndicies(text: string) {
     const stringIndicies = new Array(text.length);
     for (let i = 0; i < text.length; i += 1) {
         stringIndicies[i] = i;
@@ -133,28 +135,28 @@ function columnIndicies(text) {
     return [i for i in string_indices if i is not None]
 }
 */
-export function escapeRegExp(string) {
-  return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
+export function escapeRegExp(strVal: string) {
+  return strVal.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
 }
 
 // export default {
 //    newDocument,
 // };
-export function stripCombiningChars(text) {
+export function stripCombiningChars(text: string) {
     return text;// fixme
     // return u''.join([c for c in text if not unicodedata.combining(c)])
 }
-export function pySplit(text) {
+export function pySplit(text: string) {
     return text.trim().split(/s+/);
 }
 
-export function checkDocumentArg(document) {
+export function checkDocumentArg(document: Document) {
     if (typeof document === 'undefined') {
         throw new Error('undefined document');
     }
     return true;
 }
-export function relativePath(source, target) {
+export function relativePath(source: string, target: string) {
 /*
     Build and return a path to `target`, relative to `source` (both files).
 

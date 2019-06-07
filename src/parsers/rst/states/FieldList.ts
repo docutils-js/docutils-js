@@ -7,7 +7,7 @@ class FieldList extends SpecializedBody {
     // @ts-ignore
     field_marker(match, context, nextState) {
         const [field, blankFinish] = this.field(match);
-        this.parent.add(field);
+        this.parent!.add(field);
         this.blankFinish = blankFinish;
         return [[], nextState, []];
     }

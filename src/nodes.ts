@@ -18,14 +18,11 @@
 import xmlescape from 'xml-escape';
 import Transformer from './Transformer';
 /* eslint-disable-next-line no-unused-vars */
-import { InvalidArgumentsError, ApplicationError, UnimplementedError } from './Exceptions';
+import {InvalidArgumentsError, UnimplementedError} from './Exceptions';
 import unescape from './utils/unescape';
-import { isIterable, checkDocumentArg } from './utils';
-import {
-  Document, IElement, INode, ITextElement, IAttributes,
-    HasIndent, IReporter
-} from './types';
-import {Settings} from "../gen/Settings";
+import {checkDocumentArg, isIterable} from './utils';
+import {Document, HasIndent, IAttributes, IElement, INode, IReporter, ITextElement, TraverseArgs,} from './types';
+import {Settings} from '../gen/Settings';
 
 /* eslint-disable-next-line no-unused-vars */
 const __docformat__ = 'reStructuredText';
@@ -88,46 +85,46 @@ const _nonIdTranslateDigraphs = {
  * |test         |
  * +-------------+
  */
-function dupname(node, name) {
+function dupname(node: INode, name: string) {
   /* What is the intention of this function? */
   node.attributes.dupnames.push(name);
   node.attributes.names.splice(node.attributes.names.indexOf(name), 1);
   // Assume that this method is referenced, even though it isn't; we
   // don't want to throw unnecessary system_messages.
-  node.referenced = 1;
+  node.referenced = true;
 }
 
 /**
  * Escape string values that are elements of a list, for serialization.
  * @param {String} value - Value to escape.
  */
-function serialEscape(value) {
+function serialEscape(value: string) {
   return value.replace(/\\/g, '\\\\').replace(/ /g, '\\ ');
 }
 
 /* We don't do 'psuedo-xml' but perhaps we should */
-function pseudoQuoteattr(value) {
+function pseudoQuoteattr(value: any) {
   return `"${xmlescape(value)}"`;
 }
 
 /**
  * Return a whitespace-normalized name.
  */
-function whitespaceNormalizeName(name) {
+function whitespaceNormalizeName(name: string) {
   return name.replace(/\s+/, ' ');
 }
 
-export function fullyNormalizeName(name) {
+export function fullyNormalizeName(name: string) {
   return name.toLowerCase().replace(/\s+/, ' ');
 }
 
-function setupBacklinkable(o) {
-  o.addBackref = refid => o.attributes.backrefs.push(refid);
+function setupBacklinkable(o: any) {
+  o.addBackref = (refid: string) => o.attributes.backrefs.push(refid);
 }
 
 /* This needs to be implemented - fixme */
-function makeId(string) {
-  return string;
+function makeId(strVal: string) {
+  return strVal;
   /*
     let id = string.lower();
     // This is for unicode, I believe?
@@ -146,15 +143,17 @@ function makeId(string) {
 */
 }
 
-function _callDefaultVisit(node) {
+function _callDefaultVisit(node: INode) {
+  // @ts-ignore
   return this.default_visit(node);
 }
 
-function _callDefaultDeparture(node) {
+function _callDefaultDeparture(node: INode) {
+  // @ts-ignore
   return this.default_departure(node);
 }
 /* This is designed to be called later, a-nd not with an object. hmm */
-function _addNodeClassNames(names, o) {
+function _addNodeClassNames(names: string[], o: any) {
   names.forEach((_name) => {
     const v = `visit_${_name}`;
     if (!o[v]) {
@@ -236,7 +235,7 @@ class NodeVisitor {
       * Create a NodeVisitor.
       * @param {nodes.document} document - document to visit
       */
-    constructor(document) {
+    constructor(document: Document) {
       if (!checkDocumentArg(document)) {
         throw new Error(`Invalid document arg: ${document}`);
       }
@@ -249,10 +248,10 @@ class NodeVisitor {
      * parameter.  If the ``visit_...`` method does not exist, call
      * this.unknown_visit.
      */
-    dispatchVisit(node) {
+    dispatchVisit(node: INode) {
       const nodeName = node.tagname;
-      const methodName = `visit_${nodeName}`;
-      let method = this[methodName];
+      const methodName: string = `visit_${nodeName}`;
+      let method = (<any> this)[methodName];
       if (!method) {
         method = this.unknownVisit;
       }
@@ -265,9 +264,9 @@ class NodeVisitor {
      * parameter.  If the ``depart_...`` method does not exist, call
      * this.unknown_departure.
      */
-    dispatchDeparture(node) {
+    dispatchDeparture(node: INode) {
       const nodeName = node.tagname;
-      const method = this[`depart_${nodeName}`] || this.unknownDeparture;
+      const method = (<any> this)[`depart_${nodeName}`] || this.unknownDeparture;
       this.document.reporter.debug(
         `docutils.nodes.NodeVisitor.dispatch_departure calling for ${node}`,
       );
@@ -279,8 +278,8 @@ class NodeVisitor {
      *
      * Raise an exception unless overridden.
      */
-    unknownVisit(node) {
-      if (this.document.settings.strictVisitor || !(this.optional.includes(node.tagname))) {
+    unknownVisit(node : INode) {
+      if (this.document!.settings.docutilsCoreOptionParser!.strictVisitor || !(this.optional.includes(node.tagname))) {
         throw new Error(`visiting unknown node type:${node.tagname}`);
       }
     }
@@ -290,8 +289,8 @@ class NodeVisitor {
      *
      * Raise exception unless overridden.
      */
-    unknownDeparture(node) {
-      if (this.document.settings.strictVisitor || !(this.optional.includes(node.tagname))) {
+    unknownDeparture(node: INode) {
+      if (this.document.settings.docutilsCoreOptionParser!.strictVisitor || !(this.optional.includes(node.tagname))) {
         throw new Error(`departing unknown node type: ${node.tagname}`);
       }
     }
@@ -323,23 +322,24 @@ class SparseNodeVisitor extends NodeVisitor {
 class GenericNodeVisitor extends NodeVisitor {
     static nodeClassNames = [];
 
-    constructor(document) {
+    constructor(document: Document) {
       super(document);
       // document this/
       _addNodeClassNames(nodeClassNames, this);
     }
 
     /* eslint-disable-next-line */
-    default_visit(node) {
+    default_visit(node: INode) {
       throw new Error('not implemented');
     }
 
     /* eslint-disable-next-line */
-    default_departure(node) {
+    default_departure(node: INode) {
       throw new Error('not implemented');
     }
 }
-GenericNodeVisitor.nodeClassNames = nodeClassNames;
+// fixme
+// GenericNodeVisitor.nodeClassNames = nodeClassNames;
 
 // ========
 //  Mixins
@@ -350,9 +350,9 @@ class Resolvable {
 }
 
 class BackLinkable {
-    backrefs: any[];
+    backrefs: string[] = [];
 
-    addBackref(refid) {
+    addBackref(refid: string) {
       this.backrefs.push(refid);
     }
 }
@@ -410,7 +410,7 @@ class Targetable extends Resolvable {
 class Labeled { }
 
 // ==============================
-//  Functional Node Base Classes
+//  Functional Node: INode Base Classes
 // ==============================
 
 /**
@@ -418,78 +418,105 @@ class Labeled { }
  *
  * The base class for all docutils nodes.
  */
+
+
 abstract class Node implements INode {
-  names: any[];
-  refname: string;
-  refid: string;
-  currentSource: string;
-  currentLine: number;
-  rawsource: any;
+  /**
+   * List attributes which are defined for every Element-derived class
+   * instance and can be safely transferred to a different node.
+   */
+  basicAttributes: string[] = ['ids', 'classes', 'names', 'dupnames'];
+
+  /**
+   * List attributes, automatically initialized to empty lists for
+   * all nodes.
+   */
+  listAttributes: string[] = [];
+
+  /** List attributes that are known to the Element base class. */
+  knownAttributes: string[] = [];
+
+  childTextSeparator: string = '';
+
+  emptytag(): string {
+    throw new Error('Method not implemented.');
+  }
+
+  referenced: boolean = false;
+
+  names: any[] = [];
+
+  refname?: string;
+
+  refid?: string;
+
+  currentSource: string = '';
+
+  currentLine: number = 0;
+
+  rawsource: any = '';
 
 tagname: string;
 
-parent: INode;
+  parent?: INode;
 
-document: Document;
+document?: Document;
 
-source: string;
+source: string = '';
 
-line: number;
+line: number = 0;
 
-classTypes: any[];
+classTypes: any[] = [];
 
-children: INode[];
-  attributes: IAttributes;
+children: INode[] = [];
 
-/**
+  attributes: IAttributes = { };
+
+  /**
       * Create a node
       */
-constructor() {
-  this.tagname = this.constructor.name;
-  this.parent = undefined;
-  this.document = undefined;
-  this.source = undefined;
-  this.line = undefined;
-  this.classTypes = [];
-  this._init();
-}
+  constructor() {
+    this.tagname = this.constructor.name;
+    this.classTypes = [];
+    this._init();
+  }
 
-_init() {
-}
+  _init() {
+  }
 
 
-/**
+  /**
     Return the first node in the iterable returned by traverse(),
     or None if the iterable is empty.
 
     Parameter list is the same as of traverse.  Note that
     include_self defaults to 0, though.
     */
-nextNode(args) {
-  const iterable = this.traverse(args);
-  if (iterable.length) {
-    return iterable[0];
+  nextNode(args: TraverseArgs) {
+    const iterable = this.traverse(args);
+    if (iterable.length) {
+      return iterable[0];
+    }
+    return undefined;
   }
-  return undefined;
-}
 
-hasClassType(classType) {
-  return this.classTypes.findIndex(c => c.prototype instanceof classType
+  hasClassType(classType: any) {
+    return this.classTypes.findIndex(c => c.prototype instanceof classType
                                          || c === classType) !== -1;
-}
+  }
 
-isInline() {
-  return this.classTypes.findIndex(c => c.prototype instanceof Inline || c === Inline) !== -1;
-}
+  isInline() {
+    return this.classTypes.findIndex(c => c.prototype instanceof Inline || c === Inline) !== -1;
+  }
 
-isAdmonition() {
-  return this.classTypes.findIndex(
-    c => c.prototype instanceof Admonition || c === Admonition,
-  ) !== -1;
-}
+  isAdmonition() {
+    return this.classTypes.findIndex(
+      c => c.prototype instanceof Admonition || c === Admonition,
+    ) !== -1;
+  }
 
-asDOM(dom: any): any {
-}
+  asDOM(dom: any): any {
+  }
 
     abstract pformat(indent: string, level: number): string;
 
@@ -514,9 +541,69 @@ asDOM(dom: any): any {
       }
     }
 
-    abstract walk(any): boolean;
+    /**
+ * Traverse a tree of `Node` objects, calling the
+ * `dispatch_visit()` method of `visitor` when entering each
+ * node.  (The `walkabout()` method is similar, except it also
+ * calls the `dispatch_departure()` method before exiting each
+ * node.)
+ *
+ * This tree traversal supports limited in-place tree
+ * modifications.  Replacing one node with one or more nodes is
+ * OK, as is removing an element.  However, if the node removed
+ * or replaced occurs after the current node, the old node will
+ * still be traversed, and any new nodes will not.
+ *
+ * Within ``visit`` methods (and ``depart`` methods for
+ * `walkabout()`), `TreePruningException` subclasses may be raised
+ * (`SkipChildren`, `SkipSiblings`, `SkipNode`, `SkipDeparture`).
+ *
+ * Parameter `visitor`: A `NodeVisitor` object, containing a
+ * ``visit`` implementation for each `Node` subclass encountered.
+ *
+ * Return true if we should stop the traversal.
+ */
+    walk(visitor: any): boolean {
+      let stop: boolean = false;
+      visitor.document.reporter.debug('docutils.nodes.Node.walk calling dispatch_visit for fixme');
+      try {
+        try {
+          visitor.dispatch_visit(this);
+        } catch (error) {
+          if (error instanceof SkipChildren || error instanceof SkipNode) {
+            return stop;
+          } if (error instanceof SkipDeparture) {
+            // do nothing
+          }
+          throw error;
+        }
+        const children = [...this.children];
+        let skipSiblings = false;
+        children.forEach((child) => {
+          try {
+            if (!stop && !skipSiblings) {
+              if (child.walk(visitor)) {
+                stop = true;
+              }
+            }
+          } catch (error) {
+            if (error instanceof SkipSiblings) {
+              skipSiblings = true;
+            } else {
+              throw error;
+            }
+          }
+        });
+      } catch (error) {
+        if (error instanceof StopTraversal) {
+          stop = true;
+        }
+        throw error;
+      }
+      return stop;
+    }
 
-    walkabout(visitor): boolean {
+    walkabout(visitor: any): boolean {
       let callDepart = true;
       let stop = false;
       visitor.document.reporter.debug('docutils.nodes.Node.walkabout calling dispatch_visit');
@@ -577,6 +664,7 @@ asDOM(dom: any): any {
           throw new Error('child is undefined');
         }
         // @ts-ignore
+        // eslint-disable-next-line no-underscore-dangle
         if (typeof child._fastTraverse === 'undefined') {
           throw new Error(`${child} does not have _fastTraverse`);
         }
@@ -592,18 +680,22 @@ asDOM(dom: any): any {
       result.push(this);
       this.children.forEach((child) => {
         // @ts-ignore
+        // eslint-disable-next-line no-underscore-dangle
         result.push(...child._allTraverse());
       });
       return result;
     }
 
-    traverse({
-      condition, includeSelf = true, descend = true, siblings = false, ascend = false,
-    }) {
+    traverse(args: TraverseArgs): any[] {
+      const {
+        condition, includeSelf, descend, siblings, ascend,
+      } = args;
       const mySiblings = ascend ? true : siblings;
       if (includeSelf && descend && !mySiblings) {
         if (!condition) {
+          // eslint-disable-next-line no-underscore-dangle
           return this._allTraverse();
+          // eslint-disable-next-line no-underscore-dangle
         } if (condition.prototype instanceof Node || condition === Node) {
           return this._fastTraverse(condition);
         }
@@ -611,7 +703,7 @@ asDOM(dom: any): any {
       if (typeof condition !== 'undefined' && (condition.prototype instanceof Node || condition === Node)) {
         const nodeClass = condition;
         /* eslint-disable-next-line no-unused-vars */
-        const myCondition = (node, nodeClassArg) => (
+        const myCondition = (node: INode, nodeClassArg: any) => (
           (node instanceof nodeClassArg) || (node instanceof nodeClass)
         );
         throw new Error('unimplemented');
@@ -638,7 +730,7 @@ asDOM(dom: any): any {
         });
       }
       if (siblings || ascend) {
-        let node: INode = this as INode;
+        let node: INode | undefined = (this as INode);
         while (node != null && node.parent != null) {
           const index = node.parent.children.indexOf(node);
           node.parent.children.slice(index + 1).forEach((sibling) => {
@@ -660,7 +752,135 @@ asDOM(dom: any): any {
       return r;
     }
 
-  add(iNodes: INode[] | INode): void {
+    add(iNodes: INode[] | INode): void {
+      throw new UnimplementedError('');
+    }
+
+
+    endtag(): string {
+      return '';
+    }
+
+    starttag(quoteattr?: any): string {
+      return '';
+    }
+
+    addBackref(prbid: any): void {
+    }
+
+    updateBasicAtts(dict_: any) {
+      const dict2 = dict_ instanceof Node ? dict_.attributes : dict_;
+      this.basicAttributes.forEach((att) => {
+        const v = att in dict2 ? dict2[att] : [];
+        this.appendAttrList(att, v);
+      });
+    }
+
+    appendAttrList(attr: string, values: any[]) {
+    // List Concatenation
+      values.forEach((value) => {
+        if ((this.attributes[attr].filter((v: any) => v === value)).length === 0) {
+          this.attributes[attr].push(value);
+        }
+      });
+    }
+
+    replaceAttr(attr: string, value: any[] | any, force = true) {
+    // One or the other
+      if (force || this.attributes[attr] == null) {
+        this.attributes[attr] = value;
+      }
+    }
+
+    copyAttrConsistent(attr: string, value: any, replace?: boolean) {
+      if (this.attributes[attr] !== value) {
+        this.replaceAttr(attr, value, replace);
+      }
+    }
+
+    updateAllAtts(dict_: any, updateFun = this.copyAttrConsistent,
+      replace = true, andSource = false) {
+      const dict2 = dict_ instanceof Node ? dict_.attributes : dict_;
+      // Include the source attribute when copying?
+      let filterFun;
+      if (andSource) {
+        filterFun = this.isNotListAttribute.bind(this);
+      } else {
+        filterFun = this.isNotKnownAttribute.bind(this);
+      }
+
+      // Copy the basic attributes
+      this.updateBasicAtts(dict2);
+
+      // Grab other attributes in dict_ not in self except the
+      // (All basic attributes should be copied already)
+      const atts = Object.keys(dict2).filter(filterFun);
+      atts.forEach((att) => {
+        updateFun.bind(this)(att, dict2[att], replace);
+      });
+    }
+
+    /**
+   Updates all attributes from node or dictionary `dict_`.
+
+   Appends the basic attributes ('ids', 'names', 'classes',
+   'dupnames', but not 'source') and then, for all other attributes in
+   dict_, updates the same attribute in self.  When attributes with the
+   same identifier appear in both self and dict_ whose values aren't each
+   lists and replace is True, the values in self are replaced with the
+   values in dict_; if the values from self and dict_ for the given
+   identifier are both of list type, then the two lists are concatenated
+   and the result stored in self; otherwise, the values in self are
+   preserved.  When and_source is True, the 'source' attribute is
+   included in the copy.
+
+   NOTE: When replace is False, and self contains a 'source' attribute,
+   'source' is not replaced even when dict_ has a 'source'
+   attribute, though it may still be merged into a list depending
+   on the value of update_fun.
+   */
+    updateAllAttsConcatenating(dict_: any, replace: boolean = true,
+      andSource: boolean = false) {
+      this.updateAllAtts(dict_, this.copyAttrConcatenate, replace,
+        andSource);
+    }
+
+    /**
+   Returns True if and only if the given attribute is NOT one of the
+   basic list attributes defined for all Elements.
+   */
+    isNotListAttribute(attr: string) {
+      return !(attr in this.listAttributes);
+    }
+
+    /**
+   Returns True if and only if the given attribute is NOT recognized by
+   this class.
+   */
+    isNotKnownAttribute(attr: string) {
+      return !(attr in this.knownAttributes);
+    }
+
+    private copyAttrConcatenate(attr: string, value: any | any[], replace?: boolean) {
+    /*
+      """
+      If attr is an attribute of self and both self[attr] and value are
+      lists, concatenate the two sequences, setting the result to
+      self[attr].  If either self[attr] or value are non-sequences and
+      replace is True or self[attr] is None, replace self[attr] with value.
+          Otherwise, do nothing.
+          """ */
+      if (this.attributes[attr] !== value) {
+        if (Array.isArray(this.attributes[attr]) && Array.isArray(value)) {
+          this.appendAttrList(attr, value);
+        } else {
+          this.replaceAttr(attr, value, replace);
+        }
+      }
+    }
+
+  getCustomAttr(attrName: string): any[] | any | undefined | null {
+    return undefined;
   }
 }
 
@@ -688,7 +908,7 @@ asDOM(dom: any): any {
  *
  *      element += node
  *
- *  This is equivalent to ``element.append(node)``.
+ *  This is equivalent to ``element.append(node: INode)``.
  *
  *  To add a list of multiple child nodes at once, use the same ``+=``
  *  operator::
@@ -702,11 +922,6 @@ asDOM(dom: any): any {
 class Element extends Node implements IElement {
     nodeName: any;
 
-    /**
-     * List attributes which are defined for every Element-derived class
-     * instance and can be safely transferred to a different node.
-     */
-    basicAttributes: string[] = ['ids', 'classes', 'names', 'dupnames'];
 
     /**
      * A list of class-specific attributes that should not be copied with the
@@ -717,227 +932,206 @@ class Element extends Node implements IElement {
      */
     localAttributes: string[] = ['backrefs'];
 
-    /**
-     * List attributes, automatically initialized to empty lists for
-     * all nodes.
-     */
-    listAttributes: string[];
-
-    /** List attributes that are known to the Element base class. */
-    knownAttributes: string[];
 
     /**
      * The element generic identifier. If None, it is set as an instance
      * attribute to the name of the class.
      */
-    tagname: string = null;
+    tagname: string = '';
 
-    childTextSeparator: string = '';
+  attributes: IAttributes;
 
-    attributes: IAttributes;
 
-    referenced: boolean = false;
-
-    /**
+  /**
      * Create element.
      * @classdesc Abstracts a docutils Element.
      * @extends module:nodes~Node
      */
-    constructor(rawsource?: string, children?: INode[], attributes?: IAttributes) {
-      super();
-      this.nodeName = Symbol.for('Element');
-      this.children = [];
-      if (children === undefined) {
-        children = [];
-      }
-      this.extend(...children);
-      this.attributes = { };
-      this.listAttributes.forEach((x) => {
-        this.attributes[x] = [];
-      });
-      if (typeof attributes === 'undefined') {
-        attributes = {};
-      }
-      Object.keys(attributes).forEach((att) => {
-        const value: any | any[] = attributes[att];
-        att = att.toLowerCase();
-        /* This if path never taken... why? FIXME */
-        if (att in this.listAttributes) {
-          /* istanbul ignore next */
-          if (!isIterable(value)) {
-            throw new Error();
-          }
-          // @ts-ignore
-          const a: any[] = value;
-          this.attributes[att] = [...a];
-        } else {
-          this.attributes[att] = value;
+  constructor(rawsource?: string, children: INode[] = [], attributes: IAttributes = { }) {
+    super();
+    this.nodeName = Symbol.for('Element');
+    this.children = children; // we want to do this, imo
+    this.attributes = { };
+    this.listAttributes.forEach((x) => {
+      this.attributes[x] = [];
+    });
+    Object.keys(attributes).forEach((att) => {
+      const value: any | any[] = attributes[att];
+      const attKey = att.toLowerCase();
+
+      /* This if path never taken... why? FIXME */
+      if (attKey in this.listAttributes) {
+        /* istanbul ignore next */
+        if (!isIterable(value)) {
+          throw new Error();
         }
-      });
+        // @ts-ignore
+        const a: any[] = value;
+        this.attributes[attKey] = [...a];
+      } else {
+        this.attributes[attKey] = value;
+      }
+    });
+  }
 
-      // unsure of the correct js equivalent
-      /*
-          if self.tagname is None:
-          self.tagname = self.__class__.__name__
-        */
-    }
-
-    _init() {
-      super._init();
-      /* List attributes which are defined for every Element-derived class
+  _init() {
+    super._init();
+    /* List attributes which are defined for every Element-derived class
            instance and can be safely transferred to a different node. */
-      this.basicAttributes = ['ids', 'classes', 'names', 'dupnames'];
-      /*
+    this.basicAttributes = ['ids', 'classes', 'names', 'dupnames'];
+    /*
           "A list of class-specific attributes that should not be copied with the
           standard attributes when replacing a node.
 
           NOTE: Derived classes should override this value to prevent any of its
           attributes being copied by adding to the value in its parent class.
         */
-      this.localAttributes = ['backrefs'];
+    this.localAttributes = ['backrefs'];
 
-      /* List attributes, automatically initialized to empty lists
+    /* List attributes, automatically initialized to empty lists
            for all nodes. */
-      this.listAttributes = [...this.basicAttributes, ...this.localAttributes];
+    this.listAttributes = [...this.basicAttributes, ...this.localAttributes];
 
-      /* List attributes that are known to the Element base class. */
-      this.knownAttributes = [...this.listAttributes, 'source', 'rawsource'];
+    /* List attributes that are known to the Element base class. */
+    this.knownAttributes = [...this.listAttributes, 'source', 'rawsource'];
 
-      /* The element generic identifier. If None, it is set as an
+    /* The element generic identifier. If None, it is set as an
            instance attribute to the name of the class. */
-      // this.tagname = undefined; (already set in Node.constructor)
+    // this.tagname = undefined; (already set in Node.constructor)
 
-      /* Separator for child nodes, used by `astext()` method. */
-      this.childTextSeparator = '\n\n';
-    }
-
-
-    _domNode(domroot: any): any {
-      const element = domroot.createElement(this.tagname);
-      const l = this.attlist();
-      Object.keys(l).forEach((attribute) => {
-        // @ts-ignore
-        const value: any | any[] = l[attribute];
-        let myVal: string;
-        if (isIterable(value)) {
-          myVal = value.map(v => serialEscape(v.toString())).join(' ');
-        } else {
-          myVal = value.toString();
-        }
-        element.setAttribute(attribute, myVal);
-      });
-      this.children.forEach((child) => {
-        // @ts-ignore
-        element.appendChild(child._domNode(domroot));
-      });
-      return element;
-    }
-
-    emptytag() {
-      return `<${[this.tagname, ...Object.entries(this.attlist())
-        .map(([n, v]) => `${n}="${v}"`)].join(' ')}/>`;
-    }
+    /* Separator for child nodes, used by `astext()` method. */
+    this.childTextSeparator = '\n\n';
+  }
 
 
-    astext(): string {
-      return this.children.map(x => x.astext()).join(this.childTextSeparator);
-    }
-
-    extend(...items) {
-      items.forEach(this.append.bind(this));
-    }
-
-    append(item) {
-      this.setupChild(item);
-      this.children.push(item);
-    }
-
-
-    add(item: INode[] | INode) {
-      if (Array.isArray(item)) {
-        this.extend(...item);
+  _domNode(domroot: any): any {
+    const element = domroot.createElement(this.tagname);
+    const l = this.attlist();
+    Object.keys(l).forEach((attribute) => {
+      // @ts-ignore
+      const value: any | any[] = l[attribute];
+      let myVal: string;
+      if (isIterable(value)) {
+        myVal = value.map((v: any) => serialEscape(v.toString())).join(' ');
       } else {
-        this.append(item);
+        myVal = value.toString();
+      }
+      element.setAttribute(attribute, myVal);
+    });
+    this.children.forEach((child) => {
+      // @ts-ignore
+      // eslint-disable-next-line no-underscore-dangle
+      element.appendChild(child._domNode(domroot));
+    });
+    return element;
+  }
+
+  emptytag() {
+    return `<${[this.tagname, ...Object.entries(this.attlist())
+      .map(([n, v]) => `${n}="${v}"`)].join(' ')}/>`;
+  }
+
+
+  astext(): string {
+    return this.children.map(x => x.astext()).join(this.childTextSeparator);
+  }
+
+  extend(...items: any[]) {
+    items.forEach(this.append.bind(this));
+  }
+
+  append(item: any) {
+    this.setupChild(item);
+    this.children.push(item);
+  }
+
+  add(item: INode[] | INode) {
+    if (Array.isArray(item)) {
+      this.extend(...item);
+    } else {
+      this.append(item);
+    }
+  }
+
+  setupChild(child: INode) {
+    /* istanbul ignore if */
+    if (!(child instanceof Node)) {
+      throw new InvalidArgumentsError(`Expecting node instance ${child}`);
+    }
+
+    /* istanbul ignore if */
+    if (!child) {
+      throw new InvalidArgumentsError('need child');
+    }
+
+    child.parent = this;
+    if (this.document) {
+      child.document = this.document;
+      if (typeof child.source === 'undefined') {
+        child.source = this.document.currentSource;
+      }
+      if (typeof child.line === 'undefined') {
+        child.line = this.document.currentLine;
       }
     }
+  }
 
-    setupChild(child) {
-      /* istanbul ignore if */
-      if (!(child instanceof Node)) {
-        throw new InvalidArgumentsError(`Expecting node instance ${child}`);
+  starttag(quoteAttr?: any) {
+    const q = quoteAttr || pseudoQuoteattr;
+
+    const parts = [this.tagname];
+    const attlist = this.attlist();
+    Object.keys(attlist).forEach((name) => {
+      const value: any | any[] = attlist[name];
+
+      let myVal = value;
+      let gotPart = false;
+      if (myVal === undefined) {
+        parts.push(`${name}="True"`);
+        gotPart = true;
+      } else if (Array.isArray(myVal)) {
+        const values = myVal.map(v => serialEscape(v.toString()));
+        myVal = values.join(' ');
+      } else {
+        myVal = value.toString();
       }
-
-      /* istanbul ignore if */
-      if (!child) {
-        throw new InvalidArgumentsError('need child');
+      if (!gotPart) {
+        myVal = quoteAttr(myVal);
+        parts.push(`${name}=${myVal}`);
       }
+    });
+    return `<${parts.join(' ')}>`;
+  }
 
-      child.parent = this;
-      if (this.document) {
-        child.document = this.document;
-        if (typeof child.source === 'undefined') {
-          child.source = this.document.currentSource;
-        }
-        if (typeof child.line === 'undefined') {
-          child.line = this.document.currentLine;
-        }
+  endtag(): string {
+    return `</${this.tagname}>`;
+  }
+
+  attlist(): any {
+    const attlist = this.nonDefaultAttributes();
+    return attlist;
+  }
+
+  nonDefaultAttributes(): any {
+    const atts: any = { };
+    Object.entries(this.attributes).forEach(([key, value]) => {
+      if (this.isNotDefault(key)) {
+        atts[key] = value;
       }
-    }
+    });
+    return atts;
+  }
 
-    starttag(quoteattr?: any) {
-        const q = quoteattr || pseudoQuoteattr;
-
-      const parts = [this.tagname];
-      const attlist = this.attlist();
-      Object.entries(attlist).forEach(([name, value]) => {
-        let myVal = value;
-        let gotPart = false;
-        if (myVal === undefined) {
-          parts.push(`${name}="True"`);
-          gotPart = true;
-        } else if (Array.isArray(myVal)) {
-          const values = myVal.map(v => serialEscape(v.toString()));
-          myVal = values.join(' ');
-        } else {
-          myVal = value.toString();
-        }
-        if (!gotPart) {
-          myVal = quoteattr(myVal);
-          parts.push(`${name}=${myVal}`);
-        }
-      });
-      return `<${parts.join(' ')}>`;
-    }
-
-    endtag() {
-      return `</${this.tagname}>`;
-    }
-
-    attlist() {
-      const attlist = this.nonDefaultAttributes();
-      return attlist;
-    }
-
-    nonDefaultAttributes() {
-      const atts = { };
-      Object.entries(this.attributes).forEach(([key, value]) => {
-        if (this.isNotDefault(key)) {
-          atts[key] = value;
-        }
-      });
-      return atts;
-    }
-
-    isNotDefault(key) {
-      if (Array.isArray(this.attributes[key])
+  isNotDefault(key: string) {
+    if (Array.isArray(this.attributes[key])
             && this.attributes[key].length === 0
             && this.listAttributes.includes(key)) {
-        return false;
-      }
-      return true;
+      return false;
     }
+    return true;
+  }
 
-    /*
+  /*
        Return the index of the first child whose class does *not* match.
 
        Parameters:
@@ -947,184 +1141,92 @@ class Element extends Node implements IElement {
        - `start`: Initial index to check.
        - `end`: Initial index to *not* check.
     */
-    firstChildNotMatchingClass(childClass, start = 0,
-      end = this.children.length) {
-      const myChildClass = Array.isArray(childClass) ? childClass : [childClass];
-      const r = this.children.slice(start,
-        Math.min(this.children.length, end))
-        .findIndex((child, index) => {
-          if (myChildClass.findIndex((c) => {
-            // if (typeof child === 'undefined') {
-            //     throw new Error(`child should not be undefined, index ${index}`);
-            // }
-            if (child instanceof c
+  firstChildNotMatchingClass(childClass: any | any[], start = 0,
+    end = this.children.length): number | undefined {
+    const myChildClass = Array.isArray(childClass) ? childClass : [childClass];
+    const r = this.children.slice(start,
+      Math.min(this.children.length, end))
+      .findIndex((child, index) => {
+        if (myChildClass.findIndex((c) => {
+          // if (typeof child === 'undefined') {
+          //     throw new Error(`child should not be undefined, index ${index}`);
+          // }
+          if (child instanceof c
                     || (this.children[index].classTypes.filter(
                       (c2 => c2.prototype instanceof c || c2 === c),
                     ))
                       .length) {
-              return true;
-            }
-            return false;
-          }) === -1) {
-            // console.log(`returning index ${index} ${nodeToXml(this.children[index])}`);
             return true;
           }
           return false;
-        });
+        }) === -1) {
+          // console.log(`returning index ${index} ${nodeToXml(this.children[index])}`);
+          return true;
+        }
+        return false;
+      });
 
-      if (r !== -1) {
-        return r;
-      }
-      return undefined;
+    if (r !== -1) {
+      return r;
     }
+    return undefined;
+  }
 
-    pformat(indent: string, level: number): string {
-      return `${indent.repeat(level)}${this.starttag()}\n${this.children.map(c => c.pformat(indent, level + 1)).join('')}`;
-    }
+  pformat(indent: string, level: number): string {
+    return `${indent.repeat(level)}${this.starttag()}\n${this.children.map(c => c.pformat(indent, level + 1)).join('')}`;
+  }
 
-    copy(): INode {
-      return null;
-    }
+  copy(): INode {
+    // @ts-ignore
+    return new this.constructor(this.rawsouce, this.children, this.attributes);
+  }
 
-    deepcopy(): INode {
-      return null;
-    }
+  deepcopy(): INode {
+    return this.copy();
+  }
 
-    walk(any): boolean {
-      return true;
-    }
-
-    /*
+  /*
       Update basic attributes ('ids', 'names', 'classes',
       'dupnames', but not 'source') from node or dictionary `dict_`.
     */
-    updateBasicAtts(dict_) {
-      const dict2 = dict_ instanceof Node ? dict_.attributes : dict_;
-      this.basicAttributes.forEach((att) => {
-        const v = att in dict2 ? dict2[att] : [];
-        this.appendAttrList(att, v);
-      });
-    }
 
-    /*
-      For each element in values, if it does not exist in self[attr], append
-      it.
+  /*
+    For each element in values, if it does not exist in self[attr], append
+    it.
 
-      NOTE: Requires self[attr] and values to be sequence type and the
-      former should specifically be a list.
-    */
-    appendAttrList(attr, values) {
-      // List Concatenation
-      values.forEach((value) => {
-        if ((this.attributes[attr].filter(v => v === value)).length === 0) {
-          this.attributes[attr].push(value);
-        }
-      });
-    }
+    NOTE: Requires self[attr] and values to be sequence type and the
+    former should specifically be a list.
+  */
 
-    /*
-      If self[attr] does not exist or force is True or omitted, set
-      self[attr] to value, otherwise do nothing.
-    */
-    replaceAttr(attr, value, force = true) {
-      // One or the other
-      if (force || this.attributes[attr] == null) {
-        this.attributes[attr] = value;
-      }
-    }
+  /*
+    If self[attr] does not exist or force is True or omitted, set
+    self[attr] to value, otherwise do nothing.
+  */
 
-    /*
-      If replace is true or this.attributes[attr] is null, replace
-      this.attributes[attr] with value.  Otherwise, do nothing.
-    */
-    copyAttrConsistent(attr: string, value: any, replace?: boolean) {
-      if (this.attributes[attr] !== value) {
-        this.replaceAttr(attr, value, replace);
-      }
-    }
+  /*
+    If replace is true or this.attributes[attr] is null, replace
+    this.attributes[attr] with value.  Otherwise, do nothing.
+  */
 
-    /*
-      Updates all attributes from node or dictionary `dict_`.
+  /*
+    Updates all attributes from node or dictionary `dict_`.
 
-        Appends the basic attributes ('ids', 'names', 'classes',
-        'dupnames', but not 'source') and then, for all other attributes in
-        dict_, updates the same attribute in self.  When attributes with the
-        same identifier appear in both self and dict_, the two values are
-        merged based on the value of update_fun.  Generally, when replace is
-        True, the values in self are replaced or merged with the values in
-        dict_; otherwise, the values in self may be preserved or merged.  When
-        and_source is True, the 'source' attribute is included in the copy.
+      Appends the basic attributes ('ids', 'names', 'classes',
+      'dupnames', but not 'source') and then, for all other attributes in
+      dict_, updates the same attribute in self.  When attributes with the
+      same identifier appear in both self and dict_, the two values are
+      merged based on the value of update_fun.  Generally, when replace is
+      True, the values in self are replaced or merged with the values in
+      dict_; otherwise, the values in self may be preserved or merged.  When
+      and_source is True, the 'source' attribute is included in the copy.
 
-        NOTE: When replace is False, and self contains a 'source' attribute,
-              'source' is not replaced even when dict_ has a 'source'
-              attribute, though it may still be merged into a list depending
-              on the value of update_fun.
-        NOTE: It is easier to call the update-specific methods then to pass
-              the update_fun method to this function.
-    */
-    updateAllAtts(dict_, updateFun = this.copyAttrConsistent,
-      replace = true, andSource = false) {
-      const dict2 = dict_ instanceof Node ? dict_.attributes : dict_;
-      // Include the source attribute when copying?
-      let filterFun;
-      if (andSource) {
-        filterFun = this.isNotListAttribute.bind(this);
-      } else {
-        filterFun = this.isNotKnownAttribute.bind(this);
-      }
-
-      // Copy the basic attributes
-      this.updateBasicAtts(dict2);
-
-      // Grab other attributes in dict_ not in self except the
-      // (All basic attributes should be copied already)
-      const atts = Object.keys(dict2).filter(filterFun);
-      atts.forEach((att) => {
-        updateFun.bind(this)(att, dict2[att], replace);
-      });
-    }
-
-    /**
-        Updates all attributes from node or dictionary `dict_`.
-
-        Appends the basic attributes ('ids', 'names', 'classes',
-        'dupnames', but not 'source') and then, for all other attributes in
-        dict_, updates the same attribute in self.  When attributes with the
-        same identifier appear in both self and dict_ whose values aren't each
-        lists and replace is True, the values in self are replaced with the
-        values in dict_; if the values from self and dict_ for the given
-        identifier are both of list type, then the two lists are concatenated
-        and the result stored in self; otherwise, the values in self are
-        preserved.  When and_source is True, the 'source' attribute is
-        included in the copy.
-
-        NOTE: When replace is False, and self contains a 'source' attribute,
-              'source' is not replaced even when dict_ has a 'source'
-              attribute, though it may still be merged into a list depending
-              on the value of update_fun.
-     */
-    updateAllAttsConcatenating(dict_, replace = true,
-      andSource = false) {
-      this.updateAllAtts(dict_, this.copyAttrConcatenate, replace,
-        andSource);
-    }
-
-    /**
-      Returns True if and only if the given attribute is NOT one of the
-      basic list attributes defined for all Elements.
-    */
-    isNotListAttribute(attr) {
-      return !(attr in this.listAttributes);
-    }
-
-    /**
-        Returns True if and only if the given attribute is NOT recognized by
-        this class.
-    */
-    isNotKnownAttribute(attr) {
-      return !(attr in this.knownAttributes);
-    }
-
+      NOTE: When replace is False, and self contains a 'source' attribute,
+            'source' is not replaced even when dict_ has a 'source'
+            attribute, though it may still be merged into a list depending
+            on the value of update_fun.
+      NOTE: It is easier to call the update-specific methods then to pass
+            the update_fun method to this function.
+  */
   /** Note that this Element has been referenced by its name
    `name` or id `id`. */
   noteReferencedBy(name: string, id: string) {
@@ -1138,32 +1240,12 @@ class Element extends Node implements IElement {
       byId.referenced = 1;
     }
   }
-
-  private copyAttrConcatenate(attr: string, value: any | any[], replace?: boolean) {
-  /*
-    """
-    If attr is an attribute of self and both self[attr] and value are
-    lists, concatenate the two sequences, setting the result to
-    self[attr].  If either self[attr] or value are non-sequences and
-    replace is True or self[attr] is None, replace self[attr] with value.
-        Otherwise, do nothing.
-        """*/
-      if(this.attributes[attr] !== value) {
-          if(Array.isArray(this.attributes[attr]) && Array.isArray(value)) {
-              this.appendAttrList(attr, value);
-          } else {
-              this.replaceAttr(attr, value, replace);
-          }
-      }
-    }
-
 }
 
 // =====================
 //  Decorative Elements
 // =====================
 class header extends Element {
-
   constructor(rawsource?: string, children?: INode[], attributes?: IAttributes) {
     super(rawsource, children, attributes);
     this.classTypes = [Decorative];
@@ -1204,20 +1286,23 @@ class decoration extends Element {
 
 class Text extends Node {
   pformat(indent: string, level: number): string {
-
-    throw new Error("Method not implemented.");
+    throw new Error('Method not implemented.');
   }
-    copy(): INode {
-    return this.constructor(this.data, this.rawsource);
-     }
-    deepcopy(): INode {
-    return this.copy();
 
-    }
-    walk(any: any): boolean {
-        throw new Error("Method not implemented.");
-    }
+  copy(): INode {
+    return this.constructor(this.data, this.rawsource);
+  }
+
+  deepcopy(): INode {
+    return this.copy();
+  }
+
+  walk(any: any): boolean {
+    throw new Error('Method not implemented.');
+  }
+
   private data: string;
+
   constructor(data: string, rawsource = '') {
     super();
     if (typeof data === 'undefined') {
@@ -1229,7 +1314,7 @@ class Text extends Node {
     this.children = [];
   }
 
-  _domNode(domroot) {
+  _domNode(domroot : any) {
     return domroot.createTextNode(this.data);
   }
 
@@ -1245,6 +1330,7 @@ class Text extends Node {
     return this.toString();
   }
 
+  // eslint-disable-next-line no-unused-vars
   add(iNodes: INode[] | INode): void {
     throw new UnimplementedError('');
   }
@@ -1273,38 +1359,60 @@ interface ITransformer {
  */
 class document extends Element implements Document {
   settings: Settings;
+
   reporter: IReporter;
 
   decoration?: decoration;
+
    transformMessages: string[];
+
   private parseMessages: string[];
-  private transformer: Transformer;
+
+  public transformer: Transformer;
+
   private substitutionDefs: any;
+
   private substitutionNames: any;
+
   private citationRefs: any;
+
   private citations: any[];
+
   private footnoteRefs: any;
-  private autofootnoteRefs: string[];
+
+  private autofootnoteRefs: INode[];
+
   private symbolFootnotes: any[];
+
   private footnotes: any[];
+
   private symbolFootnoteRefs: any[];
+
   private indirectTargets: any[];
+
   private autofootnotes: any[];
+
   private refIds: any;
+
   private refNames: any;
+
   nameIds: any;
+
   private ids: any;
+
   private nameTypes: any;
+
   private idStart: number;
+
   private autofootnoteStart: number;
+
   private symbolFootnoteStart: number;
+
   /** Private constructor */
-  constructor(settings, reporter, rawsource?: any, children?: INode[], attributes?: IAttributes) {
+  constructor(settings: Settings, reporter: IReporter, rawsource?: any, children?: INode[], attributes?: IAttributes) {
     super(rawsource, children, attributes);
     this.classTypes = [Root, Structural];
     this.tagname = 'document';
-    this.currentSource = undefined;
-    this.currentLine = undefined;
     this.settings = settings;
     this.reporter = reporter;
     this.indirectTargets = [];
@@ -1336,7 +1444,7 @@ class document extends Element implements Document {
   setId(node: INode, msgnode?: INode) {
     let msg;
     let id;
-    node.attributes.ids.forEach((myId) => {
+    node.attributes.ids.forEach((myId: string) => {
       if (myId in this.ids && this.ids[myId] !== node) {
         msg = this.reporter.severe(`Duplicate ID: "${myId}".`);
         if (msgnode) {
@@ -1349,7 +1457,7 @@ class document extends Element implements Document {
       let myBreak = false;
       /* eslint-disable-next-line no-restricted-syntax */
       for (name of node.attributes.names) {
-        id = this.settings.idPrefix + makeId(name);
+        id = this.settings.docutilsCoreOptionParser!.idPrefix + makeId(name);
         if (id && !(id in this.attributes.ids)) {
           myBreak = true;
           break;
@@ -1358,7 +1466,7 @@ class document extends Element implements Document {
       if (!myBreak) {
         id = '';
         while (!id || (id in this.attributes.ids)) {
-          id = (this.settings.idPrefix + this.settings.autoIdPrefix
+          id = (this.settings.docutilsCoreOptionParser!.idPrefix + this.settings.docutilsCoreOptionParser!.autoIdPrefix
                           + this.idStart);
           this.idStart += 1;
         }
@@ -1369,8 +1477,9 @@ class document extends Element implements Document {
     return id;
   }
 
-  setNameIdMap(node, id, msgnode, explicit?: boolean) {
-    node.attributes.names.forEach((name) => {
+  setNameIdMap(node: INode, id: string, msgnode: INode,
+    explicit?: boolean) {
+    node.attributes.names.forEach((name: string) => {
       if (name in this.nameIds) {
         this.setDuplicateNameId(node, id, name, msgnode, explicit);
       } else {
@@ -1380,7 +1489,7 @@ class document extends Element implements Document {
     });
   }
 
-  setDuplicateNameId(node, id, name, msgnode, explicit) {
+  setDuplicateNameId(node: INode, id: string, name: string, msgnode: INode, explicit?: boolean) {
     const oldId = this.nameIds[name];
     const oldExplicit = this.nameTypes[name];
     this.nameTypes[name] = oldExplicit || explicit;
@@ -1453,25 +1562,25 @@ class document extends Element implements Document {
 
   noteRefname(node: INode) {
     const a = [node];
-    if (this.refNames[node.refname]) {
-      this.refNames[node.refname].push(node);
+    if (this.refNames[node.refname!]) {
+      this.refNames[node.refname!].push(node);
     } else {
-      this.refNames[node.refname] = a;
+      this.refNames[node.refname!] = a;
     }
   }
 
   noteRefId(node: INode) {
     const a = [node];
-    if (this.refIds[node.refid]) {
-      this.refIds[node.refid].push(node);
+    if (this.refIds[node.refid!]) {
+      this.refIds[node.refid!].push(node);
     } else {
-      this.refIds[node.refid] = a;
+      this.refIds[node.refid!] = a;
     }
   }
 
   noteIndirectTarget(target: INode) {
     this.indirectTargets.push(target);
-    // check this fix me
+    // check this fixme
     if (target.names) {
       this.noteRefname(target);
     }
@@ -1481,57 +1590,57 @@ class document extends Element implements Document {
     this.setId(target);
   }
 
-  noteAutofootnote(footnote) {
+  noteAutofootnote(footnote: INode) {
     this.setId(footnote);
     this.autofootnotes.push(footnote);
   }
 
-  noteAutofootnoteRef(ref) {
+  noteAutofootnoteRef(ref: INode) {
     this.setId(ref);
     this.autofootnoteRefs.push(ref);
   }
 
-  noteSymbolFootnote(footnote) {
+  noteSymbolFootnote(footnote: INode) {
     this.setId(footnote);
     this.symbolFootnotes.push(footnote);
   }
 
-  noteSymbolFootnoteRef(ref) {
+  noteSymbolFootnoteRef(ref: INode) {
     this.setId(ref);
     this.symbolFootnoteRefs.push(ref);
   }
 
-  noteFootnote(footnote) {
+  noteFootnote(footnote: INode) {
     this.setId(footnote);
     this.footnotes.push(footnote);
   }
 
-  noteFootnoteRef(ref) {
+  noteFootnoteRef(ref: INode) {
     this.setId(ref);
     const a = [ref];
-    if (this.footnoteRefs[ref.refname]) {
-      this.footnoteRefs[ref.refname].push(ref);
+    if (this.footnoteRefs[ref.refname!]) {
+      this.footnoteRefs[ref.refname!].push(ref);
     } else {
-      this.footnoteRefs[ref.refname] = a;
+      this.footnoteRefs[ref.refname!] = a;
     }
     this.noteRefname(ref);
   }
 
-  noteCitation(citation) {
+  noteCitation(citation: INode) {
     this.citations.push(citation);
   }
 
-  noteCitationRef(ref) {
+  noteCitationRef(ref: INode) {
     this.setId(ref);
-    if (this.citationRefs[ref.refname]) {
-      this.citationRefs[ref.refname].push(ref);
+    if (this.citationRefs[ref.refname!]) {
+      this.citationRefs[ref.refname!].push(ref);
     } else {
-      this.citationRefs[ref.refname] = [ref];
+      this.citationRefs[ref.refname!] = [ref];
     }
     this.noteRefname(ref);
   }
 
-  noteSubstitutionDef(subdef, defName, msgnode) {
+  noteSubstitutionDef(subdef: INode, defName: string, msgnode: INode) {
     const name = whitespaceNormalizeName(defName);
     if (Object.keys(this.substitutionDefs).includes(name)) {
       const msg = this.reporter.error(`Duplicate substitution definition name: "${name}".`, { baseNode: subdef });
@@ -1545,19 +1654,19 @@ class document extends Element implements Document {
     this.substitutionNames[fullyNormalizeName(name)] = name;
   }
 
-  noteSubstitutionRef(subref, refname) {
+  noteSubstitutionRef(subref: INode, refname: string) {
     subref.refname = whitespaceNormalizeName(refname);
   }
 
-  notePending(pending, priority) {
+  notePending(pending: INode, priority: number) {
     this.transformer.addPending(pending, priority);
   }
 
-  noteParseMessage(message) {
+  noteParseMessage(message: any) {
     this.parseMessages.push(message);
   }
 
-  noteTransformMessage(message: string) {
+  noteTransformMessage(message: any) {
     this.transformMessages.push(message);
   }
 
@@ -1577,7 +1686,7 @@ class document extends Element implements Document {
       if (index === undefined) {
         this.children.push(this.decoration);
       } else {
-        this.children.splice(index, 0, this.decoration as Node);
+        this.children.splice(index, 0, this.decoration as INode);
       }
     }
     return this.decoration;
@@ -1836,10 +1945,14 @@ class bullet_list extends Element {
 /* eslint-disable-next-line camelcase */
 class enumerated_list extends Element {
   start?: number;
+
   suffix?: string;
+
   prefix?: string;
+
   enumtype: any;
-/* eslint-disable-next-line no-useless-constructor */
+
+  /* eslint-disable-next-line no-useless-constructor */
   // @ts-ignore
   constructor(...args) {
   // @ts-ignore
@@ -2214,8 +2327,9 @@ class substitution_definition extends TextElement {
   }
 }
 class target extends TextElement {
-  indirectReferenceName: string;
-/* eslint-disable-next-line no-useless-constructor */
+  indirectReferenceName: string = '';
+
+  /* eslint-disable-next-line no-useless-constructor */
   // @ts-ignore
   constructor(...args) {
   // @ts-ignore
@@ -2288,6 +2402,7 @@ class table extends Element {
   }
 }
 class tgroup extends Element {
+  stubs?: any[];
 /* eslint-disable-next-line no-useless-constructor */
   // @ts-ignore
   constructor(...args) {
@@ -2324,6 +2439,7 @@ class tbody extends Element {
   }
 }
 class row extends Element {
+  column?: number;
 /* eslint-disable-next-line no-useless-constructor */
   // @ts-ignore
   constructor(...args) {
@@ -2344,7 +2460,7 @@ class entry extends Element {
 
 /* eslint-disable-next-line camelcase */
 class system_message extends Element {
-  constructor(message, children, attributes) {
+  constructor(message: any, children: INode[], attributes: IAttributes) {
     super((attributes.rawsource || ''),
       (message ? [new paragraph('', message), ...children] : children),
       attributes);
@@ -2379,13 +2495,14 @@ class system_message extends Element {
  */
 class pending extends Element {
   details: any;
+
   transform: any;
 
   constructor(transform: any,
-  details: any,
-              rawsource = '',
-children: INode[],
-attributes: IAttributes) {
+    details: any,
+    rawsource = '',
+    children: INode[],
+    attributes: IAttributes) {
     super(rawsource, children, attributes);
     /** The `docutils.transforms.Transform` class implementing the pending
      operation. */
@@ -2395,7 +2512,7 @@ attributes: IAttributes) {
     this.details = details || {};
   }
 
-// fixme implement this
+  // fixme implement this
   /*
     def pformat(self, indent='    ', level=0):
         internals = [
@@ -2623,7 +2740,7 @@ class generated extends TextElement {
 /**
  * convert a node to XML
  */
-function nodeToXml(node) {
+function nodeToXml(node: INode): string {
   if (node instanceof Text) {
     const text = xmlescape(node.astext());
     return text;

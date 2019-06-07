@@ -11,19 +11,20 @@ export class StringInput extends Input {
         this.sourcePath = '<string>';
     }
 
-    read(cb) {
+    read(cb: any) {
         cb(undefined, this.source);
     }
 }
 
 export class StringOutput extends Output {
+    // @ts-ignore
     constructor(destination, destinationPath, encoding, errorHandler) {
         super(destination, destinationPath, encoding, errorHandler);
         this.defaultDestinationPath = '<string>';
 
     }
 
-    write(data) {
+    write(data: string) {
         // self.destination = self.encode(data) // fixme encoding
         if (Array.isArray(data)) {
             data = JSON.stringify(data);
@@ -37,7 +38,7 @@ export class FileInput extends Input {
     private _stderr: ErrorOutput;
     private autoClose: any;
     /* ew, too much logic for a constructor, with side effects etc! */
-    constructor(args) {
+    constructor(args: any) {
         super(args);
         const {
         /* eslint-disable-next-line no-unused-vars */

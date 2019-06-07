@@ -1,8 +1,9 @@
 import Writer from '../writers/HtmlBase';
+import {Document} from "../types";
 
-function htmlTranslate(document) {
+function htmlTranslate(document: Document) {
     const writer = new Writer();
-    const output = writer.write(document, r => r);
+    const output = writer.write(document, (r: any) => r);
     if (typeof output === 'undefined') {
         throw new Error('undefined output');
     }

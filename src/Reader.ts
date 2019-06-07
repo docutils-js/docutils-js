@@ -9,9 +9,9 @@ import {Settings} from "../gen/Settings";
 const __docformat__ = 'reStructuredText';
 
 export default class Reader extends Component {
-    document: Document;
+    document?: Document;
     protected parseFn: any;
-    private settings: Settings;
+    private settings?: Settings;
     protected source: any;
     protected input: any;
     protected parser: any;
@@ -22,7 +22,8 @@ export default class Reader extends Component {
 //               universal.ExportInternals, universal.StripComments ];
     }
 
-    constructor(args) {
+    constructor(args: { parser: any, parseFn: any, parserName: string, debugFn?: any,
+    debug?: boolean }) {
         super();
         const { parser, parseFn, parserName } = args;
         this.componentType = 'reader';
@@ -30,7 +31,7 @@ export default class Reader extends Component {
         this.parser = parser;
         this.parseFn = parseFn;
         this.debugFn = args.debugFn;
-        this.debug = args.debug;
+        this.debug = args.debug || false;
         if (parser === undefined) {
             if (parserName) {
                 this.setParser(parserName);
@@ -40,7 +41,7 @@ export default class Reader extends Component {
         this.input = undefined;
     }
 
-    setParser(parserName) {
+    setParser(parserName: string) {
         const ParserClass = parsers.getParserClass(parserName);
         this.parser = new ParserClass({
  debug: this.debug,
@@ -54,7 +55,7 @@ export default class Reader extends Component {
       *   test123
       *
       */
-    read(source, parser, settings, cb) {
+    read(source: any, parser: any, settings: Settings, cb: any) {
         this.source = source;
         if (!this.parser) {
             this.parser = parser;
@@ -64,7 +65,7 @@ export default class Reader extends Component {
             throw new Error('Need source');
         }
 
-        this.source.read((error, data) => {
+        this.source.read((error: Error, data: string) => {
                              if (error) {
                                  cb(error);
                                  return;
@@ -76,7 +77,7 @@ export default class Reader extends Component {
     }
 
     /* read method without callbcks and other junk */
-    read2(input, settings) {
+    read2(input: any, settings: Settings) {
         this.input = input;
         this.settings = settings;
         this.parse();
@@ -98,8 +99,8 @@ export default class Reader extends Component {
             const document = this.parseFn(this.input);
             this.document = document;
         }
-        this.document.currentSource = undefined;
-        this.document.currentLine = undefined;
+        this.document!.currentSource = '';
+        this.document!.currentLine = 0;
     }
 
     newDocument() {
@@ -107,7 +108,7 @@ export default class Reader extends Component {
  sourcePath:
                                        this.source && this.source.sourcePath,
 },
-                                     this.settings);
+                                     this.settings!);
         return document;
     }
 }

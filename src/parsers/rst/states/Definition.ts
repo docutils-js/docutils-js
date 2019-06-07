@@ -9,9 +9,9 @@ class Definition extends SpecializedText {
     }
 
     /* eslint-disable-next-line no-unused-vars */
-    indent(match, context, nextState) {
+    indent(match: any, context: any[], nextState: any) {
         const [itemNode, blankFinish] = this.definition_list_item(context);
-        this.parent.add(itemNode);
+        this.parent!.add(itemNode);
         this.blankFinish = blankFinish;
         return [[], 'DefinitionList', []];
     }

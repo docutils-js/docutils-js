@@ -9,7 +9,7 @@ const __version__ = '';
  */
 export default class Writer extends Component {
     public parts: any;
-    public document: Document;
+    public document?: Document;
     private language: any;
     private destination: any;
     protected output: any | any[];
@@ -24,7 +24,7 @@ export default class Writer extends Component {
 
     write(document: Document, destination: any) {
         this.document = document;
-        this.language = getLanguage(document.settings.languageCode,
+        this.language = getLanguage(document.settings.docutilsCoreOptionParser!.languageCode,
                                              document.reporter);
         this.destination = destination;
         this.translate();
@@ -46,7 +46,7 @@ export default class Writer extends Component {
 
     assembleParts() {
         this.parts.whole = this.output;
-        this.parts.encoding = this.document.settings.outputEncoding;
+        this.parts.encoding = this.document!.settings.docutilsCoreOptionParser!.outputEncoding;
         this.parts.version = __version__;
     }
 }

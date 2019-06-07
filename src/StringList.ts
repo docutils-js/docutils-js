@@ -22,7 +22,7 @@ class StringList extends ViewList {
         }
     }
 
-    getTextBlock(start, flushLeft) {
+    getTextBlock(start: number, flushLeft: boolean = false) {
         let end = start;
         const last = this.length;
         while (end < last) {
@@ -130,7 +130,7 @@ const cArgs = { ... args };
 
     }
 
-    replace(old, newStr) {
+    replace(old: any, newStr: string) {
         for (let i = 0; i < this.length; i += 1) {
             this[i] = this[i].replace(old, newStr); // fix me !!
         }

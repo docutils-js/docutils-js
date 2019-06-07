@@ -1,3 +1,5 @@
+import {INode} from "./types";
+
 export class UnimplementedError extends Error {
     // @ts-ignore
     constructor(message?: string, ...params) {
@@ -12,7 +14,7 @@ export class UnimplementedError extends Error {
 
 
 export class EOFError extends Error {
-    constructor(...params) {
+    constructor(...params: any[]) {
         super(...params);
         /* instanbul ignore else */
         if (Error.captureStackTrace) {
@@ -23,7 +25,7 @@ export class EOFError extends Error {
 
 
 export class InvalidArgumentsError extends Error {
-    constructor(message, ...params) {
+    constructor(message: any, ...params: any[]) {
         super(...params);
         this.message = message;
         /* instanbul ignore else */
@@ -37,9 +39,9 @@ export const InvalidArgumentError = InvalidArgumentsError;
 
 
 export class SystemMessage extends Error {
-msg: string;
+msg: INode;
 level: number;
-    constructor(msg, level, ...params) {
+    constructor(msg: INode, level: number, ...params: any[]) {
         super(...params);
         this.message = msg.astext();
         this.msg = msg;
@@ -53,9 +55,10 @@ level: number;
 
 export class ApplicationError extends Error {
     error: Error;
-    args?: any[];
-    constructor(...params) {
+    args: any[];
+    constructor(...params: any[]) {
         super(...params);
+        this.args = params;
         const [message, kwargs] = params; // eslint-disable-line no-unused-vars
         this.error = kwargs ? kwargs.error : undefined;
         /* instanbul ignore else */
@@ -66,7 +69,7 @@ export class ApplicationError extends Error {
 }
 
 export class DataError extends ApplicationError {
-    constructor(...params) {
+    constructor(...params: any[]) {
         super(...params);
         /* instanbul ignore else */
         if (Error.captureStackTrace) {
@@ -76,7 +79,7 @@ export class DataError extends ApplicationError {
 }
 
 export class AssertError extends Error {
-    constructor(message, ...params) {
+    constructor(message: string, ...params: any[]) {
         super(...params);
         /* instanbul ignore else */
         if (Error.captureStackTrace) {

@@ -14,8 +14,8 @@ class LineBlock extends SpecializedBody {
     line_block(match, context, nextState) {
         const lineno = this.rstStateMachine.absLineNumber();
         const [line, messages, blankFinish] = this.line_block_line(match, lineno);
-        this.parent.add(line);
-        this.parent.parent.add(messages);
+        this.parent!.add(line);
+        this.parent!.parent!.add(messages);
         this.blankFinish = blankFinish;
         return [[], nextState, []];
     }

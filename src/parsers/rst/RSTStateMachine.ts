@@ -6,9 +6,9 @@ import {IElement, StateMachineRunArgs} from "../../types";
 
 class RSTStateMachine extends StateMachineWS {
     matchTitles?: boolean;
-    node: IElement;
+    node?: IElement;
     debugFn: any;
-    debug: boolean;
+    debug: boolean = false;
     run(args: StateMachineRunArgs) {
         const cArgs = { ... args };
         /* istanbul ignore if */
@@ -25,7 +25,7 @@ class RSTStateMachine extends StateMachineWS {
         if (cArgs.matchTitles === undefined) {
             cArgs.matchTitles = true;
         }
-        this.language = languages.getLanguage(document.settings.languageCode, document.reporter);
+        this.language = languages.getLanguage(document.settings.docutilsCoreOptionParser!.languageCode, document.reporter);
         this.matchTitles = cArgs.matchTitles;
         /* istanbul ignore next */
         if (cArgs.inliner === undefined) {

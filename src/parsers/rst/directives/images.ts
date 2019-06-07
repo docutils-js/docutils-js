@@ -8,12 +8,12 @@ const __docformat__ = 'reStructuredText';
 const directives = {};
 
 class Image extends Directive {
-    private finalArgumentWhitespace: boolean;
-    private alignHValues: string[];
-    private alignVValues: string[];
-    private requiredArguments: number;
-    private optionalArguments: number;
-    private alignValues: string[];
+    private finalArgumentWhitespace?: boolean;
+    private alignHValues?: string[];
+    private alignVValues?: string[];
+    private requiredArguments?: number;
+    private optionalArguments?: number;
+    private alignValues?: string[];
     _init() {
         super._init();
         this.alignHValues = ['left', 'center', 'right'];

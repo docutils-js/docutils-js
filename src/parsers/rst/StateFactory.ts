@@ -1,5 +1,5 @@
 import * as RSTStates from './RSTStates';
-import {IStateFactory} from "../../types";
+import {IStateFactory, IStateMachine} from "../../types";
 
 class StateFactory implements IStateFactory {
     private stateClasses: any[];
@@ -101,7 +101,7 @@ class StateFactory implements IStateFactory {
     }
 
     createState(stateName: string,
- stateMachine?) {
+ stateMachine?: IStateMachine) {
         if (typeof stateName === 'undefined') {
             throw new Error('Need argument stateName');
         }
@@ -113,6 +113,7 @@ class StateFactory implements IStateFactory {
         if (!Object.prototype.hasOwnProperty.call(RSTStates, stateName)) {
             throw new Error(`Unknown state ${stateName}`);
         }
+        // @ts-ignore
         const StateClass = RSTStates[stateName];
         return new StateClass({ stateMachine });
     }
@@ -121,7 +122,7 @@ class StateFactory implements IStateFactory {
         return this.stateClasses;
     }
 
-    withStateClasses(stateClasses) {
+    withStateClasses(stateClasses: any[]) {
         return new StateFactory({ stateClasses });
     }
 }

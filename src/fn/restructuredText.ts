@@ -1,8 +1,9 @@
 import * as statemachine from '../StateMachine';
 import RSTStateMachine from '../parsers/rst/RSTStateMachine';
 import StateFactory from '../parsers/rst/StateFactory';
+import {Document} from "../types";
 
-function parse(inputstring, document) {
+function parse(inputstring: string, document: Document) {
     const initialState = 'Body';
     const stateMachine = new RSTStateMachine({
         stateFactory: new StateFactory(),
@@ -12,7 +13,7 @@ function parse(inputstring, document) {
     });
             const inputLines = statemachine.string2lines(
             inputstring, {
- tabWidth: document.settings.tabWidth,
+ tabWidth: document.settings.docutilsParsersRstParser!.tabWidth,
                            convertWhitespace: true,
 },
 );

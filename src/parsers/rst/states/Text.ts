@@ -21,19 +21,19 @@ class Text extends RSTState {
     }
 
     /* eslint-disable-next-line no-unused-vars */
-    blank(match, context, nextState) {
+    blank(match: any, context: any[], nextState: any) {
         const [paragraph, literalNext] = this.paragraph(
         context, this.rstStateMachine.absLineNumber() - 1,
 );
-        this.parent.add(paragraph);
+        this.parent!.add(paragraph);
         if (literalNext) {
-            this.parent.add(this.literal_block());
+            this.parent!.add(this.literal_block());
         }
 
         return [[], 'Body', []];
     }
 
-    eof(context) {
+    eof(context: any[]): any[] {
         if ((context != null && !isIterable(context)) || context.length > 0) {
             this.blank(null, context, null);
         }
@@ -42,12 +42,12 @@ class Text extends RSTState {
 
     /** Definition list item. */
     /* eslint-disable-next-line no-unused-vars */
-    indent(match, context, nextState) {
+    indent(match: any, context: any[], nextState: any) {
         const definitionlist = new nodes.definition_list();
         const [definitionlistitem, blankFinish1] = this.definition_list_item(context);
         let blankFinish = blankFinish1;
         definitionlist.add(definitionlistitem);
-        this.parent.add(definitionlist);
+        this.parent!.add(definitionlist);
         const offset = this.rstStateMachine.lineOffset + 1;
         const [newlineOffset, blankFinish2] = this.nestedListParse(
             this.rstStateMachine.inputLines.slice(offset),
@@ -62,12 +62,12 @@ blankFinishState: 'Definition',
         blankFinish = blankFinish2;
         this.gotoLine(newlineOffset);
         if (!blankFinish) {
-            this.parent.add(this.unindentWarning('Definition list'));
+            this.parent!.add(this.unindentWarning('Definition list'));
         }
         return [[], 'Body', []];
     }
 
-    underline(match, context, nextState) {
+    underline(match: any, context: any[], nextState: any): any[] {
         /* istanbul ignore if */
         if (!Array.isArray(context)) {
             throw new Error('Context should be array');
@@ -80,16 +80,16 @@ blankFinishState: 'Definition',
         if (columnWidth(title) > underline.length) {
             if (underline.length < 4) {
                 if (this.rstStateMachine.matchTitles) {
-                    const msg = this.reporter.info(
+                    const msg = this.reporter!.info(
                         'Possible title underline, too short for the title.\n'
                         + "Treating it as ordinary text because it's so short.", [], { line: lineno },
 );
-                    this.parent.add(msg);
+                    this.parent!.add(msg);
                     throw new TransitionCorrection('text');
                 }
             } else {
                 const blocktext = `${context[0]}\n${this.rstStateMachine.line}`;
-                const msg = this.reporter.warning(
+                const msg = this.reporter!.warning(
                     'Title underline too short.',
                     [new nodes.literal_block(blocktext, blocktext)], { line: lineno },
 );
@@ -100,12 +100,12 @@ blankFinishState: 'Definition',
             const blocktext = `${context[0]}\n${this.rstStateMachine.line}`;
             // We need get_source_and_line() here to report correctly
             const [src, srcline] = this.rstStateMachine.getSourceAndLine();
-            const msg = this.reporter.severe(
+            const msg = this.reporter!.severe(
                 'Unexpected section title.',
                 [new nodes.literal_block(blocktext, blocktext)], { source: src, line: srcline },
 );
-            this.parent.add(messages);
-            this.parent.add(msg);
+            this.parent!.add(messages);
+            this.parent!.add(msg);
             return [[], nextState, []];
         }
         const style = underline[0];
@@ -128,7 +128,7 @@ blankFinishState: 'Definition',
                 let src; let
 srcline;
                 [block, src, srcline] = error.args;
-                msg = this.reporter.error('Unexpected indentation.',
+                msg = this.reporter!.error('Unexpected indentation.',
                                           { source: src, line: srcline });
             } else {
                 throw error;
@@ -136,9 +136,9 @@ srcline;
         }
         const lines = [context, ...(block || [])];
         const [pelems, literalNext] = this.paragraph(lines, startline);
-        this.parent.add(pelems);
+        this.parent!.add(pelems);
         if (msg) {
-            this.parent.add(msg);
+            this.parent!.add(msg);
         }
         if (literalNext) {
             try {
@@ -150,7 +150,7 @@ srcline;
                     throw error;
                 }
             }
-            this.parent.add(this.literal_block());
+            this.parent!.add(this.literal_block());
         }
         return [[], nextState, []];
     }
@@ -201,7 +201,7 @@ srcline;
     }
 
     /* eslint-disable-next-line camelcase */
-    definition_list_item(termline) {
+    definition_list_item(termline: string[]) {
         /* eslint-disable-next-line no-unused-vars */
         const [indented, indent, lineOffset, blankFinish] = this.rstStateMachine.getIndented({});
         const itemnode = new nodes.definition_list_item(
@@ -215,7 +215,7 @@ srcline;
         const definition = new nodes.definition('', messages);
         itemnode.add(definition);
         if (termline[0].endsWith('::')) {
-            definition.add(this.reporter.info(
+            definition.add(this.reporter!.info(
                 'Blank line missing before literal block (after the "::")? '
                     + 'Interpreted as a definition list item.', [],
                 { line: lineno + 1 },
@@ -226,7 +226,7 @@ srcline;
         return [itemnode, blankFinish];
     }
 
-    term(lines, lineno) {
+    term(lines: any[], lineno: number) {
         const [textNodes, messages] = this.inline_text(lines[0], lineno);
         const termNode = new nodes.term(lines[0]);
    //     [termNode.source,

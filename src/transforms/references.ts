@@ -4,10 +4,6 @@ import * as nodes from '../nodes';
 export const __docformat__ = 'reStructuredText';
 
 export class PropagateTargets extends Transform {
-    _init(...args) {
-        super._init(...args);
-        //this.defaultPriority = 260;
-    }
 
     apply() {
         /* eslint-disable-next-line no-unused-vars */

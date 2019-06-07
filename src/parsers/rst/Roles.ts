@@ -1,13 +1,15 @@
 import * as nodes from '../../nodes';
 import * as directives from './directives';
+import Inliner from "./Inliner";
+import {IReporter} from "../../types";
 
 const DEFAULT_INTERPRETED_ROLE = 'title-reference';
 
-const roleRegistry = {};
-const roles = {};
+const roleRegistry: any = {};
+const roles: any = {};
 
 
-function setClasses(options) {
+function setClasses(options: any) {
     if ('class' in options) {
         options.classes = options.class;
         delete options.class;
@@ -23,7 +25,7 @@ class GenericRole {
     }
 
     /* eslint-disable-next-line no-unused-vars */
-    invoke(myRole, rawtext, text, lineno, inliner, options, content) {
+    invoke(myRole: any, rawtext: any, text: any, lineno: number, inliner: Inliner, options: any, content: any) {
         const myOptions = options || {};
         setClasses(myOptions);
         return [[new this.nodeClass(rawtext, unescape(text), [], myOptions)], []];
@@ -33,7 +35,7 @@ class GenericRole {
  Add customization options to role functions, unless explicitly set or
  disabled.
  */
-function setImplicitOptions(roleFn) {
+function setImplicitOptions(roleFn: any) {
     if (!Object.prototype.hasOwnProperty.call(roleFn, 'options') || roleFn.options == null) {
         roleFn.options = { class: directives.class_option };
     } else if (!('class' in roleFn.options)) {
@@ -49,8 +51,9 @@ function setImplicitOptions(roleFn) {
       - `name`: The local or language-dependent name of the interpreted role.
       - `roleFn`: The role function.  See the module docstring.
     */
-function registerLocalRole(name, roleFn) {
+function registerLocalRole(name: string, roleFn: any) {
     setImplicitOptions(roleFn);
+    // @ts-ignore
     roles[name] = roleFn;
 }
 
@@ -61,12 +64,13 @@ function registerLocalRole(name, roleFn) {
  language, check English.  Return a 2-tuple: role function (``None`` if the
  named role cannot be found) and a list of system messages.
  */
-function roleInterface(roleName, languageModule, lineno, reporter) {
+function roleInterface(roleName: string, languageModule: any, lineno: number, reporter: IReporter) {
 const normname = roleName.toLowerCase();
-    const messages = [];
-    const msgText = [];
+    const messages: any[]= [];
+    const msgText: any[] = [];
 
     if (normname in roles) {
+        // @ts-ignore
         return [roles[normname], messages];
     }
 
@@ -111,6 +115,7 @@ const normname = roleName.toLowerCase();
 
     // # Look the role up in the registry, and return it.
     if (canonicalname in roleRegistry) {
+        // @ts-ignore
         const roleFn = roleRegistry[canonicalname];
         registerLocalRole(normname, roleFn);
         return [roleFn, messages];
@@ -125,14 +130,14 @@ Register an interpreted text role by its canonical name.
   - `name`: The canonical name of the interpreted role.
   - `roleFn`: The role function.  See the module docstring.
 */
-function registerCanonicalRole(name, roleFn) {
+function registerCanonicalRole(name: string, roleFn: any) {
     setImplicitOptions(roleFn);
     roleRegistry[name] = roleFn;
 }
 
 
 /** For roles which simply wrap a given `node_class` around the text. */
-function registerGenericRole(canonicalName, nodeClass) {
+function registerGenericRole(canonicalName: string, nodeClass: any) {
     const myRole = new GenericRole(canonicalName, nodeClass);
     registerCanonicalRole(canonicalName, myRole);
 }

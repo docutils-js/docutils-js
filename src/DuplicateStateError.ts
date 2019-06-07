@@ -1,7 +1,7 @@
 class DuplicateStateError extends Error {
     state: any;
     message: string;
-    constructor(state, ...params) {
+    constructor(state: string, ...params: any[]) {
         super(...params);
         if (Error.captureStackTrace) {
             Error.captureStackTrace(this, DuplicateStateError);

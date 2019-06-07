@@ -9,13 +9,13 @@ class ViewList extends Array {
 
     protected parentOffset: number;
 
-    public parent: ViewList;
+    public parent?: ViewList;
 
     constructor(initlist: any[], source?: string, items?: any[], parent?: any, parentOffset?: number) {
         super(...initlist);
         this.items = [];
         this.parent = parent;
-        this.parentOffset = parentOffset;
+        this.parentOffset = parentOffset || 0;
 
         if (initlist instanceof ViewList) {
 //          this.data = [...initlist.data]
@@ -33,11 +33,11 @@ class ViewList extends Array {
         }
     }
 
-    source(i) {
+    source(i: number) {
         return this.info(i)[0];
     }
 
-    offset(i) {
+    offset(i: number) {
         return this.info(i)[1];
     }
 
@@ -45,7 +45,7 @@ class ViewList extends Array {
         this.parent = undefined;
     }
 
-    splice(index, num, ...elems) {
+    splice(index: number, num: number, ...elems: any[]) {
 //        console.log(`enter slice ${index} ${num} [${elems.length}]`);
 //        console.log(`input: ${JSON.stringify(this)}`);
         const returnAry = [];
@@ -75,7 +75,7 @@ class ViewList extends Array {
         return new this.constructor(initList);
     }
 
-    info(i) {
+    info(i: number) {
         if (i === this.items.length && this.items.length > 0) {
             return [this.items[i - 1][0], null];
         }

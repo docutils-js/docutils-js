@@ -18,6 +18,7 @@ class SubstitutionDef extends Body {
 
 /** Return a list of nodes. */
     /* eslint-disable-next-line camelcase,no-unused-vars */
+    // @ts-ignore
     literal_block(match, context, nextState) {
         /* eslint-disable-next-line no-unused-vars */
         const [indented, indent, offset, blankFinish] = this.rstStateMachine.getIndented({});
@@ -62,12 +63,13 @@ class SubstitutionDef extends Body {
     }
 
     /* eslint-disable-next-line camelcase,no-unused-vars */
+    // @ts-ignore
     embedded_directive(match, context, nextState) {
         const [nodelist, blankFinish] = this.directive(
             match.result,
-            { alt: this.parent.attributes.names[0] },
+            { alt: this.parent!.attributes.names[0] },
 );
-        this.parent.add(nodelist);
+        this.parent!.add(nodelist);
         if (!this.rstStateMachine.atEof()) {
             this.blankFinish = blankFinish;
         }

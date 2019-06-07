@@ -1,5 +1,6 @@
 import FieldList from './FieldList';
 import * as nodes from '../../../nodes';
+import {INode} from "../../../types";
 
 class ExtensionOptions extends FieldList {
     /* Parse field_list fields for extension options. */
@@ -7,7 +8,7 @@ class ExtensionOptions extends FieldList {
 
     /** Override `Body.parse_field_body` for simpler parsing. */
     /* eslint-disable-next-line camelcase */
-    parse_field_body(indented, offset, node) {
+    parse_field_body(indented: string[], offset: number, node: INode) {
         const lines = [];
         /* eslint-disable-next-line no-restricted-syntax */
         for (const line of [...indented, '']) {

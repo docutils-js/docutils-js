@@ -8,11 +8,7 @@ import RSTStateMachine from "../RSTStateMachine";
 
 
 class Line extends SpecializedText {
-    private eofcheck: number;
-    _init(stateMachine: RSTStateMachine, args: RSTStateArgs) {
-        super._init(stateMachine, args);
-        this.eofcheck = 1;
-    }
+    private eofcheck: boolean = true;
 
     // @ts-ignore
     indent(...args) {
@@ -32,9 +28,9 @@ class Line extends SpecializedText {
             const lineno = this.rstStateMachine.absLineNumber() - 1;
             const transition = new nodes.transition(context[0]);
             transition.line = lineno;
-            this.parent.add(transition);
+            this.parent!.add(transition);
         }
-        this.eofcheck = 1;
+        this.eofcheck = true;
         return [];
     }
 
@@ -50,12 +46,13 @@ class Line extends SpecializedText {
         const transition = new nodes.transition(marker);
         transition.source = src;
         transition.line = srcline - 1;
-        this.parent.add(transition);
+        this.parent!.add(transition);
         return [[], 'Body', []];
     }
 
     /** Potential over- & underlined title. */
     /* eslint-disable-next-line no-unused-vars */
+    // @ts-ignore
     text(match, context, nextState) {
         const lineno = this.rstStateMachine.absLineNumber() - 1;
         let overline = context[0];
@@ -69,12 +66,12 @@ class Line extends SpecializedText {
                 if (overline.trimEnd().length < 4) {
                     this.shortOverline(context, blocktext, lineno, 2);
                 } else {
-                    const msg = this.reporter.severe(
+                    const msg = this.reporter!.severe(
                         'Incomplete section title.',
                         [new nodes.literal_block(blocktext, blocktext)],
                         { line: lineno },
 );
-                    this.parent.add(msg);
+                    this.parent!.add(msg);
                     return [[], 'Body', []];
                 }
             } else {
@@ -89,12 +86,12 @@ class Line extends SpecializedText {
             if (overline.trimEnd().length < 4) {
                 this.shortOverline(context, blocktext, lineno, 2);
             } else {
-                const msg = this.reporter.severe(
+                const msg = this.reporter!.severe(
                     'Missing matching underline for section title overline.',
                     [new nodes.literal_block(source, source)],
                     { line: lineno },
 );
-                this.parent.add(msg);
+                this.parent!.add(msg);
                 return [[], 'Body', []];
             }
         } else if (overline !== underline) {
@@ -102,12 +99,12 @@ class Line extends SpecializedText {
             if (overline.trimEnd().length < 4) {
                 this.shortOverline(context, blocktext, lineno, 2);
             } else {
-                const msg = this.reporter.severe(
+                const msg = this.reporter!.severe(
                     'Title overline & underline mismatch.',
                     [new nodes.literal_block(source, source)],
                     { line: lineno },
 );
-                this.parent.add(msg);
+                this.parent!.add(msg);
                 return [[], 'Body', []];
             }
         }
@@ -118,7 +115,7 @@ class Line extends SpecializedText {
             if (overline.trimEnd().length < 4) {
                 this.shortOverline(context, blocktext, lineno, 2);
             } else {
-                const msg = this.reporter.warning(
+                const msg = this.reporter!.warning(
                     'Title overline too short.',
                     [new nodes.literal_block(source, source)],
                     { line: lineno },
@@ -127,11 +124,11 @@ class Line extends SpecializedText {
             }
         }
         const style = [overline[0], underline[0]];
-        this.eofcheck = 0; // @@@ not sure this is correct
+        this.eofcheck = false; // @@@ not sure this is correct
         this.section({
  title: title.trimStart(), source, style, lineno: lineno + 1, messages,
 });
-        this.eofcheck = 1;
+        this.eofcheck = true;
         return [[], 'Body', []];
     }
 
@@ -144,26 +141,26 @@ class Line extends SpecializedText {
         if (overline.trimEnd().length < 4) {
             this.shortOverline(context, blocktext, lineno, 1);
         }
-        const msg = this.reporter.error(
+        const msg = this.reporter!.error(
             'Invalid section title or transition marker.',
             [new nodes.literal_block(blocktext, blocktext)],
             { line: lineno },
 );
-        this.parent.add(msg);
+        this.parent!.add(msg);
         return [[], 'Body', []];
     }
 
-    shortOverline(context, blocktext, lineno, lines = 1) {
-        const msg = this.reporter.info(
+    shortOverline(context: any[], blocktext: any | any[], lineno: number, lines = 1) {
+        const msg = this.reporter!.info(
             'Possible incomplete section title.\nTreating the overline as '
             + "ordinary text because it's so short.", [],
             { line: lineno },
 );
-        this.parent.add(msg);
+        this.parent!.add(msg);
         this.stateCorrection(context, lines);
     }
 
-    stateCorrection(context, lines = 1) {
+    stateCorrection(context: any[], lines = 1) {
         this.rstStateMachine.previousLine(lines);
         context.length = 0;
         throw new StateCorrection('Body', 'text');

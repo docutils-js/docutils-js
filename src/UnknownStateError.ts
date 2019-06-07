@@ -1,6 +1,6 @@
 class UnknownStateError extends Error {
     private state: any;
-    constructor(state, ...params) {
+    constructor(state: any, ...params: any[]) {
         super(...params);
         if (Error.captureStackTrace) {
             Error.captureStackTrace(this, UnknownStateError);

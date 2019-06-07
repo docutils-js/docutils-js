@@ -35,11 +35,11 @@ class TableMarkupError extends DataError {
  Abstract superclass for the common parts of the syntax-specific parsers.
  */
 abstract class TableParser {
-    protected doubleWidthPadChar: string;
+    protected doubleWidthPadChar: string = '';
 
-    protected block: StringList;
-    protected headBodySep: number;
-    protected headBodySeparatorPat: RegExp;
+    protected block: StringList = new StringList([]);
+    protected headBodySep?: number;
+    protected headBodySeparatorPat?: RegExp;
 
     constructor() {
         this._init();
@@ -60,7 +60,7 @@ abstract class TableParser {
 
         Raise `TableMarkupError` if there is any problem with the markup.
         */
-    parse(block) {
+    parse(block: StringList) {
         this.setup(block);
         this.findHeadBodySep();
         this.parse_table();
@@ -78,7 +78,7 @@ abstract class TableParser {
         let i;
         for (i = 0; i < this.block.length; i += 1) {
             const line = this.block[i];
-            if (this.headBodySeparatorPat.test(line)) {
+            if (this.headBodySeparatorPat!.test(line)) {
                 if (this.headBodySep) {
                     throw new TableMarkupError(
                         `Multiple head/body row separators (table lines ${this.headBodySep + 1} and ${i + 1}); only one allowed.`, i,
@@ -94,9 +94,9 @@ abstract class TableParser {
         }
     }
 
-    abstract structure_from_cells();
+    abstract structure_from_cells(): any[];
 
-    abstract setup(block: StringList);
+    abstract setup(block: StringList): void;
 
 }
 
@@ -166,23 +166,23 @@ function update_dict_of_lists(master: any, newdata: any) {
     */
 
 class GridTableParser extends TableParser {
-        private cells: number[][];
-        private colseps: any;
-        private rowseps: any;
-        private done: number[];
-        private bottom: number;
-        private right: number;
+        private cells: number[][] = [];
+        private colseps: any = {};
+        private rowseps: any = {};
+        private done: number[] = [];
+        private bottom: number = 0;
+        private right: number = 0;
         _init() {
         super._init();
         this.headBodySeparatorPat = new RegExp('\\+=[=+]+=\\+ *$');
     }
 
-    setup(block) {
+    setup(block: StringList) {
         this.block = block.slice(); // # make a copy; it may be modified
         this.block.disconnect(); //    # don't propagate changes to parent
         this.bottom = block.length - 1;
         this.right = block[0].length - 1;
-        this.headBodySep = null;
+        this.headBodySep = undefined;
         this.done = new Array(block[0].length).fill(-1);
         this.cells = [];
         this.rowseps = { 0: [0] };
@@ -202,9 +202,9 @@ class GridTableParser extends TableParser {
          */
     /* eslint-disable-next-line camelcase */
     parse_table() {
-        const corners = [[0, 0]];
+        const corners: number[][] = [[0, 0]];
         while (corners.length) {
-            const [top, left] = corners.shift();
+            const [top, left] = corners.shift()!;
             if (top === this.bottom || left === this.right
                || top <= this.done[left]) {
                 /* eslint-disable-next-line no-continue */
@@ -251,7 +251,7 @@ class GridTableParser extends TableParser {
 
         /** For keeping track of how much of each text column has been seen. */
         /* eslint-disable-next-line camelcase */
-    mark_done(top, left, bottom, right) {
+    mark_done(top: number, left: number, bottom: number, right: number) {
         // const before = top - 1; // part of assert
         const after = bottom - 1;
         for (let col = left; col < right; col += 1) {
@@ -275,7 +275,7 @@ class GridTableParser extends TableParser {
 
         /** Starting at the top-left corner, start tracing out a cell. */
         /* eslint-disable-next-line camelcase */
-    scan_cell(top, left) {
+    scan_cell(top: number, left: number) {
         // assert this.block[top][left] == '+'
         if (this.block[top][left] !== '+') {
             throw new Error('AssertError');
@@ -291,8 +291,8 @@ class GridTableParser extends TableParser {
 
 */
         /* eslint-disable-next-line camelcase */
-        scan_right(top, left) {
-            const colseps = {};
+        scan_right(top: number, left: number) {
+            const colseps: any = {};
         const line = this.block[top];
         for (let i = left + 1; i < this.right + 1; i += 1) {
             if (line[i] === '+') {
@@ -315,12 +315,12 @@ class GridTableParser extends TableParser {
              boundaries.
              */
         /* eslint-disable-next-line camelcase */
-    scan_down(top, left, right) {
+    scan_down(top: number, left: number, right: number) {
         /* istanbul ignore if */
 if (typeof right === 'undefined') {
     right = 0;
 }
-        const rowseps = {};
+        const rowseps: any = {};
         for (let i = top + 1; i < this.bottom + 1; i += 1) {
             if (this.block[i][right] === '+') {
                 rowseps[i] = [right];
@@ -344,8 +344,8 @@ if (typeof right === 'undefined') {
         */
 
         /* eslint-disable-next-line camelcase */
-    scan_left(top, left, bottom, right) {
-        const colseps = {};
+    scan_left(top: number, left: number, bottom: number, right: number) {
+        const colseps: any = {};
         const line = this.block[bottom];
         for (let i = right - 1; i > left; i = -1) {
             if (line[i] === '+') {
@@ -370,8 +370,8 @@ if (typeof right === 'undefined') {
                 Noting row boundaries, see if we can return to the starting point.
          */
     /* eslint-disable-next-line camelcase,no-unused-vars */
-    scan_up(top, left, bottom, right) {
-        const rowseps = {};
+    scan_up(top: number, left: number, bottom: number, right: number) {
+        const rowseps: any = {};
         for (let i = bottom - 1; i > top; i -= 1) {
             if (this.block[i][left] === '+') {
                 rowseps[i] = [left];
@@ -435,13 +435,12 @@ if (typeof right === 'undefined') {
         }
         let numheadrows;
         let bodyrows;
-        let headrows;
+        let headrows: any[] = [];
         if (this.headBodySep) { // :          # separate head rows from body rows
             numheadrows = rowindex[this.headBodySep];
             headrows = rows.slice(undefined, numheadrows);
             bodyrows = rows.slice(numheadrows);
         } else {
-            headrows = [];
             bodyrows = rows;
         }
         return [colspecs, headrows, bodyrows];
@@ -495,20 +494,20 @@ following data structure, whose interpretation is the same as for
        (0, 0, 12, [''])]])
 */
 class SimpleTableParser extends TableParser {
-    private table: any[];
-    private spanPat: RegExp;
-    private columns: any[];
+    private table: any[] = [];
+    private spanPat: RegExp = /-[ -]*$/;
+    private columns: any[] = [];
     private border_end: any;
     private colseps: any;
     private rowseps: any;
-    private done: number[];
+    private done?: number[];
     _init() {
         super._init();
         this.headBodySeparatorPat = /=[ =]*$/;
         this.spanPat = /-[ -]*$/;
     }
 
-    setup(block) {
+    setup(block: StringList) {
         this.block = block.slice(); // make a copy; it will be modified
         this.block.disconnect(); // don't propagate changes to parent
         // Convert top & bottom borders to column span underlines:
@@ -675,7 +674,7 @@ class SimpleTableParser extends TableParser {
         Adjust the end value for the last column if there is text overflow.
         */
     /* eslint-disable-next-line camelcase */
-    check_columns(lines, firstLine, columns) {
+    check_columns(lines: any, firstLine: number, columns: any | any[]) {
         // "Infinite" value for a dummy last column's beginning, used to
         // check for text overflow:
         columns.push([Number.MAX_SAFE_INTEGER, undefined]);

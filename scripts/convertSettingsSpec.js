@@ -1,10 +1,10 @@
 const fs = require('fs');
 const camelcase = require('camelcase');
-const spec = require('./gen/settingsSpec');
+const spec = require('../gen/settingsSpec');
 const specOut = {};
 Object.keys(spec).forEach(key => {
     const outKey = camelcase(key, { pascalCase: true });
-    
+
     specOut[outKey] = {};
 
     spec[key].forEach((d) => {
@@ -17,7 +17,9 @@ Object.keys(spec).forEach(key => {
             t: f2
         }
         const dest = camelcase(e.dest || opt1.substring(2));
-
+        if(Object.prototype.hasOwnProperty.call(specOut[outKey], dest)) {
+            throw new Error(`key already exists ${dest}`);
+        }
         if (Object.prototype.hasOwnProperty.call(e, 'default')) {
             x.def = e.default;
         }
@@ -25,5 +27,5 @@ Object.keys(spec).forEach(key => {
 
     });
 });
-fs.writeFileSync('gen/newSettingsSpec.json',
+fs.writeFileSync('build/newSettingsSpec.json',
     JSON.stringify(specOut), 'utf-8');

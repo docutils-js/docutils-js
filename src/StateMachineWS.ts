@@ -57,7 +57,7 @@ untilBlank: cArgs.untilBlank, stripIndent: cArgs.stripIndent, blockIndent:
       return [indented, offset, blankFinish];
     }
 
-    getFirstKnownIndented(args: GetIndentedArgs) {
+    getFirstKnownIndented(args: GetIndentedArgs): any[] {
       const cArgs: GetIndentedArgs = { ... args };
       /* istanbul ignore if */
       if (cArgs.stripIndent === undefined) {

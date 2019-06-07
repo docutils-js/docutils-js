@@ -2,7 +2,7 @@ import SpecializedBody from './SpecializedBody';
 
 /** Second and subsequent enumerated_list list_items. */
 class EnumeratedList extends SpecializedBody {
-    private lastordinal?: number;
+    private lastordinal: number = 0;
     private auto?: number;
     private format: any;
     /** Enumerated list item. */
@@ -10,10 +10,10 @@ class EnumeratedList extends SpecializedBody {
     enumerator(match, context, nextState) {
         /* eslint-disable-next-line no-unused-vars */
         const [format, sequence, text, ordinal] = this.parse_enumerator(
-            match, this.parent.attributes.enumtype,
+            match, this.parent!.attributes.enumtype,
 );
         if ((format !== this.format
-              || (sequence !== '#' && (sequence !== this.parent.attributes.enumtype
+              || (sequence !== '#' && (sequence !== this.parent!.attributes.enumtype
                                        || this.auto// fixme
                                        || ordinal !== (this.lastordinal + 1)))
               || !this.is_enumerated_list_item(ordinal, sequence, format))) {
@@ -27,13 +27,13 @@ class EnumeratedList extends SpecializedBody {
         const [listitem, blankFinish] = this.list_item(
             match.result.index + match.result[0].length,
 );
-        this.parent.add(listitem);
+        this.parent!.add(listitem);
         this.blankFinish = blankFinish;
         this.lastordinal = ordinal;
         return [[], nextState, []];
     }
 
-    private is_enumerated_list_item(ordinal, sequence, format) {
+    private is_enumerated_list_item(ordinal: any, sequence: any, format: any) {
         return false;
     }
 

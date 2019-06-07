@@ -40,11 +40,12 @@ export const quotePairs = {// open char: matching closing characters // usage ex
     typographic conventions in different languages,
     so we test for additional matches stored in `quote_pairs`.
     */
-function matchChars(c1, c2) {
+function matchChars(c1: string, c2: string) {
     if (!openers.includes(c1)) {
         return false;
     }
     const i = openers.indexOf(c1);
+    // @ts-ignore
     return c2 === closers[i] || (quotePairs[c1] || '').includes(c2);
 }
 

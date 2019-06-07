@@ -7,10 +7,11 @@ abstract class Input extends TransformSpec {
     private errorHandler: any;
     protected sourcePath: any;
     protected source: any;
-    constructor({
- source, sourcePath, encoding, errorHandler,
+    constructor(args: {
+ source: any, sourcePath: string, encoding: string, errorHandler: string,
 }) {
         super();
+        const { source, sourcePath, encoding, errorHandler } = args;
         this.encoding = encoding;
         this.errorHandler = errorHandler;
         this.source = source;
@@ -22,10 +23,10 @@ abstract class Input extends TransformSpec {
     }
 
     /* istanbul ignore method */
-    abstract read(cb?: any);
+    abstract read(cb?: any): void;
 
     /* istanbul ignore method */
-    decode(data) {
+    decode(data: string): string {
         return data;
     }
 

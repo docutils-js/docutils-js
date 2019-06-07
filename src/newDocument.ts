@@ -1,5 +1,6 @@
 import { document } from './nodes';
 import newReporter from './newReporter';
+import {Settings} from "../gen/Settings";
 
 /* eslint-disable-next-line no-unused-vars */
 const __docformat__ = 'reStructuredText';
@@ -24,13 +25,15 @@ const __docformat__ = 'reStructuredText';
  * @returns {module:nodes~document} New document
  * @see module:newDocument~newDocument
  */
-function newDocument({ sourcePath }, settings) {
+function newDocument(args: { sourcePath: string }, settings: Settings) {
+    const {sourcePath} = args;
     const reporter = newReporter({ sourcePath }, settings);
     const attrs: any = {};
     if (typeof sourcePath !== 'undefined') {
         attrs.source = sourcePath;
     }
 
+    // eslint-disable-next-line new-cap
     const myDocument = new document(settings, reporter, '', [], attrs);
     myDocument.noteSource(sourcePath, -1);
     return myDocument;

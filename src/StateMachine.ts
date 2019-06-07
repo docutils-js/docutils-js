@@ -19,7 +19,7 @@ class StateMachine implements IStateMachine {
 
     protected states: any;
 
-    public inputLines?: StringList;
+    public inputLines: StringList = new StringList([]);
 
     public debugFn: any;
 
@@ -38,12 +38,12 @@ class StateMachine implements IStateMachine {
 
     lineOffset: number;
 
-    line?: string;
+    line: string = '';
 
-    inputOffset: number;
+    inputOffset: number = 0;
 
     // eslint-disable-next-line no-unused-vars
-    public node: INode;
+    public node?: INode;
 
     public language: any;
 
@@ -78,9 +78,6 @@ class StateMachine implements IStateMachine {
       }
       this.stateFactory = cArgs.stateFactory;
       this.debugFn = cArgs.debugFn;
-      this.inputLines = undefined;
-      this.inputOffset = 0;
-      this.line = undefined;
       this.lineOffset = -1;
       this.debug = cArgs.debug;
       this.initialState = cArgs.initialState;
@@ -146,7 +143,7 @@ class StateMachine implements IStateMachine {
         }
         this.inputLines = new StringList(cArgs.inputLines, cArgs.inputSource || '');
       }
-      this.inputOffset = cArgs.inputOffset;
+      this.inputOffset = cArgs.inputOffset!;
       this.lineOffset = -1;
       this.currentState = cArgs.initialState || this.initialState;
       if (this.debug) {
@@ -276,10 +273,10 @@ class StateMachine implements IStateMachine {
         }
         this.currentState = nextState;
       }
-      if (typeof this.states[this.currentState] === 'undefined') {
+      if (typeof this.states[this.currentState!] === 'undefined') {
         throw new UnknownStateError(this.currentState);
       }
-      return this.states[this.currentState];
+      return this.states[this.currentState!];
     }
 
     /* Load `self.line` with the `n`'th next line and return it. */
@@ -287,7 +284,7 @@ class StateMachine implements IStateMachine {
       // /     console.log('*** advancing to next line');
       this.lineOffset += n;
       if (this.lineOffset >= this.inputLines.length) {
-        this.line = null;
+        this.line = '';
         this.notifyObservers();
         throw new EOFError();
       }
@@ -313,7 +310,7 @@ class StateMachine implements IStateMachine {
     previousLine(n = 1) {
       this.lineOffset -= n;
       if (this.lineOffset < 0) {
-        this.line = null;
+        this.line = '';
       } else {
         this.line = this.inputLines[this.lineOffset];
       }
@@ -321,7 +318,7 @@ class StateMachine implements IStateMachine {
       return this.line;
     }
 
-    gotoLine(lineOffset) {
+    gotoLine(lineOffset: number): string  | undefined {
       this.lineOffset = lineOffset - this.inputOffset;
       this.line = this.inputLines[this.lineOffset];
       this.notifyObservers();
@@ -362,7 +359,7 @@ class StateMachine implements IStateMachine {
 
 
     /* eslint-disable-next-line no-unused-vars */
-    insertInput(inputLines, source) {
+    insertInput(inputLines: any, source: any) {
         // self.input_lines.insert(self.line_offset + 1, '',
         //     source='internal padding after '+source,
         //     offset=len(input_lines))
@@ -391,7 +388,7 @@ class StateMachine implements IStateMachine {
       }
     }
 
-    checkLine(context, state, transitions) {
+    checkLine(context: any[], state: any, transitions: any[] | undefined | null) {
       /* istanbul ignore if */
       if (!Array.isArray(context)) {
         throw new Error('context should be array');
@@ -406,7 +403,7 @@ class StateMachine implements IStateMachine {
       const stateCorrection = true;
 
       /* eslint-disable-next-line no-restricted-syntax */
-      for (const name of transitions) {
+      for (const name of transitions!) {
         // how is this initialized?
         const [pattern, method, nextState] = state.transitions[name];
         const result = pattern.exec(this.line);
@@ -430,7 +427,7 @@ class StateMachine implements IStateMachine {
       return state.noMatch(context, transitions);
     }
 
-    addState(stateClass) {
+    addState(stateClass: any) {
       if (typeof stateClass === 'undefined') {
         // throw new InvalidArgumentsError('stateClass should be a class');
         return;
@@ -454,7 +451,7 @@ class StateMachine implements IStateMachine {
       this.states[stateName] = r;
     }
 
-    addStates(stateClasses) {
+    addStates(stateClasses: any[]) {
       if (!stateClasses) {
         throw new Error('');
       }
@@ -511,15 +508,15 @@ class StateMachine implements IStateMachine {
 }
 
 
-function expandtabs(string) {
+function expandtabs(strVal: string) {
   let tabIndex;
   /* eslint-disable-next-line no-cond-assign */
-  while ((tabIndex = string.indexOf('\t')) !== -1) {
-    string = string.substring(0, tabIndex) + Array(8 - (tabIndex % 8)).fill(' ').join('') + string.substring(tabIndex + 1);
+  while ((tabIndex = strVal.indexOf('\t')) !== -1) {
+    strVal = strVal.substring(0, tabIndex) + Array(8 - (tabIndex % 8)).fill(' ').join('') + strVal.substring(tabIndex + 1);
   }
-  return string;
+  return strVal;
 }
-export function string2lines(astring, args) {
+export function string2lines(astring?: string, args?: any) {
   if (!astring) {
     astring = '';
   }

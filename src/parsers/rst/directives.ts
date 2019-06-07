@@ -2,8 +2,9 @@ import * as _fallbackLanguageModule from './languages/en';
 import * as images from './directives/images';
 import * as parts from './directives/parts';
 import { ApplicationError } from '../../Exceptions';
+import {Document} from "../../types";
 
-const dirMap = { images, parts };
+const dirMap: any = { images, parts };
 
 const directiveRegistry = {
       attention: ['admonitions', 'Attention'],
@@ -55,11 +56,11 @@ const directiveRegistry = {
     'restructuredtext-test-directive': ['misc', 'TestDirective'],
 };
 
-const _directives = {};
+const _directives: any = {};
 
- function directive(directiveName, languageModule, document) {
+ function directive(directiveName: string, languageModule: any, document: Document) {
     const normName = directiveName.toLowerCase();
-    const messages = [];
+    const messages: any[] = [];
     const msgText = [];
     if (normName in _directives) {
         return [_directives[normName], messages];
@@ -82,7 +83,8 @@ const _directives = {};
     if (!Object.prototype.hasOwnProperty.call(directiveRegistry, canonicalName)) {
         return [undefined, messages];
     }
-    const [modulename, classname] = directiveRegistry[canonicalName];
+    // @ts-ignore
+     const [modulename, classname] = directiveRegistry[canonicalName];
     const DirectiveClass = dirMap[modulename] ? dirMap[modulename][classname] : undefined;
     _directives[normName] = DirectiveClass;
     return [DirectiveClass, messages];
@@ -95,7 +97,7 @@ const _directives = {};
  Raise ``ValueError`` if no argument is found.
  */
 /* eslint-disable-next-line camelcase */
-function class_option(argument) {
+function class_option(argument: any) {
 /*
     if argument is None:
         raise ValueError('argument required but none supplied')
@@ -124,7 +126,7 @@ function class_option(argument) {
  * Raise ``ValueError`` if no argument is found or if the argument's value is
  * not valid (not an entry in the supplied list).
  */
-function choice(argument, values) {
+function choice(argument: string, values: string[]) {
     const value = argument.toLowerCase().trim();
     if (values.indexOf(value) !== -1) {
         return value;

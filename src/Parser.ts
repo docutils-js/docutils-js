@@ -1,30 +1,27 @@
 import Component from './Component';
 import { UnimplementedError } from './Exceptions';
+import {Document, ParserArgs} from "./types";
 
-class Parser extends Component {
+abstract class Parser extends Component {
     protected debugFn: any;
     protected debug: boolean;
 
-    constructor(args) {
+    constructor(args: ParserArgs) {
         super();
         this.componentType = 'parser';
         this.configSection = 'parsers';
-        this.debug = args.debug;
+        this.debug = args.debug || false;
         this.debugFn = args.debugFn;
     }
 
     /* istanbul ignore function */
     /* eslint-disable-next-line no-unused-vars */
-    parse(inputstring, document) {
-        throw new UnimplementedError('subclass implement parse');
-    }
-
+    abstract parse(inputstring: string, document: Document):any | any[] | void;
     /* eslint-disable-next-line no-unused-vars */
-    setupParse(inputstring, document) {
-    }
+    setupParse(inputstring: string, document: Document) : void {
+    } ;
+    abstract finishParse(): void;
 
-    finishParse() {
-    }
 }
 
 export default Parser;

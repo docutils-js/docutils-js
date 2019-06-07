@@ -8,14 +8,14 @@ class Explicit extends SpecializedBody {
     // @ts-ignore
     explicit_markup(match, context, nextState) {
         const [nodelist, blankFinish] = this.explicit_construct(match);
-        this.parent.add(nodelist);
+        this.parent!.add(nodelist);
         this.blankFinish = blankFinish;
         return [[], nextState, []];
     }
 
     /** Determine which explicit construct this is, parse & return it. */
     /* eslint-disable-next-line camelcase */
-    explicit_construct(match) {
+    explicit_construct(match: any) {
         const errors = [];
         /* eslint-disable-next-line no-restricted-syntax */
         for (const [method, pattern] of this.explicit.constructs) {
@@ -29,7 +29,7 @@ class Explicit extends SpecializedBody {
                     if (error instanceof MarkupError) {
                         const lineno = this.rstStateMachine.absLineNumber();
                         const message = error.args.join(' ');
-                        errors.push(this.reporter.warning(message, [], { line: lineno }));
+                        errors.push(this.reporter!.warning(message, [], { line: lineno }));
                         break;
                     }
                     throw error;
@@ -44,7 +44,7 @@ class Explicit extends SpecializedBody {
     // @ts-ignore
     anonymous(match, context, nextState) {
         const [nodelist, blankFinish] = this.anonymous_target(match);
-        this.parent.add(nodelist);
+        this.parent!.add(nodelist);
         this.blankFinish = blankFinish;
         return [[], nextState, []];
     }
