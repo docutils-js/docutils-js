@@ -1,13 +1,15 @@
 const fs = require('fs');
 const camelcase = require('camelcase');
 const spec = require('../gen/settingsSpec');
-const specOut = {};
+const specOut: any = {};
+const componentMap: any = {};
 Object.keys(spec).forEach(key => {
     const outKey = camelcase(key, { pascalCase: true });
 
+    componentMap[key] = outKey;
     specOut[outKey] = {};
 
-    spec[key].forEach((d) => {
+    spec[key].forEach((d: any) => {
         const { desc, opts, e } = d;
 
         const [opt1] = opts;
@@ -18,14 +20,16 @@ Object.keys(spec).forEach(key => {
         }
         const dest = camelcase(e.dest || opt1.substring(2));
         if(Object.prototype.hasOwnProperty.call(specOut[outKey], dest)) {
-            throw new Error(`key already exists ${dest}`);
+            // if (Object.prototype.hasOwnProperty.call(e, 'default')) {
+            //     specOut[outKey][dest].def = e.default;
+            // }
+        } else {
+            specOut[outKey][dest] = x;
         }
         if (Object.prototype.hasOwnProperty.call(e, 'default')) {
-            x.def = e.default;
+            specOut[outKey][dest].def = e.default;
         }
-        specOut[outKey][dest] = x;
-
     });
 });
 fs.writeFileSync('build/newSettingsSpec.json',
-    JSON.stringify(specOut), 'utf-8');
+    JSON.stringify(specOut ), 'utf-8');

@@ -66,6 +66,7 @@
     "sax": "^1.2.4",
     "stack-trace": "^0.0.10",
     "stacktrace-js": "^2.0.0",
+    "ts-node": "^8.2.0",
     "xml-escape": "^1.1.0",
     "xml-formatter": "^1.1.0",
     "xmldom": "^0.1.27"

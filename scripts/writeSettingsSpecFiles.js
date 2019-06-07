@@ -7,6 +7,7 @@ const lines = [];
 const defaultLines = [];
 const defaults = {};
 const ifaces = Object.keys(spec);
+const ejs = require('ejs');
 
 Object.keys(spec).forEach(compName =>  {
     defaults[compName] = {};
