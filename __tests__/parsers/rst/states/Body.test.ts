@@ -7,21 +7,24 @@ jest.mock('../../../../src/parsers/rst/RSTStateMachine');
 jest.mock('../../../../src/parsers/rst/StateFactory');
 
 beforeEach(() => {
+    // @ts-ignore
     RSTStateMachine.mockClear();
+    // @ts-ignore
     StateFactory.mockClear();
     /* eslint-disable-next-line no-unused-vars */
+    // @ts-ignore
     RSTStateMachine.mockImplementation(({ indent, untilBlank, stripIndent }) => ({
         absLineNumber: () => 1,
         /* eslint-disable-next-line no-unused-vars */
-            getFirstKnownIndented: (...args) => [new StringList('hello'), indent, 0, true],
+            getFirstKnownIndented: (...args: any[]) => [new StringList(['hello']), indent, 0, true],
         /* eslint-disable-next-line no-unused-vars */
-            stateFactory: { withStateClasses: classes => new StateFactory() },
+            stateFactory: { withStateClasses: (classes: any[]) => new StateFactory() },
         }));
 });
 
 function createRSTStateMachine() {
     const sm = new RSTStateMachine({
- stateFactory: {},
+ stateFactory: new StateFactory()   ,
                                      initialState: 'Body',
         debug: true,
         /* eslint-disable-next-line no-console */
@@ -30,11 +33,10 @@ function createRSTStateMachine() {
     return sm;
 }
 
-function createBody(optSm) {
+function createBody(optSm?: any) {
     const stateMachine = optSm || createRSTStateMachine();
-    const body = new Body({
-        stateMachine,
-        debug: true,
+    const body = new Body(stateMachine,
+        { debug:  true,
     });
     return body;
 }
@@ -58,7 +60,7 @@ test('Body constructor',
 // (?<!(?<!\\x00):)${nonWhitespaceEscapeBefore}[ ]?:([ ]+|$)`),
 test('hyperlink_target, no args', () => {
     const body = createBody();
-    expect(() => body.hyperlink_target()).toThrow();
+    expect(() => body.hyperlink_target({})).toThrow();
 });
 
 test('explicit hyperlink_target, with arg (malformed)', () => {

@@ -1,8 +1,8 @@
 import Text from './Text';
 import { EOFError } from '../../../Exceptions';
 import State from "../../../states/State";
-import {RSTStateArgs} from "./RSTState";
 import RSTStateMachine from "../RSTStateMachine";
+import {RSTStateArgs} from "../types";
 
 class SpecializedText extends Text {
     _init(stateMachine: RSTStateMachine, args: RSTStateArgs) {
@@ -44,6 +44,6 @@ class SpecializedText extends Text {
     }
 }
 
-//SpecializedText.stateName = 'SpecializedText';
+SpecializedText.stateName = 'SpecializedText';
 //SpecializedText.constructor.stateName = 'SpecializedText';
 export default SpecializedText;

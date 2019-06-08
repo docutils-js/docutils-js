@@ -3,8 +3,8 @@ import { columnWidth } from '../../../utils';
 import { EOFError } from '../../../Exceptions';
 import * as nodes from '../../../nodes';
 import StateCorrection from '../../../StateCorrection';
-import {RSTStateArgs} from "./RSTState";
 import RSTStateMachine from "../RSTStateMachine";
+import {RSTStateArgs} from "../types";
 
 
 class Line extends SpecializedText {
@@ -166,6 +166,6 @@ class Line extends SpecializedText {
         throw new StateCorrection('Body', 'text');
     }
 }
-//Line.stateName = 'Line';
+Line.stateName = 'Line';
 //Line.constructor.stateName = 'Line';
 export default Line;

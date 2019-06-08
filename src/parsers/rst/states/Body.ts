@@ -1,4 +1,4 @@
-import RSTState, {RSTStateArgs} from './RSTState';
+import RSTState from './RSTState';
 import * as RegExps from '../RegExps';
 import * as nodes from '../../../nodes';
 import MarkupError from '../MarkupError';
@@ -13,6 +13,7 @@ import UnexpectedIndentationError from '../../../UnexpectedIndentationError';
 import RSTStateMachine from "../RSTStateMachine";
 import {INode} from "../../../types";
 import {line_block} from "../../../nodes";
+import {RSTStateArgs} from "../types";
 
 const fullyNormalizeName = nodes.fullyNormalizeName;
 
@@ -485,7 +486,7 @@ class Body extends RSTState {
         );
         this.parent!.add(messages);
         if (directiveClass) {
-            return this.run_directive(
+            return this.runDirective(
                 directiveClass, match, typeName, optionPresets,
             );
         }
@@ -513,7 +514,7 @@ class Body extends RSTState {
                   Returns a 2-tuple: list of nodes, and a "blank finish" boolean.
                   */
     /* eslint-disable-next-line camelcase */
-    run_directive(directive: any, match: any, typeName: any, option_presets: any) {
+    runDirective(directive: any, match: any, typeName: any, option_presets: any) {
         /*        if isinstance(directive, (FunctionType, MethodType)):
                   from docutils.parsers.rst import convert_directive_function
                   directive = convert_directive_function(directive)
@@ -920,8 +921,7 @@ class Body extends RSTState {
                 this.rstStateMachine.getFirstKnownIndented({ indent }));
         }
         const listitem = new nodes.list_item(indented.join('\n'));
-        if (indented) {
-            //          console.log('xnested parse');
+        if (indented) { // fixme equivalent?
             this.nestedParse( {
                 inputLines: indented,
                 inputOffset: lineOffset,
@@ -1537,6 +1537,7 @@ return [];
         return [];
     }
 }
-//Body.stateName = 'Body';
+
+Body.stateName = 'Body';
 //Body.constructor.stateName = 'Body';
 export default Body;

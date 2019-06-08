@@ -2,8 +2,8 @@ import Body from './Body';
 import { EOFError } from '../../../Exceptions';
 import * as nodes from '../../../nodes';
 import * as RegExps from '../RegExps';
-import {RSTStateArgs} from "./RSTState";
 import RSTStateMachine from "../RSTStateMachine";
+import {RSTStateArgs} from "../types";
 
 /** Parser for the contents of a substitution_definition element. */
 class SubstitutionDef extends Body {
@@ -84,6 +84,6 @@ class SubstitutionDef extends Body {
         throw new EOFError();
     }
 }
-//SubstitutionDef.stateName = 'SubstitutionDef';
+SubstitutionDef.stateName = 'SubstitutionDef';
 //SubstitutionDef.constructor.stateName = 'SubstitutionDef';
 export default SubstitutionDef;

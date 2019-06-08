@@ -4,21 +4,33 @@ import DuplicateTransitionError from '../DuplicateTransitionError';
 import {IReporter, IState, IStateMachine} from "../types";
 import {StateMachine} from "../StateMachine";
 import StateMachineWS from "../StateMachineWS";
-import {RSTStateArgs} from "../parsers/rst/states/RSTState";
+import {RSTStateArgs} from "../parsers/rst/types";
 
 class State implements IState {
+    /**
+      * {Name: pattern} mapping, used by `make_transition()`. Each pattern may
+      * be a string or a compiled `re` pattern. Override in subclasses.
+     */
+    public patterns: any;
+    /**
+     * A list of transitions to initialize when a `State` is instantiated.
+     * Each entry is either a transition name string, or a (transition name, next
+     * state name) pair. See `make_transitions()`. Override in subclasses.
+     */
+    protected initialTransitions?: string[] | string[][];
+
+
+    protected indentSm?: any;
+    protected nestedSm?: any;
+    protected nestedSmKwargs?: any;
+
     protected knownIndentSm: any;
     protected debug: boolean;
     protected knownIndentSmKwargs: any;
     protected indentSmKwargs: any;
-    protected patterns: any;
 
-    protected indentSm?: StateMachine;
-    protected nestedSmKwargs: any;
-    protected transitionOrder: string[];
-    protected transitions: any;
-    protected initialTransitions?: string[] | string[][];
-    protected nestedSm: any;
+    protected transitionOrder: string[] = [];
+    protected transitions: any = { };
     protected reporter?: IReporter;
     private stateMachine?: StateMachine;
 
@@ -26,11 +38,6 @@ class State implements IState {
         this.stateMachine = stateMachine;
         this.debug = args.debug!;
         this._init(stateMachine, args);
-        this.transitionOrder = [];
-        this.transitions = {};
-        // this.patterns = {}
-        // this.initialTransitions = args.initialTransitions;
-        // this.wsInitialTransitions = args.wsInitialTransitions;
 
         this.addInitialTransitions();
         /* istanbul ignore if */

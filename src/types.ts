@@ -345,7 +345,10 @@ export interface IState {
     makeTransitions(nameList: any[]): (any[] | {})[];
 }
 
-export interface StateMachineRunArgs {
+export interface StateMachineCommonArgs {
+}
+
+export interface StateMachineRunArgs extends StateMachineCommonArgs {
     inputLines: StringList | string | string[];
     inputOffset?: number;
     context?: any[];
@@ -376,4 +379,12 @@ export interface TraverseArgs {
     ascend?: boolean;
 }
 
+
+export interface IStateMachineWS extends IStateMachine {
+    getIndented(labeled: GetIndentedArgs): any[];
+
+    getKnownIndented(labeled: GetIndentedArgs): any[];
+
+    getFirstKnownIndented(args: GetIndentedArgs): any[];
+}
 

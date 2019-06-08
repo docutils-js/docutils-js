@@ -2,13 +2,19 @@ import StateMachineWS from '../../StateMachineWS';
 import Inliner from './Inliner';
 import * as languages from '../../languages';
 import {IElement, StateMachineRunArgs} from "../../types";
+import {RstMemo} from "./types";
 
-
+/**
+ * reStructuredText's master StateMachine.
+ *
+ * The entry point to reStructuredText parsing is the `run()` method.
+ */
 class RSTStateMachine extends StateMachineWS {
     matchTitles?: boolean;
     node?: IElement;
     debugFn: any;
     debug: boolean = false;
+    private memo?: RstMemo;
     run(args: StateMachineRunArgs) {
         const cArgs = { ... args };
         /* istanbul ignore if */

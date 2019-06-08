@@ -41,6 +41,6 @@ class EnumeratedList extends SpecializedBody {
 return [];
     }
 }
-//EnumeratedList.stateName = 'EnumeratedList';
+EnumeratedList.stateName = 'EnumeratedList';
 //EnumeratedList.constructor.stateName = 'EnumeratedList';
 export default EnumeratedList;

@@ -55,6 +55,6 @@ class Explicit extends SpecializedBody {
         this.invalid_input();
     };
 }
-//Explicit.stateName = 'Explicit';
+Explicit.stateName = 'Explicit';
 //Explicit.constructor.stateName = 'Explicit';
 export default Explicit;

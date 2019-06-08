@@ -20,6 +20,6 @@ class LineBlock extends SpecializedBody {
         return [[], nextState, []];
     }
 }
-//LineBlock.stateName = 'LineBlock';
+LineBlock.stateName = 'LineBlock';
 //LineBlock.constructor.stateName = 'LineBlock';
 export default LineBlock;

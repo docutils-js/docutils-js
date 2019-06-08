@@ -1,4 +1,4 @@
-import RSTState, {RSTStateArgs} from './RSTState';
+import RSTState from './RSTState';
 import {columnWidth, isIterable} from '../../../utils';
 import unescape from '../../../utils/unescape';
 import * as nodes from '../../../nodes';
@@ -9,6 +9,7 @@ import {EOFError} from '../../../Exceptions';
 import {INode} from "../../../types";
 import State from "../../../states/State";
 import RSTStateMachine from "../RSTStateMachine";
+import {RSTStateArgs} from "../types";
 
 class Text extends RSTState {
     _init(stateMachine: RSTStateMachine, args: RSTStateArgs) {
@@ -221,8 +222,7 @@ srcline;
                 { line: lineno + 1 },
 ));
         }
-        // @ts-ignore
-        this.nestedParse(indented, { inputOffset: lineOffset, node: definition });
+        this.nestedParse( { inputLines: indented, inputOffset: lineOffset, node: definition });
         return [itemnode, blankFinish];
     }
 
@@ -254,6 +254,6 @@ srcline;
         return [nodeList, messages];
     }
 }
-//Text.stateName = 'Text';
+Text.stateName = 'Text';
 //Text.constructor.stateName = 'Text';
 export default Text;

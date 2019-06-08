@@ -1,6 +1,6 @@
 import State from './State';
 import StateMachineWS from "../StateMachineWS";
-import {RSTStateArgs} from "../parsers/rst/states/RSTState";
+import {RSTStateArgs} from "../parsers/rst/types";
 
 class StateWS extends State {
     private wsPatterns: any;
@@ -64,7 +64,7 @@ class StateWS extends State {
             throw Error(`no sm run ${this} ${IndentSm!.constructor.name}`);
         }
 
-        const results = sm.run({ indented, inputOffset: lineOffset });
+        const results = sm.run({ inputLines: indented, inputOffset: lineOffset });
         return [context, nextState, results];
     }
 

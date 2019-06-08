@@ -14,9 +14,18 @@ import {
 } from './types';
 import State from './states/State';
 
+/**
+ * A finite state machine for text filters using regular expressions.
+ *
+ * The input is provided in the form of a list of one-line strings (no
+ * newlines). States are subclasses of the `State` class. Transitions consist
+ * of regular expression patterns and transition methods, and are defined in
+ * each state.
+ *
+ * The state machine is started with the `run()` method, which returns the
+ * results of processing in a list.
+ */
 class StateMachine implements IStateMachine {
-    public memo: any;
-
     protected states: any;
 
     public inputLines: StringList = new StringList([]);
@@ -57,7 +66,10 @@ class StateMachine implements IStateMachine {
     private _stderr: ErrorOutput;
 
     constructor(args: {
-        stateFactory: IStateFactory, initialState: string; debug?: boolean, debugFn?: any,
+        stateFactory: IStateFactory,
+        initialState: string;
+        debug?: boolean,
+        debugFn?: any,
 }) {
         const cArgs = { ... args };
       /* Perform some sanity checking on arguments */
@@ -103,10 +115,14 @@ class StateMachine implements IStateMachine {
       // do-nothing
     }
 
+    forEachState(cb: (state: State) => void) {
+        // @ts-ignore
+        Object.values(this.states).forEach(cb);
+    }
+
     unlink() {
-      // @ts-ignore
-        Object.values(this.states).forEach(s => s.unlink());
-      this.states = undefined;
+        this.forEachState(s =>s.unlink());
+        this.states = undefined;
     }
 
     /**
@@ -274,7 +290,7 @@ class StateMachine implements IStateMachine {
         this.currentState = nextState;
       }
       if (typeof this.states[this.currentState!] === 'undefined') {
-        throw new UnknownStateError(this.currentState);
+        throw new UnknownStateError(this.currentState, JSON.stringify(this.states));
       }
       return this.states[this.currentState!];
     }
@@ -387,8 +403,26 @@ class StateMachine implements IStateMachine {
         throw error;
       }
     }
-
-    checkLine(context: any[], state: any, transitions: any[] | undefined | null) {
+/*
+ * Examine one line of input for a transition match & execute its method.
+ *
+ * Parameters:
+ *
+ * - `context`: application-dependent storage.
+ * - `state`: a `State` object, the current state.
+ * - `transitions`: an optional ordered list of transition names to try,
+ *   instead of ``state.transition_order``.
+ *
+ * Return the values returned by the transition method:
+ *
+ * - context: possibly modified from the parameter `context`;
+ * - next state name (`State` subclass name);
+ * - the result output of the transition, a list.
+ *
+ * When there is no match, ``state.no_match()`` is called and its return
+ * value is returned.
+ */
+checkLine(context: any[], state: any, transitions: any[] | undefined | null) {
       /* istanbul ignore if */
       if (!Array.isArray(context)) {
         throw new Error('context should be array');

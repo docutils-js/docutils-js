@@ -6,7 +6,7 @@ class StateFactory implements IStateFactory {
     private args: any | undefined;
     constructor(args?: any) {
         this.args = args;
-        if (args && args.stateClasses) {
+        if (args && args.stateClasses && args.stateClasses.length) {
             this.stateClasses = args.stateClasses;
         } else {
             this.stateClasses = [RSTStates.Body,
@@ -115,7 +115,7 @@ class StateFactory implements IStateFactory {
         }
         // @ts-ignore
         const StateClass = RSTStates[stateName];
-        return new StateClass({ stateMachine });
+        return new StateClass(stateMachine, { });
     }
 
     getStateClasses() {

@@ -6,36 +6,14 @@ import {Document, IElement, INode} from "../../../types";
 import StringList from "../../../StringList";
 import Inliner from "../Inliner";
 import RSTStateMachine from "../RSTStateMachine";
+import {NestedParseArgs, RSTStateArgs} from "../types";
 
-export interface CommonParseArgs {
-    inputLines?: StringList;
-    inputOffset?: number;
-    node?: INode;
-    matchTitles?: boolean;
-}
+abstract class RSTState extends StateWS {
+    static stateName: string;
 
-export interface RSTStateArgs {
-    stateClasses?: string[];
-    debug?: boolean;
-}
+    private nestedSmCache: any[] = [];
 
-export interface RSTParseArgs extends CommonParseArgs {
-    inliner: Inliner,
-    document: Document,
-}
-export interface NestedParseArgs extends CommonParseArgs, StateMachineClassArgs {
-    initialState?: any;
-    blankFinish?: boolean;
-    blankFinishState?: string;
-    extraSettings?: any;
-}
 
-interface StateMachineClassArgs {
-    stateMachineClass?: any;
-    stateMachineKwargs?: any;
-}
-
-class RSTState extends StateWS {
     public explicit: any
     public memo: any;
     public inliner?: Inliner;
@@ -43,7 +21,6 @@ class RSTState extends StateWS {
 
     protected rstStateMachine: RSTStateMachine;
     public document?: Document;
-    private nestedSmCache: any[] = [];
     protected stateClasses?: string[];
     public messages: INode[] = [];
 
@@ -59,6 +36,7 @@ class RSTState extends StateWS {
 // fixme this whole thing needs rework
     _init(stateMachine: RSTStateMachine, args: RSTStateArgs) {
         super._init(stateMachine, args);
+        this.rstStateMachine = stateMachine;
         this.nestedSm = NestedStateMachine;
         this.nestedSmCache = [];
         this.stateClasses = args.stateClasses || [];
@@ -141,7 +119,7 @@ class RSTState extends StateWS {
 //          if(!stateMachineKwargs.document) {
 //              throw new Error("expectinf document")
             //          }
-            if (!mCopy.stateMachineKwargs.stateFactory) {
+            if (!mCopy.stateMachineKwargs!.stateFactory) {
                 throw new Error('need statefactory');
             }
             stateMachine = new mCopy.stateMachineClass({
@@ -181,7 +159,7 @@ class RSTState extends StateWS {
         if (!myargs.stateMachineKwargs) {
             myargs.stateMachineKwargs = {...this.nestedSmKwargs};
         }
-        myargs.stateMachineKwargs.initialState = myargs.initialState;
+        myargs.stateMachineKwargs!.initialState = myargs.initialState;
         const stateMachine = new myargs.stateMachineClass({
             stateFactory: this.rstStateMachine.stateFactory,
             debug: this.debug,

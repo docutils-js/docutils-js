@@ -1,9 +1,10 @@
-import RSTState, {RSTStateArgs} from './RSTState';
+import RSTState from './RSTState';
 import * as RegExps from '../RegExps';
 import { escapeRegExp } from '../../../utils';
 import * as nodes from '../../../nodes';
 import { EOFError } from '../../../Exceptions';
 import RSTStateMachine from "../RSTStateMachine";
+import {RSTStateArgs} from "../types";
 
 /**
     Nested parse handler for quoted (unindented) literal blocks.
@@ -102,6 +103,6 @@ class QuotedLiteralBlock extends RSTState {
         throw new EOFError();
     }
 }
-//QuotedLiteralBlock.stateName = 'QuotedLiteralBlock';
+QuotedLiteralBlock.stateName = 'QuotedLiteralBlock';
 //QuotedLiteralBlock.constructor.stateName = 'QuotedLiteralBlock';
 export default QuotedLiteralBlock;

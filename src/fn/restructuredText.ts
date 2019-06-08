@@ -3,6 +3,12 @@ import RSTStateMachine from '../parsers/rst/RSTStateMachine';
 import StateFactory from '../parsers/rst/StateFactory';
 import {Document} from "../types";
 
+/**
+ *
+ * @param inputstring
+ * @param document
+ */
+
 function parse(inputstring: string, document: Document) {
     const initialState = 'Body';
     const stateMachine = new RSTStateMachine({

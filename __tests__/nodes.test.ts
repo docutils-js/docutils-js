@@ -1,10 +1,11 @@
-import { /* DOMParser, DOMImplementation, */ XMLSerializer } from 'xmldom';
+import { DOMParser, DOMImplementation, XMLSerializer } from 'xmldom';
 import * as nodes from '../src/nodes';
 import newDocument from '../src/newDocument';
-import baseSettings from '../src/baseSettings';
+import defaults from "../gen/defaults";
 
 function createNodeVisitor() {
-    return new nodes.NodeVisitor({ reporter: { debug: () => {} } });
+    let document = newDocument({sourcePath: ""}, defaults);
+    return new nodes.NodeVisitor(document);
 }
 
 test('paragraph with text', () => {
@@ -24,7 +25,7 @@ test('problematic', () => {
     expect(p.attributes.refid).toBe('auto1');
 });
 test('setId', () => {
-    const d = newDocument({}, baseSettings);
+    const d = newDocument({ sourcePath: ''}, defaults );
     const p = new nodes.paragraph('test', 'test', [], {});
     d.setId(p);
 });
@@ -55,14 +56,14 @@ test('_domNode', () => {
 });
 
 test('firstChildNotMatchingClass', () => {
-    const node = new nodes.document();
+    const node = newDocument({ sourcePath: ''}, defaults)
     node.children.push(new nodes.section());
     const index = node.firstChildNotMatchingClass(nodes.Titular);
     expect(index).toEqual(0);
 });
 
 test('firstChildNotMatchingClass 2', () => {
-    const node = new nodes.document();
+    const node = newDocument({ sourcePath: ''}, defaults)
     node.children.push(new nodes.Text('hello'));
     const index = node.firstChildNotMatchingClass(nodes.Titular);
     expect(index).toEqual(0);

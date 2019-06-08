@@ -1,7 +1,7 @@
 import Body from './Body';
 import { EOFError } from '../../../Exceptions';
-import {RSTStateArgs} from "./RSTState";
 import RSTStateMachine from "../RSTStateMachine";
+import {RSTStateArgs} from "../types";
 
 class SpecializedBody extends Body {
     _init(stateMachine: RSTStateMachine, args: RSTStateArgs) {
@@ -112,6 +112,6 @@ class SpecializedBody extends Body {
         throw new EOFError();
     }
 }
-//SpecializedBody.stateName = 'SpecializedBody';
+SpecializedBody.stateName = 'SpecializedBody';
 //SpecializedBody.constructor.stateName = 'SpecializedBody';
 export default SpecializedBody;

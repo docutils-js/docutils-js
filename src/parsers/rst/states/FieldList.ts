@@ -12,6 +12,6 @@ class FieldList extends SpecializedBody {
         return [[], nextState, []];
     }
 }
-//FieldList.stateName = 'FieldList';
+FieldList.stateName = 'FieldList';
 //FieldList.constructor.stateName = 'FieldList';
 export default FieldList;
