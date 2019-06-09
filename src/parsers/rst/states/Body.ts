@@ -467,7 +467,8 @@ class Body extends RSTState {
     }
 
     disallowedInsideSubstitutionDefinitions(node: INode) {
-        if (((node.attributes && node.attributes.ids.length) || node instanceof nodes.reference
+
+        if (((node.attributes && node.attributes.ids && node.attributes.ids.length) || node instanceof nodes.reference
              || node instanceof nodes.footnote_reference) && node.attributes.auto) {
             return true;
         }

@@ -1,5 +1,5 @@
 export default class TransformError extends Error {
-    constructor(message, ...params) {
+    constructor(message: string, ...params: any[]) {
         super(...params);
         /* instanbul ignore else */
         if (Error.captureStackTrace) {

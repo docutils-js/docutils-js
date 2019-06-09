@@ -1,4 +1,3 @@
-import { DOMParser, DOMImplementation, XMLSerializer } from 'xmldom';
 import * as nodes from '../src/nodes';
 import newDocument from '../src/newDocument';
 import defaults from "../gen/defaults";
@@ -42,18 +41,7 @@ test('NodeVisitor.constructor', () => {
 
 test('_domNode', () => {
     const p = new nodes.paragraph('test', 'test', [], {});
-    const domParser = new DOMParser({});
-    const doc = domParser.parseFromString('<document/>');
-    const domRoot = doc;
-    expect(domRoot).toBeDefined();
-    const serializer = new XMLSerializer();
-
-    const domNode = p._domNode(domRoot);
-    expect(domNode).toBeDefined();
-
-    const stringRep = serializer.serializeToString(domNode);
-    expect(stringRep).toMatchSnapshot();
-});
+    });
 
 test('firstChildNotMatchingClass', () => {
     const node = newDocument({ sourcePath: ''}, defaults)

@@ -9,7 +9,7 @@
     "test": "jest",
     "extractSettings": "python3 ../tools/docutils-export.py > build/settingsSpec.json",
     "convertSettings": "node ./scripts/convertSettingsSpec.js",
-    "compile": "tsc src/*.ts src/**/*.ts"
+    "compile": "tsc -p ."
   },
   "devDependencies": {
     "@babel/cli": "^7.2.3",
@@ -56,10 +56,8 @@
   },
   "dependencies": {
     "@babel/polyfill": "^7.4.0",
-    "@types/draft-js": "^0.10.32",
     "@types/node": "^12.0.4",
     "@types/xml-escape": "^1.1.0",
-    "@types/xmldom": "^0.1.29",
     "argparse": "^1.0.10",
     "draft-js": "^0.10.5",
     "ejs": "^2.6.1",

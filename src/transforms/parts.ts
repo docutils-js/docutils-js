@@ -12,10 +12,10 @@ export const __docformat__ = 'reStructuredText';
  * form of the TOC should be used.
  */
 export class SectNum extends Transform {
-    private start: number;
-    private maxDepth: number;
-    private startValue: number;
-    private prefix: number;
+    private start?: number;
+    private maxDepth?: number;
+    private startValue?: number;
+    private prefix?: number;
     apply() {
         const s = this.startNode;
         // @ts-ignore

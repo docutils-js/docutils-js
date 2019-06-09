@@ -9,7 +9,6 @@ const __docformat__ = 'reStructuredText';
 const supported = ['standalone'];
 const transforms = '';
 
-this.document = undefined;
 
 function getTransforms() {
     const s = baseReaderTransforms;

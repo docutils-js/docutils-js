@@ -491,8 +491,8 @@ export interface DocutilsReadersStandaloneReader {
 }
 
 export interface Settings {
-    _source: string | undefined;
-    _destination: string | undefined;
+    _source?: string;
+    _destination?: string;
 docutilsCoreOptionParser?: DocutilsCoreOptionParser;
 docutilsFrontendOptionParser?: DocutilsFrontendOptionParser;
 docutilsParsersRstParser?: DocutilsParsersRstParser;

@@ -1,9 +1,9 @@
+// @ts-ignore
 import { genKey, ContentBlock, CharacterMetadata } from 'draft-js';
 import {
  __version__, Writer as BaseWriter, Transform, nodes,
 } from '../index';
 import {Document, IElement, INode} from "../types";
-import {FormatCodeSettings} from "ts-morph";
 import {Settings} from "../../gen/Settings";
 
 const GenericNodeVisitor = nodes.GenericNodeVisitor;
