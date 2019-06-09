@@ -688,7 +688,7 @@ children: INode[] = [];
 
     traverse(args: TraverseArgs): any[] {
       const {
-        condition, includeSelf, descend, siblings, ascend,
+        condition, includeSelf = true, descend = true, siblings = false, ascend = false,
       } = args;
       const mySiblings = ascend ? true : siblings;
       if (includeSelf && descend && !mySiblings) {
@@ -972,6 +972,7 @@ class Element extends Node implements IElement {
         this.attributes[attKey] = value;
       }
     });
+    this.tagname = this.constructor.name;
   }
 
   _init() {
@@ -1096,7 +1097,7 @@ class Element extends Node implements IElement {
         myVal = value.toString();
       }
       if (!gotPart) {
-        myVal = quoteAttr(myVal);
+        myVal = q(myVal);
         parts.push(`${name}=${myVal}`);
       }
     });
@@ -1368,7 +1369,7 @@ class document extends Element implements Document {
 
   private parseMessages: string[];
 
-  public transformer: Transformer;
+  transformer: Transformer;
 
   private substitutionDefs: any;
 

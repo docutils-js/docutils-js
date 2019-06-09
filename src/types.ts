@@ -8,6 +8,7 @@ import {Settings} from "../gen/Settings";
 import State from "./states/State";
 import StringList from "./StringList";
 import Inliner from "./parsers/rst/Inliner";
+import Transformer from "./Transformer";
 
 export interface ParserArgs
 {
@@ -159,6 +160,8 @@ export interface Document extends IElement {
     settings: Settings;
 
     // eslint-disable-next-line camelcase
+    transformer: Transformer;
+
     noteTransformMessage(message: any): void;
 
     noteImplicitTarget(target: any, msgnode: any): void;
@@ -196,7 +199,7 @@ export interface Document extends IElement {
     getDecoration(): any;
 }
 
-export interface TransformSpec {
+export interface ITransformSpec {
     /**
      * List of functions to try to resolve unknown references.  Unknown
      * references have a 'refname' attribute which doesn't correspond to any
@@ -226,7 +229,7 @@ export interface TransformSpec {
     getTransforms(): any[];
 }
 
-export interface Component extends TransformSpec {
+export interface IComponent extends ITransformSpec {
     componentType: string;
     supported: string[];
 
@@ -388,3 +391,27 @@ export interface IStateMachineWS extends IStateMachine {
     getFirstKnownIndented(args: GetIndentedArgs): any[];
 }
 
+export interface ITransformer {
+    document: Document;
+
+    /**
+     * apply the transforms
+     */
+    applyTransforms(): void;
+
+    /**
+     * Store multiple transforms, with default priorities.
+     * @param {Array} transformList - Array of transform classes (not instances).
+     */
+    addTransforms(transformList: any[]): void;
+
+    /**
+     *
+     * Return a string, `priority` combined with `self.serialno`.
+     *
+     * This ensures FIFO order on transforms with identical priority.
+     */
+    getPriorityString(class_: any, priority: number): string;
+
+    addPending(pending: any, priority: any): void;
+}

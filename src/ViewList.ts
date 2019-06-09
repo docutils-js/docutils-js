@@ -5,7 +5,7 @@
 import { ApplicationError } from './Exceptions';
 
 class ViewList extends Array {
-    protected items: any[];
+    public items: any[];
 
     protected parentOffset: number;
 

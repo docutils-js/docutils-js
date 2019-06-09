@@ -23,10 +23,10 @@ class Reporter implements IReporter {
     private observers: any[];
     private maxLevel: number;
     private debugLevel: number = 0;
-    private DEBUG_LEVEL: number;
-    private INFO_LEVEL: number;
-    private WARNING_LEVEL: number;
-    private ERROR_LEVEL: number;
+    public  DEBUG_LEVEL: number;
+    public  INFO_LEVEL: number;
+    public WARNING_LEVEL: number;
+    public  ERROR_LEVEL: number;
     private SEVERE_LEVEL: number;
     debugFlag?: boolean;
     reportLevel: number;

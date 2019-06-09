@@ -22,6 +22,9 @@ class Parser extends BaseParser {
     }
 
     parse(inputstring: string, document: Document) {
+        if(!inputstring.split) {
+            throw new Error('not a string');
+        }
         if (!inputstring) {
             throw new Error('need input for rst parser');
         }
@@ -41,6 +44,9 @@ class Parser extends BaseParser {
 },
 );
 //      console.log(`initial state is ${this.initialState}`);
+        if(this.stateMachine.debug) {
+            console.log('fo')
+        }
         this.stateMachine.run({ inputLines, document,
             inliner: this.inliner });
         this.finishParse();

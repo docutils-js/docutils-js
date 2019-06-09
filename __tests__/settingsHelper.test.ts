@@ -1,7 +1,7 @@
-import { fn } from "../src/settingsHelper";
+import { getDefaultSettings } from "../src/settingsHelper";
 
 test("1", () => {
-  expect(fn()).toMatchInlineSnapshot(`
+  expect(getDefaultSettings()).toMatchInlineSnapshot(`
     Object {
       "docutilsCoreOptionParser": Object {
         "autoIdPrefix": "id",

@@ -5,9 +5,12 @@ import newDocument from '../../src/newDocument';
 import * as nodes from '../../src/nodes';
 import defaults from "../../gen/defaults";
 
+defaults.docutilsCoreOptionParser!.debug = true;
+
+
 const ReadmeRst = fs.readFileSync(path.join(__dirname, '../../README.rst'), { encoding: 'UTF-8' });
 
-test('1', () => {
+test.only('1', () => {
     const p = new Parser({});
     const document = newDocument({ sourcePath: '' }, defaults);
     p.parse('* a bullet point', document);

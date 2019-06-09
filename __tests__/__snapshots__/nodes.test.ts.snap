@@ -1,3 +1,82 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`_domNode 1`] = `"<>test</>"`;
+exports[`_domNode 1`] = `"<paragraph>test</paragraph>"`;
+
+exports[`paragraph with text 1`] = `"<paragraph>This is my paragraph text.</paragraph>"`;
+
+exports[`paragraph with text 2`] = `
+paragraph {
+  "attributes": Object {
+    "backrefs": Array [],
+    "classes": Array [],
+    "dupnames": Array [],
+    "ids": Array [],
+    "names": Array [],
+  },
+  "basicAttributes": Array [
+    "ids",
+    "classes",
+    "names",
+    "dupnames",
+  ],
+  "childTextSeparator": "
+
+",
+  "children": Array [
+    Text {
+      "attributes": Object {},
+      "basicAttributes": Array [
+        "ids",
+        "classes",
+        "names",
+        "dupnames",
+      ],
+      "childTextSeparator": "",
+      "children": Array [],
+      "classTypes": Array [],
+      "currentLine": 0,
+      "currentSource": "",
+      "data": "This is my paragraph text.",
+      "knownAttributes": Array [],
+      "line": 0,
+      "listAttributes": Array [],
+      "names": Array [],
+      "rawsource": "",
+      "referenced": false,
+      "source": "",
+      "tagname": "Text",
+    },
+  ],
+  "classTypes": Array [
+    [Function],
+  ],
+  "currentLine": 0,
+  "currentSource": "",
+  "knownAttributes": Array [
+    "ids",
+    "classes",
+    "names",
+    "dupnames",
+    "backrefs",
+    "source",
+    "rawsource",
+  ],
+  "line": 0,
+  "listAttributes": Array [
+    "ids",
+    "classes",
+    "names",
+    "dupnames",
+    "backrefs",
+  ],
+  "localAttributes": Array [
+    "backrefs",
+  ],
+  "names": Array [],
+  "nodeName": Symbol(Element),
+  "rawsource": "",
+  "referenced": false,
+  "source": "",
+  "tagname": "paragraph",
+}
+`;

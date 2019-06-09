@@ -14,7 +14,7 @@ export default class Reader extends Component {
     private settings?: Settings;
     protected source: any;
     protected input: any;
-    protected parser: any;
+    public parser: any;
     private debug: boolean;
     private debugFn: any;
     getTransforms() {
@@ -22,7 +22,7 @@ export default class Reader extends Component {
 //               universal.ExportInternals, universal.StripComments ];
     }
 
-    constructor(args: { parser: any, parseFn: any, parserName: string, debugFn?: any,
+    constructor(args: { parser?: any, parseFn?: any, parserName?: string, debugFn?: any,
     debug?: boolean }) {
         super();
         const { parser, parseFn, parserName } = args;

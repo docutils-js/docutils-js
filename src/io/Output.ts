@@ -1,12 +1,14 @@
 import TransformSpec from '../TransformSpec';
 
-class Output extends TransformSpec {
+class Output<T> extends TransformSpec {
+    public componentType: string = 'output';
+    public supported: string[] = [];
     protected defaultDestinationPath: any;
     private destinationPath: any;
     private encoding: any;
-    protected destination: any;
+    public destination?: T;
     private errorHandler: string;
-    constructor(destination: any, destinationPath: string, encoding: string, errorHandler: string) {
+    constructor(destination?: T, destinationPath?: any, encoding?: any, errorHandler?: any) {
         super();
         this.encoding = encoding;
         this.errorHandler = errorHandler || 'strict';

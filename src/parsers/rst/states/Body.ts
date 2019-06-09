@@ -764,8 +764,8 @@ class Body extends RSTState {
                         const [attributionEnd, indent] = this.check_attribution(indented, i);
                         if (attributionEnd) {
                             const aLines = indented.slice(i, attributionEnd);
-                            aLines.trimRight(match.index + match[0].length, undefined, 1);
-                            aLines.trimRight(indent, 1);
+                            aLines.trimEnd(match.index + match[0].length, undefined, 1);
+                            aLines.trimEnd(indent, 1);
                             return [indented.slice(0, i), aLines,
                                     i, indented.slice(attributionEnd),
                                     lineOffset + attributionEnd];
@@ -921,7 +921,7 @@ class Body extends RSTState {
                 this.rstStateMachine.getFirstKnownIndented({ indent }));
         }
         const listitem = new nodes.list_item(indented.join('\n'));
-        if (indented) { // fixme equivalent?
+        if (indented && indented.length) { // fixme equivalent?
             this.nestedParse( {
                 inputLines: indented,
                 inputOffset: lineOffset,

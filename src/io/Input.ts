@@ -1,6 +1,8 @@
 import TransformSpec from '../TransformSpec';
 
 abstract class Input extends TransformSpec {
+    public componentType: string = "input";
+    public supported: string[] = [];
     private successfulEncoding: any;
     private defaultSourcePath: any;
     private encoding: any;

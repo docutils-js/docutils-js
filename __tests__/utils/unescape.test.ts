@@ -1,13 +1,5 @@
 import unescape from '../../src/utils/unescape';
 
-test('unescape no args', () => {
-    expect(() => unescape()).toThrow();
-});
-
-test('unescape with non-string arg', () => {
-    expect(() => unescape({})).toThrow();
-});
-
 test('unescape with string arg requiring no escaping', () => {
     expect(unescape('hello')).toBe('hello');
 });

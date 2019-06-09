@@ -1,7 +1,8 @@
 import { Publisher } from '../src/Core';
 import { StringInput, StringOutput } from '../src/io';
 import * as nodes from '../src/nodes';
-import baseSettings from '../src/baseSettings';
+import defaults from "../gen/defaults";
+import {INode} from "../src/types";
 
 const path = require('path');
 const fs = require('fs');
@@ -12,10 +13,10 @@ const testFilesRoot = path.join(__dirname, '../testfiles/forms/');
 // for files we want to return the files
 // dor directories we want to return the directories
 
-fs.readdirSync(restFilesRoot, { withFileTypes: true }).filter(e => e.isDirectory)
+fs.readdirSync(testFilesRoot, { withFileTypes: true }).filter((e: any) => e.isDirectory)
 
-const files = micromatch([glob]);
-const table = files.map(file => ([file, fs.readFileSync(file, 'utf-8')]));
+//const files = micromatch([glob]);
+//const table = files.map(file => ([file, fs.readFileSync(file, 'utf-8')]));
 
 const defaultArgs = {
     readerName: 'standalone',
@@ -26,17 +27,18 @@ const defaultArgs = {
     writerName: 'xml',
 };
 
-const defaultSettings = { ...baseSettings };
+const defaultSettings = { ...defaults };
 
+const table: any[][] = [];
 test.each(table)('%s', (file, input) => {
-    const myOpts = {};
+    const myOpts: any = {};
 
     const settings = { ...defaultSettings };
     const args = { ...defaultArgs };
 
     const { readerName, parserName, writerName } = args;
     const source = new StringInput({ source: input });
-    const destination = new StringOutput({});
+    const destination = new StringOutput();
     const pub = new Publisher({
         source, destination, settings,
     });
@@ -44,7 +46,7 @@ test.each(table)('%s', (file, input) => {
     return new Promise((resolve, reject) => {
         /* {argv, usage, description, settingsSpec,
            settingsOverrides, configSection, enableExitStatus } */
-        const fn = () => pub.publish({}, (error) => {
+        const fn = () => pub.publish({}, (error: any) => {
             if (error) {
                 if (myOpts.expectError) {
                     resolve();
@@ -57,24 +59,24 @@ test.each(table)('%s', (file, input) => {
 
             const Visitor = class extends nodes.GenericNodeVisitor {
                 /* eslint-disable-next-line camelcase,no-unused-vars */
-                default_departure(node) {
+                default_departure(node: INode) {
                     /**/
                 }
 
                 /* eslint-disable-next-line camelcase */
-                default_visit(node) {
+                default_visit(node: INode) {
                     if (node.attributes && node.attributes.refuri) {
                         //                                console.log(node.attributes.refuri);
                         if (!/^https?:\/\//.test(node.attributes.refuri)) {
                             const msg = `Invalid refuri ${node.attributes.refuri}`;
-                            const messages = [document.reporter.warning(msg, [], {})];
+                            const messages = [document!.reporter.warning(msg, [], {})];
                             node.add(messages);
                         }
                     }
                 }
             };
-            const visitor = new Visitor(document);
-            document.walkabout(visitor);
+            const visitor = new Visitor(document!);
+            document!.walkabout(visitor);
             expect(destination.destination).toMatchSnapshot();
             resolve();
         });

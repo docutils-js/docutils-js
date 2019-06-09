@@ -1,28 +1,28 @@
-/*
-This module defines table parser classes,which parse plaintext-graphic tables
-and produce a well-formed data structure suitable for building a CALS table.
-
-:Classes:
-    - `GridTableParser`: Parse fully-formed tables represented with a grid.
-    - `SimpleTableParser`: Parse simple tables, delimited by top & bottom
-      borders.
-
-:Exception class: `TableMarkupError`
-
-:Function:
-    `update_dict_of_lists()`: Merge two dictionaries containing list values.
-*/
+/**
+ * This module defines table parser classes,which parse plaintext-graphic tables
+ * and produce a well-formed data structure suitable for building a CALS table.
+ *
+ * :Classes:
+ *     - `GridTableParser`: Parse fully-formed tables represented with a grid.
+ *     - `SimpleTableParser`: Parse simple tables, delimited by top & bottom
+ *       borders.
+ *
+ * :Exception class: `TableMarkupError`
+ *
+ * :Function:
+ *     `update_dict_of_lists()`: Merge two dictionaries containing list values.
+ **/
 
 import { DataError } from '../../Exceptions';
 import { stripCombiningChars } from '../../utils';
 import StringList from "../../StringList";
 
 /**
- Raise if there is any problem with table markup.
-
- The keyword argument `offset` denotes the offset of the problem
- from the table's start line.
- */
+ * Raise if there is any problem with table markup.
+ *
+ * The keyword argument `offset` denotes the offset of the problem
+ * from the table's start line.
+ **/
 class TableMarkupError extends DataError {
     offset?: number;
     constructor(message: string, offset?: number) {
@@ -35,7 +35,7 @@ class TableMarkupError extends DataError {
  Abstract superclass for the common parts of the syntax-specific parsers.
  */
 abstract class TableParser {
-    protected doubleWidthPadChar: string = '';
+    protected doubleWidthPadChar: string = '\x00';
 
     protected block: StringList = new StringList([]);
     protected headBodySep?: number;
@@ -48,18 +48,17 @@ abstract class TableParser {
     /* eslint-disable-next-line no-unused-vars */
     _init() {
         /** Padding character for East Asian double-width text. */
-        this.doubleWidthPadChar = '\x00';
     }
 
-        /**
-        Analyze the text `block` and return a table data structure.
-
-        Given a plaintext-graphic table in `block` (list of lines of text; no
-        whitespace padding), parse the table, construct and return the data
-        necessary to construct a CALS table or equivalent.
-
-        Raise `TableMarkupError` if there is any problem with the markup.
-        */
+     /**
+     * Analyze the text `block` and return a table data structure.
+     *
+     * Given a plaintext-graphic table in `block` (list of lines of text; no
+     * whitespace padding), parse the table, construct and return the data
+     * necessary to construct a CALS table or equivalent.
+     *
+     * Raise `TableMarkupError` if there is any problem with the markup.
+     */
     parse(block: StringList) {
         this.setup(block);
         this.findHeadBodySep();
@@ -71,7 +70,7 @@ abstract class TableParser {
     abstract parse_table(): void;
 
     /**
-     Look for a head/body row separator line; store the line index.
+     * Look for a head/body row separator line; store the line index.
      */
     /* eslint-disable-next-line camelcase */
     findHeadBodySep() {
@@ -81,7 +80,8 @@ abstract class TableParser {
             if (this.headBodySeparatorPat!.test(line)) {
                 if (this.headBodySep) {
                     throw new TableMarkupError(
-                        `Multiple head/body row separators (table lines ${this.headBodySep + 1} and ${i + 1}); only one allowed.`, i,
+                        `Multiple head/body row separators (table lines ` +
+                        `${this.headBodySep + 1} and ${i + 1}); only one allowed.`, i,
 );
                 } else {
                     this.headBodySep = i;

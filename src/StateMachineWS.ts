@@ -36,7 +36,7 @@ class StateMachineWS extends StateMachine implements IStateMachineWS {
         return [indented, indent, offset, blankFinish];
     }
 
-    getKnownIndented(labeled: GetIndentedArgs) {
+    getKnownIndented(labeled: GetIndentedArgs): any[] {
         const cArgs: GetIndentedArgs = {...labeled};
         /* istanbul ignore if */
         if (typeof cArgs.stripIndent === 'undefined') {

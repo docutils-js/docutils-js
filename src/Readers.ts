@@ -12,7 +12,7 @@ export class ReReader extends Reader {
 /* eslint-disable-next-line no-unused-vars */
 const _ReaderAliases = {};
 
-export function getReaderClass(readerName) {
+export function getReaderClass(readerName: string): any {
 //    console.log(readerName);
     if (readerName === 'standalone') {
         return standalone.default;

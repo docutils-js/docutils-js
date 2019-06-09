@@ -1,13 +1,13 @@
 import Inliner from '../../../src/parsers/rst/Inliner';
 import newReporter from '../../../src/newReporter';
 import newDocument from '../../../src/newDocument';
-import baseSettings from '../../../src/baseSettings';
-
+import defaults from "../../../gen/defaults";
+const baseSettings = defaults;
 function setupInliner() {
     const inliner = new Inliner();
-    inliner.initCustomizations({});
-    const document = newDocument({}, { ...baseSettings });
-    const reporter = newReporter({}, { ...baseSettings });
+    inliner.initCustomizations(baseSettings);
+    const document = newDocument({sourcePath:''}, { ...baseSettings });
+    const reporter = newReporter({sourcePath:''}, { ...baseSettings });
     let language;
     /* eslint-disable-next-line no-unused-vars */
     const memo = {
@@ -18,7 +18,7 @@ function setupInliner() {
     return inliner;
 }
 
-function testInitialInlinerPattern(text, inliner) {
+function testInitialInlinerPattern(text: any, inliner?: Inliner) {
     if (typeof inliner === 'undefined') {
         inliner = setupInliner();
     }
@@ -26,8 +26,8 @@ function testInitialInlinerPattern(text, inliner) {
     if (!result) {
         return undefined;
     }
-    const rr = {};
-    inliner.patterns.initial[1].forEach((x, index) => {
+    const rr: any = {};
+    inliner.patterns.initial[1].forEach((x: any, index: number) => {
         if (x != null) {
             rr[x] = result[index];
         }
@@ -46,5 +46,5 @@ test.each([
     ['emphasis surrounded by text', 'hello *and* goodbye'],
 ])('%s', (a, b) => {
     const results = testInitialInlinerPattern(b);
-    expect(results.groups).toMatchSnapshot();
+    expect(results!.groups).toMatchSnapshot();
 });

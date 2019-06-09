@@ -11,11 +11,7 @@ const __docformat__ = 'reStructuredText';
  */
 
 class TransformSpec extends SettingsSpec {
-    private unknownReferenceResolvers: any[];
-    constructor() {
-        super();
-        this.unknownReferenceResolvers = [];
-    }
+    public unknownReferenceResolvers: any[] = [];
 
     /**
      * Get the transforms associated with the instance.

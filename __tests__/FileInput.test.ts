@@ -1,6 +1,6 @@
 import { FileInput } from '../src/io';
 
-function createFileInput(args) {
+function createFileInput(args: any) {
     let myArgs;
     if (typeof args === 'undefined') {
         myArgs = {
@@ -13,5 +13,5 @@ function createFileInput(args) {
 }
 
 test('FileInput.constructor no-args', () => {
-    expect(() => createFileInput()).toThrow();
+    expect(() => createFileInput({})).toThrow();
 });

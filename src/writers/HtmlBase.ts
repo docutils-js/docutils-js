@@ -7,7 +7,6 @@ import { getLanguage } from '../languages';
 import { UnimplementedError } from '../Exceptions';
 import {Settings} from "../../gen/Settings";
 import {Document, IAttributes, INode} from "../types";
-import any = jasmine.any;
 import {row, tgroup} from "../nodes";
 
 /* eslint-disable-next-line no-unused-vars */
@@ -1917,8 +1916,8 @@ class HTMLBaseWriter extends BaseWriter {
      * Create HTMLBaseWriter.
      * @param {Object} args - arguments to function
      */
-    constructor(args?: any) {
-        super(args);
+    constructor() {
+        super();
         this.attr = {};
         this.translatorClass = HTMLTranslator;
     }

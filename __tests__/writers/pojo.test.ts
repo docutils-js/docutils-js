@@ -1,6 +1,6 @@
 import { Publisher } from '../../src/Core';
 import { StringInput, StringOutput } from '../../src/io';
-import baseSettings from '../../src/baseSettings';
+import defaults from "../../gen/defaults";
 
 const currentLogLines = [];
 
@@ -20,14 +20,14 @@ const defaultArgs = {
     writerName: 'pojo',
 };
 
-const defaultSettings = { ...baseSettings };
+const defaultSettings = { ...defaults};
 
 test('rst2pojo pipeline', () => {
     const settings = { ...defaultSettings };
     const args = { ...defaultArgs };
 
 /* eslint-disable-next-line no-unused-vars */
-    const debugFn = (msg) => {
+    const debugFn = (msg: string) => {
 //      console.log(msg);
 //      currentLogLines.push(msg);
     };
@@ -41,18 +41,18 @@ I like food.
 `,
 });
 
-    const destination = new StringOutput({});
+    const destination = new StringOutput();
     const pub = new Publisher({
         source, destination, settings, debug: true, debugFn,
     });
     pub.setComponents(readerName, parserName, writerName);
     return new Promise((resolve, reject) => {
-        pub.publish({}, (error) => {
+        pub.publish({}, (error: string) => {
             if (error) {
                 reject(error);
                 return;
             }
-            expect(JSON.parse(destination.destination)).toMatchSnapshot();
+            expect(JSON.parse(destination.destination!)).toMatchSnapshot();
             currentLogLines.length = 0;
             resolve();
         });

@@ -120,7 +120,7 @@ document {
           "rawsource": "",
           "referenced": false,
           "source": "",
-          "tagname": "",
+          "tagname": "title",
         },
         section {
           "attributes": Object {
@@ -219,7 +219,7 @@ document {
               "rawsource": "",
               "referenced": false,
               "source": "",
-              "tagname": "",
+              "tagname": "title",
             },
             paragraph {
               "attributes": Object {
@@ -295,7 +295,7 @@ document {
               "rawsource": "",
               "referenced": false,
               "source": undefined,
-              "tagname": "",
+              "tagname": "paragraph",
             },
           ],
           "classTypes": Array [
@@ -330,7 +330,7 @@ document {
           "rawsource": "",
           "referenced": false,
           "source": "",
-          "tagname": "",
+          "tagname": "section",
         },
       ],
       "classTypes": Array [
@@ -365,7 +365,7 @@ document {
       "rawsource": "",
       "referenced": false,
       "source": "",
-      "tagname": "",
+      "tagname": "section",
     },
   ],
   "citationRefs": Object {},
@@ -479,7 +479,7 @@ document {
           "rawsource": "",
           "referenced": false,
           "source": "",
-          "tagname": "",
+          "tagname": "title",
         },
         paragraph {
           "attributes": Object {
@@ -555,7 +555,7 @@ document {
           "rawsource": "",
           "referenced": false,
           "source": undefined,
-          "tagname": "",
+          "tagname": "paragraph",
         },
       ],
       "classTypes": Array [
@@ -683,7 +683,7 @@ document {
             "rawsource": "",
             "referenced": false,
             "source": "",
-            "tagname": "",
+            "tagname": "title",
           },
           [Circular],
         ],
@@ -719,12 +719,12 @@ document {
         "rawsource": "",
         "referenced": false,
         "source": "",
-        "tagname": "",
+        "tagname": "section",
       },
       "rawsource": "",
       "referenced": false,
       "source": "",
-      "tagname": "",
+      "tagname": "section",
     },
     "test": section {
       "attributes": Object {
@@ -823,7 +823,7 @@ document {
           "rawsource": "",
           "referenced": false,
           "source": "",
-          "tagname": "",
+          "tagname": "title",
         },
         section {
           "attributes": Object {
@@ -922,7 +922,7 @@ document {
               "rawsource": "",
               "referenced": false,
               "source": "",
-              "tagname": "",
+              "tagname": "title",
             },
             paragraph {
               "attributes": Object {
@@ -998,7 +998,7 @@ document {
               "rawsource": "",
               "referenced": false,
               "source": undefined,
-              "tagname": "",
+              "tagname": "paragraph",
             },
           ],
           "classTypes": Array [
@@ -1033,7 +1033,7 @@ document {
           "rawsource": "",
           "referenced": false,
           "source": "",
-          "tagname": "",
+          "tagname": "section",
         },
       ],
       "classTypes": Array [
@@ -1068,7 +1068,7 @@ document {
       "rawsource": "",
       "referenced": false,
       "source": "",
-      "tagname": "",
+      "tagname": "section",
     },
   },
   "indirectTargets": Array [],

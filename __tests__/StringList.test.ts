@@ -7,14 +7,14 @@ import StringList from '../src/StringList';
 // @returns an array of X arrays of N elements, X being the product of the input arrays' lengths.
 
 /* eslint-disable-next-line no-unused-vars */
-function cartesianProduct(...arrays) {
-        function _inner(...args) {
+function cartesianProduct(...arrays: any[]) {
+        function _inner(...args: any[]): any {
                 if (arguments.length > 1) {
                         const arr2 = args.pop(); // arr of arrs of elems
                         const arr1 = args.pop(); // arr of elems
                         return _inner(...args,
-                                arr1.map(e1 => arr2.map(e2 => [e1, ...e2]))
-                                    .reduce((arr, e) => arr.concat(e), []));
+                                arr1.map((e1: any) => arr2.map((e2: any[]) => [e1, ...e2]))
+                                    .reduce((arr: any, e: any) => arr.concat(e), []));
                 }
                         return args[0];
         }

@@ -12,9 +12,7 @@ import {RstMemo} from "./types";
 class RSTStateMachine extends StateMachineWS {
     matchTitles?: boolean;
     node?: IElement;
-    debugFn: any;
-    debug: boolean = false;
-    private memo?: RstMemo;
+    public memo?: RstMemo;
     run(args: StateMachineRunArgs) {
         const cArgs = { ... args };
         /* istanbul ignore if */
@@ -60,6 +58,7 @@ class RSTStateMachine extends StateMachineWS {
         }
         this.node = undefined;
         this.memo = undefined;
+
         return [];
     }
 }

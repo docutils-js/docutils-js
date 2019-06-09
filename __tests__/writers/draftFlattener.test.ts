@@ -2,8 +2,8 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { Publisher } from '../../src/Core';
 import { StringInput, StringOutput } from '../../src/io';
-import baseSettings from '../../src/baseSettings';
 import * as nodes from '../../src/nodes';
+import defaults from "../../gen/defaults";
 
 jest.mock('../../src/io/Output');
 
@@ -25,7 +25,7 @@ const defaultArgs = {
     writerName: 'draft',
 };
 
-const defaultSettings = { ...baseSettings };
+const defaultSettings = { ...defaults};
 
 test.skip('rst2pojo pipeline', () => {
     const src = fs.readFileSync(path.join(__dirname, '../../testfiles/docs/index.txt'), { encoding: 'utf-8' });
@@ -34,7 +34,7 @@ test.skip('rst2pojo pipeline', () => {
     const args = { ...defaultArgs };
 
     /* eslint-disable-next-line no-unused-vars */
-    const debugFn = (msg) => {
+    const debugFn = (msg:string ) => {
 //      console.log(msg);
 //      currentLogLines.push(msg);
     };
@@ -44,18 +44,18 @@ test.skip('rst2pojo pipeline', () => {
         source: src,
 });
 
-    const destination = new StringOutput({});
+    const destination = new StringOutput();
     const pub = new Publisher({
         source, destination, settings, debug: true, debugFn,
     });
     pub.setComponents(readerName, parserName, writerName);
     return new Promise((resolve, reject) => {
-        pub.publish({}, (error) => {
+        pub.publish({}, (error: Error) => {
             if (error) {
                 reject(error);
                 return;
             }
-            fs.writeFileSync(nodes.formatXml(nodeToXmldestination.destination), 'out.xml', 'utf-8');
+            fs.writeFileSync(destination.destination!, 'out.xml', 'utf-8');
             currentLogLines.length = 0;
             resolve();
         });

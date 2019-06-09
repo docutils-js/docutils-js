@@ -6,7 +6,7 @@ import { ApplicationError } from './Exceptions';
 
 export class StringInput extends Input {
 
-    constructor(source: any, sourcePath: any, encoding: any, errorHandler: any) {
+    constructor(source: any, sourcePath?: any, encoding?: any, errorHandler?: any) {
         super({source, sourcePath, encoding, errorHandler});
         this.sourcePath = '<string>';
     }
@@ -16,9 +16,8 @@ export class StringInput extends Input {
     }
 }
 
-export class StringOutput extends Output {
-    // @ts-ignore
-    constructor(destination, destinationPath, encoding, errorHandler) {
+export class StringOutput extends Output<string> {
+    constructor(destination?: string, destinationPath?: string, encoding?: any, errorHandler?: any) {
         super(destination, destinationPath, encoding, errorHandler);
         this.defaultDestinationPath = '<string>';
 
@@ -114,6 +113,3 @@ export class FileInput extends Input {
     }
 }
 
-export class FileOutput extends Output {
-
-}

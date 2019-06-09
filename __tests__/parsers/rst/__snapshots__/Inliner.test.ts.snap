@@ -1,0 +1,29 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Bold 1`] = `""`;
+
+exports[`Bold 2`] = `""`;
+
+exports[`Emphasis 1`] = `""`;
+
+exports[`Emphasis 2`] = `""`;
+
+exports[`Interpreted text 1`] = `""`;
+
+exports[`Interpreted text 2`] = `""`;
+
+exports[`Interpreted text, no specified role 1`] = `""`;
+
+exports[`Interpreted text, no specified role 2`] = `""`;
+
+exports[`Literal 1`] = `""`;
+
+exports[`Literal 2`] = `""`;
+
+exports[`Not sure 1`] = `""`;
+
+exports[`Not sure 2`] = `""`;
+
+exports[`inliner 1 1`] = `""`;
+
+exports[`inliner 1 2`] = `""`;

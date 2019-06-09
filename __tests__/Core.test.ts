@@ -1,7 +1,8 @@
 import { Publisher } from '../src/Core';
 import { StringInput, StringOutput } from '../src/io';
 import * as nodes from '../src/nodes';
-import baseSettings from '../src/baseSettings';
+import defaults from "../gen/defaults";
+import {INode} from "../src/types";
 
 const currentLogLines = [];
 
@@ -21,36 +22,38 @@ const defaultArgs = {
     writerName: 'xml',
 };
 
-const defaultSettings = { ...baseSettings };
+const defaultSettings = { ...defaults };
 
 test('full rst2xml pipeline with specific input', () => {
     const settings = { ...defaultSettings };
     const args = { ...defaultArgs };
 
     /* eslint-disable-next-line no-unused-vars */
-    const debugFn = (msg) => {
+    const debugFn = (msg: string) => {
+
 //        console.log(msg);
 //      currentLogLines.push(msg);
     };
 
     const { readerName, parserName, writerName } = args;
-    const source = new StringInput({
- source: `.. _A ReStructuredText Primer: ../../user/rst/quickstart.html
+    const source = new StringInput(
+ `.. _A ReStructuredText Primer: ../../user/rst/quickstart.html
 .. _Quick reStructuredText: ../../user/rst/quickref.html
-`,
-});
-        const destination = new StringOutput({});
+`
+);
+        const destination = new StringOutput();
     const pub = new Publisher({
  source, destination, settings, debug: true, debugFn,
 });
     pub.setComponents(readerName, parserName, writerName);
     return new Promise((resolve, reject) => {
-        pub.publish({}, (error) => {
-            if (error) {
+        pub.publish({}, (error: Error | any) => {
+                        if (error) {
                 reject(error);
-                return;
-            }
-            expect(destination.destination).toMatchSnapshot();
+            return;
+        }
+            // @ts-ignore
+        expect(destination.destination).toMatchSnapshot();
             currentLogLines.length = 0;
             resolve();
         });
@@ -295,18 +298,18 @@ footnote 2.
 ])('%s', (...inputAry) => {
     /* eslint-disable-next-line no-unused-vars */
              const [a, raw, opts] = inputAry;
-             const myOpts = opts || {};
+             const myOpts: any = opts || {};
 
               const settings = { ...defaultSettings };
               const args = { ...defaultArgs };
-              const debugFn = (msg) => {
+              const debugFn = (msg: string) => {
                   currentLogLines.push(msg);
               };
 
               const { readerName, parserName, writerName } = args;
 //            console.log(raw);
-              const source = new StringInput({ source: raw });
-              const destination = new StringOutput({});
+              const source = new StringInput(raw);
+              const destination = new StringOutput();
               const pub = new Publisher({
                   source, destination, settings, debug: true, debugFn,
 });
@@ -314,7 +317,7 @@ footnote 2.
               return new Promise((resolve, reject) => {
                   /* {argv, usage, description, settingsSpec,
 settingsOverrides, configSection, enableExitStatus } */
-                  const fn = () => pub.publish({}, (error) => {
+                  const fn = () => pub.publish({}, (error: any) => {
                       if (error) {
                           if (myOpts.expectError) {
                               resolve();
@@ -323,16 +326,16 @@ settingsOverrides, configSection, enableExitStatus } */
                           }
                           return;
                       }
-                      const document = pub.document;
+                      const document = pub.document!;
 
                       const Visitor = class extends nodes.GenericNodeVisitor {
                           /* eslint-disable-next-line camelcase,no-unused-vars */
-                          default_departure(node) {
+                          default_departure(node: INode) {
                               /**/
                           }
 
                           /* eslint-disable-next-line camelcase */
-                          default_visit(node) {
+                          default_visit(node: INode) {
                               if (node.attributes && node.attributes.refuri) {
 //                                console.log(node.attributes.refuri);
                                   if (!/^https?:\/\//.test(node.attributes.refuri)) {

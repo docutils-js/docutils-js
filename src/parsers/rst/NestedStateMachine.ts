@@ -2,6 +2,7 @@ import StateMachineWS from '../../StateMachineWS';
 import {StateMachineRunArgs} from "../../types";
 
 class NestedStateMachine extends StateMachineWS {
+    public memo: any;
     run(args: StateMachineRunArgs) {
     const {
     inputLines, inputOffset, memo, node, matchTitles,

@@ -6,5 +6,5 @@ test('Text.constructor', () => {
 });
 
 test('Text.constructor invalid args', () => {
-    expect(() => new Text()).toThrow();
+    expect(() => new Text('')).toThrow();
 });

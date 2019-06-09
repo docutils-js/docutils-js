@@ -17,7 +17,7 @@ export default class Writer extends Component {
      * @constructor
      *
      */
-    constructor(args?: any) {
+    constructor() {
         super();
         this.parts = {};
     }

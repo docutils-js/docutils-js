@@ -89,8 +89,8 @@ class POJOWriter extends BaseWriter {
       * Create POJOWriter
       * @param {Object} args - Arguments, none right now
       */
-    constructor(args?: any) {
-        super(args);
+    constructor() {
+        super();
         this.translatorClass = POJOTranslator;
     }
 

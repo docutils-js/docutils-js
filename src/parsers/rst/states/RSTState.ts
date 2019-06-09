@@ -54,9 +54,12 @@ abstract class RSTState extends StateWS {
         super.runtimeInit();
         const {memo} = this.rstStateMachine;
         this.memo = memo;
-        this.reporter = memo.reporter;
-        this.inliner = memo.inliner;
-        this.document = memo.document;
+        if(!memo) {
+            throw new Error('need memo')
+        }
+        this.reporter = memo!.reporter;
+        this.inliner = memo!.inliner;
+        this.document = memo!.document;
         this.parent = this.rstStateMachine.node;
         if (!this.reporter!.getSourceAndLine) {
             this.reporter!.getSourceAndLine = this.rstStateMachine.getSourceAndLine;

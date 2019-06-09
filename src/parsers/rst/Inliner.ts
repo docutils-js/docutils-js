@@ -105,7 +105,7 @@ class Inliner {
     private nonWhitespaceBefore: string;
     private nonWhitespaceEscapeBefore: string;
     private nonUnescapedWhitespaceEscapeBefore: string;
-    private patterns: any;
+    public patterns: any;
     private reporter?: IReporter;
     private parent?: IElement;
     private document?: Document;

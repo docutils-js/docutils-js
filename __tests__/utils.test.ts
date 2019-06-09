@@ -1,15 +1,15 @@
 import * as utils from '../src/utils';
 import unescape from '../src/utils/unescape';
-import baseSettings from '../src/baseSettings';
 import Reporter from '../src/Reporter';
 import newReporter from '../src/newReporter';
+import defaults from "../gen/defaults";
 
 function createReporter() {
-    return new Reporter(undefined, 0, 4, undefined, true, 'utf-8');
+    return new Reporter('', 0, 4, undefined, true, 'utf-8');
 }
 
 test('1', () => {
-    const r = newReporter({}, { ...baseSettings });
+    const r = newReporter({sourcePath:''}, { ...defaults });
 
 //    r.attachObserver(node => {
 //      console.log(node.children[0].children[0].astext());
@@ -29,7 +29,7 @@ test('columnIndicies', () => {
 });
 
 test('isIterable with null or undefined value', () => {
-    expect(utils.isIterable()).toBe(false);
+    expect(utils.isIterable(undefined)).toBe(false);
 });
 
 test('Reporter.systemMessage with Error/Exception', () => {

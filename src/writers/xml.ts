@@ -4,7 +4,7 @@ import * as nodes from '../nodes';
 import {Document, INode} from "../types";
 import {Settings} from "../../gen/Settings";
 
-export function escapeXml(unsafe) {
+export function escapeXml(unsafe: string) {
     if (typeof unsafe === 'undefined') {
         throw new Error('need unsafE');
     }
@@ -30,7 +30,7 @@ class XMLTranslator extends nodes.GenericNodeVisitor {
     private level: number;
     private inSimple: number;
     private fixedText: number;
-    private simple_nodes: any[];
+    private simple_nodes: any[] = [];
     private doctype: any;
 
     constructor(document: Document) {
@@ -45,10 +45,10 @@ class XMLTranslator extends nodes.GenericNodeVisitor {
         const settings: Settings = this.settings;
         this.newline = '';
         this.indent = '';
-        if (settings.xmlWriter.newlines) {
+        if (settings.docutilsWritersDocutilsXmlWriter!.newlines) {
             this.newline = '\n';
         }
-        if (settings.xmlWriter.indents) {
+        if (settings.docutilsWritersDocutilsXmlWriter!.indents) {
             this.newline = 'n';
             this.indent = '    ';
         }
@@ -56,17 +56,17 @@ class XMLTranslator extends nodes.GenericNodeVisitor {
         this.inSimple = 0;
         this.fixedText = 0;
         this.output = [];
-        if (settings.xmlWriter.xmlDeclaration) {
-            this.output.push(this.xmlDeclaration(settings.outputEncoding));
+        if (settings.docutilsWritersDocutilsXmlWriter!.xmlDeclaration) {
+            this.output.push(this.xmlDeclaration(settings.docutilsCoreOptionParser!.outputEncoding));
         }
-        if (settings.xmlWriter.doctypeDeclaration) {
+        if (settings.docutilsWritersDocutilsXmlWriter!.doctypeDeclaration) {
             this.output.push(this.doctype);
         }
         this.output.push(this.generator);
     }
 
     /* eslint-disable-next-line camelcase */
-    default_visit(node) {
+    default_visit(node: INode) {
         this.simple_nodes = [nodes.TextElement];// nodes.image, nodes.colspec, nodes.transition]
         if (!this.inSimple) {
             this.output.push(Array(this.level + 1).join(this.indent));
@@ -92,7 +92,7 @@ class XMLTranslator extends nodes.GenericNodeVisitor {
     }
 
     /* eslint-disable-next-line camelcase */
-    default_departure(node) {
+    default_departure(node: INode) {
         this.level -= 1;
         if (!this.inSimple) {
             this.output.push(Array(this.level + 1).join(this.indent));
@@ -105,13 +105,13 @@ class XMLTranslator extends nodes.GenericNodeVisitor {
     }
 
     /* eslint-disable-next-line camelcase */
-    visit_Text(node) {
+    visit_Text(node: INode) {
         const text = escapeXml(node.astext());
         this.output.push(text);
     }
 
     /* eslint-disable-next-line camelcase,no-unused-vars */
-    depart_Text(node) {
+    depart_Text(node: INode) {
     }
 
     private xmlDeclaration(outputEncoding: string) {
@@ -123,8 +123,8 @@ class XMLTranslator extends nodes.GenericNodeVisitor {
 export default class Writer extends BaseWriter {
     private visitor: any;
     private translatorClass: any;
-    constructor(args) {
-        super(args);
+    constructor() {
+        super();
         this.translatorClass = XMLTranslator;
     }
 
@@ -132,7 +132,7 @@ export default class Writer extends BaseWriter {
         const TranslatorClass = this.translatorClass;
         const visitor = new TranslatorClass(this.document);
         this.visitor = visitor;
-        this.document.walkabout(visitor);
+        this.document!.walkabout(visitor);
         this.output = visitor.output.join('');
         if (process.stderr) {
             // process.stderr.write(this.output);
