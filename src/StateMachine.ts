@@ -1,13 +1,13 @@
-import UnknownStateError from './UnknownStateError';
+import UnknownStateError from './error/UnknownStateError';
 import ErrorOutput from './ErrorOutput';
 import { isIterable } from './utils';
 import {
   ApplicationError, EOFError, InvalidArgumentsError, UnimplementedError as Unimp,
 } from './Exceptions';
-import UnexpectedIndentationError from './UnexpectedIndentationError';
+import UnexpectedIndentationError from './error/UnexpectedIndentationError';
 import StateCorrection from './StateCorrection';
 import TransitionCorrection from './TransitionCorrection';
-import DuplicateStateError from './DuplicateStateError';
+import DuplicateStateError from './error/DuplicateStateError';
 import StringList from './StringList';
 import {
   INode, IStateFactory, IStateMachine, StateMachineRunArgs,

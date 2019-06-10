@@ -1,6 +1,6 @@
 import {InvalidArgumentsError} from '../Exceptions';
-import UnknownTransitionError from '../UnknownTransitionError';
-import DuplicateTransitionError from '../DuplicateTransitionError';
+import UnknownTransitionError from '../error/UnknownTransitionError';
+import DuplicateTransitionError from '../error/DuplicateTransitionError';
 import {IReporter, IState, IStateMachine} from "../types";
 import {StateMachine} from "../StateMachine";
 import StateMachineWS from "../StateMachineWS";

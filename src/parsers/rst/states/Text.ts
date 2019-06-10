@@ -4,7 +4,7 @@ import unescape from '../../../utils/unescape';
 import * as nodes from '../../../nodes';
 import * as RegExps from '../RegExps';
 import TransitionCorrection from '../../../TransitionCorrection';
-import UnexpectedIndentationError from '../../../UnexpectedIndentationError';
+import UnexpectedIndentationError from '../../../error/UnexpectedIndentationError';
 import {EOFError} from '../../../Exceptions';
 import {INode} from "../../../types";
 import State from "../../../states/State";

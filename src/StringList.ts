@@ -1,6 +1,6 @@
 import ViewList from './ViewList';
 import {columnIndicies} from './utils';
-import UnexpectedIndentationError from './UnexpectedIndentationError';
+import UnexpectedIndentationError from './error/UnexpectedIndentationError';
 import {GetIndentedArgs} from "./types";
 
 class StringList extends ViewList {

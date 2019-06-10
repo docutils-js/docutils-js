@@ -167,3 +167,5 @@ validator: 'frontend.validate_boolean',
 }]]];
 
  */
+
+export { Writer as XMLWriter };

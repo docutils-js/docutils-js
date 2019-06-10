@@ -8,14 +8,10 @@ const fs = require('fs');
 //logSocket.write('test');
 
 const path = require('path');
-const baseSettings = require('../lib/baseSettings').default;
-const parse = require('../lib/index').parse;
-const StringOutput = require('../lib/index').StringOutput;
-const Writer = require('../lib/writers/xml.js').default;
-const Reader = require('../lib/index').StandaloneReader;
+const { parse, StringOutput, Reader, XMLWriter, defaults } = require('../lib/src/index');
 
 const argv = process.argv.slice(2);
-const settings = { ...baseSettings };
+const settings = { ...defaults };
 
 function _getCallerFile() {
     const originalFunc = Error.prepareStackTrace;
@@ -55,12 +51,12 @@ console.log = log;
 
 const reader = new Reader({ parseFn: parse });
 const docSource = fs.readFileSync(argv[0], { encoding: 'utf-8' });
-const document = reader.read2(docSource, settings);
+const document = reader.read2(docSource, defaults);
 if(typeof document === 'undefined') {
     throw new Error("received undefined from parse, no document");
 }
 
-const writer = new Writer();
+const writer = new XMLWriter();
 const destination = new StringOutput();
 writer.write(document, destination);
 process.stdout.write(writer.output);

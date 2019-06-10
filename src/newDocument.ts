@@ -39,4 +39,6 @@ function newDocument(args: { sourcePath: string }, settings: Settings) {
     return myDocument;
 }
 
+export { newDocument };
+
 export default newDocument;

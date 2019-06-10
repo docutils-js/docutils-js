@@ -1,11 +1,9 @@
+import { IDirective } from "./types";
+
 /**
  *
  *
  */
-class Directive {
-    _init()
-    {
-
-    }
+class Directive implements IDirective {
 }
 export default Directive;

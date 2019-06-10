@@ -9,7 +9,7 @@ import * as tableparser from '../tableparser';
 import { ApplicationError, UnimplementedError as Unimp } from '../../../Exceptions';
 import TransitionCorrection from '../../../TransitionCorrection';
 import * as directives from '../directives';
-import UnexpectedIndentationError from '../../../UnexpectedIndentationError';
+import UnexpectedIndentationError from '../../../error/UnexpectedIndentationError';
 import RSTStateMachine from "../RSTStateMachine";
 import {INode} from "../../../types";
 import {line_block} from "../../../nodes";
@@ -516,6 +516,7 @@ class Body extends RSTState {
                   */
     /* eslint-disable-next-line camelcase */
     runDirective(directive: any, match: any, typeName: any, option_presets: any) {
+    
         /*        if isinstance(directive, (FunctionType, MethodType)):
                   from docutils.parsers.rst import convert_directive_function
                   directive = convert_directive_function(directive)
@@ -1540,5 +1541,4 @@ return [];
 }
 
 Body.stateName = 'Body';
-//Body.constructor.stateName = 'Body';
 export default Body;

@@ -14,8 +14,9 @@ class Image extends Directive {
     private requiredArguments?: number;
     private optionalArguments?: number;
     private alignValues?: string[];
-    _init() {
-        super._init();
+
+    constructor() {
+      super();
         this.alignHValues = ['left', 'center', 'right'];
         this.alignVValues = ['top', 'middle', 'bottom'];
         this.alignValues = [...this.alignHValues, ...this.alignVValues];
@@ -50,6 +51,7 @@ class Image extends Directive {
     }
 
     run(): INode {
+           
         return new nodes.comment('', 'test', [], {});
     }
 }

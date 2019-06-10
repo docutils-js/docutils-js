@@ -184,5 +184,6 @@ const defaults: Settings = {
     "docutilsReadersPepReader": {},
     "docutilsReadersStandaloneReader": {"doctitleXform": true, "docinfoXform": true, "sectsubtitleXform": false}
 };
-;
+
+export { defaults, defaults as baseSettings };
 export default defaults;

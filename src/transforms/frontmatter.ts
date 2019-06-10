@@ -3,7 +3,7 @@ import * as nodes from '../nodes';
 import * as utils from '../utils';
 import Transform from '../Transform';
 /* eslint-disable-next-line no-unused-vars */
-import TransformError from '../TransformError';
+import TransformError from '../error/TransformError';
 import {Document, IElement, INode} from "../types";
 
 /**

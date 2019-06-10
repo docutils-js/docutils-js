@@ -112,3 +112,5 @@ export default class Reader extends Component {
         return document;
     }
 }
+
+export { Reader }

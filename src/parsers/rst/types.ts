@@ -1,5 +1,5 @@
 import Inliner from "./Inliner";
-import {Document, INode, IReporter, StateMachineCommonArgs} from "../../types";
+import { Document, INode, IReporter, StateMachineCommonArgs } from "../../types";
 import StringList from "../../StringList";
 
 export interface CommonParseArgs {
@@ -47,4 +47,9 @@ export interface RstMemo {
     sectionLevel: number,
     sectionBubbleUpKludge: boolean,
     inliner: Inliner,
+}
+
+
+export interface IDirective {
+
 }

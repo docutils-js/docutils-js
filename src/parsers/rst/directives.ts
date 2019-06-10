@@ -1,3 +1,5 @@
+/* equivalent of docutils.parsers.rst.directives */
+
 import * as _fallbackLanguageModule from './languages/en';
 import * as images from './directives/images';
 import * as parts from './directives/parts';

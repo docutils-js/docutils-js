@@ -282,5 +282,5 @@ encoding:
         }
     }
 }
-
+export { Publisher };
 export default Publisher;

@@ -226,7 +226,7 @@ export interface ITransformSpec {
      */
     unknownReferenceResolvers: any[];
 
-    getTransforms(): any[];
+    getTransforms(): ITransformSpec[];
 }
 
 export interface IComponent extends ITransformSpec {

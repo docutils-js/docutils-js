@@ -8,7 +8,7 @@ class Parser extends BaseParser {
     private inliner: any;
     private initialState: string;
     private stateMachine?: RSTStateMachine;
-    constructor(args: ParserArgs) {
+    constructor(args: ParserArgs = {}) {
         super(args);
         this.configSection = 'restructuredtext parser';
         this.configSectionDependencies = ['parsers'];
@@ -56,5 +56,7 @@ class Parser extends BaseParser {
     }
 
 }
+
+export { Parser as RSTParser };
 
 export default Parser;

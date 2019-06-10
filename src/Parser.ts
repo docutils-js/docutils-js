@@ -6,7 +6,7 @@ abstract class Parser extends Component {
     protected debugFn: any;
     protected debug: boolean;
 
-    constructor(args: ParserArgs) {
+    constructor(args: ParserArgs = {}) {
         super();
         this.componentType = 'parser';
         this.configSection = 'parsers';

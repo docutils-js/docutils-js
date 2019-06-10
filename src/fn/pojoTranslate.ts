@@ -8,6 +8,7 @@ function pojoTranslate(document: Document) {
         throw new Error('undefined output');
     }
     return output;
-}
 
+}
+export { pojoTranslate };
 export default pojoTranslate;

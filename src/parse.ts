@@ -13,4 +13,5 @@ function parse(docSource: string, settings?: Settings) {
     return restParse(docSource, document);
 }
 
+export { parse };
 export default parse;

@@ -52,3 +52,5 @@ export default class Reader extends BaseReader {
             ]
 */
 }
+
+export { Reader as StandaloneReader };

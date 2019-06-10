@@ -10,4 +10,6 @@ function htmlTranslate(document: Document) {
     return output;
 }
 
+export { htmlTranslate };
+
 export default htmlTranslate;
