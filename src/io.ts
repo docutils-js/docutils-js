@@ -1,5 +1,4 @@
 import { createReadStream } from 'fs';
-import ErrorOutput from './ErrorOutput';
 import Input from './io/Input';
 import Output from './io/Output';
 import { ApplicationError } from './Exceptions';
@@ -34,7 +33,7 @@ export class StringOutput extends Output<string> {
 }
 
 export class FileInput extends Input {
-    private _stderr: ErrorOutput;
+    private _stderr: any;
     private autoClose: any;
     /* ew, too much logic for a constructor, with side effects etc! */
     constructor(args: any) {
@@ -59,7 +58,6 @@ export class FileInput extends Input {
         }
 
         this.autoClose = myAutoClose;
-        this._stderr = new ErrorOutput();
         if (!source) {
             if (sourcePath) {
                 try {

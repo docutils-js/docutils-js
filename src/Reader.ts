@@ -9,6 +9,7 @@ import {Settings} from "../gen/Settings";
 const __docformat__ = 'reStructuredText';
 
 export default class Reader extends Component {
+    componentType: string = 'reader';
     document?: Document;
     protected parseFn: any;
     private settings?: Settings;

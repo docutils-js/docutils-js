@@ -1,5 +1,4 @@
 import UnknownStateError from './error/UnknownStateError';
-import ErrorOutput from './ErrorOutput';
 import { isIterable } from './utils';
 import {
   ApplicationError, EOFError, InvalidArgumentsError, UnimplementedError as Unimp,
@@ -63,7 +62,7 @@ class StateMachine implements IStateMachine {
     private currentState?: string;
 
     private initialState?: string;
-    private _stderr: ErrorOutput;
+    private _stderr: any;
 
     constructor(args: {
         stateFactory: IStateFactory,
@@ -108,7 +107,6 @@ class StateMachine implements IStateMachine {
       this.addStates(stateClasses);
       this.observers = [];
         // eslint-disable-next-line no-underscore-dangle
-      this._stderr = new ErrorOutput();
     }
 
     _init() {

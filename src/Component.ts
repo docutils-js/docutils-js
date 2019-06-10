@@ -9,7 +9,7 @@ const __docformat__ = 'reStructuredText';
  */
 class Component extends TransformSpec {
     supported: string[] = [];
-    componentType: string = '';
+    componentType: string = 'random';
     toString() {
         return `Component<${this.constructor.name}>`;
     }

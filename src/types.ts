@@ -229,6 +229,7 @@ export interface ITransformSpec {
     getTransforms(): ITransformSpec[];
 }
 
+/** Base interface for Docutils components. */
 export interface IComponent extends ITransformSpec {
     componentType: string;
     supported: string[];
