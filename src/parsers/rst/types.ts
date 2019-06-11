@@ -36,13 +36,11 @@ interface StateMachineClassArgs {
     stateMachineKwargs?: StateMachineArgs;
 }
 
-interface ILanguage {
-}
 
 export interface RstMemo {
     document: Document;
     reporter: IReporter,
-    language: ILanguage,
+    language: IRSTLanguage,
     titleStyles: (string[] | string)[]
     sectionLevel: number,
     sectionBubbleUpKludge: boolean,
@@ -52,4 +50,11 @@ export interface RstMemo {
 
 export interface IDirective {
 
+}
+export interface IDirectives {
+[directiveName: string]: any
+};
+
+export interface IRSTLanguage {
+    directives: IDirectives;
 }

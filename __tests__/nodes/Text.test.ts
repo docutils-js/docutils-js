@@ -5,6 +5,6 @@ test('Text.constructor', () => {
     expect(text).toBeDefined();
 });
 
-test('Text.constructor invalid args', () => {
+test('Text.constructor no text', () => {
     expect(() => new Text('')).toThrow();
 });

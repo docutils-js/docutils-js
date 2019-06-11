@@ -7,4 +7,4 @@ export const simpleTableBorderPat = /=+[ =]*$/;
 export const gridTableTopPat = /\+-[-+]+-\+ *$/;
 export const emailPattern = '%(emailc)s+(?:\\.%(emailc)s+)*(?<!\x00)@%(emailc)s+(?:\\.%(emailc)s*)*%(uri_end)s';
 export const nonalphanum7bit = '[!-/:-@[-`{-~]';
-export const simplename = '\\w+';
+export const simplename = '\\w+'; // fixme

@@ -2,8 +2,9 @@ import Reporter from './Reporter';
 import { ApplicationError } from './Exceptions';
 import {DocutilsCoreOptionParser, Settings} from '../gen/Settings';
 import defaults from "../gen/defaults";
+import { IReporter } from "./types";
 
-export default function newReporter(labeled: { sourcePath: string }, settings: Settings) {
+export default function newReporter(labeled: { sourcePath: string }, settings: Settings): IReporter {
     const keys = ['reportLevel', 'haltLevel', //'warningStream',
          'debug',
                   'errorEncoding', 'errorEncodingErrorHandler'];

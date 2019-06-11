@@ -2,9 +2,10 @@
 
 module.exports = {
     plugins: ['plugins/restructuredtext'],
-// "source": {
+    "source": {
+        "includePattern": "\.ts",
 //        "excludePattern": ".?"
-//    },    
+    },    
     "templates": {
         "default": {
             "outputSourceFiles": false,

@@ -483,7 +483,7 @@ class Body extends RSTState {
         }
 
         const [directiveClass, messages] = directives.directive(
-            typeName, this.memo.language, this.document!,
+            typeName, this.memo!.language, this.document!,
         );
         this.parent!.add(messages);
         if (directiveClass) {
@@ -516,7 +516,7 @@ class Body extends RSTState {
                   */
     /* eslint-disable-next-line camelcase */
     runDirective(directive: any, match: any, typeName: any, option_presets: any) {
-    
+
         /*        if isinstance(directive, (FunctionType, MethodType)):
                   from docutils.parsers.rst import convert_directive_function
                   directive = convert_directive_function(directive)

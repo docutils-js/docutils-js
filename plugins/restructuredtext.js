@@ -2,7 +2,7 @@ require("@babel/polyfill");
 
 const env = require('jsdoc/env');
 
-const docutils = require('../lib/index');
+const docutils = require('../lib/src/index');
 const parse = docutils.parse;
 const pojoTranslate = docutils.pojoTranslate;
 const htmlTranslate = docutils.htmlTranslate;

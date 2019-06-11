@@ -3,6 +3,7 @@ import Inliner from './Inliner';
 import * as languages from '../../languages';
 import {IElement, StateMachineRunArgs} from "../../types";
 import {RstMemo} from "./types";
+import { getLanguage } from "./languages";
 
 /**
  * reStructuredText's master StateMachine.
@@ -29,7 +30,7 @@ class RSTStateMachine extends StateMachineWS {
         if (cArgs.matchTitles === undefined) {
             cArgs.matchTitles = true;
         }
-        this.language = languages.getLanguage(document.settings.docutilsCoreOptionParser!.languageCode, document.reporter);
+        this.language = getLanguage(document.settings.docutilsCoreOptionParser!.languageCode);
         this.matchTitles = cArgs.matchTitles;
         /* istanbul ignore next */
         if (cArgs.inliner === undefined) {

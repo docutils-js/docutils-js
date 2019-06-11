@@ -3,10 +3,8 @@ import unescape from '../src/utils/unescape';
 import Reporter from '../src/Reporter';
 import newReporter from '../src/newReporter';
 import defaults from "../gen/defaults";
+import { LogLevel } from "../src/types";
 
-function createReporter() {
-    return new Reporter('', 0, 4, undefined, true, 'utf-8');
-}
 
 test('1', () => {
     const r = newReporter({sourcePath:''}, { ...defaults });
@@ -33,6 +31,6 @@ test('isIterable with null or undefined value', () => {
 });
 
 test('Reporter.systemMessage with Error/Exception', () => {
-    const reporter = createReporter();
-    reporter.systemMessage(reporter.WARNING_LEVEL, new Error('my error'), [], {});
+    const reporter = newReporter({sourcePath:''}, defaults);
+    reporter.systemMessage(LogLevel.WarningLevel, new Error('my error'), [], {});
 });

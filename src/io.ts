@@ -3,6 +3,7 @@ import Input from './io/Input';
 import Output from './io/Output';
 import { ApplicationError } from './Exceptions';
 
+/** Direct string input. */
 export class StringInput extends Input {
 
     constructor(source: any, sourcePath?: any, encoding?: any, errorHandler?: any) {

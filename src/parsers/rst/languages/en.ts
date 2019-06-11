@@ -1,7 +1,9 @@
 /* eslint-disable-next-line no-unused-vars */
+import { IDirectives } from "../types";
+
 const __docformat__ = 'reStructuredText';
 
-export const directives: any = {
+export const directives: IDirectives = {
       // language-dependent: fixed
       attention: 'attention',
       caution: 'caution',

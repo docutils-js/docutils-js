@@ -6,7 +6,7 @@ import {Document, IElement, INode} from "../../../types";
 import StringList from "../../../StringList";
 import Inliner from "../Inliner";
 import RSTStateMachine from "../RSTStateMachine";
-import {NestedParseArgs, RSTStateArgs} from "../types";
+import { NestedParseArgs, RstMemo, RSTStateArgs } from "../types";
 
 abstract class RSTState extends StateWS {
     static stateName: string;
@@ -15,7 +15,7 @@ abstract class RSTState extends StateWS {
 
 
     public explicit: any
-    public memo: any;
+    public memo?: RstMemo;
     public inliner?: Inliner;
     protected parent?: IElement;
 
@@ -203,7 +203,7 @@ abstract class RSTState extends StateWS {
 
     checkSubsection(args: { source: string, style: any | any[], lineno: number}) {
         const { source, style, lineno } = args;
-        const {memo} = this;
+        const memo = this.memo!;
         const titleStyles: any[] = memo.titleStyles;
 //        console.log(titleStyles);
         const mylevel = memo.sectionLevel;
@@ -250,7 +250,7 @@ abstract class RSTState extends StateWS {
 
     newSubsection(args: {title: string, lineno: number, messages: any | any[]}) {
         const { title, lineno, messages} = args;
-        const {memo} = this;
+        const memo = this.memo!;
         const mylevel = memo.sectionLevel;
         memo.sectionLevel += 1;
         const sectionNode = new nodes.section();

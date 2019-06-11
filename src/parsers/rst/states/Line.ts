@@ -19,8 +19,8 @@ class Line extends SpecializedText {
     // @ts-ignore
     eof(context) {
         const marker = context[0].trim();
-        if (this.memo.sectionBubbleUpKludge) {
-            this.memo.sectionBubbleUpKludge = false;
+        if (this.memo!.sectionBubbleUpKludge) {
+            this.memo!.sectionBubbleUpKludge = false;
         } else if (marker.length < 4) {
             this.stateCorrection(context);
         }

@@ -184,6 +184,36 @@ export function relativePath(source: string, target: string) {
 */
 }
 
+/**
+    Return a list of normalized combinations for a `BCP 47` language tag.
+
+    Example:
+
+    >>> from docutils.utils import normalize_language_tag
+    >>> normalize_language_tag('de_AT-1901')
+    ['de-at-1901', 'de-at', 'de-1901', 'de']
+    >>> normalize_language_tag('de-CH-x_altquot')
+    ['de-ch-x-altquot', 'de-ch', 'de-x-altquot', 'de']
+*/
+function normalizedLanguageTag(tag: string) {
+    // normalize:
+    let myTag = tag.toLowerCase().replace(/-/g, '_');
+    // split (except singletons, which mark the following tag as non-standard):
+    tag = tag.replace(/_([a-zA-Z0-9])_/g, '$1-');
+    const subtags = tag.split('_');
+    const base_tag = subtags.pop();
+    // find all combinations of subtags
+    const taglist = [];
+    /*
+    for(let i = subtags.length; i >= 0; i -= 1) {
+      // for tags in unique_combinations(subtags, n):
+        for tags in itertools.combinations(subtags, n):
+            taglist.append('-'.join(base_tag+tags))
+    taglist += base_tag
+    return taglist
+*/
+}
 export {
  findCombiningChars, columnWidth, escape2null, splitEscapedWhitespace, columnIndicies,
+  normalizedLanguageTag
 };

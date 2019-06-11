@@ -242,6 +242,14 @@ export interface IComponent extends ITransformSpec {
     supports(format: string): boolean;
 }
 
+export enum LogLevel {
+    DebugLevel = 0,
+    InfoLevel,
+    WarningLevel,
+    SevereLevel,
+    ErrorLevel,
+};
+
 export interface IReporter {
     reportLevel: number;
     getSourceAndLine?: (lineno?: number) => any[];
@@ -250,7 +258,7 @@ export interface IReporter {
 
     setConditions(): void;
 
-    systemMessage(level: number, message: string, children: Element[], attributes: IAttributes): INode;
+    systemMessage(level: number, message: string | Error, children: Element[], attributes: IAttributes): INode;
 
     notifyObservers(message: string): void;
 

@@ -1,10 +1,11 @@
 /* equivalent of docutils.parsers.rst.directives */
 
-import * as _fallbackLanguageModule from './languages/en';
-import * as images from './directives/images';
-import * as parts from './directives/parts';
-import { ApplicationError } from '../../Exceptions';
-import {Document} from "../../types";
+import * as _fallbackLanguageModule from "./languages/en";
+import * as images from "./directives/images";
+import * as parts from "./directives/parts";
+import { ApplicationError } from "../../Exceptions";
+import { Document } from "../../types";
+import { IRSTLanguage } from "./types";
 
 const dirMap: any = { images, parts };
 
@@ -60,7 +61,7 @@ const directiveRegistry = {
 
 const _directives: any = {};
 
- function directive(directiveName: string, languageModule: any, document: Document) {
+function directive(directiveName: string, languageModule: IRSTLanguage, document: Document) {
     const normName = directiveName.toLowerCase();
     const messages: any[] = [];
     const msgText = [];
