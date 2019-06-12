@@ -4,7 +4,7 @@ module.exports = {
       es6: true,
       jest: true,
   },
-  extends: 'airbnb-base',
+    extends: ['plugin:@typescript-eslint/recommended'],
   globals: {
     Atomics: 'readonly',
     SharedArrayBuffer: 'readonly',

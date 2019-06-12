@@ -2592,7 +2592,8 @@ class literal extends TextElement {
   }
 } // Inline
 class reference extends TextElement {
-/* eslint-disable-next-line no-useless-constructor */
+  indirectReferenceName: string | undefined;
+  /* eslint-disable-next-line no-useless-constructor */
   // @ts-ignore
   constructor(...args) {
   // @ts-ignore

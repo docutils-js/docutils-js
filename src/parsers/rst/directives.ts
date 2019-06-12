@@ -6,6 +6,7 @@ import * as parts from "./directives/parts";
 import { ApplicationError } from "../../Exceptions";
 import { Document } from "../../types";
 import { IRSTLanguage } from "./types";
+import { escape2null, pySplit, splitEscapedWhitespace } from "../../utils";
 
 const dirMap: any = { images, parts };
 
@@ -58,6 +59,12 @@ const directiveRegistry = {
       date: ['misc', 'Date'],
     'restructuredtext-test-directive': ['misc', 'TestDirective'],
 };
+
+export function uri(argument: string) {
+const parts = splitEscapedWhitespace(escape2null(argument));
+const uri = parts.map(part => pySplit(unescape(part)).join('')).join(' ');
+return uri;
+}
 
 const _directives: any = {};
 

@@ -1,6 +1,14 @@
 import * as nodes from '../../../nodes';
 import Directive from '../Directive';
 import {INode} from "../../../types";
+import { lengthOrPercentageOrUnitless, lengthOrUnitless, unchanged } from "../directiveConversions";
+import SubstitutionDef from "../states/SubstitutionDef";
+import { escape2null } from "../../../utils";
+import Body from "../states/Body";
+import StringList from "../../../StringList";
+import { fullyNormalizeName, whitespaceNormalizeName } from "../../../nodes";
+import { setClasses } from "../Roles";
+import { uri } from "../directives";
 
 /* eslint-disable-next-line no-unused-vars */
 const __docformat__ = 'reStructuredText';
@@ -8,54 +16,99 @@ const __docformat__ = 'reStructuredText';
 const directives = {};
 
 class Image extends Directive {
-    private finalArgumentWhitespace?: boolean;
-    private alignHValues?: string[];
-    private alignVValues?: string[];
-    private requiredArguments?: number;
-    private optionalArguments?: number;
-    private alignValues?: string[];
+  private finalArgumentWhitespace?: boolean;
+  private alignHValues: string[] = ['left', 'center', 'right'];
+  private alignVValues: string[] = ['top', 'middle', 'bottom'];
+;
 
-    constructor() {
-      super();
-        this.alignHValues = ['left', 'center', 'right'];
-        this.alignVValues = ['top', 'middle', 'bottom'];
-        this.alignValues = [...this.alignHValues, ...this.alignVValues];
-        this.requiredArguments = 1;
-        this.optionalArguments = 1;
-        this.finalArgumentWhitespace = true;
-        // @ts-ignore
-        this.optionSpec = {
-        // @ts-ignore
- alt: directives.unchanged,
-        // @ts-ignore
-                           height: directives.length_or_unitless,
-        // @ts-ignore
-                           width: directives.length_or_percentage_or_unitless,
-        // @ts-ignore
-                           scale: directives.percentage,
-        // @ts-ignore
-            align: this.align,
-        // @ts-ignore
-                           name: directives.unchanged,
-        // @ts-ignore
-                           target: directives.unchanged_required,
-        // @ts-ignore
-                           class: directives.class_option,
-        // @ts-ignore
-};
+  private alignValues: string[] = [...this.alignHValues, ...this.alignVValues];
+
+
+  constructor(args: { name: string; args: any; options: any; content: any; lineno: number; contentOffset: number; blockText: StringList; state: Body; stateMachine: any }) {
+    super(args);
+  }
+
+  align(argument: any): any | any[] {
+    // @ts-ignore
+    return directives.choice(argument);
+  }
+
+  private addName(imageNode: INode) {
+
+  }
+
+  run(): any[] {
+    if(!this.arguments) {
+      throw new Error('');
+    }
+    if (this.options && 'align' in this.options) {
+      if (this.state instanceof SubstitutionDef) {
+        // Check for align_v_values.
+        if (this.alignVValues.indexOf(this.options.align) == -1) {
+          throw this.error(
+            `Error in "${this.name}" directive: "${this.options.align}" is not a valid value '
+                        'for the "align" option within a substitution '
+                        'definition.  Valid values for "align" are: "${this.alignVValues.join('", "')}".`);
+        }
+      } else if (this.alignHValues.indexOf(this.options.align) === -1) {
+        throw this.error(`Error in "${this.name}" directive: "${this.options.align}" is ` +
+          `not a valid value for the "align" option.  Valid values for "align" are: "${this.alignHValues.join('", "')}".`);
+      }
     }
 
-    align(argument: any): any | any[] {
-        // @ts-ignore
-        return directives.choice(argument);
-    }
+    const messages = [];
+    const reference = uri(this.arguments[0])
+    this.options.uri = reference
+    let referenceNode = null
+    if ('target' in this.options) {
+      let blockStr: string = escape2null(this.options.target
+        .split(/\n/));
+      let block = blockStr.split(/\n/);
+      const [targetType, data] = this.state.parse_target(
+        block, this.blockText, this.lineno);
+      let referenceNode;
+      if (targetType === 'refuri') {
+        referenceNode = new nodes.reference('', '', [], { refuri: data });
+      } else if (targetType === 'refname') {
+        referenceNode = new nodes.reference('', '', [], {
+          refname: fullyNormalizeName(data),
+          name: whitespaceNormalizeName(data)
+        });
+        referenceNode.indirectReferenceName = data
+        this.state.document!.noteRefname(referenceNode)
+      } else {                           // malformed target
+        messages.push(data)       // data is a system message
+      }
+      delete this.options.target;
+      setClasses(this.options)
+      const imageNode = new nodes.image('', this.blockText, this.options);
+      this.addName(imageNode)
+      if (referenceNode) {
+        referenceNode.children.push(imageNode);
 
-    run(): INode {
-           
-        return new nodes.comment('', 'test', [], {});
+        return [...messages, referenceNode];
+      } else {
+        return [...messages, imageNode];
+      }
     }
+    return [];
+  }
 }
-
+  Image.optionSpec = {
+  alt: unchanged,
+  height: lengthOrUnitless,
+  width: lengthOrPercentageOrUnitless,
+  // @ts-ignore
+  scale: directives.percentage,
+  // @ts-ignore
+  align: Image.align,
+  // @ts-ignore
+  name: unchanged,
+  // @ts-ignore
+  target: directives.unchanged_required,
+  // @ts-ignore
+  class: directives.class_option,
+};
 class Figure extends Image {
 }
 
