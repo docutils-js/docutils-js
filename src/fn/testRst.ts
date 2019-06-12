@@ -1,43 +1,43 @@
 const testSource = [
     ['Title', 'Title\n=====\nParagraph.', { check: () => true }],
-           ['program lang', `Want to learn about \`my favorite programming language\`_?
+    ['program lang', `Want to learn about \`my favorite programming language\`_?
 
 .. _my favorite programming language: http://www.python.org`],
-           ['interpreted text with no role', '`test`'],
-           ['interpreted text role prefix', ':role:`test`'],
-           ['interpreted text role suffix', '`test`:role:'],
-           ['interpreted text role emphasis prefix', ':emphasis:`test`'],
-           ['interpreted text role emphasis suffix', '`test`:emphasis:'],
-           ['interpreted text with no end string suffix', '`test'],
-           ['interpreted text with both roles', ':role:`test`:role:'],
-           ['Random indent', '  \n   \n \n     \n\n  \n'],
-           ['Anonymous reference', '__ http://www.python.org\n'],
-           ['Links', `.. _A ReStructuredText Primer: ../../user/rst/quickstart.html
+    ['interpreted text with no role', '`test`'],
+    ['interpreted text role prefix', ':role:`test`'],
+    ['interpreted text role suffix', '`test`:role:'],
+    ['interpreted text role emphasis prefix', ':emphasis:`test`'],
+    ['interpreted text role emphasis suffix', '`test`:emphasis:'],
+    ['interpreted text with no end string suffix', '`test'],
+    ['interpreted text with both roles', ':role:`test`:role:'],
+    ['Random indent', '  \n   \n \n     \n\n  \n'],
+    ['Anonymous reference', '__ http://www.python.org\n'],
+    ['Links', `.. _A ReStructuredText Primer: ../../user/rst/quickstart.html
 .. _Quick reStructuredText: ../../user/rst/quickref.html
 `],
-                   ['Anonymous via two dots', '.. __: http://www.python.org\n'],
-           ['Inline internal targets', `* bullet list
+    ['Anonymous via two dots', '.. __: http://www.python.org\n'],
+    ['Inline internal targets', `* bullet list
 
   .. _\`second item\`:
 
 * second item, with hyperlink target.`],
-           ['Anonymous via .. no blankFinish', '.. __: http://www.python.org'],
-           ['Nested sections', 'Title\n=====\n\nSection-------\n\nThird@@@@@\n\nSecond\n======\n\nOoops\n@@@@@\n'],
-           ['Short overline', '===\nTitle\n===\n'],
-           ['Short overline 2', '===\nTitle\n'],
+    ['Anonymous via .. no blankFinish', '.. __: http://www.python.org'],
+    ['Nested sections', 'Title\n=====\n\nSection-------\n\nThird@@@@@\n\nSecond\n======\n\nOoops\n@@@@@\n'],
+    ['Short overline', '===\nTitle\n===\n'],
+    ['Short overline 2', '===\nTitle\n'],
     ['Incomplete title', '=====\nTitle\n', { expectError: true }],
-           ['Line block with continuation line', `| Lend us a couple of bob till Thursday.
+    ['Line block with continuation line', `| Lend us a couple of bob till Thursday.
 | I'm absolutely skint.
 | But I'm expecting a postal order and I can pay you back
   as soon as it comes.
 | Love, Ewan.`],
-           ['bullet from spec', `- This is a bullet list.
+    ['bullet from spec', `- This is a bullet list.
 
 - Bullets can be "*", "+", or "-".`],
-           ['Bullet no unindent', '* bullet'],
-           ['Nested bullets', '* bullet\n\n + bullet\n\n + bullet\n\n* bullet\n'],
-           ['Transition correction', '====::\n'],
-           ['Excerpt 1', `Configuration settings:
+    ['Bullet no unindent', '* bullet'],
+    ['Nested bullets', '* bullet\n\n + bullet\n\n + bullet\n\n* bullet\n'],
+    ['Transition correction', '====::\n'],
+    ['Excerpt 1', `Configuration settings:
 \`footnote_references <footnote_references setting_>\`_.
 
 .. _footnote: ../doctree.html#footnote
@@ -46,19 +46,19 @@ const testSource = [
    ../../user/config.html#footnote-references-html4css1-writer
 
 `],
-           ['Mixed bullets', '* bullet\n+ bullet\n'],
-           ['Transition marker', '-------\n\n'],
-           ['Bullet list, invalid input', '* bullet\ninvalid'],
-           ['Bullet list, invalid input line', '* bullet\n-----------'],
-           ['Bullet list, invalid input field marker', '* bullet\n:Hello: foo\n'],
-           ['Bullet list, invalid input doctest', '* bullet\n>>> foo\n'],
-           ['Field list', `:Author: David Goodger
+    ['Mixed bullets', '* bullet\n+ bullet\n'],
+    ['Transition marker', '-------\n\n'],
+    ['Bullet list, invalid input', '* bullet\ninvalid'],
+    ['Bullet list, invalid input line', '* bullet\n-----------'],
+    ['Bullet list, invalid input field marker', '* bullet\n:Hello: foo\n'],
+    ['Bullet list, invalid input doctest', '* bullet\n>>> foo\n'],
+    ['Field list', `:Author: David Goodger
 :Contact: docutils-develop@lists.sourceforge.net
 :Revision: $Revision: 8205 $
 :Date: $Date: 2017-11-27 03:07:28 -0800 (Mon, 27 Nov 2017) $
 :Copyright: This document has been placed in the public domain.
 `],
-           ['option list', `         -a            command-line option "a"
+    ['option list', `         -a            command-line option "a"
          -b file       options can have arguments
                        and long descriptions
          --long        options can be long also
@@ -66,7 +66,7 @@ const testSource = [
                        arguments
          /V            DOS/VMS-style options too
 `],
-           ['literal block', `      Literal blocks are either indented or line-prefix-quoted blocks,
+    ['literal block', `      Literal blocks are either indented or line-prefix-quoted blocks,
       and indicated with a double-colon ("::") at the end of the
       preceding paragraph (right here -->)::
 
@@ -75,7 +75,7 @@ const testSource = [
               spaces_and_linebreaks = 'are preserved'
               markup_processing = None
 `],
-           ['literal block without blank finish', `      Literal blocks are either indented or line-prefix-quoted blocks,
+    ['literal block without blank finish', `      Literal blocks are either indented or line-prefix-quoted blocks,
       and indicated with a double-colon ("::") at the end of the
       preceding paragraph (right here -->)::
 
@@ -83,13 +83,13 @@ const testSource = [
               text = 'is left as-is'
               spaces_and_linebreaks = 'are preserved'
               markup_processing = None`],
-           ['block quote', `      Block quotes consist of indented body elements:
+    ['block quote', `      Block quotes consist of indented body elements:
 
           This theory, that is mine, is mine.
 
           -- Anne Elk (Miss)
 `],
-           ['doctest block', `      >>> print 'Python-specific usage examples; begun with ">>>"'
+    ['doctest block', `      >>> print 'Python-specific usage examples; begun with ">>>"'
       Python-specific usage examples; begun with ">>>"
       >>> print '(cut and pasted from interactive Python sessions)'
       (cut and pasted from interactive Python sessions)
@@ -104,7 +104,7 @@ how
     or more paragraphs or body elements, indented relative to
     the term.
 `],
-           ['definition list with classifier term', `term : classifier\n   test\n\nwhat
+    ['definition list with classifier term', `term : classifier\n   test\n\nwhat
     Definition lists associate a term with a definition.
 
 how
@@ -112,33 +112,33 @@ how
     or more paragraphs or body elements, indented relative to
     the term.
 `],
-           ['Citation', 'Hello [Goober]_\n\n.. [Goober] Citation.\n'],
-           ['Footnote', `.. [1] A footnote contains body elements, consistently
+    ['Citation', 'Hello [Goober]_\n\n.. [Goober] Citation.\n'],
+    ['Footnote', `.. [1] A footnote contains body elements, consistently
    indented by at least 3 spaces.`],
-           ['Image Directive', '.. image:: mylogo.png\n'],
-           ['Comment', `.. Comments begin with two dots and a space.  Anything may
+    ['Image Directive', '.. image:: mylogo.png\n'],
+    ['Comment', `.. Comments begin with two dots and a space.  Anything may
    follow, except for the syntax of footnotes/citations,
    hyperlink targets, directives, or substitution definitions.`],
-           ['Random', '* bullet\n* bullet\n\n '],
-           ['Random 2', 'Header 1\n========\nText\n\nHeader 2\n-------'],
-           ['Random 2', 'Test.\nTest2\nTest3\n-----'],
-           ['Random 4', `Test3
+    ['Random', '* bullet\n* bullet\n\n '],
+    ['Random 2', 'Header 1\n========\nText\n\nHeader 2\n-------'],
+    ['Random 2', 'Test.\nTest2\nTest3\n-----'],
+    ['Random 4', `Test3
 -----
 
 This is a test.
 
 * BUllet list 1
 * The emacs rst editor is weird.`],
-           ['Emphasis', '*hello*'],
-           ['Emphasis surrounded by text', 'stuff *hello* things'],
-           ['Emphasis preceded by text', 'stuff *hello*'],
-           ['Emphasis followed by text', '*hello* test'],
-           ['Strong', '**hello**'],
-           ['Emphasis and inline', '*hello* and **goodbye**'],
-           ['Inline followed by emphasis', '**hello** and *goodbye*'],
-           ['docutils title', '==========================================\n Docutils_ Project Documentation Overview\n==========================================\n'],
-           ['Paragraph ending in ::', 'This is my paragraph ending in::\n'],
-           ['more complex grid table', `+------------------------+------------+----------+----------+
+    ['Emphasis', '*hello*'],
+    ['Emphasis surrounded by text', 'stuff *hello* things'],
+    ['Emphasis preceded by text', 'stuff *hello*'],
+    ['Emphasis followed by text', '*hello* test'],
+    ['Strong', '**hello**'],
+    ['Emphasis and inline', '*hello* and **goodbye**'],
+    ['Inline followed by emphasis', '**hello** and *goodbye*'],
+    ['docutils title', '==========================================\n Docutils_ Project Documentation Overview\n==========================================\n'],
+    ['Paragraph ending in ::', 'This is my paragraph ending in::\n'],
+    ['more complex grid table', `+------------------------+------------+----------+----------+
 | Header row, column 1   | Header 2   | Header 3 | Header 4 |
 | (header rows optional) |            |          |          |
 +========================+============+==========+==========+
@@ -150,7 +150,7 @@ This is a test.
 +------------------------+ span rows. | - contain           |
 | body row 4             |            | - body elements.    |
 +------------------------+------------+---------------------+`],
-           ['grid table', `+------------------------+------------+----------+
+    ['grid table', `+------------------------+------------+----------+
 | Header row, column 1   | Header 2   | Header 3 |
 +========================+============+==========+
 | body row 1, column 1   | column 2   | column 3 |
@@ -177,14 +177,14 @@ This is a test.
                             releases (no label).
     =============  =======  ============================================
 `],
-           ['simple table', `         ====================  ==========  ==========
+    ['simple table', `         ====================  ==========  ==========
          Header row, column 1  Header 2    Header 3
          ====================  ==========  ==========
          body row 1, column 1  column 2    column 3
          body row 2            Cells may span columns
          ====================  ======================
 `],
-           ['multilevel blockquote', `This is a top-level paragraph.
+    ['multilevel blockquote', `This is a top-level paragraph.
 
     This paragraph belongs to a first-level block quote.
 
@@ -197,7 +197,7 @@ Another top-level paragraph.
     This paragraph belongs to a first-level block quote.  The
     second-level block quote above is inside this first-level
     block quote.`],
-           ['complex', `- This is the first line of a bullet list
+    ['complex', `- This is the first line of a bullet list
   item's paragraph.  All lines must align
   relative to the first line.  [1]_
 

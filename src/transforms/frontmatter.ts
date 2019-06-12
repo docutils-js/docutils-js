@@ -26,7 +26,7 @@ class TitlePromoter extends Transform {
             // @ts-ignore
 
             ...node.children.slice(0, index),
-// @ts-ignore
+            // @ts-ignore
             ...section.children.slice(1)];
         node.children = newChildren;
         // assert isinstance(node[0], nodes.title)
@@ -48,7 +48,7 @@ class TitlePromoter extends Transform {
         // NOTE: Change second parameter to False to NOT replace
         //       attributes that already exist in node with those in
         //       section
-            // NOTE: Remove third parameter to NOT copy the 'source'
+        // NOTE: Remove third parameter to NOT copy the 'source'
         //       attribute from section
         subtitle.updateAllAttsConcatenating(subsection, true, true);
 
@@ -56,11 +56,11 @@ class TitlePromoter extends Transform {
         // subtitle:
         subtitle.children = subsection!.children[0].children.slice();
         node.children = [node.children[0], // title
-         subtitle,
-        // everything that was before the section:
+            subtitle,
+            // everything that was before the section:
             ...node.children.slice(1, index),
-        // everything that was in the subsection:
-             ...subsection.children.slice(1)];
+            // everything that was in the subsection:
+            ...subsection.children.slice(1)];
         return 1;
     }
 
@@ -70,7 +70,7 @@ class TitlePromoter extends Transform {
             || !(node.children[index] instanceof nodes.section)) {
             return [null, null];
         }
-            return [node.children[index], index];
+        return [node.children[index], index];
     }
 }
 
@@ -123,19 +123,19 @@ export class DocInfo extends Transform {
         super._init(document, startNode);
 
         this.biblioNodes = {
- author: nodes.author,
-                             authors: nodes.authors,
-                             organization: nodes.organization,
-                             address: nodes.address,
-                             contact: nodes.contact,
-                             version: nodes.version,
-                             revision: nodes.revision,
-                             status: nodes.status,
-                             date: nodes.date,
-                             copyright: nodes.copyright,
-                             dedication: nodes.topic,
-                             abstract: nodes.topic,
-};
+            author: nodes.author,
+            authors: nodes.authors,
+            organization: nodes.organization,
+            address: nodes.address,
+            contact: nodes.contact,
+            version: nodes.version,
+            revision: nodes.revision,
+            status: nodes.status,
+            date: nodes.date,
+            copyright: nodes.copyright,
+            dedication: nodes.topic,
+            abstract: nodes.topic,
+        };
     }
 
     apply() {

@@ -14,8 +14,8 @@ export function escapeXml(unsafe: string) {
             case '>': return '&gt;';
             case '&': return '&amp;';
             case '\'': return '&apos;';
-        case '"': return '&quot;';
-        default: return c;
+            case '"': return '&quot;';
+            default: return c;
         }
     });
 }
@@ -98,9 +98,9 @@ class XMLTranslator extends nodes.GenericNodeVisitor {
             this.output.push(Array(this.level + 1).join(this.indent));
         }
         this.output.push(node.endtag());
-//      if(node instanceof nodes['FixedTextElement'] || node instanceof nodes.literal) {
-//          this.fixedText -= 1;
-//      }
+        //      if(node instanceof nodes['FixedTextElement'] || node instanceof nodes.literal) {
+        //          this.fixedText -= 1;
+        //      }
         // bla
     }
 

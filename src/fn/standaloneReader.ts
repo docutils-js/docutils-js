@@ -1,7 +1,7 @@
 import * as references from '../transforms/references';
 import * as frontmatter from '../transforms/frontmatter';
 import baseReaderTransforms from
-'./baseReaderTransforms';
+    './baseReaderTransforms';
 
 /* eslint-disable-next-line no-unused-vars */
 const __docformat__ = 'reStructuredText';
@@ -14,9 +14,9 @@ function getTransforms() {
     const s = baseReaderTransforms;
     // @ts-ignore
     const r = [...s, references.PropagateTargets,
-               frontmatter.DocTitle,
-               frontmatter.SectionSubTitle,
-               frontmatter.DocInfo];
+        frontmatter.DocTitle,
+        frontmatter.SectionSubTitle,
+        frontmatter.DocInfo];
     return r;
     /*
         return readers.Reader.get_transforms(self) + [

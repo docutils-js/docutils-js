@@ -30,9 +30,9 @@ export default class Reader extends BaseReader {
     getTransforms() {
         const s = super.getTransforms();
         const r = [...s, references.PropagateTargets,
-                   frontmatter.DocTitle,
-                   frontmatter.SectionSubTitle,
-                   frontmatter.DocInfo];
+            frontmatter.DocTitle,
+            frontmatter.SectionSubTitle,
+            frontmatter.DocInfo];
         return r;
     }
     /*

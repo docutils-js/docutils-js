@@ -25,10 +25,10 @@ export default class Writer extends Component {
     write(document: Document, destination: any) {
         this.document = document;
         this.language = getLanguage(document.settings.docutilsCoreOptionParser!.languageCode,
-                                             document.reporter);
+            document.reporter);
         this.destination = destination;
         this.translate();
-//        console.log(this.output);
+        //        console.log(this.output);
         let fn;
         if (typeof this.destination === 'function') {
             fn = this.destination;

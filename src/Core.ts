@@ -16,7 +16,7 @@ export function publish(args: any) {
         usage: defaultUsage,
         description: defaultDescription,
         enableExitStatus: defaults.defaultEnableExitStatus,
-};
+    };
     const myArgs = { ..._defaults, ...args };
     const {
         reader, readerName, parser, parserName, writer, writerName,
@@ -28,30 +28,30 @@ export function publish(args: any) {
     });
     pub.setComponents(readerName, parserName, writerName);
     pub.publish2({
-argv, usage, description, settingsSpec, settingsOverrides, configSection, enableExitStatus,
-});
+        argv, usage, description, settingsSpec, settingsOverrides, configSection, enableExitStatus,
+    });
 }
 
 
 export function publishCmdLine(args: any, cb: any) {
     const _defaults = {
- readerName: 'standalone',
-                        parserName: 'restructuredtext',
-                        usage: defaultUsage,
-                        description: defaultDescription,
-                        enableExitStatus: true,
-};
+        readerName: 'standalone',
+        parserName: 'restructuredtext',
+        usage: defaultUsage,
+        description: defaultDescription,
+        enableExitStatus: true,
+    };
     args = { ..._defaults, ...args };
     const {
- reader, readerName, parser, parserName, writer, writerName,
-      settings, settingsSpec, settingsOverrides, configSection,
-            enableExitStatus, argv, usage, description,
-} = args;
+        reader, readerName, parser, parserName, writer, writerName,
+        settings, settingsSpec, settingsOverrides, configSection,
+        enableExitStatus, argv, usage, description,
+    } = args;
     const pub = new Publisher({
- reader, parser, writer, settings,
-});
+        reader, parser, writer, settings,
+    });
     pub.setComponents(readerName, parserName, writerName);
     pub.publish({
-argv, usage, description, settingsSpec, settingsOverrides, configSection, enableExitStatus,
-}, cb);
+        argv, usage, description, settingsSpec, settingsOverrides, configSection, enableExitStatus,
+    }, cb);
 }

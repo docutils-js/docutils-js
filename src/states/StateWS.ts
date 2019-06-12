@@ -34,9 +34,9 @@ class StateWS extends State {
         this.knownIndentSm = null;
         this.knownIndentSmKwargs = null;
         this.wsPatterns = {
- blank: ' *$',
-                           indent: ' +',
-};
+            blank: ' *$',
+            indent: ' +',
+        };
         this.wsInitialTransitions = ['blank', 'indent'];
     }
 
@@ -73,12 +73,12 @@ class StateWS extends State {
         /* eslint-disable-next-line no-unused-vars */
         const [indented, lineOffset, blankFinish] = this.wsStateMachine.getKnownIndented(
             match.end(),
-);
+        );
         const knownIndentSm = this.knownIndentSm;
         const sm = new knownIndentSm({
- debug: this.debug,
-                                       ...this.knownIndentSmKwargs,
-});
+            debug: this.debug,
+            ...this.knownIndentSmKwargs,
+        });
         const results = sm.run({ indented, inputOffset: lineOffset });
         return [context, nextState, results];
     }

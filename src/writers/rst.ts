@@ -61,11 +61,11 @@ class RSTTranslator extends GenericNodeVisitor {
     default_visit(node: INode) {
         if (node.tagname && (<IElement>node).attlist) {
             const me = [node.tagname, (<IElement>node).attlist(), []];
-//            console.log(me);
+            //            console.log(me);
             this.ancestors.push(me);
             this.level += 1;
         } else {
-//            console.log(node.astext());
+            //            console.log(node.astext());
         }
 
         //      console.log(this.level);
@@ -625,7 +625,7 @@ class RSTTranslator extends GenericNodeVisitor {
         this.default_visit(node);
         this.newLine();
         const title = node.astext();
-//        console.log(this.sectionNum);
+        //        console.log(this.sectionNum);
         const sectSpec = defaultSections[this.sectionNum - 1];
         let index = 0;
         if (sectSpec.length === 2) {

@@ -41,13 +41,13 @@ class StringList extends ViewList {
     }
 
     getIndented(args: GetIndentedArgs) {
-const {  start, untilBlank, stripIndent, blockIndent, firstIndent } = args;
-const cArgs = { ... args };
-if(stripIndent == null) {
-    cArgs.stripIndent = true;
-}
-if (cArgs.start == null) {
-                cArgs.start = 0;
+        const {  start, untilBlank, stripIndent, blockIndent, firstIndent } = args;
+        const cArgs = { ... args };
+        if(stripIndent == null) {
+            cArgs.stripIndent = true;
+        }
+        if (cArgs.start == null) {
+            cArgs.start = 0;
         }
         let indent = blockIndent;
         let end = cArgs.start;
@@ -90,7 +90,7 @@ if (cArgs.start == null) {
             block[0] = block[0].substring(firstIndent);
         }
         if (indent && cArgs.stripIndent) {
-//          console.log(block.constructor.name);
+            //          console.log(block.constructor.name);
             block.trimLeft(indent, firstIndent != null ? 1 : 0);
         }
 

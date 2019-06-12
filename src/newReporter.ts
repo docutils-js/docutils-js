@@ -6,8 +6,8 @@ import { IReporter } from "./types";
 
 export default function newReporter(labeled: { sourcePath: string }, settings: Settings): IReporter {
     const keys = ['reportLevel', 'haltLevel', //'warningStream',
-         'debug',
-                  'errorEncoding', 'errorEncodingErrorHandler'];
+        'debug',
+        'errorEncoding', 'errorEncodingErrorHandler'];
     const core: DocutilsCoreOptionParser = settings.docutilsCoreOptionParser || {};
     if(typeof core !== 'undefined') {
         if (typeof core.reportLevel === 'undefined') {
@@ -33,8 +33,8 @@ export default function newReporter(labeled: { sourcePath: string }, settings: S
         throw new ApplicationError(`Missing required keys from settings object to instantiate reporter. Missing keys ${missingKeys.map(key => `"${key}"`).join(', ')}.`);
     }
     return new Reporter(labeled.sourcePath, core.reportLevel,
-                        core.haltLevel,
-                        core.warningStream, core.debug,
-                        core.errorEncoding,
-                        core.errorEncodingErrorHandler);
+        core.haltLevel,
+        core.warningStream, core.debug,
+        core.errorEncoding,
+        core.errorEncodingErrorHandler);
 }

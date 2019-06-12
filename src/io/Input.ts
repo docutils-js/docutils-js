@@ -10,8 +10,8 @@ abstract class Input extends TransformSpec {
     protected sourcePath: any;
     protected source: any;
     constructor(args: {
- source: any, sourcePath: string, encoding: string, errorHandler: string,
-}) {
+        source: any; sourcePath: string; encoding: string; errorHandler: string;
+    }) {
         super();
         const { source, sourcePath, encoding, errorHandler } = args;
         this.encoding = encoding;

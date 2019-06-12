@@ -41,8 +41,8 @@ export class FileInput extends Input {
         super(args);
         const {
         /* eslint-disable-next-line no-unused-vars */
- source, sourcePath, encoding, errorHandler, autoClose,
-              mode,
+            source, sourcePath, encoding, errorHandler, autoClose,
+            mode,
         } = args;
         let myAutoClose = autoClose;
         /* eslint-disable-next-line no-unused-vars */
@@ -82,22 +82,22 @@ export class FileInput extends Input {
      */
     read(cb?: any) {
         setTimeout(() => {
-        let data;
-        try {
+            let data;
+            try {
             /* reading ? */
-            if (this.source === process.stdin) {
+                if (this.source === process.stdin) {
                 // do stuff
-            } else {
-                data = this.source.read();
-//                if (data === null) {
-//                    console.log('read returned null ?');
-//                }
-                cb(undefined, data);
+                } else {
+                    data = this.source.read();
+                    //                if (data === null) {
+                    //                    console.log('read returned null ?');
+                    //                }
+                    cb(undefined, data);
+                }
+            } catch (error) {
+                //            console.log(error.stack);
+                cb(error, undefined);
             }
-        } catch (error) {
-//            console.log(error.stack);
-            cb(error, undefined);
-        }
         }, 100);
     }
 

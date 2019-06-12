@@ -54,7 +54,7 @@ class State implements IState {
         if (!this.nestedSmKwargs) {
             // console.log('I am bogus');
             throw new Error();
-/*
+            /*
             this.nestedSmKwargs = {
                 stateClasses: [this.constructor],
                 initialState: this.constructor.name,
@@ -67,7 +67,7 @@ class State implements IState {
 
     // eslint-disable-next-line no-unused-vars
     _init(stateMachine: StateMachine, args: RSTStateArgs) {
-            /* empty */
+        /* empty */
         this.patterns = {};
         this.initialTransitions = undefined;
         this.nestedSm = null;

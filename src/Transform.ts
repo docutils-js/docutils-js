@@ -11,7 +11,7 @@ export default class Transform {
         this.document = document;
         this.startNode = startNode;
         this.language = getLanguage(document.settings.docutilsCoreOptionParser!.languageCode,
-                                              document.reporter);
+            document.reporter);
         this._init(document, startNode);
     }
 

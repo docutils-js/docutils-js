@@ -36,14 +36,14 @@ class Parser extends BaseParser {
             initialState: this.initialState,
             debugFn: this.debugFn,
             debug: document.reporter.debugFlag,
-});
+        });
         const inputLines = statemachine.string2lines(
             inputstring, {
- tabWidth: document.settings.docutilsParsersRstParser!.tabWidth,
-                           convertWhitespace: true,
-},
-);
-//      console.log(`initial state is ${this.initialState}`);
+                tabWidth: document.settings.docutilsParsersRstParser!.tabWidth,
+                convertWhitespace: true,
+            },
+        );
+        //      console.log(`initial state is ${this.initialState}`);
         if(this.stateMachine.debug) {
             console.log('fo')
         }

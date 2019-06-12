@@ -59,7 +59,7 @@ class POJOTranslator extends GenericNodeVisitor {
         const me = this.ancestors.pop();
         if (this.level === 1) {
             this.root = me;
-//          console.log(JSON.stringify(me));
+            //          console.log(JSON.stringify(me));
         } else {
             const parent = this.ancestors[this.ancestors.length - 1];
             parent[2].push(me);
@@ -70,8 +70,8 @@ class POJOTranslator extends GenericNodeVisitor {
     /* eslint-disable-next-line camelcase */
     visit_Text(node: Text) {
         this.ancestors[this.ancestors.length - 1][2].push(node.astext());
-//      const text = escapeXml(node.astext())
-//      this.output.push(text);
+        //      const text = escapeXml(node.astext())
+        //      this.output.push(text);
     }
 
     /* eslint-disable-next-line camelcase,no-unused-vars */

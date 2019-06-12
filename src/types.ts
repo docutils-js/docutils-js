@@ -14,8 +14,8 @@ export interface ParserArgs
 {
     inliner?: Inliner;
     rfc2822?: boolean;
-    debug?: boolean,
-    debugFn?: any
+    debug?: boolean;
+    debugFn?: any;
 }
 
 export interface ISettings {
@@ -93,7 +93,7 @@ export interface INode extends SourceLocation {
     children: INode[];
 
     // eslint-disable-next-line max-len
-    traverse(args: { condition?: any, includeSelf?: boolean, descend?: boolean, siblings?: boolean, ascend?: boolean }): any[];
+    traverse(args: { condition?: any; includeSelf?: boolean; descend?: boolean; siblings?: boolean; ascend?: boolean }): any[];
 
     astext(): string;
 
@@ -129,7 +129,7 @@ export interface INode extends SourceLocation {
      on the value of update_fun.
      */
     updateAllAttsConcatenating(dict_: any, replace:  boolean,
-                               andSource: boolean): void;
+        andSource: boolean): void;
 
     nextNode(args: TraverseArgs): INode | undefined | null;
 

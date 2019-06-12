@@ -154,7 +154,7 @@ class HTMLTranslator extends nodes.NodeVisitor {
      * are extracted), tag name, and optional attributes.
      */
     starttag(node: INode, tagname: string = '', suffix: string = '\n', empty: boolean = false,
-             attributes: IAttributes = {}) {
+        attributes: IAttributes = {}) {
         if (typeof suffix !== 'string') {
             throw new Error('suffix should be a string!!');
         }
@@ -219,7 +219,7 @@ class HTMLTranslator extends nodes.NodeVisitor {
         const parts = [myTagname];
         Object.keys(attlist).forEach((name: string) => {
             const value: any | any[] | undefined | null = attlist[name];
-           // value=None was used for boolean attributes without
+            // value=None was used for boolean attributes without
             // value, but this isn't supported by XHTML.
             //            assert value is not None
             if (Array.isArray(value)) {
@@ -540,7 +540,7 @@ class HTMLTranslator extends nodes.NodeVisitor {
         }
         /* eslint-disable-next-line camelcase,no-unused-vars */
         const totalWidth = this.colspecs.map(subNode => subNode.attributes.colwidth)
-              .reduce((a, c) => a + c);
+            .reduce((a, c) => a + c);
         this.body.push(this.starttag(node, 'colgroup'));
         this.colspecs.forEach((subNode) => {
             const colWidth = parseInt(subNode.attributes.colwidth, 10) * 100.0 / totalWidth + 0.5;
@@ -705,7 +705,7 @@ class HTMLTranslator extends nodes.NodeVisitor {
     /* eslint-disable-next-line camelcase */
     visit_doctest_block(node: INode) {
         this.body.push(this.starttag(node, 'pre', '', false,
-                                     { CLASS: 'code javascript doctest' }));
+            { CLASS: 'code javascript doctest' }));
     }
 
     /* eslint-disable-next-line camelcase,no-unused-vars */
@@ -768,7 +768,7 @@ class HTMLTranslator extends nodes.NodeVisitor {
         const ggParent = node.parent!.parent!.parent!;
         let stubs: any[] = ggParent.getCustomAttr('stubs');
         if(stubs[node.parent!.getCustomAttr('column')]) {
-           // "stubs" list is an attribute of the tgroup element
+            // "stubs" list is an attribute of the tgroup element
             atts.class.push('stub');
         }
         let tagname;
@@ -847,7 +847,7 @@ class HTMLTranslator extends nodes.NodeVisitor {
     /* eslint-disable-next-line camelcase */
     visit_field_name(node: INode) {
         this.body.push(this.starttag(node, 'dt', '', false,
-                                     { CLASS: node.parent!.attributes.classes.join(' ') }));
+            { CLASS: node.parent!.attributes.classes.join(' ') }));
     }
 
     /* eslint-disable-next-line camelcase,no-unused-vars */
@@ -858,7 +858,7 @@ class HTMLTranslator extends nodes.NodeVisitor {
     /* eslint-disable-next-line camelcase */
     visit_field_body(node: INode) {
         this.body.push(this.starttag(node, 'dd', '', false,
-                                     { CLASS: node.parent!.attributes.classes.join(' ') }));
+            { CLASS: node.parent!.attributes.classes.join(' ') }));
 
         // prevent misalignment of following content if the field is empty:
         if (!node.children.length) {
@@ -936,8 +936,8 @@ class HTMLTranslator extends nodes.NodeVisitor {
         const href = `#${node.attributes.refid || ''}`;
         const classes = `footnote-reference ${this.settings.docutilsWritersHtml4Css1Writer!.footnoteReferences}`;
         this.body.push(this.starttag(node, 'a', '', // suffix,
-                                     false,
-                                     { CLASS: classes, href }));
+            false,
+            { CLASS: classes, href }));
     }
 
     /* eslint-disable-next-line camelcase,no-unused-vars */
@@ -955,7 +955,7 @@ class HTMLTranslator extends nodes.NodeVisitor {
     depart_generated(node: INode) {
     }
 
-/*
+    /*
           visit_header(node: INode) {
           this.context.push(len(this.body))
           }
@@ -1561,7 +1561,7 @@ class HTMLTranslator extends nodes.NodeVisitor {
         throw new nodes.SkipNode();
     }
 
-/*
+    /*
       visit_substitution_reference(node: INode) {
       this.unimplemented_visit(node: INode)
       }

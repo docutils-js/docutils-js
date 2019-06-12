@@ -35,7 +35,7 @@ class Reporter implements IReporter {
     private stream: any;
     private encoding?: string;
     constructor(source: string, reportLevel: number, haltLevel?: number, stream?: any, debug?: boolean, encoding?: string,
-                errorHandler:string = 'backslashreplace') {
+        errorHandler: string = 'backslashreplace') {
         if (haltLevel === undefined) {
             haltLevel = 4;
         }
@@ -62,7 +62,7 @@ class Reporter implements IReporter {
 
     /* need better system for arguments!! */
     systemMessage(level: number, message: string | Error,
-    children?: INode[], kwargs?: any) {
+        children?: INode[], kwargs?: any) {
         if (typeof children === 'undefined') {
             children = [];
         }

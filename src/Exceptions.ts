@@ -39,8 +39,8 @@ export const InvalidArgumentError = InvalidArgumentsError;
 
 
 export class SystemMessage extends Error {
-msg: INode;
-level: number;
+    msg: INode;
+    level: number;
     constructor(msg: INode, level: number, ...params: any[]) {
         super(...params);
         this.message = msg.astext();

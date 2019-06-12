@@ -16,9 +16,9 @@ abstract class Parser extends Component {
 
     /* istanbul ignore function */
     /* eslint-disable-next-line no-unused-vars */
-    abstract parse(inputstring: string, document: Document):any | any[] | void;
+    abstract parse(inputstring: string, document: Document): any | any[] | void;
     /* eslint-disable-next-line no-unused-vars */
-    setupParse(inputstring: string, document: Document) : void {
+    setupParse(inputstring: string, document: Document): void {
     } ;
     abstract finishParse(): void;
 

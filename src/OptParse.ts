@@ -19,7 +19,7 @@ export default class OptionParser {
     _processArgs(largs: string[], rargs: string[], values: any) {
         while (rargs.length) {
             const arg = rargs[0];
-//          console.log(`arg is ${arg}`)
+            //          console.log(`arg is ${arg}`)
             if (arg === '--') {
                 rargs.splice(0);
                 return;
@@ -34,9 +34,9 @@ export default class OptionParser {
 
     parseArgs(args: string[], values?: any ): any {
         /* no idea what is what */
-//      console.log(`in base opton parser`);
+        //      console.log(`in base opton parser`);
         const rargs = this._getArgs(args);
-//      console.log(`my rargs is ${rargs}`);
+        //      console.log(`my rargs is ${rargs}`);
         if (values === undefined) {
             values = this.getDefaultValues();
         }

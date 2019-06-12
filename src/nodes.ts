@@ -34,47 +34,47 @@ const _nonIdChars = /[^a-z0-9]+/ig;
 const _nonIdAtEnds = /^[-0-9]+|-+$/;
 /* eslint-disable-next-line no-unused-vars */
 const _nonIdTranslate = {
-  0x00f8: 'o', // o with stroke
-  0x0111: 'd', // d with stroke
-  0x0127: 'h', // h with stroke
-  0x0131: 'i', // dotless i
-  0x0142: 'l', // l with stroke
-  0x0167: 't', // t with stroke
-  0x0180: 'b', // b with stroke
-  0x0183: 'b', // b with topbar
-  0x0188: 'c', // c with hook
-  0x018c: 'd', // d with topbar
-  0x0192: 'f', // f with hook
-  0x0199: 'k', // k with hook
-  0x019a: 'l', // l with bar
-  0x019e: 'n', // n with long right leg
-  0x01a5: 'p', // p with hook
-  0x01ab: 't', // t with palatal hook
-  0x01ad: 't', // t with hook
-  0x01b4: 'y', // y with hook
-  0x01b6: 'z', // z with stroke
-  0x01e5: 'g', // g with stroke
-  0x0225: 'z', // z with hook
-  0x0234: 'l', // l with curl
-  0x0235: 'n', // n with curl
-  0x0236: 't', // t with curl
-  0x0237: 'j', // dotless j
-  0x023c: 'c', // c with stroke
-  0x023f: 's', // s with swash tail
-  0x0240: 'z', // z with swash tail
-  0x0247: 'e', // e with stroke
-  0x0249: 'j', // j with stroke
-  0x024b: 'q', // q with hook tail
-  0x024d: 'r', // r with stroke
-  0x024f: 'y', // y with stroke
+    0x00f8: 'o', // o with stroke
+    0x0111: 'd', // d with stroke
+    0x0127: 'h', // h with stroke
+    0x0131: 'i', // dotless i
+    0x0142: 'l', // l with stroke
+    0x0167: 't', // t with stroke
+    0x0180: 'b', // b with stroke
+    0x0183: 'b', // b with topbar
+    0x0188: 'c', // c with hook
+    0x018c: 'd', // d with topbar
+    0x0192: 'f', // f with hook
+    0x0199: 'k', // k with hook
+    0x019a: 'l', // l with bar
+    0x019e: 'n', // n with long right leg
+    0x01a5: 'p', // p with hook
+    0x01ab: 't', // t with palatal hook
+    0x01ad: 't', // t with hook
+    0x01b4: 'y', // y with hook
+    0x01b6: 'z', // z with stroke
+    0x01e5: 'g', // g with stroke
+    0x0225: 'z', // z with hook
+    0x0234: 'l', // l with curl
+    0x0235: 'n', // n with curl
+    0x0236: 't', // t with curl
+    0x0237: 'j', // dotless j
+    0x023c: 'c', // c with stroke
+    0x023f: 's', // s with swash tail
+    0x0240: 'z', // z with swash tail
+    0x0247: 'e', // e with stroke
+    0x0249: 'j', // j with stroke
+    0x024b: 'q', // q with hook tail
+    0x024d: 'r', // r with stroke
+    0x024f: 'y', // y with stroke
 };
 /* eslint-disable-next-line no-unused-vars */
 const _nonIdTranslateDigraphs = {
-  0x00df: 'sz', // ligature sz
-  0x00e6: 'ae', // ae
-  0x0153: 'oe', // ligature oe
-  0x0238: 'db', // db digraph
-  0x0239: 'qp', // qp digraph
+    0x00df: 'sz', // ligature sz
+    0x00e6: 'ae', // ae
+    0x0153: 'oe', // ligature oe
+    0x0238: 'db', // db digraph
+    0x0239: 'qp', // qp digraph
 };
 
 /**
@@ -86,12 +86,12 @@ const _nonIdTranslateDigraphs = {
  * +-------------+
  */
 function dupname(node: INode, name: string) {
-  /* What is the intention of this function? */
-  node.attributes.dupnames.push(name);
-  node.attributes.names.splice(node.attributes.names.indexOf(name), 1);
-  // Assume that this method is referenced, even though it isn't; we
-  // don't want to throw unnecessary system_messages.
-  node.referenced = true;
+    /* What is the intention of this function? */
+    node.attributes.dupnames.push(name);
+    node.attributes.names.splice(node.attributes.names.indexOf(name), 1);
+    // Assume that this method is referenced, even though it isn't; we
+    // don't want to throw unnecessary system_messages.
+    node.referenced = true;
 }
 
 /**
@@ -99,33 +99,33 @@ function dupname(node: INode, name: string) {
  * @param {String} value - Value to escape.
  */
 function serialEscape(value: string) {
-  return value.replace(/\\/g, '\\\\').replace(/ /g, '\\ ');
+    return value.replace(/\\/g, '\\\\').replace(/ /g, '\\ ');
 }
 
 /* We don't do 'psuedo-xml' but perhaps we should */
 function pseudoQuoteattr(value: any) {
-  return `"${xmlescape(value)}"`;
+    return `"${xmlescape(value)}"`;
 }
 
 /**
  * Return a whitespace-normalized name.
  */
 function whitespaceNormalizeName(name: string) {
-  return name.replace(/\s+/, ' ');
+    return name.replace(/\s+/, ' ');
 }
 
 export function fullyNormalizeName(name: string) {
-  return name.toLowerCase().replace(/\s+/, ' ');
+    return name.toLowerCase().replace(/\s+/, ' ');
 }
 
 function setupBacklinkable(o: any) {
-  o.addBackref = (refid: string) => o.attributes.backrefs.push(refid);
+    o.addBackref = (refid: string) => o.attributes.backrefs.push(refid);
 }
 
 /* This needs to be implemented - fixme */
 function makeId(strVal: string) {
-  return strVal;
-  /*
+    return strVal;
+    /*
     let id = string.lower();
     // This is for unicode, I believe?
     //if not isinstance(id, str):
@@ -144,54 +144,54 @@ function makeId(strVal: string) {
 }
 
 function _callDefaultVisit(node: INode) {
-  // @ts-ignore
-  return this.default_visit(node);
+    // @ts-ignore
+    return this.default_visit(node);
 }
 
 function _callDefaultDeparture(node: INode) {
-  // @ts-ignore
-  return this.default_departure(node);
+    // @ts-ignore
+    return this.default_departure(node);
 }
 /* This is designed to be called later, a-nd not with an object. hmm */
 function _addNodeClassNames(names: string[], o: any) {
-  names.forEach((_name) => {
-    const v = `visit_${_name}`;
-    if (!o[v]) {
-      o[v] = _callDefaultVisit.bind(o);
-    }
-    const d = `depart_${_name}`;
-    if (!o[d]) {
-      o[d] = _callDefaultDeparture.bind(o);
-    }
-  });
+    names.forEach((_name) => {
+        const v = `visit_${_name}`;
+        if (!o[v]) {
+            o[v] = _callDefaultVisit.bind(o);
+        }
+        const d = `depart_${_name}`;
+        if (!o[d]) {
+            o[d] = _callDefaultDeparture.bind(o);
+        }
+    });
 }
 
 const nodeClassNames = ['Text', 'abbreviation', 'acronym', 'address',
-  'admonition', 'attention', 'attribution', 'author',
-  'authors', 'block_quote', 'bullet_list', 'caption',
-  'caution', 'citation', 'citation_reference',
-  'classifier', 'colspec', 'comment', 'compound',
-  'contact', 'container', 'copyright', 'danger',
-  'date', 'decoration', 'definition', 'definition_list',
-  'definition_list_item', 'description', 'docinfo',
-  'doctest_block', 'document', 'emphasis', 'entry',
-  'enumerated_list', 'error', 'field', 'field_body',
-  'field_list', 'field_name', 'figure', 'footer',
-  'footnote', 'footnote_reference', 'generated',
-  'header', 'hint', 'image', 'important', 'inline',
-  'label', 'legend', 'line', 'line_block', 'list_item',
-  'literal', 'literal_block', 'math',
-  'math_block', 'note', 'option', 'option_argument',
-  'option_group', 'option_list', 'option_list_item',
-  'option_string', 'organization', 'paragraph',
-  'pending', 'problematic', 'raw', 'reference',
-  'revision', 'row', 'rubric', 'section', 'sidebar',
-  'status', 'strong', 'subscript',
-  'substitution_definition', 'substitution_reference',
-  'subtitle', 'superscript', 'system_message', 'table',
-  'target', 'tbody', 'term', 'tgroup', 'thead', 'tip',
-  'title', 'title_reference', 'topic', 'transition',
-  'version', 'warning'];
+    'admonition', 'attention', 'attribution', 'author',
+    'authors', 'block_quote', 'bullet_list', 'caption',
+    'caution', 'citation', 'citation_reference',
+    'classifier', 'colspec', 'comment', 'compound',
+    'contact', 'container', 'copyright', 'danger',
+    'date', 'decoration', 'definition', 'definition_list',
+    'definition_list_item', 'description', 'docinfo',
+    'doctest_block', 'document', 'emphasis', 'entry',
+    'enumerated_list', 'error', 'field', 'field_body',
+    'field_list', 'field_name', 'figure', 'footer',
+    'footnote', 'footnote_reference', 'generated',
+    'header', 'hint', 'image', 'important', 'inline',
+    'label', 'legend', 'line', 'line_block', 'list_item',
+    'literal', 'literal_block', 'math',
+    'math_block', 'note', 'option', 'option_argument',
+    'option_group', 'option_list', 'option_list_item',
+    'option_string', 'organization', 'paragraph',
+    'pending', 'problematic', 'raw', 'reference',
+    'revision', 'row', 'rubric', 'section', 'sidebar',
+    'status', 'strong', 'subscript',
+    'substitution_definition', 'substitution_reference',
+    'subtitle', 'superscript', 'system_message', 'table',
+    'target', 'tbody', 'term', 'tgroup', 'thead', 'tip',
+    'title', 'title_reference', 'topic', 'transition',
+    'version', 'warning'];
 
 const SkipChildren = class {};
 const StopTraversal = class {};
@@ -236,11 +236,11 @@ class NodeVisitor {
       * @param {nodes.document} document - document to visit
       */
     constructor(document: Document) {
-      if (!checkDocumentArg(document)) {
-        throw new Error(`Invalid document arg: ${document}`);
-      }
-      this.document = document;
-      this.optional = [];
+        if (!checkDocumentArg(document)) {
+            throw new Error(`Invalid document arg: ${document}`);
+        }
+        this.document = document;
+        this.optional = [];
     }
 
     /**
@@ -249,14 +249,14 @@ class NodeVisitor {
      * this.unknown_visit.
      */
     dispatchVisit(node: INode) {
-      const nodeName = node.tagname;
-      const methodName: string = `visit_${nodeName}`;
-      let method = (<any> this)[methodName];
-      if (!method) {
-        method = this.unknownVisit;
-      }
-      this.document.reporter.debug(`docutils.nodes.NodeVisitor.dispatch_visit calling for ${nodeName}`);
-      return method.bind(this)(node);
+        const nodeName = node.tagname;
+        const methodName = `visit_${nodeName}`;
+        let method = (<any> this)[methodName];
+        if (!method) {
+            method = this.unknownVisit;
+        }
+        this.document.reporter.debug(`docutils.nodes.NodeVisitor.dispatch_visit calling for ${nodeName}`);
+        return method.bind(this)(node);
     }
 
     /*
@@ -265,12 +265,12 @@ class NodeVisitor {
      * this.unknown_departure.
      */
     dispatchDeparture(node: INode) {
-      const nodeName = node.tagname;
-      const method = (<any> this)[`depart_${nodeName}`] || this.unknownDeparture;
-      this.document.reporter.debug(
-        `docutils.nodes.NodeVisitor.dispatch_departure calling for ${node}`,
-      );
-      return method.bind(this)(node);
+        const nodeName = node.tagname;
+        const method = (<any> this)[`depart_${nodeName}`] || this.unknownDeparture;
+        this.document.reporter.debug(
+            `docutils.nodes.NodeVisitor.dispatch_departure calling for ${node}`,
+        );
+        return method.bind(this)(node);
     }
 
     /**
@@ -278,10 +278,10 @@ class NodeVisitor {
      *
      * Raise an exception unless overridden.
      */
-    unknownVisit(node : INode) {
-      if (this.document!.settings.docutilsCoreOptionParser!.strictVisitor || !(this.optional.includes(node.tagname))) {
-        throw new Error(`visiting unknown node type:${node.tagname}`);
-      }
+    unknownVisit(node: INode) {
+        if (this.document!.settings.docutilsCoreOptionParser!.strictVisitor || !(this.optional.includes(node.tagname))) {
+            throw new Error(`visiting unknown node type:${node.tagname}`);
+        }
     }
 
     /**
@@ -290,9 +290,9 @@ class NodeVisitor {
      * Raise exception unless overridden.
      */
     unknownDeparture(node: INode) {
-      if (this.document.settings.docutilsCoreOptionParser!.strictVisitor || !(this.optional.includes(node.tagname))) {
-        throw new Error(`departing unknown node type: ${node.tagname}`);
-      }
+        if (this.document.settings.docutilsCoreOptionParser!.strictVisitor || !(this.optional.includes(node.tagname))) {
+            throw new Error(`departing unknown node type: ${node.tagname}`);
+        }
     }
 }
 /**
@@ -323,19 +323,19 @@ class GenericNodeVisitor extends NodeVisitor {
     static nodeClassNames = [];
 
     constructor(document: Document) {
-      super(document);
-      // document this/
-      _addNodeClassNames(nodeClassNames, this);
+        super(document);
+        // document this/
+        _addNodeClassNames(nodeClassNames, this);
     }
 
     /* eslint-disable-next-line */
     default_visit(node: INode) {
-      throw new Error('not implemented');
+        throw new Error('not implemented');
     }
 
     /* eslint-disable-next-line */
     default_departure(node: INode) {
-      throw new Error('not implemented');
+        throw new Error('not implemented');
     }
 }
 // fixme
@@ -353,7 +353,7 @@ class BackLinkable {
     backrefs: string[] = [];
 
     addBackref(refid: string) {
-      this.backrefs.push(refid);
+        this.backrefs.push(refid);
     }
 }
 
@@ -399,9 +399,9 @@ class Inline { }
 class Referential extends Resolvable { }
 
 class Targetable extends Resolvable {
-  // referenced = 0
-  // indirect_reference_name = null
-  /* Holds the whitespace_normalized_name (contains mixed case) of a target.
+    // referenced = 0
+    // indirect_reference_name = null
+    /* Holds the whitespace_normalized_name (contains mixed case) of a target.
     Required for MoinMoin/reST compatibility.
     */
 }
@@ -421,102 +421,102 @@ class Labeled { }
 
 
 abstract class Node implements INode {
-  /**
+    /**
    * List attributes which are defined for every Element-derived class
    * instance and can be safely transferred to a different node.
    */
-  basicAttributes: string[] = ['ids', 'classes', 'names', 'dupnames'];
+    basicAttributes: string[] = ['ids', 'classes', 'names', 'dupnames'];
 
-  /**
+    /**
    * List attributes, automatically initialized to empty lists for
    * all nodes.
    */
-  listAttributes: string[] = [];
+    listAttributes: string[] = [];
 
-  /** List attributes that are known to the Element base class. */
-  knownAttributes: string[] = [];
+    /** List attributes that are known to the Element base class. */
+    knownAttributes: string[] = [];
 
-  childTextSeparator: string = '';
+    childTextSeparator: string = '';
 
-  emptytag(): string {
-    throw new Error('Method not implemented.');
-  }
+    emptytag(): string {
+        throw new Error('Method not implemented.');
+    }
 
-  referenced: boolean = false;
+    referenced: boolean = false;
 
-  names: any[] = [];
+    names: any[] = [];
 
-  refname?: string;
+    refname?: string;
 
-  refid?: string;
+    refid?: string;
 
-  currentSource: string = '';
+    currentSource: string = '';
 
-  currentLine: number = 0;
+    currentLine: number = 0;
 
-  rawsource: any = '';
+    rawsource: any = '';
 
-tagname: string;
+    tagname: string;
 
-  parent?: INode;
+    parent?: INode;
 
-document?: Document;
+    document?: Document;
 
-source: string = '';
+    source: string = '';
 
-line: number = 0;
+    line: number = 0;
 
-classTypes: any[] = [];
+    classTypes: any[] = [];
 
-children: INode[] = [];
+    children: INode[] = [];
 
-  attributes: IAttributes = { };
+    attributes: IAttributes = { };
 
-  /**
+    /**
       * Create a node
       */
-  constructor() {
-    this.tagname = this.constructor.name;
-    this.classTypes = [];
-    this._init();
-  }
+    constructor() {
+        this.tagname = this.constructor.name;
+        this.classTypes = [];
+        this._init();
+    }
 
-  _init() {
-  }
+    _init() {
+    }
 
 
-  /**
+    /**
     Return the first node in the iterable returned by traverse(),
     or None if the iterable is empty.
 
     Parameter list is the same as of traverse.  Note that
     include_self defaults to 0, though.
     */
-  nextNode(args: TraverseArgs) {
-    const iterable = this.traverse(args);
-    if (iterable.length) {
-      return iterable[0];
+    nextNode(args: TraverseArgs) {
+        const iterable = this.traverse(args);
+        if (iterable.length) {
+            return iterable[0];
+        }
+        return undefined;
     }
-    return undefined;
-  }
 
-  hasClassType(classType: any) {
-    return this.classTypes.findIndex(c => c.prototype instanceof classType
+    hasClassType(classType: any) {
+        return this.classTypes.findIndex(c => c.prototype instanceof classType
                                          || c === classType) !== -1;
-  }
+    }
 
-  isInline() {
-    return this.classTypes.findIndex(c => c.prototype instanceof Inline || c === Inline) !== -1;
-  }
+    isInline() {
+        return this.classTypes.findIndex(c => c.prototype instanceof Inline || c === Inline) !== -1;
+    }
 
-  isAdmonition() {
-    return this.classTypes.findIndex(
-      c => c.prototype instanceof Admonition || c === Admonition,
-    ) !== -1;
-  }
+    isAdmonition() {
+        return this.classTypes.findIndex(
+            c => c.prototype instanceof Admonition || c === Admonition,
+        ) !== -1;
+    }
 
-  asDOM(dom: any): any {
-  }
+    asDOM(dom: any): any {
+    }
 
     abstract pformat(indent: string, level: number): string;
 
@@ -529,16 +529,16 @@ children: INode[] = [];
     abstract _domNode(domroot: any): any;
 
     protected setupChild(child: INode) {
-      child.parent = this;
-      if (this.document) {
-        child.document = this.document;
-        if (child.source == null) {
-          child.source = this.document.currentSource;
+        child.parent = this;
+        if (this.document) {
+            child.document = this.document;
+            if (child.source == null) {
+                child.source = this.document.currentSource;
+            }
+            if (child.line == null) {
+                child.line = this.document.currentLine;
+            }
         }
-        if (child.line == null) {
-          child.line = this.document.currentLine;
-        }
-      }
     }
 
     /**
@@ -564,260 +564,260 @@ children: INode[] = [];
  * Return true if we should stop the traversal.
  */
     walk(visitor: any): boolean {
-      let stop: boolean = false;
-      visitor.document.reporter.debug('docutils.nodes.Node.walk calling dispatch_visit for fixme');
-      try {
+        let stop = false;
+        visitor.document.reporter.debug('docutils.nodes.Node.walk calling dispatch_visit for fixme');
         try {
-          visitor.dispatch_visit(this);
+            try {
+                visitor.dispatch_visit(this);
+            } catch (error) {
+                if (error instanceof SkipChildren || error instanceof SkipNode) {
+                    return stop;
+                } if (error instanceof SkipDeparture) {
+                    // do nothing
+                }
+                throw error;
+            }
+            const children = [...this.children];
+            let skipSiblings = false;
+            children.forEach((child) => {
+                try {
+                    if (!stop && !skipSiblings) {
+                        if (child.walk(visitor)) {
+                            stop = true;
+                        }
+                    }
+                } catch (error) {
+                    if (error instanceof SkipSiblings) {
+                        skipSiblings = true;
+                    } else {
+                        throw error;
+                    }
+                }
+            });
         } catch (error) {
-          if (error instanceof SkipChildren || error instanceof SkipNode) {
-            return stop;
-          } if (error instanceof SkipDeparture) {
-            // do nothing
-          }
-          throw error;
-        }
-        const children = [...this.children];
-        let skipSiblings = false;
-        children.forEach((child) => {
-          try {
-            if (!stop && !skipSiblings) {
-              if (child.walk(visitor)) {
+            if (error instanceof StopTraversal) {
                 stop = true;
-              }
             }
-          } catch (error) {
-            if (error instanceof SkipSiblings) {
-              skipSiblings = true;
-            } else {
-              throw error;
-            }
-          }
-        });
-      } catch (error) {
-        if (error instanceof StopTraversal) {
-          stop = true;
+            throw error;
         }
-        throw error;
-      }
-      return stop;
+        return stop;
     }
 
     walkabout(visitor: any): boolean {
-      let callDepart = true;
-      let stop = false;
-      visitor.document.reporter.debug('docutils.nodes.Node.walkabout calling dispatch_visit');
-      try {
+        let callDepart = true;
+        let stop = false;
+        visitor.document.reporter.debug('docutils.nodes.Node.walkabout calling dispatch_visit');
         try {
-          visitor.dispatchVisit(this);
-        } catch (error) {
-          if (error instanceof SkipNode || error instanceof SkipChildren) {
-            return stop;
-          } if (error instanceof SkipDeparture) {
-            callDepart = false;
-          } else {
-            throw error;
-          }
-        }
-
-        const { children } = this;
-        try {
-          /* eslint-disable-next-line no-restricted-syntax */
-          for (const child of [...children]) {
-            // console.log(typeof child);
-            // console.log(Object.keys(child));
-            if (child.walkabout(visitor)) {
-              stop = true;
-              break;
+            try {
+                visitor.dispatchVisit(this);
+            } catch (error) {
+                if (error instanceof SkipNode || error instanceof SkipChildren) {
+                    return stop;
+                } if (error instanceof SkipDeparture) {
+                    callDepart = false;
+                } else {
+                    throw error;
+                }
             }
-          }
+
+            const { children } = this;
+            try {
+                /* eslint-disable-next-line no-restricted-syntax */
+                for (const child of [...children]) {
+                    // console.log(typeof child);
+                    // console.log(Object.keys(child));
+                    if (child.walkabout(visitor)) {
+                        stop = true;
+                        break;
+                    }
+                }
+            } catch (error) {
+                if (!(error instanceof SkipSiblings)) {
+                    throw error;
+                }
+            }
         } catch (error) {
-          if (!(error instanceof SkipSiblings)) {
-            throw error;
-          }
+            if (error instanceof StopTraversal) {
+                stop = true;
+            } else {
+                throw error;
+            }
         }
-      } catch (error) {
-        if (error instanceof StopTraversal) {
-          stop = true;
-        } else {
-          throw error;
+        if (callDepart) {
+            visitor.document.reporter.debug(
+                `docutils.nodes.Node.walkabout calling dispatch_departure for ${this}`,
+            );
+            visitor.dispatchDeparture(this);
         }
-      }
-      if (callDepart) {
-        visitor.document.reporter.debug(
-          `docutils.nodes.Node.walkabout calling dispatch_departure for ${this}`,
-        );
-        visitor.dispatchDeparture(this);
-      }
-      return stop;
+        return stop;
     }
 
     _fastTraverse(cls: any) {
-      // Specialized traverse() that only supports instance checks.
-      const result = [];
-      if (this instanceof cls) {
-        result.push(this);
-      }
-      const myNode = this;
-      myNode.children.forEach((child) => {
-        if (typeof child === 'undefined') {
-          throw new Error('child is undefined');
+        // Specialized traverse() that only supports instance checks.
+        const result = [];
+        if (this instanceof cls) {
+            result.push(this);
         }
-        // @ts-ignore
-        // eslint-disable-next-line no-underscore-dangle
-        if (typeof child._fastTraverse === 'undefined') {
-          throw new Error(`${child} does not have _fastTraverse`);
-        }
-        // @ts-ignore
-        result.push(...child._fastTraverse(cls));
-      });
-      return result;
+        const myNode = this;
+        myNode.children.forEach((child) => {
+            if (typeof child === 'undefined') {
+                throw new Error('child is undefined');
+            }
+            // @ts-ignore
+            // eslint-disable-next-line no-underscore-dangle
+            if (typeof child._fastTraverse === 'undefined') {
+                throw new Error(`${child} does not have _fastTraverse`);
+            }
+            // @ts-ignore
+            result.push(...child._fastTraverse(cls));
+        });
+        return result;
     }
 
     _allTraverse() {
-      // Specialized traverse() that doesn't check for a condition.
-      const result = [];
-      result.push(this);
-      this.children.forEach((child) => {
+        // Specialized traverse() that doesn't check for a condition.
+        const result = [];
+        result.push(this);
+        this.children.forEach((child) => {
         // @ts-ignore
         // eslint-disable-next-line no-underscore-dangle
-        result.push(...child._allTraverse());
-      });
-      return result;
+            result.push(...child._allTraverse());
+        });
+        return result;
     }
 
     traverse(args: TraverseArgs): any[] {
-      const {
-        condition, includeSelf = true, descend = true, siblings = false, ascend = false,
-      } = args;
-      const mySiblings = ascend ? true : siblings;
-      if (includeSelf && descend && !mySiblings) {
-        if (!condition) {
-          // eslint-disable-next-line no-underscore-dangle
-          return this._allTraverse();
-          // eslint-disable-next-line no-underscore-dangle
-        } if (condition.prototype instanceof Node || condition === Node) {
-          return this._fastTraverse(condition);
+        const {
+            condition, includeSelf = true, descend = true, siblings = false, ascend = false,
+        } = args;
+        const mySiblings = ascend ? true : siblings;
+        if (includeSelf && descend && !mySiblings) {
+            if (!condition) {
+                // eslint-disable-next-line no-underscore-dangle
+                return this._allTraverse();
+                // eslint-disable-next-line no-underscore-dangle
+            } if (condition.prototype instanceof Node || condition === Node) {
+                return this._fastTraverse(condition);
+            }
         }
-      }
-      if (typeof condition !== 'undefined' && (condition.prototype instanceof Node || condition === Node)) {
-        const nodeClass = condition;
-        /* eslint-disable-next-line no-unused-vars */
-        const myCondition = (node: INode, nodeClassArg: any) => (
-          (node instanceof nodeClassArg) || (node instanceof nodeClass)
-        );
-        throw new Error('unimplemented');
-      }
-      /*
+        if (typeof condition !== 'undefined' && (condition.prototype instanceof Node || condition === Node)) {
+            const nodeClass = condition;
+            /* eslint-disable-next-line no-unused-vars */
+            const myCondition = (node: INode, nodeClassArg: any) => (
+                (node instanceof nodeClassArg) || (node instanceof nodeClass)
+            );
+            throw new Error('unimplemented');
+        }
+        /*
         if isinstance(condition, (types.ClassType, type)):
             node_class = condition
             def condition(node, node_class=node_class):
                 return isinstance(node, node_class)
 */
-      const r = [];
-      if (includeSelf && (condition == null || condition(this))) {
-        r.push(this);
-      }
-      if (descend && this.children.length) {
-        this.children.forEach((child) => {
-          r.push(...child.traverse({
-            includeSelf: true,
-            descend: true,
-            siblings: false,
-            ascend: false,
-            condition,
-          }));
-        });
-      }
-      if (siblings || ascend) {
-        let node: INode | undefined = (this as INode);
-        while (node != null && node.parent != null) {
-          const index = node.parent.children.indexOf(node);
-          node.parent.children.slice(index + 1).forEach((sibling) => {
-            r.push(...sibling.traverse({
-              includeSelf: true,
-              descend,
-              siblings: false,
-              ascend: false,
-              condition,
-            }));
-          });
-          if (!ascend) {
-            node = undefined;
-          } else {
-            node = node.parent;
-          }
+        const r = [];
+        if (includeSelf && (condition == null || condition(this))) {
+            r.push(this);
         }
-      }
-      return r;
+        if (descend && this.children.length) {
+            this.children.forEach((child) => {
+                r.push(...child.traverse({
+                    includeSelf: true,
+                    descend: true,
+                    siblings: false,
+                    ascend: false,
+                    condition,
+                }));
+            });
+        }
+        if (siblings || ascend) {
+            let node: INode | undefined = (this as INode);
+            while (node != null && node.parent != null) {
+                const index = node.parent.children.indexOf(node);
+                node.parent.children.slice(index + 1).forEach((sibling) => {
+                    r.push(...sibling.traverse({
+                        includeSelf: true,
+                        descend,
+                        siblings: false,
+                        ascend: false,
+                        condition,
+                    }));
+                });
+                if (!ascend) {
+                    node = undefined;
+                } else {
+                    node = node.parent;
+                }
+            }
+        }
+        return r;
     }
 
     add(iNodes: INode[] | INode): void {
-      throw new UnimplementedError('');
+        throw new UnimplementedError('');
     }
 
 
     endtag(): string {
-      return '';
+        return '';
     }
 
     starttag(quoteattr?: any): string {
-      return '';
+        return '';
     }
 
     addBackref(prbid: any): void {
     }
 
     updateBasicAtts(dict_: any) {
-      const dict2 = dict_ instanceof Node ? dict_.attributes : dict_;
-      this.basicAttributes.forEach((att) => {
-        const v = att in dict2 ? dict2[att] : [];
-        this.appendAttrList(att, v);
-      });
+        const dict2 = dict_ instanceof Node ? dict_.attributes : dict_;
+        this.basicAttributes.forEach((att) => {
+            const v = att in dict2 ? dict2[att] : [];
+            this.appendAttrList(att, v);
+        });
     }
 
     appendAttrList(attr: string, values: any[]) {
     // List Concatenation
-      values.forEach((value) => {
-        if ((this.attributes[attr].filter((v: any) => v === value)).length === 0) {
-          this.attributes[attr].push(value);
-        }
-      });
+        values.forEach((value) => {
+            if ((this.attributes[attr].filter((v: any) => v === value)).length === 0) {
+                this.attributes[attr].push(value);
+            }
+        });
     }
 
     replaceAttr(attr: string, value: any[] | any, force = true) {
     // One or the other
-      if (force || this.attributes[attr] == null) {
-        this.attributes[attr] = value;
-      }
+        if (force || this.attributes[attr] == null) {
+            this.attributes[attr] = value;
+        }
     }
 
     copyAttrConsistent(attr: string, value: any, replace?: boolean) {
-      if (this.attributes[attr] !== value) {
-        this.replaceAttr(attr, value, replace);
-      }
+        if (this.attributes[attr] !== value) {
+            this.replaceAttr(attr, value, replace);
+        }
     }
 
     updateAllAtts(dict_: any, updateFun = this.copyAttrConsistent,
-      replace = true, andSource = false) {
-      const dict2 = dict_ instanceof Node ? dict_.attributes : dict_;
-      // Include the source attribute when copying?
-      let filterFun;
-      if (andSource) {
-        filterFun = this.isNotListAttribute.bind(this);
-      } else {
-        filterFun = this.isNotKnownAttribute.bind(this);
-      }
+        replace = true, andSource = false) {
+        const dict2 = dict_ instanceof Node ? dict_.attributes : dict_;
+        // Include the source attribute when copying?
+        let filterFun;
+        if (andSource) {
+            filterFun = this.isNotListAttribute.bind(this);
+        } else {
+            filterFun = this.isNotKnownAttribute.bind(this);
+        }
 
-      // Copy the basic attributes
-      this.updateBasicAtts(dict2);
+        // Copy the basic attributes
+        this.updateBasicAtts(dict2);
 
-      // Grab other attributes in dict_ not in self except the
-      // (All basic attributes should be copied already)
-      const atts = Object.keys(dict2).filter(filterFun);
-      atts.forEach((att) => {
-        updateFun.bind(this)(att, dict2[att], replace);
-      });
+        // Grab other attributes in dict_ not in self except the
+        // (All basic attributes should be copied already)
+        const atts = Object.keys(dict2).filter(filterFun);
+        atts.forEach((att) => {
+            updateFun.bind(this)(att, dict2[att], replace);
+        });
     }
 
     /**
@@ -840,9 +840,9 @@ children: INode[] = [];
    on the value of update_fun.
    */
     updateAllAttsConcatenating(dict_: any, replace: boolean = true,
-      andSource: boolean = false) {
-      this.updateAllAtts(dict_, this.copyAttrConcatenate, replace,
-        andSource);
+        andSource: boolean = false) {
+        this.updateAllAtts(dict_, this.copyAttrConcatenate, replace,
+            andSource);
     }
 
     /**
@@ -850,7 +850,7 @@ children: INode[] = [];
    basic list attributes defined for all Elements.
    */
     isNotListAttribute(attr: string) {
-      return !(attr in this.listAttributes);
+        return !(attr in this.listAttributes);
     }
 
     /**
@@ -858,7 +858,7 @@ children: INode[] = [];
    this class.
    */
     isNotKnownAttribute(attr: string) {
-      return !(attr in this.knownAttributes);
+        return !(attr in this.knownAttributes);
     }
 
     private copyAttrConcatenate(attr: string, value: any | any[], replace?: boolean) {
@@ -870,18 +870,18 @@ children: INode[] = [];
       replace is True or self[attr] is None, replace self[attr] with value.
           Otherwise, do nothing.
           """ */
-      if (this.attributes[attr] !== value) {
-        if (Array.isArray(this.attributes[attr]) && Array.isArray(value)) {
-          this.appendAttrList(attr, value);
-        } else {
-          this.replaceAttr(attr, value, replace);
+        if (this.attributes[attr] !== value) {
+            if (Array.isArray(this.attributes[attr]) && Array.isArray(value)) {
+                this.appendAttrList(attr, value);
+            } else {
+                this.replaceAttr(attr, value, replace);
+            }
         }
-      }
     }
 
-  getCustomAttr(attrName: string): any[] | any | undefined | null {
-    return undefined;
-  }
+    getCustomAttr(attrName: string): any[] | any | undefined | null {
+        return undefined;
+    }
 }
 
 /*
@@ -939,200 +939,200 @@ class Element extends Node implements IElement {
      */
     tagname: string = '';
 
-  attributes: IAttributes;
+    attributes: IAttributes;
 
 
-  /**
+    /**
      * Create element.
      * @classdesc Abstracts a docutils Element.
      * @extends module:nodes~Node
      */
-  constructor(rawsource?: string, children: INode[] = [], attributes: IAttributes = { }) {
-    super();
-    this.nodeName = Symbol.for('Element');
-    this.children = children; // we want to do this, imo
-    this.attributes = { };
-    this.listAttributes.forEach((x) => {
-      this.attributes[x] = [];
-    });
-    Object.keys(attributes).forEach((att) => {
-      const value: any | any[] = attributes[att];
-      const attKey = att.toLowerCase();
+    constructor(rawsource?: string, children: INode[] = [], attributes: IAttributes = { }) {
+        super();
+        this.nodeName = Symbol.for('Element');
+        this.children = children; // we want to do this, imo
+        this.attributes = { };
+        this.listAttributes.forEach((x) => {
+            this.attributes[x] = [];
+        });
+        Object.keys(attributes).forEach((att) => {
+            const value: any | any[] = attributes[att];
+            const attKey = att.toLowerCase();
 
-      /* This if path never taken... why? FIXME */
-      if (attKey in this.listAttributes) {
-        /* istanbul ignore next */
-        if (!isIterable(value)) {
-          throw new Error();
-        }
-        // @ts-ignore
-        const a: any[] = value;
-        this.attributes[attKey] = [...a];
-      } else {
-        this.attributes[attKey] = value;
-      }
-    });
-    this.tagname = this.constructor.name;
-  }
+            /* This if path never taken... why? FIXME */
+            if (attKey in this.listAttributes) {
+                /* istanbul ignore next */
+                if (!isIterable(value)) {
+                    throw new Error();
+                }
+                // @ts-ignore
+                const a: any[] = value;
+                this.attributes[attKey] = [...a];
+            } else {
+                this.attributes[attKey] = value;
+            }
+        });
+        this.tagname = this.constructor.name;
+    }
 
-  _init() {
-    super._init();
-    /* List attributes which are defined for every Element-derived class
+    _init() {
+        super._init();
+        /* List attributes which are defined for every Element-derived class
            instance and can be safely transferred to a different node. */
-    this.basicAttributes = ['ids', 'classes', 'names', 'dupnames'];
-    /*
+        this.basicAttributes = ['ids', 'classes', 'names', 'dupnames'];
+        /*
           "A list of class-specific attributes that should not be copied with the
           standard attributes when replacing a node.
 
           NOTE: Derived classes should override this value to prevent any of its
           attributes being copied by adding to the value in its parent class.
         */
-    this.localAttributes = ['backrefs'];
+        this.localAttributes = ['backrefs'];
 
-    /* List attributes, automatically initialized to empty lists
+        /* List attributes, automatically initialized to empty lists
            for all nodes. */
-    this.listAttributes = [...this.basicAttributes, ...this.localAttributes];
+        this.listAttributes = [...this.basicAttributes, ...this.localAttributes];
 
-    /* List attributes that are known to the Element base class. */
-    this.knownAttributes = [...this.listAttributes, 'source', 'rawsource'];
+        /* List attributes that are known to the Element base class. */
+        this.knownAttributes = [...this.listAttributes, 'source', 'rawsource'];
 
-    /* The element generic identifier. If None, it is set as an
+        /* The element generic identifier. If None, it is set as an
            instance attribute to the name of the class. */
-    // this.tagname = undefined; (already set in Node.constructor)
+        // this.tagname = undefined; (already set in Node.constructor)
 
-    /* Separator for child nodes, used by `astext()` method. */
-    this.childTextSeparator = '\n\n';
-  }
-
-
-  _domNode(domroot: any): any {
-    const element = domroot.createElement(this.tagname);
-    const l = this.attlist();
-    Object.keys(l).forEach((attribute) => {
-      // @ts-ignore
-      const value: any | any[] = l[attribute];
-      let myVal: string;
-      if (isIterable(value)) {
-        myVal = value.map((v: any) => serialEscape(v.toString())).join(' ');
-      } else {
-        myVal = value.toString();
-      }
-      element.setAttribute(attribute, myVal);
-    });
-    this.children.forEach((child) => {
-      // @ts-ignore
-      // eslint-disable-next-line no-underscore-dangle
-      element.appendChild(child._domNode(domroot));
-    });
-    return element;
-  }
-
-  emptytag() {
-    return `<${[this.tagname, ...Object.entries(this.attlist())
-      .map(([n, v]) => `${n}="${v}"`)].join(' ')}/>`;
-  }
-
-
-  astext(): string {
-    return this.children.map(x => x.astext()).join(this.childTextSeparator);
-  }
-
-  extend(...items: any[]) {
-    items.forEach(this.append.bind(this));
-  }
-
-  append(item: any) {
-    this.setupChild(item);
-    this.children.push(item);
-  }
-
-  add(item: INode[] | INode) {
-    if (Array.isArray(item)) {
-      this.extend(...item);
-    } else {
-      this.append(item);
+        /* Separator for child nodes, used by `astext()` method. */
+        this.childTextSeparator = '\n\n';
     }
-  }
 
-  setupChild(child: INode) {
+
+    _domNode(domroot: any): any {
+        const element = domroot.createElement(this.tagname);
+        const l = this.attlist();
+        Object.keys(l).forEach((attribute) => {
+            // @ts-ignore
+            const value: any | any[] = l[attribute];
+            let myVal: string;
+            if (isIterable(value)) {
+                myVal = value.map((v: any) => serialEscape(v.toString())).join(' ');
+            } else {
+                myVal = value.toString();
+            }
+            element.setAttribute(attribute, myVal);
+        });
+        this.children.forEach((child) => {
+            // @ts-ignore
+            // eslint-disable-next-line no-underscore-dangle
+            element.appendChild(child._domNode(domroot));
+        });
+        return element;
+    }
+
+    emptytag() {
+        return `<${[this.tagname, ...Object.entries(this.attlist())
+            .map(([n, v]) => `${n}="${v}"`)].join(' ')}/>`;
+    }
+
+
+    astext(): string {
+        return this.children.map(x => x.astext()).join(this.childTextSeparator);
+    }
+
+    extend(...items: any[]) {
+        items.forEach(this.append.bind(this));
+    }
+
+    append(item: any) {
+        this.setupChild(item);
+        this.children.push(item);
+    }
+
+    add(item: INode[] | INode) {
+        if (Array.isArray(item)) {
+            this.extend(...item);
+        } else {
+            this.append(item);
+        }
+    }
+
+    setupChild(child: INode) {
     /* istanbul ignore if */
-    if (!(child instanceof Node)) {
-      throw new InvalidArgumentsError(`Expecting node instance ${child}`);
+        if (!(child instanceof Node)) {
+            throw new InvalidArgumentsError(`Expecting node instance ${child}`);
+        }
+
+        /* istanbul ignore if */
+        if (!child) {
+            throw new InvalidArgumentsError('need child');
+        }
+
+        child.parent = this;
+        if (this.document) {
+            child.document = this.document;
+            if (typeof child.source === 'undefined') {
+                child.source = this.document.currentSource;
+            }
+            if (typeof child.line === 'undefined') {
+                child.line = this.document.currentLine;
+            }
+        }
     }
 
-    /* istanbul ignore if */
-    if (!child) {
-      throw new InvalidArgumentsError('need child');
+    starttag(quoteAttr?: any) {
+        const q = quoteAttr || pseudoQuoteattr;
+
+        const parts = [this.tagname];
+        const attlist = this.attlist();
+        Object.keys(attlist).forEach((name) => {
+            const value: any | any[] = attlist[name];
+
+            let myVal = value;
+            let gotPart = false;
+            if (myVal === undefined) {
+                parts.push(`${name}="True"`);
+                gotPart = true;
+            } else if (Array.isArray(myVal)) {
+                const values = myVal.map(v => serialEscape(v.toString()));
+                myVal = values.join(' ');
+            } else {
+                myVal = value.toString();
+            }
+            if (!gotPart) {
+                myVal = q(myVal);
+                parts.push(`${name}=${myVal}`);
+            }
+        });
+        return `<${parts.join(' ')}>`;
     }
 
-    child.parent = this;
-    if (this.document) {
-      child.document = this.document;
-      if (typeof child.source === 'undefined') {
-        child.source = this.document.currentSource;
-      }
-      if (typeof child.line === 'undefined') {
-        child.line = this.document.currentLine;
-      }
+    endtag(): string {
+        return `</${this.tagname}>`;
     }
-  }
 
-  starttag(quoteAttr?: any) {
-    const q = quoteAttr || pseudoQuoteattr;
+    attlist(): any {
+        const attlist = this.nonDefaultAttributes();
+        return attlist;
+    }
 
-    const parts = [this.tagname];
-    const attlist = this.attlist();
-    Object.keys(attlist).forEach((name) => {
-      const value: any | any[] = attlist[name];
+    nonDefaultAttributes(): any {
+        const atts: any = { };
+        Object.entries(this.attributes).forEach(([key, value]) => {
+            if (this.isNotDefault(key)) {
+                atts[key] = value;
+            }
+        });
+        return atts;
+    }
 
-      let myVal = value;
-      let gotPart = false;
-      if (myVal === undefined) {
-        parts.push(`${name}="True"`);
-        gotPart = true;
-      } else if (Array.isArray(myVal)) {
-        const values = myVal.map(v => serialEscape(v.toString()));
-        myVal = values.join(' ');
-      } else {
-        myVal = value.toString();
-      }
-      if (!gotPart) {
-        myVal = q(myVal);
-        parts.push(`${name}=${myVal}`);
-      }
-    });
-    return `<${parts.join(' ')}>`;
-  }
-
-  endtag(): string {
-    return `</${this.tagname}>`;
-  }
-
-  attlist(): any {
-    const attlist = this.nonDefaultAttributes();
-    return attlist;
-  }
-
-  nonDefaultAttributes(): any {
-    const atts: any = { };
-    Object.entries(this.attributes).forEach(([key, value]) => {
-      if (this.isNotDefault(key)) {
-        atts[key] = value;
-      }
-    });
-    return atts;
-  }
-
-  isNotDefault(key: string) {
-    if (Array.isArray(this.attributes[key])
+    isNotDefault(key: string) {
+        if (Array.isArray(this.attributes[key])
             && this.attributes[key].length === 0
             && this.listAttributes.includes(key)) {
-      return false;
+            return false;
+        }
+        return true;
     }
-    return true;
-  }
 
-  /*
+    /*
        Return the index of the first child whose class does *not* match.
 
        Parameters:
@@ -1142,56 +1142,56 @@ class Element extends Node implements IElement {
        - `start`: Initial index to check.
        - `end`: Initial index to *not* check.
     */
-  firstChildNotMatchingClass(childClass: any | any[], start = 0,
-    end = this.children.length): number | undefined {
-    const myChildClass = Array.isArray(childClass) ? childClass : [childClass];
-    const r = this.children.slice(start,
-      Math.min(this.children.length, end))
-      .findIndex((child, index) => {
-        if (myChildClass.findIndex((c) => {
-          // if (typeof child === 'undefined') {
-          //     throw new Error(`child should not be undefined, index ${index}`);
-          // }
-          if (child instanceof c
+    firstChildNotMatchingClass(childClass: any | any[], start = 0,
+        end = this.children.length): number | undefined {
+        const myChildClass = Array.isArray(childClass) ? childClass : [childClass];
+        const r = this.children.slice(start,
+            Math.min(this.children.length, end))
+            .findIndex((child, index) => {
+                if (myChildClass.findIndex((c) => {
+                    // if (typeof child === 'undefined') {
+                    //     throw new Error(`child should not be undefined, index ${index}`);
+                    // }
+                    if (child instanceof c
                     || (this.children[index].classTypes.filter(
-                      (c2 => c2.prototype instanceof c || c2 === c),
+                        (c2 => c2.prototype instanceof c || c2 === c),
                     ))
-                      .length) {
-            return true;
-          }
-          return false;
-        }) === -1) {
-          // console.log(`returning index ${index} ${nodeToXml(this.children[index])}`);
-          return true;
+                        .length) {
+                        return true;
+                    }
+                    return false;
+                }) === -1) {
+                    // console.log(`returning index ${index} ${nodeToXml(this.children[index])}`);
+                    return true;
+                }
+                return false;
+            });
+
+        if (r !== -1) {
+            return r;
         }
-        return false;
-      });
-
-    if (r !== -1) {
-      return r;
+        return undefined;
     }
-    return undefined;
-  }
 
-  pformat(indent: string, level: number): string {
-    return `${indent.repeat(level)}${this.starttag()}\n${this.children.map(c => c.pformat(indent, level + 1)).join('')}`;
-  }
+    pformat(indent: string, level: number): string {
+        return `${indent.repeat(level)}${this.starttag()}\n${this.children.map(c => c.pformat(indent, level + 1)).join('')}`;
+    }
 
-  copy(): INode {
+    copy(): INode {
     // @ts-ignore
-    return new this.constructor(this.rawsouce, this.children, this.attributes);
-  }
+        return new this.constructor(this.rawsouce, this.children, this.attributes);
+    }
 
-  deepcopy(): INode {
-    return this.copy();
-  }
+    deepcopy(): INode {
+        return this.copy();
+    }
 
-  /*
+    /*
       Update basic attributes ('ids', 'names', 'classes',
       'dupnames', but not 'source') from node or dictionary `dict_`.
     */
 
-  /*
+    /*
     For each element in values, if it does not exist in self[attr], append
     it.
 
@@ -1199,17 +1199,17 @@ class Element extends Node implements IElement {
     former should specifically be a list.
   */
 
-  /*
+    /*
     If self[attr] does not exist or force is True or omitted, set
     self[attr] to value, otherwise do nothing.
   */
 
-  /*
+    /*
     If replace is true or this.attributes[attr] is null, replace
     this.attributes[attr] with value.  Otherwise, do nothing.
   */
 
-  /*
+    /*
     Updates all attributes from node or dictionary `dict_`.
 
       Appends the basic attributes ('ids', 'names', 'classes',
@@ -1228,128 +1228,128 @@ class Element extends Node implements IElement {
       NOTE: It is easier to call the update-specific methods then to pass
             the update_fun method to this function.
   */
-  /** Note that this Element has been referenced by its name
+    /** Note that this Element has been referenced by its name
    `name` or id `id`. */
-  noteReferencedBy(name: string, id: string) {
-    this.referenced = true;
-    const byName = this.attributes.expect_referenced_by_name[name];
-    const byId = this.attributes.expect_referenced_by_name[id];
-    if (byName != null) {
-      byName.referenced = true;
+    noteReferencedBy(name: string, id: string) {
+        this.referenced = true;
+        const byName = this.attributes.expect_referenced_by_name[name];
+        const byId = this.attributes.expect_referenced_by_name[id];
+        if (byName != null) {
+            byName.referenced = true;
+        }
+        if (byId != null) {
+            byId.referenced = 1;
+        }
     }
-    if (byId != null) {
-      byId.referenced = 1;
-    }
-  }
 }
 
 // =====================
 //  Decorative Elements
 // =====================
 class header extends Element {
-  constructor(rawsource?: string, children?: INode[], attributes?: IAttributes) {
-    super(rawsource, children, attributes);
-    this.classTypes = [Decorative];
-  }
+    constructor(rawsource?: string, children?: INode[], attributes?: IAttributes) {
+        super(rawsource, children, attributes);
+        this.classTypes = [Decorative];
+    }
 }
 
 class footer extends Element {
-  // @ts-ignore
-  constructor(...args) {
-  // @ts-ignore
-    super(...args);
-    this.classTypes = [Decorative];
-  }
+    // @ts-ignore
+    constructor(...args) {
+        // @ts-ignore
+        super(...args);
+        this.classTypes = [Decorative];
+    }
 }
 
 class decoration extends Element {
-  // @ts-ignore
-  constructor(...args) {
-  // @ts-ignore
-    super(...args);
-    this.classTypes = [Decorative];
-  }
-
-  getHeader() {
-    if (!this.children.length || !(this.children[0] instanceof header)) {
-      this.children.splice(0, 0, new header());
+    // @ts-ignore
+    constructor(...args) {
+        // @ts-ignore
+        super(...args);
+        this.classTypes = [Decorative];
     }
-    return this.children[0];
-  }
 
-  getFooter() {
-    if (!this.children.length || !(this.children[this.children.length - 1] instanceof footer)) {
-      this.add(new footer());
+    getHeader() {
+        if (!this.children.length || !(this.children[0] instanceof header)) {
+            this.children.splice(0, 0, new header());
+        }
+        return this.children[0];
     }
-    return this.children[this.children.length - 1];
-  }
+
+    getFooter() {
+        if (!this.children.length || !(this.children[this.children.length - 1] instanceof footer)) {
+            this.add(new footer());
+        }
+        return this.children[this.children.length - 1];
+    }
 }
 
 class Text extends Node {
-  pformat(indent: string, level: number): string {
-    throw new Error('Method not implemented.');
-  }
-
-  copy(): INode {
-    return this.constructor(this.data, this.rawsource);
-  }
-
-  deepcopy(): INode {
-    return this.copy();
-  }
-
-  walk(any: any): boolean {
-    throw new Error('Method not implemented.');
-  }
-
-  private data: string;
-
-  constructor(data: string, rawsource = '') {
-    super();
-    if (typeof data === 'undefined') {
-      throw new Error('data should not be undefined');
+    pformat(indent: string, level: number): string {
+        throw new Error('Method not implemented.');
     }
 
-    this.rawsource = rawsource;
-    this.data = data;
-    this.children = [];
-  }
+    copy(): INode {
+        return this.constructor(this.data, this.rawsource);
+    }
 
-  _domNode(domroot : any) {
-    return domroot.createTextNode(this.data);
-  }
+    deepcopy(): INode {
+        return this.copy();
+    }
 
-  astext() {
-    return unescape(this.data);
-  }
+    walk(any: any): boolean {
+        throw new Error('Method not implemented.');
+    }
 
-  toString() {
-    return this.astext();
-  }
+    private data: string;
 
-  toSource() {
-    return this.toString();
-  }
+    constructor(data: string, rawsource = '') {
+        super();
+        if (typeof data === 'undefined') {
+            throw new Error('data should not be undefined');
+        }
 
-  // eslint-disable-next-line no-unused-vars
-  add(iNodes: INode[] | INode): void {
-    throw new UnimplementedError('');
-  }
+        this.rawsource = rawsource;
+        this.data = data;
+        this.children = [];
+    }
+
+    _domNode(domroot: any) {
+        return domroot.createTextNode(this.data);
+    }
+
+    astext() {
+        return unescape(this.data);
+    }
+
+    toString() {
+        return this.astext();
+    }
+
+    toSource() {
+        return this.toString();
+    }
+
+    // eslint-disable-next-line no-unused-vars
+    add(iNodes: INode[] | INode): void {
+        throw new UnimplementedError('');
+    }
 }
 
 class TextElement extends Element implements ITextElement {
-  constructor(rawsource?: any, text?: string, children?: INode[], attributes?: IAttributes) {
-    const cAry = children || [];
-    /* istanbul ignore if */
-    if (Array.isArray(text)) {
-      throw new InvalidArgumentsError('text should not be an array');
+    constructor(rawsource?: any, text?: string, children?: INode[], attributes?: IAttributes) {
+        const cAry = children || [];
+        /* istanbul ignore if */
+        if (Array.isArray(text)) {
+            throw new InvalidArgumentsError('text should not be an array');
+        }
+        super(rawsource, (typeof text !== 'undefined' && text !== '') ? [new Text(text), ...cAry] : cAry, attributes);
     }
-    super(rawsource, (typeof text !== 'undefined' && text !== '') ? [new Text(text), ...cAry] : cAry, attributes);
-  }
 }
 
 interface ITransformer {
-  addPending(pending: any, priority: any): void;
+    addPending(pending: any, priority: any): void;
 }
 
 /**
@@ -1359,339 +1359,339 @@ interface ITransformer {
  * @extends Element
  */
 class document extends Element implements Document {
-  settings: Settings;
+    settings: Settings;
 
-  reporter: IReporter;
+    reporter: IReporter;
 
-  decoration?: decoration;
+    decoration?: decoration;
 
-   transformMessages: string[];
+    transformMessages: string[];
 
-  private parseMessages: string[];
+    private parseMessages: string[];
 
-  transformer: Transformer;
+    transformer: Transformer;
 
-  private substitutionDefs: any;
+    private substitutionDefs: any;
 
-  private substitutionNames: any;
+    private substitutionNames: any;
 
-  private citationRefs: any;
+    private citationRefs: any;
 
-  private citations: any[];
+    private citations: any[];
 
-  private footnoteRefs: any;
+    private footnoteRefs: any;
 
-  private autofootnoteRefs: INode[];
+    private autofootnoteRefs: INode[];
 
-  private symbolFootnotes: any[];
+    private symbolFootnotes: any[];
 
-  private footnotes: any[];
+    private footnotes: any[];
 
-  private symbolFootnoteRefs: any[];
+    private symbolFootnoteRefs: any[];
 
-  private indirectTargets: any[];
+    private indirectTargets: any[];
 
-  private autofootnotes: any[];
+    private autofootnotes: any[];
 
-  private refIds: any;
+    private refIds: any;
 
-  private refNames: any;
+    private refNames: any;
 
-  nameIds: any;
+    nameIds: any;
 
-  private ids: any;
+    private ids: any;
 
-  private nameTypes: any;
+    private nameTypes: any;
 
-  private idStart: number;
+    private idStart: number;
 
-  private autofootnoteStart: number;
+    private autofootnoteStart: number;
 
-  private symbolFootnoteStart: number;
+    private symbolFootnoteStart: number;
 
-  /** Private constructor */
-  constructor(settings: Settings, reporter: IReporter, rawsource?: any, children?: INode[], attributes?: IAttributes) {
-    super(rawsource, children, attributes);
-    this.classTypes = [Root, Structural];
-    this.tagname = 'document';
-    this.settings = settings;
-    this.reporter = reporter;
-    this.indirectTargets = [];
-    this.substitutionDefs = {};
-    this.substitutionNames = {};
-    this.refNames = {};
-    this.refIds = {};
-    this.nameIds = {};
-    this.nameTypes = {};
-    this.ids = {};
-    this.footnoteRefs = {};
-    this.citationRefs = {};
-    this.autofootnotes = [];
-    this.autofootnoteRefs = [];
-    this.symbolFootnotes = [];
-    this.symbolFootnoteRefs = [];
-    this.footnotes = [];
-    this.citations = [];
-    this.autofootnoteStart = 1;
-    this.symbolFootnoteStart = 0;
-    this.idStart = 1;
-    this.parseMessages = [];
-    this.transformMessages = [];
-    this.transformer = new Transformer(this);
-    this.decoration = undefined;
-    this.document = this;
-  }
-
-  setId(node: INode, msgnode?: INode) {
-    let msg;
-    let id;
-    node.attributes.ids.forEach((myId: string) => {
-      if (myId in this.ids && this.ids[myId] !== node) {
-        msg = this.reporter.severe(`Duplicate ID: "${myId}".`);
-        if (msgnode) {
-          msgnode.add(msg);
-        }
-      }
-    });
-    if (node.attributes.ids.length === 0) {
-      let name;
-      let myBreak = false;
-      /* eslint-disable-next-line no-restricted-syntax */
-      for (name of node.attributes.names) {
-        id = this.settings.docutilsCoreOptionParser!.idPrefix + makeId(name);
-        if (id && !(id in this.attributes.ids)) {
-          myBreak = true;
-          break;
-        }
-      }
-      if (!myBreak) {
-        id = '';
-        while (!id || (id in this.attributes.ids)) {
-          id = (this.settings.docutilsCoreOptionParser!.idPrefix + this.settings.docutilsCoreOptionParser!.autoIdPrefix
-                          + this.idStart);
-          this.idStart += 1;
-        }
-      }
-      node.attributes.ids.push(id);
+    /** Private constructor */
+    constructor(settings: Settings, reporter: IReporter, rawsource?: any, children?: INode[], attributes?: IAttributes) {
+        super(rawsource, children, attributes);
+        this.classTypes = [Root, Structural];
+        this.tagname = 'document';
+        this.settings = settings;
+        this.reporter = reporter;
+        this.indirectTargets = [];
+        this.substitutionDefs = {};
+        this.substitutionNames = {};
+        this.refNames = {};
+        this.refIds = {};
+        this.nameIds = {};
+        this.nameTypes = {};
+        this.ids = {};
+        this.footnoteRefs = {};
+        this.citationRefs = {};
+        this.autofootnotes = [];
+        this.autofootnoteRefs = [];
+        this.symbolFootnotes = [];
+        this.symbolFootnoteRefs = [];
+        this.footnotes = [];
+        this.citations = [];
+        this.autofootnoteStart = 1;
+        this.symbolFootnoteStart = 0;
+        this.idStart = 1;
+        this.parseMessages = [];
+        this.transformMessages = [];
+        this.transformer = new Transformer(this);
+        this.decoration = undefined;
+        this.document = this;
     }
-    this.ids[id] = node;
-    return id;
-  }
 
-  setNameIdMap(node: INode, id: string, msgnode: INode,
-    explicit?: boolean) {
-    node.attributes.names.forEach((name: string) => {
-      if (name in this.nameIds) {
-        this.setDuplicateNameId(node, id, name, msgnode, explicit);
-      } else {
-        this.nameIds[name] = id;
-        this.nameTypes[name] = explicit;
-      }
-    });
-  }
+    setId(node: INode, msgnode?: INode) {
+        let msg;
+        let id;
+        node.attributes.ids.forEach((myId: string) => {
+            if (myId in this.ids && this.ids[myId] !== node) {
+                msg = this.reporter.severe(`Duplicate ID: "${myId}".`);
+                if (msgnode) {
+                    msgnode.add(msg);
+                }
+            }
+        });
+        if (node.attributes.ids.length === 0) {
+            let name;
+            let myBreak = false;
+            /* eslint-disable-next-line no-restricted-syntax */
+            for (name of node.attributes.names) {
+                id = this.settings.docutilsCoreOptionParser!.idPrefix + makeId(name);
+                if (id && !(id in this.attributes.ids)) {
+                    myBreak = true;
+                    break;
+                }
+            }
+            if (!myBreak) {
+                id = '';
+                while (!id || (id in this.attributes.ids)) {
+                    id = (this.settings.docutilsCoreOptionParser!.idPrefix + this.settings.docutilsCoreOptionParser!.autoIdPrefix
+                          + this.idStart);
+                    this.idStart += 1;
+                }
+            }
+            node.attributes.ids.push(id);
+        }
+        this.ids[id] = node;
+        return id;
+    }
 
-  setDuplicateNameId(node: INode, id: string, name: string, msgnode: INode, explicit?: boolean) {
-    const oldId = this.nameIds[name];
-    const oldExplicit = this.nameTypes[name];
-    this.nameTypes[name] = oldExplicit || explicit;
-    let oldNode;
-    if (explicit) {
-      if (oldExplicit) {
-        let level = 2;
-        if (oldId != null) {
-          oldNode = this.ids[oldId];
-          if ('refuri' in node.attributes) {
-            const { refuri } = node.attributes;
-            if (oldNode.attributes.names.length
+    setNameIdMap(node: INode, id: string, msgnode: INode,
+        explicit?: boolean) {
+        node.attributes.names.forEach((name: string) => {
+            if (name in this.nameIds) {
+                this.setDuplicateNameId(node, id, name, msgnode, explicit);
+            } else {
+                this.nameIds[name] = id;
+                this.nameTypes[name] = explicit;
+            }
+        });
+    }
+
+    setDuplicateNameId(node: INode, id: string, name: string, msgnode: INode, explicit?: boolean) {
+        const oldId = this.nameIds[name];
+        const oldExplicit = this.nameTypes[name];
+        this.nameTypes[name] = oldExplicit || explicit;
+        let oldNode;
+        if (explicit) {
+            if (oldExplicit) {
+                let level = 2;
+                if (oldId != null) {
+                    oldNode = this.ids[oldId];
+                    if ('refuri' in node.attributes) {
+                        const { refuri } = node.attributes;
+                        if (oldNode.attributes.names.length
                            && 'refuri' in oldNode.attributes
                            && oldNode.attributes.refuri === refuri) {
-              level = 1; // just inform if refuri's identical
+                            level = 1; // just inform if refuri's identical
+                        }
+                    }
+                    if (level > 1) {
+                        dupname(oldNode, name);
+                        this.nameIds[name] = null;
+                    }
+                }
+                const msg = this.reporter.systemMessage(
+                    level, `Duplicate explicit target name: "${name}".`,
+                    [], { backrefs: [id], base_node: node },
+                );
+                if (msgnode != null) {
+                    msgnode.add(msg);
+                }
+                dupname(node, name);
+            } else {
+                this.nameIds[name] = id;
+                if (oldId != null) {
+                    oldNode = this.ids[oldId];
+                    dupname(oldNode, name);
+                }
             }
-          }
-          if (level > 1) {
-            dupname(oldNode, name);
-            this.nameIds[name] = null;
-          }
+        } else {
+            if (oldId != null && !oldExplicit) {
+                this.nameIds[name] = null;
+                oldNode = this.ids[oldId];
+                dupname(oldNode, name);
+            }
+            dupname(node, name);
         }
-        const msg = this.reporter.systemMessage(
-          level, `Duplicate explicit target name: "${name}".`,
-          [], { backrefs: [id], base_node: node },
-        );
-        if (msgnode != null) {
-          msgnode.add(msg);
+        if (!explicit || (!oldExplicit && oldId != null)) {
+            const msg = this.reporter.info(
+                `Duplicate implicit target name: "${name}".`, [],
+                { backrefs: [id], base_node: node },
+            );
+            if (msgnode != null) {
+                msgnode.add(msg);
+            }
         }
-        dupname(node, name);
-      } else {
-        this.nameIds[name] = id;
-        if (oldId != null) {
-          oldNode = this.ids[oldId];
-          dupname(oldNode, name);
+    }
+
+    hasName(name: string) {
+        return Object.keys(this.nameIds).includes(name);
+    }
+
+    noteImplicitTarget(target: INode, msgnode: INode) {
+        const id = this.setId(target, msgnode);
+        this.setNameIdMap(target, id, msgnode);
+    }
+
+    noteExplicitTarget(target: INode, msgnode: INode) {
+        const id = this.setId(target, msgnode);
+        this.setNameIdMap(target, id, msgnode, true);
+    }
+
+    noteRefname(node: INode) {
+        const a = [node];
+        if (this.refNames[node.refname!]) {
+            this.refNames[node.refname!].push(node);
+        } else {
+            this.refNames[node.refname!] = a;
         }
-      }
-    } else {
-      if (oldId != null && !oldExplicit) {
-        this.nameIds[name] = null;
-        oldNode = this.ids[oldId];
-        dupname(oldNode, name);
-      }
-      dupname(node, name);
     }
-    if (!explicit || (!oldExplicit && oldId != null)) {
-      const msg = this.reporter.info(
-        `Duplicate implicit target name: "${name}".`, [],
-        { backrefs: [id], base_node: node },
-      );
-      if (msgnode != null) {
-        msgnode.add(msg);
-      }
+
+    noteRefId(node: INode) {
+        const a = [node];
+        if (this.refIds[node.refid!]) {
+            this.refIds[node.refid!].push(node);
+        } else {
+            this.refIds[node.refid!] = a;
+        }
     }
-  }
 
-  hasName(name: string) {
-    return Object.keys(this.nameIds).includes(name);
-  }
-
-  noteImplicitTarget(target: INode, msgnode: INode) {
-    const id = this.setId(target, msgnode);
-    this.setNameIdMap(target, id, msgnode);
-  }
-
-  noteExplicitTarget(target: INode, msgnode: INode) {
-    const id = this.setId(target, msgnode);
-    this.setNameIdMap(target, id, msgnode, true);
-  }
-
-  noteRefname(node: INode) {
-    const a = [node];
-    if (this.refNames[node.refname!]) {
-      this.refNames[node.refname!].push(node);
-    } else {
-      this.refNames[node.refname!] = a;
+    noteIndirectTarget(target: INode) {
+        this.indirectTargets.push(target);
+        // check this fixme
+        if (target.names) {
+            this.noteRefname(target);
+        }
     }
-  }
 
-  noteRefId(node: INode) {
-    const a = [node];
-    if (this.refIds[node.refid!]) {
-      this.refIds[node.refid!].push(node);
-    } else {
-      this.refIds[node.refid!] = a;
+    noteAnonymousTarget(target: INode) {
+        this.setId(target);
     }
-  }
 
-  noteIndirectTarget(target: INode) {
-    this.indirectTargets.push(target);
-    // check this fixme
-    if (target.names) {
-      this.noteRefname(target);
+    noteAutofootnote(footnote: INode) {
+        this.setId(footnote);
+        this.autofootnotes.push(footnote);
     }
-  }
 
-  noteAnonymousTarget(target: INode) {
-    this.setId(target);
-  }
-
-  noteAutofootnote(footnote: INode) {
-    this.setId(footnote);
-    this.autofootnotes.push(footnote);
-  }
-
-  noteAutofootnoteRef(ref: INode) {
-    this.setId(ref);
-    this.autofootnoteRefs.push(ref);
-  }
-
-  noteSymbolFootnote(footnote: INode) {
-    this.setId(footnote);
-    this.symbolFootnotes.push(footnote);
-  }
-
-  noteSymbolFootnoteRef(ref: INode) {
-    this.setId(ref);
-    this.symbolFootnoteRefs.push(ref);
-  }
-
-  noteFootnote(footnote: INode) {
-    this.setId(footnote);
-    this.footnotes.push(footnote);
-  }
-
-  noteFootnoteRef(ref: INode) {
-    this.setId(ref);
-    const a = [ref];
-    if (this.footnoteRefs[ref.refname!]) {
-      this.footnoteRefs[ref.refname!].push(ref);
-    } else {
-      this.footnoteRefs[ref.refname!] = a;
+    noteAutofootnoteRef(ref: INode) {
+        this.setId(ref);
+        this.autofootnoteRefs.push(ref);
     }
-    this.noteRefname(ref);
-  }
 
-  noteCitation(citation: INode) {
-    this.citations.push(citation);
-  }
-
-  noteCitationRef(ref: INode) {
-    this.setId(ref);
-    if (this.citationRefs[ref.refname!]) {
-      this.citationRefs[ref.refname!].push(ref);
-    } else {
-      this.citationRefs[ref.refname!] = [ref];
+    noteSymbolFootnote(footnote: INode) {
+        this.setId(footnote);
+        this.symbolFootnotes.push(footnote);
     }
-    this.noteRefname(ref);
-  }
 
-  noteSubstitutionDef(subdef: INode, defName: string, msgnode: INode) {
-    const name = whitespaceNormalizeName(defName);
-    if (Object.keys(this.substitutionDefs).includes(name)) {
-      const msg = this.reporter.error(`Duplicate substitution definition name: "${name}".`, { baseNode: subdef });
-      if (msgnode != null) {
-        msgnode.add(msg);
-      }
-      const oldnode = this.substitutionDefs[name];
-      dupname(oldnode, name);
+    noteSymbolFootnoteRef(ref: INode) {
+        this.setId(ref);
+        this.symbolFootnoteRefs.push(ref);
     }
-    this.substitutionDefs[name] = subdef;
-    this.substitutionNames[fullyNormalizeName(name)] = name;
-  }
 
-  noteSubstitutionRef(subref: INode, refname: string) {
-    subref.refname = whitespaceNormalizeName(refname);
-  }
-
-  notePending(pending: INode, priority: number) {
-    this.transformer.addPending(pending, priority);
-  }
-
-  noteParseMessage(message: any) {
-    this.parseMessages.push(message);
-  }
-
-  noteTransformMessage(message: any) {
-    this.transformMessages.push(message);
-  }
-
-  noteSource(source: string, offset: number) {
-    this.currentSource = source;
-    if (offset === undefined) {
-      this.currentLine = offset;
-    } else {
-      this.currentLine = offset + 1;
+    noteFootnote(footnote: INode) {
+        this.setId(footnote);
+        this.footnotes.push(footnote);
     }
-  }
 
-  getDecoration() {
-    if (!this.decoration) {
-      this.decoration = new decoration();
-      const index = this.firstChildNotMatchingClass(Titular);
-      if (index === undefined) {
-        this.children.push(this.decoration);
-      } else {
-        this.children.splice(index, 0, this.decoration as INode);
-      }
+    noteFootnoteRef(ref: INode) {
+        this.setId(ref);
+        const a = [ref];
+        if (this.footnoteRefs[ref.refname!]) {
+            this.footnoteRefs[ref.refname!].push(ref);
+        } else {
+            this.footnoteRefs[ref.refname!] = a;
+        }
+        this.noteRefname(ref);
     }
-    return this.decoration;
-  }
+
+    noteCitation(citation: INode) {
+        this.citations.push(citation);
+    }
+
+    noteCitationRef(ref: INode) {
+        this.setId(ref);
+        if (this.citationRefs[ref.refname!]) {
+            this.citationRefs[ref.refname!].push(ref);
+        } else {
+            this.citationRefs[ref.refname!] = [ref];
+        }
+        this.noteRefname(ref);
+    }
+
+    noteSubstitutionDef(subdef: INode, defName: string, msgnode: INode) {
+        const name = whitespaceNormalizeName(defName);
+        if (Object.keys(this.substitutionDefs).includes(name)) {
+            const msg = this.reporter.error(`Duplicate substitution definition name: "${name}".`, { baseNode: subdef });
+            if (msgnode != null) {
+                msgnode.add(msg);
+            }
+            const oldnode = this.substitutionDefs[name];
+            dupname(oldnode, name);
+        }
+        this.substitutionDefs[name] = subdef;
+        this.substitutionNames[fullyNormalizeName(name)] = name;
+    }
+
+    noteSubstitutionRef(subref: INode, refname: string) {
+        subref.refname = whitespaceNormalizeName(refname);
+    }
+
+    notePending(pending: INode, priority: number) {
+        this.transformer.addPending(pending, priority);
+    }
+
+    noteParseMessage(message: any) {
+        this.parseMessages.push(message);
+    }
+
+    noteTransformMessage(message: any) {
+        this.transformMessages.push(message);
+    }
+
+    noteSource(source: string, offset: number) {
+        this.currentSource = source;
+        if (offset === undefined) {
+            this.currentLine = offset;
+        } else {
+            this.currentLine = offset + 1;
+        }
+    }
+
+    getDecoration() {
+        if (!this.decoration) {
+            this.decoration = new decoration();
+            const index = this.firstChildNotMatchingClass(Titular);
+            if (index === undefined) {
+                this.children.push(this.decoration);
+            } else {
+                this.children.splice(index, 0, this.decoration as INode);
+            }
+        }
+        return this.decoration;
+    }
 }
 
 class FixedTextElement extends TextElement {
@@ -1706,32 +1706,32 @@ class FixedTextElement extends TextElement {
 // ================
 class title extends TextElement {
 /* eslint-disable-next-line no-useless-constructor */
-  // @ts-ignore
-  constructor(...args) {
-  // @ts-ignore
-    super(...args);
-    this.classTypes = [Titular, PreBibliographic];
-  }
+    // @ts-ignore
+    constructor(...args) {
+        // @ts-ignore
+        super(...args);
+        this.classTypes = [Titular, PreBibliographic];
+    }
 }
 
 class subtitle extends TextElement {
 /* eslint-disable-next-line no-useless-constructor */
-  // @ts-ignore
-  constructor(...args) {
-  // @ts-ignore
-    super(...args);
-    this.classTypes = [Titular, PreBibliographic];
-  }
+    // @ts-ignore
+    constructor(...args) {
+        // @ts-ignore
+        super(...args);
+        this.classTypes = [Titular, PreBibliographic];
+    }
 }
 
 class rubric extends TextElement {
 /* eslint-disable-next-line no-useless-constructor */
-  // @ts-ignore
-  constructor(...args) {
-  // @ts-ignore
-    super(...args);
-    this.classTypes = [Titular];
-  }
+    // @ts-ignore
+    constructor(...args) {
+        // @ts-ignore
+        super(...args);
+        this.classTypes = [Titular];
+    }
 }
 
 // ========================
@@ -1739,113 +1739,113 @@ class rubric extends TextElement {
 // ========================
 
 class docinfo extends Element {
-  // @ts-ignore
-  constructor(...args) {
-  // @ts-ignore
-    super(...args);
-    this.classTypes = [Bibliographic];
-  }
+    // @ts-ignore
+    constructor(...args) {
+        // @ts-ignore
+        super(...args);
+        this.classTypes = [Bibliographic];
+    }
 }
 
 class author extends TextElement {
-  // @ts-ignore
-  constructor(...args) {
-  // @ts-ignore
-    super(...args);
-    this.classTypes = [Bibliographic];
-  }
+    // @ts-ignore
+    constructor(...args) {
+        // @ts-ignore
+        super(...args);
+        this.classTypes = [Bibliographic];
+    }
 }
 
 class authors extends Element {
-  // @ts-ignore
-  constructor(...args) {
-  // @ts-ignore
-    super(...args);
-    this.classTypes = [Bibliographic];
-  }
+    // @ts-ignore
+    constructor(...args) {
+        // @ts-ignore
+        super(...args);
+        this.classTypes = [Bibliographic];
+    }
 }
 
 class organization extends TextElement {
-  // @ts-ignore
-  constructor(...args) {
-  // @ts-ignore
-    super(...args);
-    this.classTypes = [Bibliographic];
-  }
+    // @ts-ignore
+    constructor(...args) {
+        // @ts-ignore
+        super(...args);
+        this.classTypes = [Bibliographic];
+    }
 }
 
 class address extends FixedTextElement {
-  // @ts-ignore
-  constructor(...args) {
-  // @ts-ignore
-    super(...args);
-    this.classTypes = [Bibliographic];
-  }
+    // @ts-ignore
+    constructor(...args) {
+        // @ts-ignore
+        super(...args);
+        this.classTypes = [Bibliographic];
+    }
 }
 
 class contact extends TextElement {
-  // @ts-ignore
-  constructor(...args) {
-  // @ts-ignore
-    super(...args);
-    this.classTypes = [Bibliographic];
-  }
+    // @ts-ignore
+    constructor(...args) {
+        // @ts-ignore
+        super(...args);
+        this.classTypes = [Bibliographic];
+    }
 }
 
 class version extends TextElement {
-  // @ts-ignore
-  constructor(...args) {
-  // @ts-ignore
-    super(...args);
-    this.classTypes = [Bibliographic];
-  }
+    // @ts-ignore
+    constructor(...args) {
+        // @ts-ignore
+        super(...args);
+        this.classTypes = [Bibliographic];
+    }
 }
 
 class revision extends TextElement {
-  // @ts-ignore
-  constructor(...args) {
-  // @ts-ignore
-    super(...args);
-    this.classTypes = [Bibliographic];
-  }
+    // @ts-ignore
+    constructor(...args) {
+        // @ts-ignore
+        super(...args);
+        this.classTypes = [Bibliographic];
+    }
 }
 
 class status extends TextElement {
-  // @ts-ignore
-  constructor(...args) {
-  // @ts-ignore
-    super(...args);
-    this.classTypes = [Bibliographic];
-  }
+    // @ts-ignore
+    constructor(...args) {
+        // @ts-ignore
+        super(...args);
+        this.classTypes = [Bibliographic];
+    }
 }
 
 class date extends TextElement {
-  // @ts-ignore
-  constructor(...args) {
-  // @ts-ignore
-    super(...args);
-    this.classTypes = [Bibliographic];
-  }
+    // @ts-ignore
+    constructor(...args) {
+        // @ts-ignore
+        super(...args);
+        this.classTypes = [Bibliographic];
+    }
 }
 
 class copyright extends TextElement {
-  // @ts-ignore
-  constructor(...args) {
-  // @ts-ignore
-    super(...args);
-    this.classTypes = [Bibliographic];
-  }
+    // @ts-ignore
+    constructor(...args) {
+        // @ts-ignore
+        super(...args);
+        this.classTypes = [Bibliographic];
+    }
 }
 
 
 class section extends Element {
-  /* eslint-disable-next-line no-useless-constructor */
-  // @ts-ignore
-  constructor(...args) {
-  // @ts-ignore
-    super(...args);
-    this.classTypes = [Structural];
-  }
+    /* eslint-disable-next-line no-useless-constructor */
+    // @ts-ignore
+    constructor(...args) {
+        // @ts-ignore
+        super(...args);
+        this.classTypes = [Structural];
+    }
 }
 
 /**
@@ -1859,12 +1859,12 @@ class section extends Element {
  *  table, list, block quote, etc.
  */
 class topic extends Element {
-  // @ts-ignore
-  constructor(...args) {
-  // @ts-ignore
-    super(...args);
-    this.classTypes = [Structural];
-  }
+    // @ts-ignore
+    constructor(...args) {
+        // @ts-ignore
+        super(...args);
+        this.classTypes = [Structural];
+    }
 }
 
 /*
@@ -1882,22 +1882,22 @@ class topic extends Element {
  */
 
 class sidebar extends Element {
-  // @ts-ignore
-  constructor(...args) {
-  // @ts-ignore
-    super(...args);
-    this.classTypes = [Structural];
-  }
+    // @ts-ignore
+    constructor(...args) {
+        // @ts-ignore
+        super(...args);
+        this.classTypes = [Structural];
+    }
 }
 
 class transition extends Element {
 /* eslint-disable-next-line no-useless-constructor */
-  // @ts-ignore
-  constructor(...args) {
-  // @ts-ignore
-    super(...args);
-    this.classTypes = [Structural];
-  }
+    // @ts-ignore
+    constructor(...args) {
+        // @ts-ignore
+        super(...args);
+        this.classTypes = [Structural];
+    }
 } // Structural
 
 // ===============
@@ -1906,122 +1906,122 @@ class transition extends Element {
 
 class paragraph extends TextElement {
 /* eslint-disable-next-line no-useless-constructor */
-  // @ts-ignore
-  constructor(...args) {
-  // @ts-ignore
-    super(...args);
-    this.classTypes = [General];
-  }
+    // @ts-ignore
+    constructor(...args) {
+        // @ts-ignore
+        super(...args);
+        this.classTypes = [General];
+    }
 } // General
 
 class compound extends Element {
-  // @ts-ignore
-  constructor(...args) {
-  // @ts-ignore
-    super(...args);
-    this.classTypes = [General];
-  }
+    // @ts-ignore
+    constructor(...args) {
+        // @ts-ignore
+        super(...args);
+        this.classTypes = [General];
+    }
 }
 
 
 class container extends Element {
-  // @ts-ignore
-  constructor(...args) {
-  // @ts-ignore
-    super(...args);
-    this.classTypes = [General];
-  }
+    // @ts-ignore
+    constructor(...args) {
+        // @ts-ignore
+        super(...args);
+        this.classTypes = [General];
+    }
 }
 /* eslint-disable-next-line camelcase */
 class bullet_list extends Element {
 /* eslint-disable-next-line no-useless-constructor */
-  // @ts-ignore
-  constructor(...args) {
-  // @ts-ignore
-    super(...args);
-    this.classTypes = [Sequential];
-  }
+    // @ts-ignore
+    constructor(...args) {
+        // @ts-ignore
+        super(...args);
+        this.classTypes = [Sequential];
+    }
 }
 
 /* eslint-disable-next-line camelcase */
 class enumerated_list extends Element {
-  start?: number;
+    start?: number;
 
-  suffix?: string;
+    suffix?: string;
 
-  prefix?: string;
+    prefix?: string;
 
-  enumtype: any;
+    enumtype: any;
 
-  /* eslint-disable-next-line no-useless-constructor */
-  // @ts-ignore
-  constructor(...args) {
-  // @ts-ignore
-    super(...args);
-    this.classTypes = [Sequential];
-  }
+    /* eslint-disable-next-line no-useless-constructor */
+    // @ts-ignore
+    constructor(...args) {
+        // @ts-ignore
+        super(...args);
+        this.classTypes = [Sequential];
+    }
 }
 
 /* eslint-disable-next-line camelcase */
 class list_item extends Element {
 /* eslint-disable-next-line no-useless-constructor */
-  // @ts-ignore
-  constructor(...args) {
-  // @ts-ignore
-    super(...args);
-    this.classTypes = [Part];
-  }
+    // @ts-ignore
+    constructor(...args) {
+        // @ts-ignore
+        super(...args);
+        this.classTypes = [Part];
+    }
 }
 
 /* eslint-disable-next-line camelcase */
 class definition_list extends Element {
 /* eslint-disable-next-line no-useless-constructor */
-  // @ts-ignore
-  constructor(...args) {
-  // @ts-ignore
-    super(...args);
-    this.classTypes = [Sequential];
-  }
+    // @ts-ignore
+    constructor(...args) {
+        // @ts-ignore
+        super(...args);
+        this.classTypes = [Sequential];
+    }
 }
 
 /* eslint-disable-next-line camelcase */
 class definition_list_item extends Element {
 /* eslint-disable-next-line no-useless-constructor */
-  // @ts-ignore
-  constructor(...args) {
-  // @ts-ignore
-    super(...args);
-    this.classTypes = [Part];
-  }
+    // @ts-ignore
+    constructor(...args) {
+        // @ts-ignore
+        super(...args);
+        this.classTypes = [Part];
+    }
 }
 
 class term extends TextElement {
 /* eslint-disable-next-line no-useless-constructor */
-  // @ts-ignore
-  constructor(...args) {
-  // @ts-ignore
-    super(...args);
-    this.classTypes = [Part];
-  }
+    // @ts-ignore
+    constructor(...args) {
+        // @ts-ignore
+        super(...args);
+        this.classTypes = [Part];
+    }
 }
 
 class classifier extends TextElement {
 /* eslint-disable-next-line no-useless-constructor */
-  // @ts-ignore
-  constructor(...args) {
-  // @ts-ignore
-    super(...args);
-    this.classTypes = [Part];
-  }
+    // @ts-ignore
+    constructor(...args) {
+        // @ts-ignore
+        super(...args);
+        this.classTypes = [Part];
+    }
 }
 class definition extends Element {
 /* eslint-disable-next-line no-useless-constructor */
-  // @ts-ignore
-  constructor(...args) {
-  // @ts-ignore
-    super(...args);
-    this.classTypes = [Part];
-  }
+    // @ts-ignore
+    constructor(...args) {
+        // @ts-ignore
+        super(...args);
+        this.classTypes = [Part];
+    }
 }
 /*
 class classifier(Part, TextElement): pass
@@ -2029,445 +2029,445 @@ class classifier(Part, TextElement): pass
 /* eslint-disable-next-line camelcase */
 class field_list extends Element {
 /* eslint-disable-next-line no-useless-constructor */
-  // @ts-ignore
-  constructor(...args) {
-  // @ts-ignore
-    super(...args);
-    this.classTypes = [Sequential];
-  }
+    // @ts-ignore
+    constructor(...args) {
+        // @ts-ignore
+        super(...args);
+        this.classTypes = [Sequential];
+    }
 } // (Sequential, Element
 class field extends Element {
 /* eslint-disable-next-line no-useless-constructor */
-  // @ts-ignore
-  constructor(...args) {
-  // @ts-ignore
-    super(...args);
-    this.classTypes = [Part];
-  }
+    // @ts-ignore
+    constructor(...args) {
+        // @ts-ignore
+        super(...args);
+        this.classTypes = [Part];
+    }
 } // (Part
 /* eslint-disable-next-line camelcase */
 class field_name extends TextElement {
 /* eslint-disable-next-line no-useless-constructor */
-  // @ts-ignore
-  constructor(...args) {
-  // @ts-ignore
-    super(...args);
-    this.classTypes = [Part];
-  }
+    // @ts-ignore
+    constructor(...args) {
+        // @ts-ignore
+        super(...args);
+        this.classTypes = [Part];
+    }
 } // (Part
 /* eslint-disable-next-line camelcase */
 class field_body extends Element {
 /* eslint-disable-next-line no-useless-constructor */
-  // @ts-ignore
-  constructor(...args) {
-  // @ts-ignore
-    super(...args);
-    this.classTypes = [Part];
-  }
+    // @ts-ignore
+    constructor(...args) {
+        // @ts-ignore
+        super(...args);
+        this.classTypes = [Part];
+    }
 } // (Part
 
 class option extends Element {
-  // @ts-ignore
-  constructor(...args) {
-  // @ts-ignore
-    super(...args);
-    this.classTypes = [Part];
-    this.childTextSeparator = ''; // fixme test this
-  }
+    // @ts-ignore
+    constructor(...args) {
+        // @ts-ignore
+        super(...args);
+        this.classTypes = [Part];
+        this.childTextSeparator = ''; // fixme test this
+    }
 }
 
 /* eslint-disable-next-line camelcase */
 class option_argument extends TextElement {
-  // @ts-ignore
-  constructor(...args) {
-  // @ts-ignore
-    super(...args);
-    this.classTypes = [Part];
-  }
+    // @ts-ignore
+    constructor(...args) {
+        // @ts-ignore
+        super(...args);
+        this.classTypes = [Part];
+    }
 
-  // fixme test this
-  astext() {
-    const r = super.astext();
-    return (this.attributes.delimiter || ' ') + r;
-  }
+    // fixme test this
+    astext() {
+        const r = super.astext();
+        return (this.attributes.delimiter || ' ') + r;
+    }
 }
 
 /* eslint-disable-next-line camelcase */
 class option_group extends Element {
-  // @ts-ignore
-  constructor(...args) {
-  // @ts-ignore
-    super(...args);
-    this.classTypes = [Part];
-    this.childTextSeparator = ', ';
-  }
+    // @ts-ignore
+    constructor(...args) {
+        // @ts-ignore
+        super(...args);
+        this.classTypes = [Part];
+        this.childTextSeparator = ', ';
+    }
 }
 
 /* eslint-disable-next-line camelcase */
 class option_list extends Element {
 /* eslint-disable-next-line no-useless-constructor */
-  // @ts-ignore
-  constructor(...args) {
-  // @ts-ignore
-    super(...args);
-    this.classTypes = [Sequential];
-  }
+    // @ts-ignore
+    constructor(...args) {
+        // @ts-ignore
+        super(...args);
+        this.classTypes = [Sequential];
+    }
 } // Sequential
 /* eslint-disable-next-line camelcase */
 class option_list_item extends Element {
 /* eslint-disable-next-line no-useless-constructor */
-  // @ts-ignore
-  constructor(...args) {
-  // @ts-ignore
-    super(...args);
-    this.classTypes = [Part];
-    this.childTextSeparator = '  ';
-  }
+    // @ts-ignore
+    constructor(...args) {
+        // @ts-ignore
+        super(...args);
+        this.classTypes = [Part];
+        this.childTextSeparator = '  ';
+    }
 }
 
 /* eslint-disable-next-line camelcase */
 class option_string extends TextElement {
 /* eslint-disable-next-line no-useless-constructor */
-  // @ts-ignore
-  constructor(...args) {
-  // @ts-ignore
-    super(...args);
-    this.classTypes = [Part];
-  }
+    // @ts-ignore
+    constructor(...args) {
+        // @ts-ignore
+        super(...args);
+        this.classTypes = [Part];
+    }
 } // (Part
 class description extends Element {
 /* eslint-disable-next-line no-useless-constructor */
-  // @ts-ignore
-  constructor(...args) {
-  // @ts-ignore
-    super(...args);
-    this.classTypes = [Part];
-  }
+    // @ts-ignore
+    constructor(...args) {
+        // @ts-ignore
+        super(...args);
+        this.classTypes = [Part];
+    }
 } // (Part
 
 /* eslint-disable-next-line camelcase */
 class literal_block extends FixedTextElement {
 /* eslint-disable-next-line no-useless-constructor */
-  // @ts-ignore
-  constructor(...args) {
-  // @ts-ignore
-    super(...args);
-    this.classTypes = [General];
-  }
+    // @ts-ignore
+    constructor(...args) {
+        // @ts-ignore
+        super(...args);
+        this.classTypes = [General];
+    }
 }
 
 /* eslint-disable-next-line camelcase */
 class doctest_block extends FixedTextElement {
 /* eslint-disable-next-line no-useless-constructor */
-  // @ts-ignore
-  constructor(...args) {
-  // @ts-ignore
-    super(...args);
-    this.classTypes = [General];
-  }
+    // @ts-ignore
+    constructor(...args) {
+        // @ts-ignore
+        super(...args);
+        this.classTypes = [General];
+    }
 }
 
 /* eslint-disable-next-line camelcase */
 class math_block extends FixedTextElement {
 /* eslint-disable-next-line no-useless-constructor */
-  // @ts-ignore
-  constructor(...args) {
-  // @ts-ignore
-    super(...args);
-    this.classTypes = [General];
-  }
+    // @ts-ignore
+    constructor(...args) {
+        // @ts-ignore
+        super(...args);
+        this.classTypes = [General];
+    }
 }
 /* eslint-disable-next-line camelcase */
 class line_block extends Element {
 /* eslint-disable-next-line no-useless-constructor */
-  // @ts-ignore
-  constructor(...args) {
-  // @ts-ignore
-    super(...args);
-    this.classTypes = [General];
-  }
+    // @ts-ignore
+    constructor(...args) {
+        // @ts-ignore
+        super(...args);
+        this.classTypes = [General];
+    }
 }
 
 class line extends TextElement implements HasIndent {
-  indent: any;
+    indent: any;
 
-  _init() {
-    super._init();
-    this.indent = undefined;
-    this.classTypes = [Part];
-  }
+    _init() {
+        super._init();
+        this.indent = undefined;
+        this.classTypes = [Part];
+    }
 } // Part
 
 /* eslint-disable-next-line camelcase */
 class block_quote extends Element {
 /* eslint-disable-next-line no-useless-constructor */
-  // @ts-ignore
-  constructor(...args) {
-  // @ts-ignore
-    super(...args);
-    this.classTypes = [General];
-  }
+    // @ts-ignore
+    constructor(...args) {
+        // @ts-ignore
+        super(...args);
+        this.classTypes = [General];
+    }
 }
 class attribution extends TextElement {
 /* eslint-disable-next-line no-useless-constructor */
-  // @ts-ignore
-  constructor(...args) {
-  // @ts-ignore
-    super(...args);
-    this.classTypes = [Part];
-  }
+    // @ts-ignore
+    constructor(...args) {
+        // @ts-ignore
+        super(...args);
+        this.classTypes = [Part];
+    }
 }
 class attention extends Element {
 /* eslint-disable-next-line no-useless-constructor */
-  // @ts-ignore
-  constructor(...args) {
-  // @ts-ignore
-    super(...args);
-    this.classTypes = [Admonition];
-  }
+    // @ts-ignore
+    constructor(...args) {
+        // @ts-ignore
+        super(...args);
+        this.classTypes = [Admonition];
+    }
 }
 class caution extends Element {
 /* eslint-disable-next-line no-useless-constructor */
-  // @ts-ignore
-  constructor(...args) {
-  // @ts-ignore
-    super(...args);
-    this.classTypes = [Admonition];
-  }
+    // @ts-ignore
+    constructor(...args) {
+        // @ts-ignore
+        super(...args);
+        this.classTypes = [Admonition];
+    }
 }
 class danger extends Element {
 /* eslint-disable-next-line no-useless-constructor */
-  // @ts-ignore
-  constructor(...args) {
-  // @ts-ignore
-    super(...args);
-    this.classTypes = [Admonition];
-  }
+    // @ts-ignore
+    constructor(...args) {
+        // @ts-ignore
+        super(...args);
+        this.classTypes = [Admonition];
+    }
 }
 class error extends Element {
 /* eslint-disable-next-line no-useless-constructor */
-  // @ts-ignore
-  constructor(...args) {
-  // @ts-ignore
-    super(...args);
-    this.classTypes = [Admonition];
-  }
+    // @ts-ignore
+    constructor(...args) {
+        // @ts-ignore
+        super(...args);
+        this.classTypes = [Admonition];
+    }
 }
 class important extends Element {
 /* eslint-disable-next-line no-useless-constructor */
-  // @ts-ignore
-  constructor(...args) {
-  // @ts-ignore
-    super(...args);
-    this.classTypes = [Admonition];
-  }
+    // @ts-ignore
+    constructor(...args) {
+        // @ts-ignore
+        super(...args);
+        this.classTypes = [Admonition];
+    }
 }
 class note extends Element {
 /* eslint-disable-next-line no-useless-constructor */
-  // @ts-ignore
-  constructor(...args) {
-  // @ts-ignore
-    super(...args);
-    this.classTypes = [Admonition];
-  }
+    // @ts-ignore
+    constructor(...args) {
+        // @ts-ignore
+        super(...args);
+        this.classTypes = [Admonition];
+    }
 }
 
 class tip extends Element {
 /* eslint-disable-next-line no-useless-constructor */
-  // @ts-ignore
-  constructor(...args) {
-  // @ts-ignore
-    super(...args);
-    this.classTypes = [Admonition];
-  }
+    // @ts-ignore
+    constructor(...args) {
+        // @ts-ignore
+        super(...args);
+        this.classTypes = [Admonition];
+    }
 }
 class hint extends Element {
 /* eslint-disable-next-line no-useless-constructor */
-  // @ts-ignore
-  constructor(...args) {
-  // @ts-ignore
-    super(...args);
-    this.classTypes = [Admonition];
-  }
+    // @ts-ignore
+    constructor(...args) {
+        // @ts-ignore
+        super(...args);
+        this.classTypes = [Admonition];
+    }
 }
 class warning extends Element {
 /* eslint-disable-next-line no-useless-constructor */
-  // @ts-ignore
-  constructor(...args) {
-  // @ts-ignore
-    super(...args);
-    this.classTypes = [Admonition];
-  }
+    // @ts-ignore
+    constructor(...args) {
+        // @ts-ignore
+        super(...args);
+        this.classTypes = [Admonition];
+    }
 }
 class admonition extends Element {
 /* eslint-disable-next-line no-useless-constructor */
-  // @ts-ignore
-  constructor(...args) {
-  // @ts-ignore
-    super(...args);
-    this.classTypes = [Admonition];
-  }
+    // @ts-ignore
+    constructor(...args) {
+        // @ts-ignore
+        super(...args);
+        this.classTypes = [Admonition];
+    }
 }
 class comment extends FixedTextElement {
 /* eslint-disable-next-line no-useless-constructor */
-  // @ts-ignore
-  constructor(...args) {
-  // @ts-ignore
-    super(...args);
-    this.classTypes = [Special, Invisible, Inline, Targetable];
-  }
+    // @ts-ignore
+    constructor(...args) {
+        // @ts-ignore
+        super(...args);
+        this.classTypes = [Special, Invisible, Inline, Targetable];
+    }
 }
 /* eslint-disable-next-line camelcase */
 class substitution_definition extends TextElement {
 /* eslint-disable-next-line no-useless-constructor */
-  // @ts-ignore
-  constructor(...args) {
-  // @ts-ignore
-    super(...args);
-    this.classTypes = [Special, Invisible];
-  }
+    // @ts-ignore
+    constructor(...args) {
+        // @ts-ignore
+        super(...args);
+        this.classTypes = [Special, Invisible];
+    }
 }
 class target extends TextElement {
-  indirectReferenceName: string = '';
+    indirectReferenceName: string = '';
 
-  /* eslint-disable-next-line no-useless-constructor */
-  // @ts-ignore
-  constructor(...args) {
-  // @ts-ignore
-    super(...args);
-    this.classTypes = [Special, Invisible, Inline, Targetable];
-  }
+    /* eslint-disable-next-line no-useless-constructor */
+    // @ts-ignore
+    constructor(...args) {
+        // @ts-ignore
+        super(...args);
+        this.classTypes = [Special, Invisible, Inline, Targetable];
+    }
 }
 class footnote extends Element {
 /* eslint-disable-next-line no-useless-constructor */
-  // @ts-ignore
-  constructor(...args) {
-  // @ts-ignore
-    super(...args);
-    this.classTypes = [General, BackLinkable, Labeled, Targetable];
-  }
+    // @ts-ignore
+    constructor(...args) {
+        // @ts-ignore
+        super(...args);
+        this.classTypes = [General, BackLinkable, Labeled, Targetable];
+    }
 }
 class citation extends Element {
 /* eslint-disable-next-line no-useless-constructor */
-  // @ts-ignore
-  constructor(...args) {
-  // @ts-ignore
-    super(...args);
-    this.classTypes = [General, BackLinkable, Labeled, Targetable];
-  }
+    // @ts-ignore
+    constructor(...args) {
+        // @ts-ignore
+        super(...args);
+        this.classTypes = [General, BackLinkable, Labeled, Targetable];
+    }
 }
 class label extends TextElement {
 /* eslint-disable-next-line no-useless-constructor */
-  // @ts-ignore
-  constructor(...args) {
-  // @ts-ignore
-    super(...args);
-    this.classTypes = [Part];
-  }
+    // @ts-ignore
+    constructor(...args) {
+        // @ts-ignore
+        super(...args);
+        this.classTypes = [Part];
+    }
 }
 class figure extends Element {
 /* eslint-disable-next-line no-useless-constructor */
-  // @ts-ignore
-  constructor(...args) {
-  // @ts-ignore
-    super(...args);
-    this.classTypes = [General];
-  }
+    // @ts-ignore
+    constructor(...args) {
+        // @ts-ignore
+        super(...args);
+        this.classTypes = [General];
+    }
 }
 class caption extends TextElement {
 /* eslint-disable-next-line no-useless-constructor */
-  // @ts-ignore
-  constructor(...args) {
-  // @ts-ignore
-    super(...args);
-    this.classTypes = [Part];
-  }
+    // @ts-ignore
+    constructor(...args) {
+        // @ts-ignore
+        super(...args);
+        this.classTypes = [Part];
+    }
 }
 class legend extends Element {
 /* eslint-disable-next-line no-useless-constructor */
-  // @ts-ignore
-  constructor(...args) {
-  // @ts-ignore
-    super(...args);
-    this.classTypes = [Part];
-  }
+    // @ts-ignore
+    constructor(...args) {
+        // @ts-ignore
+        super(...args);
+        this.classTypes = [Part];
+    }
 }
 
 class table extends Element {
 /* eslint-disable-next-line no-useless-constructor */
-  // @ts-ignore
-  constructor(...args) {
-  // @ts-ignore
-    super(...args);
-    this.classTypes = [General];
-  }
+    // @ts-ignore
+    constructor(...args) {
+        // @ts-ignore
+        super(...args);
+        this.classTypes = [General];
+    }
 }
 class tgroup extends Element {
-  stubs?: any[];
-/* eslint-disable-next-line no-useless-constructor */
-  // @ts-ignore
-  constructor(...args) {
-  // @ts-ignore
-    super(...args);
-    this.classTypes = [Part];
-  }
+    stubs?: any[];
+    /* eslint-disable-next-line no-useless-constructor */
+    // @ts-ignore
+    constructor(...args) {
+        // @ts-ignore
+        super(...args);
+        this.classTypes = [Part];
+    }
 }
 class colspec extends Element {
 /* eslint-disable-next-line no-useless-constructor */
-  // @ts-ignore
-  constructor(...args) {
-  // @ts-ignore
-    super(...args);
-    this.classTypes = [Part];
-  }
+    // @ts-ignore
+    constructor(...args) {
+        // @ts-ignore
+        super(...args);
+        this.classTypes = [Part];
+    }
 }
 class thead extends Element {
 /* eslint-disable-next-line no-useless-constructor */
-  // @ts-ignore
-  constructor(...args) {
-  // @ts-ignore
-    super(...args);
-    this.classTypes = [Part];
-  }
+    // @ts-ignore
+    constructor(...args) {
+        // @ts-ignore
+        super(...args);
+        this.classTypes = [Part];
+    }
 }
 class tbody extends Element {
 /* eslint-disable-next-line no-useless-constructor */
-  // @ts-ignore
-  constructor(...args) {
-  // @ts-ignore
-    super(...args);
-    this.classTypes = [Part];
-  }
+    // @ts-ignore
+    constructor(...args) {
+        // @ts-ignore
+        super(...args);
+        this.classTypes = [Part];
+    }
 }
 class row extends Element {
-  column?: number;
-/* eslint-disable-next-line no-useless-constructor */
-  // @ts-ignore
-  constructor(...args) {
-  // @ts-ignore
-    super(...args);
-    this.classTypes = [Part];
-  }
+    column?: number;
+    /* eslint-disable-next-line no-useless-constructor */
+    // @ts-ignore
+    constructor(...args) {
+        // @ts-ignore
+        super(...args);
+        this.classTypes = [Part];
+    }
 }
 class entry extends Element {
 /* eslint-disable-next-line no-useless-constructor */
-  // @ts-ignore
-  constructor(...args) {
-  // @ts-ignore
-    super(...args);
-    this.classTypes = [Part];
-  }
+    // @ts-ignore
+    constructor(...args) {
+        // @ts-ignore
+        super(...args);
+        this.classTypes = [Part];
+    }
 }
 
 /* eslint-disable-next-line camelcase */
 class system_message extends Element {
-  constructor(message: any, children: INode[], attributes: IAttributes) {
-    super((attributes.rawsource || ''),
-      (message ? [new paragraph('', message), ...children] : children),
-      attributes);
-    setupBacklinkable(this);
-    this.classTypes = [Special, BackLinkable, PreBibliographic];
-  }
+    constructor(message: any, children: INode[], attributes: IAttributes) {
+        super((attributes.rawsource || ''),
+            (message ? [new paragraph('', message), ...children] : children),
+            attributes);
+        setupBacklinkable(this);
+        this.classTypes = [Special, BackLinkable, PreBibliographic];
+    }
 }
 /**
  *  The "pending" element is used to encapsulate a pending operation: the
@@ -2495,26 +2495,26 @@ class system_message extends Element {
  *  transforms.
  */
 class pending extends Element {
-  details: any;
+    details: any;
 
-  transform: any;
+    transform: any;
 
-  constructor(transform: any,
-    details: any,
-    rawsource = '',
-    children: INode[],
-    attributes: IAttributes) {
-    super(rawsource, children, attributes);
-    /** The `docutils.transforms.Transform` class implementing the pending
+    constructor(transform: any,
+        details: any,
+        rawsource = '',
+        children: INode[],
+        attributes: IAttributes) {
+        super(rawsource, children, attributes);
+        /** The `docutils.transforms.Transform` class implementing the pending
      operation. */
-    this.transform = transform;
+        this.transform = transform;
 
-    /** Detail data (dictionary) required by the pending operation. */
-    this.details = details || {};
-  }
+        /** Detail data (dictionary) required by the pending operation. */
+        this.details = details || {};
+    }
 
-  // fixme implement this
-  /*
+    // fixme implement this
+    /*
     def pformat(self, indent='    ', level=0):
         internals = [
               '.. internal attributes:',
@@ -2553,12 +2553,12 @@ class pending extends Element {
 
 
 class raw extends FixedTextElement {
-  // @ts-ignore
-  constructor(...args) {
-  // @ts-ignore
-    super(...args);
-    this.classTypes = [Special, Inline, PreBibliographic];
-  }
+    // @ts-ignore
+    constructor(...args) {
+        // @ts-ignore
+        super(...args);
+        this.classTypes = [Special, Inline, PreBibliographic];
+    }
 }
 
 // =================
@@ -2566,174 +2566,174 @@ class raw extends FixedTextElement {
 // =================
 class emphasis extends TextElement {
 /* eslint-disable-next-line no-useless-constructor */
-  // @ts-ignore
-  constructor(...args) {
-  // @ts-ignore
-    super(...args);
-    this.classTypes = [Inline];
-  }
+    // @ts-ignore
+    constructor(...args) {
+        // @ts-ignore
+        super(...args);
+        this.classTypes = [Inline];
+    }
 }
 class strong extends TextElement {
 /* eslint-disable-next-line no-useless-constructor */
-  // @ts-ignore
-  constructor(...args) {
-  // @ts-ignore
-    super(...args);
-    this.classTypes = [Inline];
-  }
+    // @ts-ignore
+    constructor(...args) {
+        // @ts-ignore
+        super(...args);
+        this.classTypes = [Inline];
+    }
 } // Inline
 class literal extends TextElement {
 /* eslint-disable-next-line no-useless-constructor */
-  // @ts-ignore
-  constructor(...args) {
-  // @ts-ignore
-    super(...args);
-    this.classTypes = [Inline];
-  }
+    // @ts-ignore
+    constructor(...args) {
+        // @ts-ignore
+        super(...args);
+        this.classTypes = [Inline];
+    }
 } // Inline
 class reference extends TextElement {
-  indirectReferenceName: string | undefined;
-  /* eslint-disable-next-line no-useless-constructor */
-  // @ts-ignore
-  constructor(...args) {
-  // @ts-ignore
-    super(...args);
-    this.classTypes = [General, Inline, Referential];
-  }
+    indirectReferenceName: string | undefined;
+    /* eslint-disable-next-line no-useless-constructor */
+    // @ts-ignore
+    constructor(...args) {
+        // @ts-ignore
+        super(...args);
+        this.classTypes = [General, Inline, Referential];
+    }
 } // General, Inline, Referential
 /* eslint-disable-next-line camelcase */
 class footnote_reference extends TextElement {
 /* eslint-disable-next-line no-useless-constructor */
-  // @ts-ignore
-  constructor(...args) {
-  // @ts-ignore
-    super(...args);
-    this.classTypes = [General, Inline, Referential];
-  }
+    // @ts-ignore
+    constructor(...args) {
+        // @ts-ignore
+        super(...args);
+        this.classTypes = [General, Inline, Referential];
+    }
 } // General, Inline, Referential
 /* eslint-disable-next-line camelcase */
 class citation_reference extends TextElement {
 /* eslint-disable-next-line no-useless-constructor */
-  // @ts-ignore
-  constructor(...args) {
-  // @ts-ignore
-    super(...args);
-    this.classTypes = [General, Inline, Referential];
-  }
+    // @ts-ignore
+    constructor(...args) {
+        // @ts-ignore
+        super(...args);
+        this.classTypes = [General, Inline, Referential];
+    }
 } // General, Inline, Referential
 /* eslint-disable-next-line camelcase */
 class substitution_reference extends TextElement {
 /* eslint-disable-next-line no-useless-constructor */
-  // @ts-ignore
-  constructor(...args) {
-  // @ts-ignore
-    super(...args);
-    this.classTypes = [Inline];
-  }
+    // @ts-ignore
+    constructor(...args) {
+        // @ts-ignore
+        super(...args);
+        this.classTypes = [Inline];
+    }
 } // General, Inline, Referential
 /* eslint-disable-next-line camelcase */
 class title_reference extends TextElement {
 /* eslint-disable-next-line no-useless-constructor */
-  // @ts-ignore
-  constructor(...args) {
-  // @ts-ignore
-    super(...args);
-    this.classTypes = [Inline];
-  }
+    // @ts-ignore
+    constructor(...args) {
+        // @ts-ignore
+        super(...args);
+        this.classTypes = [Inline];
+    }
 } // General, Inline, Referential
 
 /* eslint-disable-next-line camelcase */
 class abbreviation extends TextElement {
 /* eslint-disable-next-line no-useless-constructor */
-  // @ts-ignore
-  constructor(...args) {
-  // @ts-ignore
-    super(...args);
-    this.classTypes = [Inline];
-  }
+    // @ts-ignore
+    constructor(...args) {
+        // @ts-ignore
+        super(...args);
+        this.classTypes = [Inline];
+    }
 }
 
 class acronym extends TextElement {
 /* eslint-disable-next-line no-useless-constructor */
-  // @ts-ignore
-  constructor(...args) {
-  // @ts-ignore
-    super(...args);
-    this.classTypes = [Inline];
-  }
+    // @ts-ignore
+    constructor(...args) {
+        // @ts-ignore
+        super(...args);
+        this.classTypes = [Inline];
+    }
 }
 
 class superscript extends TextElement {
 /* eslint-disable-next-line no-useless-constructor */
-  // @ts-ignore
-  constructor(...args) {
-  // @ts-ignore
-    super(...args);
-    this.classTypes = [Inline];
-  }
+    // @ts-ignore
+    constructor(...args) {
+        // @ts-ignore
+        super(...args);
+        this.classTypes = [Inline];
+    }
 }
 
 class subscript extends TextElement {
 /* eslint-disable-next-line no-useless-constructor */
-  // @ts-ignore
-  constructor(...args) {
-  // @ts-ignore
-    super(...args);
-    this.classTypes = [Inline];
-  }
+    // @ts-ignore
+    constructor(...args) {
+        // @ts-ignore
+        super(...args);
+        this.classTypes = [Inline];
+    }
 }
 class math extends TextElement {
 /* eslint-disable-next-line no-useless-constructor */
-  // @ts-ignore
-  constructor(...args) {
-  // @ts-ignore
-    super(...args);
-    this.classTypes = [Inline];
-  }
+    // @ts-ignore
+    constructor(...args) {
+        // @ts-ignore
+        super(...args);
+        this.classTypes = [Inline];
+    }
 }
 class image extends Element {
 /* eslint-disable-next-line no-useless-constructor */
-  // @ts-ignore
-  constructor(...args) {
-  // @ts-ignore
-    super(...args);
-    this.classTypes = [General, Inline];
-  }
+    // @ts-ignore
+    constructor(...args) {
+        // @ts-ignore
+        super(...args);
+        this.classTypes = [General, Inline];
+    }
 
-  astext() {
-    return this.attributes.alt || '';
-  }
+    astext() {
+        return this.attributes.alt || '';
+    }
 }
 
 
 class inline extends TextElement {
 /* eslint-disable-next-line no-useless-constructor */
-  // @ts-ignore
-  constructor(...args) {
-  // @ts-ignore
-    super(...args);
-    this.classTypes = [Inline];
-  }
+    // @ts-ignore
+    constructor(...args) {
+        // @ts-ignore
+        super(...args);
+        this.classTypes = [Inline];
+    }
 }
 
 class problematic extends TextElement {
 /* eslint-disable-next-line no-useless-constructor */
-  // @ts-ignore
-  constructor(...args) {
-  // @ts-ignore
-    super(...args);
-    this.classTypes = [Inline];
-  }
+    // @ts-ignore
+    constructor(...args) {
+        // @ts-ignore
+        super(...args);
+        this.classTypes = [Inline];
+    }
 }
 
 class generated extends TextElement {
 /* eslint-disable-next-line no-useless-constructor */
-  // @ts-ignore
-  constructor(...args) {
-  // @ts-ignore
-    super(...args);
-    this.classTypes = [Inline];
-  }
+    // @ts-ignore
+    constructor(...args) {
+        // @ts-ignore
+        super(...args);
+        this.classTypes = [Inline];
+    }
 }
 
 // ========================================
@@ -2743,58 +2743,58 @@ class generated extends TextElement {
  * convert a node to XML
  */
 function nodeToXml(node: INode): string {
-  if (node instanceof Text) {
-    const text = xmlescape(node.astext());
-    return text;
-  }
-  if (node.children.length) {
-    return [node.starttag(), ...node.children.map(c => nodeToXml(c)), node.endtag()].join('');
-  }
-  return node.emptytag();
+    if (node instanceof Text) {
+        const text = xmlescape(node.astext());
+        return text;
+    }
+    if (node.children.length) {
+        return [node.starttag(), ...node.children.map(c => nodeToXml(c)), node.endtag()].join('');
+    }
+    return node.emptytag();
 }
 
 export {
-  Node, whitespaceNormalizeName, NodeVisitor, GenericNodeVisitor,
-  SparseNodeVisitor, nodeToXml, Element, TextElement,
-  Text, abbreviation, acronym, address, admonition, attention,
-  /* eslint-disable-next-line camelcase */
-  attribution, author, authors, block_quote, bullet_list, caption,
-  /* eslint-disable-next-line camelcase */
-  caution, citation, citation_reference, classifier, colspec, comment,
-  compound, contact, container, copyright, danger, date, decoration,
-  /* eslint-disable-next-line camelcase */
-  definition, definition_list, definition_list_item, description,
-  /* eslint-disable-next-line camelcase */
-  docinfo, doctest_block, document, emphasis, entry, enumerated_list,
-  /* eslint-disable-next-line camelcase */
-  error, field, field_body, field_list, field_name, figure, footer,
-  /* eslint-disable-next-line camelcase */
-  footnote, footnote_reference, generated, header, hint, image,
-  /* eslint-disable-next-line camelcase */
-  important, inline, label, legend, line, line_block, list_item,
-  /* eslint-disable-next-line camelcase */
-  literal, literal_block, math, math_block, note, option,
-  /* eslint-disable-next-line camelcase */
-  option_argument, option_group, option_list, option_list_item,
-  /* eslint-disable-next-line camelcase */
-  option_string, organization, paragraph, pending, problematic, raw,
-  reference, revision, row, rubric, section, sidebar, status, strong,
-  /* eslint-disable-next-line camelcase */
-  subscript, substitution_definition, substitution_reference, subtitle,
-  /* eslint-disable-next-line camelcase */
-  superscript, system_message, table, target, tbody, term, tgroup,
-  /* eslint-disable-next-line camelcase */
-  thead, tip, title, title_reference, topic, transition, version,
-  warning,
+    Node, whitespaceNormalizeName, NodeVisitor, GenericNodeVisitor,
+    SparseNodeVisitor, nodeToXml, Element, TextElement,
+    Text, abbreviation, acronym, address, admonition, attention,
+    /* eslint-disable-next-line camelcase */
+    attribution, author, authors, block_quote, bullet_list, caption,
+    /* eslint-disable-next-line camelcase */
+    caution, citation, citation_reference, classifier, colspec, comment,
+    compound, contact, container, copyright, danger, date, decoration,
+    /* eslint-disable-next-line camelcase */
+    definition, definition_list, definition_list_item, description,
+    /* eslint-disable-next-line camelcase */
+    docinfo, doctest_block, document, emphasis, entry, enumerated_list,
+    /* eslint-disable-next-line camelcase */
+    error, field, field_body, field_list, field_name, figure, footer,
+    /* eslint-disable-next-line camelcase */
+    footnote, footnote_reference, generated, header, hint, image,
+    /* eslint-disable-next-line camelcase */
+    important, inline, label, legend, line, line_block, list_item,
+    /* eslint-disable-next-line camelcase */
+    literal, literal_block, math, math_block, note, option,
+    /* eslint-disable-next-line camelcase */
+    option_argument, option_group, option_list, option_list_item,
+    /* eslint-disable-next-line camelcase */
+    option_string, organization, paragraph, pending, problematic, raw,
+    reference, revision, row, rubric, section, sidebar, status, strong,
+    /* eslint-disable-next-line camelcase */
+    subscript, substitution_definition, substitution_reference, subtitle,
+    /* eslint-disable-next-line camelcase */
+    superscript, system_message, table, target, tbody, term, tgroup,
+    /* eslint-disable-next-line camelcase */
+    thead, tip, title, title_reference, topic, transition, version,
+    warning,
 
-  Root, Titular, PreBibliographic, Bibliographic,
-  Decorative, Structural, Body, General, Sequential,
-  Admonition, Special, Invisible, Part, Inline, Referential, Targetable, Labeled,
-  _addNodeClassNames,
+    Root, Titular, PreBibliographic, Bibliographic,
+    Decorative, Structural, Body, General, Sequential,
+    Admonition, Special, Invisible, Part, Inline, Referential, Targetable, Labeled,
+    _addNodeClassNames,
 
-  SkipChildren,
-  StopTraversal,
-  SkipNode,
-  SkipDeparture,
-  SkipSiblings,
+    SkipChildren,
+    StopTraversal,
+    SkipNode,
+    SkipDeparture,
+    SkipSiblings,
 };

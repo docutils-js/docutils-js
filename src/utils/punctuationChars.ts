@@ -21,15 +21,15 @@ export const closers = '"\\\')>\\\\]}\\u0f3b\\u0f3d\\u169c\\u2046\\u207e\\u208e\
         + '\\u2e1c\\u2e20\\u201a\\u201e';
 
 export const quotePairs = {// open char: matching closing characters // usage example
-               '\xbb': '\xbb', // » » Swedish
-               '\u2018': '\u201a', // ‘ ‚ Albanian/Greek/Turkish
-               '\u2019': '\u2019', // ’ ’ Swedish
-               '\u201a': '\u2018\u2019', // ‚ ‘ German ‚ ’ Polish
-               '\u201c': '\u201e', // “ „ Albanian/Greek/Turkish
-               '\u201e': '\u201c\u201d', // „ “ German „ ” Polish
-               '\u201d': '\u201d', // ” ” Swedish
-               '\u203a': '\u203a', // › › Swedish
-              };
+    '\xbb': '\xbb', // » » Swedish
+    '\u2018': '\u201a', // ‘ ‚ Albanian/Greek/Turkish
+    '\u2019': '\u2019', // ’ ’ Swedish
+    '\u201a': '\u2018\u2019', // ‚ ‘ German ‚ ’ Polish
+    '\u201c': '\u201e', // “ „ Albanian/Greek/Turkish
+    '\u201e': '\u201c\u201d', // „ “ German „ ” Polish
+    '\u201d': '\u201d', // ” ” Swedish
+    '\u203a': '\u203a', // › › Swedish
+};
 
 /**
     Test whether `c1` and `c2` are a matching open/close character pair.

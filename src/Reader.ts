@@ -20,11 +20,11 @@ export default class Reader extends Component {
     private debugFn: any;
     getTransforms() {
         return [...super.getTransforms(), universal.Decorations]; // fixme
-//               universal.ExportInternals, universal.StripComments ];
+        //               universal.ExportInternals, universal.StripComments ];
     }
 
-    constructor(args: { parser?: any, parseFn?: any, parserName?: string, debugFn?: any,
-    debug?: boolean }) {
+    constructor(args: { parser?: any; parseFn?: any; parserName?: string; debugFn?: any;
+        debug?: boolean; }) {
         super();
         const { parser, parseFn, parserName } = args;
         this.componentType = 'reader';
@@ -45,9 +45,9 @@ export default class Reader extends Component {
     setParser(parserName: string) {
         const ParserClass = parsers.getParserClass(parserName);
         this.parser = new ParserClass({
- debug: this.debug,
-                                       debugFn: this.debugFn,
-});
+            debug: this.debug,
+            debugFn: this.debugFn,
+        });
     }
 
     /**
@@ -67,14 +67,14 @@ export default class Reader extends Component {
         }
 
         this.source.read((error: Error, data: string) => {
-                             if (error) {
-                                 cb(error);
-                                 return;
-                             }
-                             this.input = data;
-                             this.parse();
-                             cb(undefined, this.document);
-                         });
+            if (error) {
+                cb(error);
+                return;
+            }
+            this.input = data;
+            this.parse();
+            cb(undefined, this.document);
+        });
     }
 
     /* read method without callbcks and other junk */
@@ -106,10 +106,10 @@ export default class Reader extends Component {
 
     newDocument() {
         const document = newDocument({
- sourcePath:
+            sourcePath:
                                        this.source && this.source.sourcePath,
-},
-                                     this.settings!);
+        },
+        this.settings!);
         return document;
     }
 }

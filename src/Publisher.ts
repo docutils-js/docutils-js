@@ -21,10 +21,10 @@ interface PublisherArgs {
     writer?: Writer;
     source?: Input;
     sourceClass?: any;
-    destination?: Output<any>,
-    destinationClass?: any,
-    settings: Settings,
-    debugFn?: any,
+    destination?: Output<any>;
+    destinationClass?: any;
+    settings: Settings;
+    debugFn?: any;
     debug?: boolean;
 }
 
@@ -64,9 +64,9 @@ class Publisher {
      */
     constructor(args: PublisherArgs) {
         const {
- reader, parser, writer, source, sourceClass, destination,
-              destinationClass, settings, debugFn,
-} = args;
+            reader, parser, writer, source, sourceClass, destination,
+            destinationClass, settings, debugFn,
+        } = args;
         /* Terrible defaults ! */
         const sourceClass2 = sourceClass;
         const destinationClass2 = destinationClass;
@@ -123,7 +123,7 @@ class Publisher {
     }
 
     setupOptionParser(args: {
-        usage: string, description: string, settingsSpec: any, configSection: string, defaults: any,
+        usage: string; description: string; settingsSpec: any; configSection: string; defaults: any;
     }) {
         const { usage, description, settingsSpec, configSection, defaults } = args;
         let settingsSpec2 = settingsSpec;
@@ -149,15 +149,15 @@ class Publisher {
     }
 
     processCommandLine(args: {
-        argv: string[], usage: string, description: string, settingsSpec: SettingsSpec, configSection: string,
-        settingsOverrides: any,
+        argv: string[]; usage: string; description: string; settingsSpec: SettingsSpec; configSection: string;
+        settingsOverrides: any;
     }) {
         const optionParser = this.setupOptionParser({
             usage: args.usage,
             description: args.description,
             settingsSpec: args.settingsSpec,
             configSection: args.configSection,
-           defaults: args.settingsOverrides,
+            defaults: args.settingsOverrides,
         });
         let argv = args.argv;
         if (argv === undefined) {
@@ -176,7 +176,7 @@ class Publisher {
         }
     }
 
-    setSource(args: { source?: any, sourcePath?: string }) {
+    setSource(args: { source?: any; sourcePath?: string }) {
         let sourcePath = args.sourcePath;
         let source = args.source;
         if (typeof sourcePath === 'undefined') {
@@ -187,17 +187,17 @@ class Publisher {
         try {
             const sourceClass = this.sourceClass;
             this.source = new sourceClass({
- source,
-sourcePath,
-encoding:
+                source,
+                sourcePath,
+                encoding:
                                                 this.settings.docutilsCoreOptionParser!.inputEncoding,
-});
+            });
         } catch (error) {
             throw new ApplicationError(`Unable to instantiate Source class ${this.sourceClass.constructor.name}: ${error.message}`, { error });
         }
     }
 
-    setDestination(args:{ destination?: any, destinationPath?: string }) {
+    setDestination(args: { destination?: any; destinationPath?: string }) {
         let destinationPath = args.destinationPath;
         let destination = args.destination;
         if (destinationPath === undefined) {
@@ -213,14 +213,14 @@ encoding:
                 encoding: this.settings.docutilsCoreOptionParser!.outputEncoding,
                 errorHandler: this.settings.docutilsCoreOptionParser!.outputEncodingErrorHandler,
             },
-);
+        );
     }
 
     applyTransforms() {
         this._document!.transformer.populateFromComponents(
             this.source!, this.reader!, this.reader!.parser,
             this.writer!, this.destination!,
-);
+        );
         this._document!.transformer.applyTransforms();
     }
 
@@ -229,7 +229,7 @@ encoding:
         const {
         /* eslint-disable-next-line no-unused-vars */
             argv, usage, description, settingsSpec, settingsOverrides,
-        /* eslint-disable-next-line no-unused-vars */
+            /* eslint-disable-next-line no-unused-vars */
             configSection, enableExitStatus,
         } = args;
     }
@@ -239,21 +239,21 @@ encoding:
 
         const {
             /* eslint-disable-next-line no-unused-vars */
- argv, usage, description, settingsSpec, settingsOverrides, configSection, enableExitStatus,
-} = args;
+            argv, usage, description, settingsSpec, settingsOverrides, configSection, enableExitStatus,
+        } = args;
         /* eslint-disable-next-line no-unused-vars */
         let exit;
         try {
             if (this.settings === undefined) {
                 this.processCommandLine({
- argv, usage, description, settingsSpec, configSection, settingsOverrides,
-});
+                    argv, usage, description, settingsSpec, configSection, settingsOverrides,
+                });
             }
             // console.log(this.source);
             this.setIO();
 
             // KM
-//          console.log('*** about to call read');
+            //          console.log('*** about to call read');
             /* we may need to change semantics here !! */
 
             if (typeof this.reader === 'undefined') {
@@ -276,7 +276,7 @@ encoding:
                     this.writer!.assembleParts();
                     cb(undefined, output);
                 }),
-);
+            );
         } catch (error) {
             cb(error, undefined);
         }

@@ -1,7 +1,7 @@
 // @ts-ignore
 import { genKey, ContentBlock, CharacterMetadata } from 'draft-js';
 import {
- __version__, Writer as BaseWriter, Transform, nodes,
+    __version__, Writer as BaseWriter, Transform, nodes,
 } from '../index';
 import {Document, IElement, INode} from "../types";
 import {Settings} from "../../gen/Settings";
@@ -83,7 +83,7 @@ class DraftTranslator extends GenericNodeVisitor {
             /* eslint-disable-next-line no-empty */
             if (typeof mappedStyle === 'undefined') {
             } else {
-        /* eslint-disable-next-line no-console */
+                /* eslint-disable-next-line no-console */
                 console.log(`visiting inline style ${mappedStyle}`);
                 this.inlineStyles.push(mappedStyle);
             }
@@ -92,7 +92,7 @@ class DraftTranslator extends GenericNodeVisitor {
             if (typeof mappedType === 'undefined') {
                 mappedType = node.tagname.replace(/_/g, '-');
             }
-        /* eslint-disable-next-line no-console */
+            /* eslint-disable-next-line no-console */
             console.log(`visiting block ${mappedType}`);
         }
 
@@ -108,9 +108,9 @@ class DraftTranslator extends GenericNodeVisitor {
             /* eslint-disable-next-line no-empty */
             if (typeof mappedStyle === 'undefined') {
             } else {
-        /* eslint-disable-next-line no-console */
+                /* eslint-disable-next-line no-console */
                 console.log(`departing inline style ${mappedStyle}`);
-        /* eslint-disable-next-line no-console */
+                /* eslint-disable-next-line no-console */
                 console.log(`creating characterMetadata with ${this.inlineStyles}`);
                 // @ts-ignore
                 const cmd = CharacterMetadata.create({ style: this.inlineStyles, entity: null });
@@ -123,12 +123,12 @@ class DraftTranslator extends GenericNodeVisitor {
             if (typeof mappedType === 'undefined') {
                 mappedType = node.tagname.replace(/_/g, '-');
             }
-        /* eslint-disable-next-line no-console */
+            /* eslint-disable-next-line no-console */
             console.log(`departing block ${mappedType}`);
             this.blocks.push(new ContentBlock({
- key: genKey(), type: mappedType, characterList: this.inline, text: this.text,
-}));
-        /* eslint-disable-next-line no-console */
+                key: genKey(), type: mappedType, characterList: this.inline, text: this.text,
+            }));
+            /* eslint-disable-next-line no-console */
             console.log('setting text to \'\'');
             this.text = '';
             this.inline = [];
@@ -154,8 +154,8 @@ class DraftTranslator extends GenericNodeVisitor {
         const text = node.astext();
         /* eslint-disable-next-line no-console */
         console.log(`departing text: ${this.inlineStyles}`);
-//        const cmd = CharacterMetadata.create({ style: this.inlineStyles, entity: null });
-//        this.inline.push(Array(text.length).fill(cmd));
+        //        const cmd = CharacterMetadata.create({ style: this.inlineStyles, entity: null });
+        //        this.inline.push(Array(text.length).fill(cmd));
         /* eslint-disable-next-line no-console */
         console.log(`adding '${text}' to '${this.text}'`);
         this.text += text;
