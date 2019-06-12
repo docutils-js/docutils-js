@@ -17,12 +17,12 @@ export default class Writer extends Component {
      * @constructor
      *
      */
-    constructor() {
+    public constructor() {
         super();
         this.parts = {};
     }
 
-    write(document: Document, destination: any) {
+    public write(document: Document, destination: any) {
         this.document = document;
         this.language = getLanguage(document.settings.docutilsCoreOptionParser!.languageCode,
             document.reporter);
@@ -40,11 +40,11 @@ export default class Writer extends Component {
         return fn(this.output);
     }
 
-    translate() {
+    public translate() {
         throw new Error('subclass must override this method');
     }
 
-    assembleParts() {
+    public assembleParts() {
         this.parts.whole = this.output;
         this.parts.encoding = this.document!.settings.docutilsCoreOptionParser!.outputEncoding;
         this.parts.version = __version__;

@@ -4,11 +4,17 @@ import UnexpectedIndentationError from './error/UnexpectedIndentationError';
 import {GetIndentedArgs} from "./types";
 
 class StringList extends ViewList {
-    constructor(initlist: string[], source?: string, items?: any[], parent?: any, parentOffset?: number) {
+    public constructor(
+        initlist: string[],
+        source?: string,
+        items?: any[],
+        parent?: any,
+        parentOffset?: number
+    ) {
         super(initlist, source, items, parent, parentOffset);
     }
 
-    trimLeft(trimLength: number, start = 0, end: number) {
+    public trimLeft(trimLength: number, start = 0, end: number) {
         let localEnd = end;
         if (localEnd === undefined) {
             localEnd = this.length;
@@ -22,7 +28,7 @@ class StringList extends ViewList {
         }
     }
 
-    getTextBlock(start: number, flushLeft: boolean = false) {
+    public getTextBlock(start: number, flushLeft: boolean = false) {
         let end = start;
         const last = this.length;
         while (end < last) {
@@ -40,7 +46,7 @@ class StringList extends ViewList {
         return this.slice(start, end);
     }
 
-    getIndented(args: GetIndentedArgs) {
+    public getIndented(args: GetIndentedArgs) {
         const {  start, untilBlank, stripIndent, blockIndent, firstIndent } = args;
         const cArgs = { ... args };
         if(stripIndent == null) {
@@ -97,7 +103,13 @@ class StringList extends ViewList {
         return [block, indent || 0, blankFinish];
     }
 
-    get2dBlock(top: number, left: number, bottom: number, right: number, stripIndent: boolean = true) {
+    public get2dBlock(
+        top: number,
+        left: number,
+        bottom: number,
+        right: number,
+        stripIndent: boolean = true
+    ) {
 
         const block = this.slice(top, bottom);
         let indent = right;
@@ -128,18 +140,18 @@ class StringList extends ViewList {
         return block;
     }
 
-    padDoubleWidth() {
+    public padDoubleWidth() {
         //        throw new Unimp('padDoublewidth');
 
     }
 
-    replace(old: any, newStr: string) {
+    public replace(old: any, newStr: string) {
         for (let i = 0; i < this.length; i += 1) {
             this[i] = this[i].replace(old, newStr); // fix me !!
         }
     }
 
-    trimTop(n = 1) {
+    public trimTop(n = 1) {
         /* Remove items from the start of the list, without touching the parent. */
         /* istanbul ignore if */
         if (n > this.length) {

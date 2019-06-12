@@ -6,24 +6,29 @@ import { ApplicationError } from './Exceptions';
 /** Direct string input. */
 export class StringInput extends Input {
 
-    constructor(source: any, sourcePath?: any, encoding?: any, errorHandler?: any) {
+    public constructor(source: any, sourcePath?: any, encoding?: any, errorHandler?: any) {
         super({source, sourcePath, encoding, errorHandler});
         this.sourcePath = '<string>';
     }
 
-    read(cb: any) {
+    public read(cb: any) {
         cb(undefined, this.source);
     }
 }
 
 export class StringOutput extends Output<string> {
-    constructor(destination?: string, destinationPath?: string, encoding?: any, errorHandler?: any) {
+    public constructor(
+        destination?: string,
+        destinationPath?: string,
+        encoding?: any,
+        errorHandler?: any
+    ) {
         super(destination, destinationPath, encoding, errorHandler);
         this.defaultDestinationPath = '<string>';
 
     }
 
-    write(data: string) {
+    public write(data: string) {
         // self.destination = self.encode(data) // fixme encoding
         if (Array.isArray(data)) {
             data = JSON.stringify(data);
@@ -37,7 +42,7 @@ export class FileInput extends Input {
     private _stderr: any;
     private autoClose: any;
     /* ew, too much logic for a constructor, with side effects etc! */
-    constructor(args: any) {
+    public constructor(args: any) {
         super(args);
         const {
         /* eslint-disable-next-line no-unused-vars */
@@ -80,7 +85,7 @@ export class FileInput extends Input {
 
     /* Read and decode a single file and return the data (Unicode string).
      */
-    read(cb?: any) {
+    public read(cb?: any) {
         setTimeout(() => {
             let data;
             try {
@@ -105,7 +110,7 @@ export class FileInput extends Input {
     //     return this.read().splitlines(true);
     // }
 
-    close() {
+    public close() {
         if (this.source !== process.stdin) {
             this.source.close();
         }

@@ -18,13 +18,15 @@ export default class Reader extends Component {
     public parser: any;
     private debug: boolean;
     private debugFn: any;
-    getTransforms() {
+    public getTransforms() {
         return [...super.getTransforms(), universal.Decorations]; // fixme
         //               universal.ExportInternals, universal.StripComments ];
     }
 
-    constructor(args: { parser?: any; parseFn?: any; parserName?: string; debugFn?: any;
-        debug?: boolean; }) {
+    public constructor(
+        args: { parser?: any; parseFn?: any; parserName?: string; debugFn?: any;
+            debug?: boolean; }
+    ) {
         super();
         const { parser, parseFn, parserName } = args;
         this.componentType = 'reader';
@@ -42,7 +44,7 @@ export default class Reader extends Component {
         this.input = undefined;
     }
 
-    setParser(parserName: string) {
+    public setParser(parserName: string) {
         const ParserClass = parsers.getParserClass(parserName);
         this.parser = new ParserClass({
             debug: this.debug,
@@ -56,7 +58,7 @@ export default class Reader extends Component {
       *   test123
       *
       */
-    read(source: any, parser: any, settings: Settings, cb: any) {
+    public read(source: any, parser: any, settings: Settings, cb: any) {
         this.source = source;
         if (!this.parser) {
             this.parser = parser;
@@ -78,7 +80,7 @@ export default class Reader extends Component {
     }
 
     /* read method without callbcks and other junk */
-    read2(input: any, settings: Settings) {
+    public read2(input: any, settings: Settings) {
         this.input = input;
         this.settings = settings;
         this.parse();
@@ -88,7 +90,7 @@ export default class Reader extends Component {
 
     /* Delegates to this.parser, providing arguments
        based on instance variables */
-    parse() {
+    public parse() {
         if (this.parser) {
             const document = this.newDocument();
             this.parser.parse(this.input, document);
@@ -104,7 +106,7 @@ export default class Reader extends Component {
         this.document!.currentLine = 0;
     }
 
-    newDocument() {
+    public newDocument() {
         const document = newDocument({
             sourcePath:
                                        this.source && this.source.sourcePath,

@@ -33,7 +33,7 @@ interface PublisherArgs {
  */
 
 class Publisher {
-    get document(): Document | null | undefined {
+    public get document(): Document | null | undefined {
         return this._document;
     }
     private settings: Settings;
@@ -62,7 +62,7 @@ class Publisher {
      * @param {object} args.settings - Settings for docutils engine.
      * @param {function} args.debugFn - Debug function.
      */
-    constructor(args: PublisherArgs) {
+    public constructor(args: PublisherArgs) {
         const {
             reader, parser, writer, source, sourceClass, destination,
             destinationClass, settings, debugFn,
@@ -92,7 +92,7 @@ class Publisher {
         this.settings = settings;
     }
 
-    setReader(readerName: string, parser?: Parser, parserName?: string) {
+    public setReader(readerName: string, parser?: Parser, parserName?: string) {
         const ReaderClass = readers.getReaderClass(readerName);
         this.reader = new ReaderClass({
             parser, parserName, debug: this.debug, debugFn: this.debugFn,
@@ -100,14 +100,14 @@ class Publisher {
         this.parser = this.reader!.parser;
     }
 
-    setWriter(writerName: string) {
+    public setWriter(writerName: string) {
         const writerClass = writers.getWriterClass(writerName);
         /* not setting document here, the write method takes it, which
          * is confusing */
         this.writer = new writerClass();
     }
 
-    setComponents(readerName: string, parserName: string, writerName: string) {
+    public setComponents(readerName: string, parserName: string, writerName: string) {
         if (!this.reader) {
             this.setReader(readerName, this.parser, parserName);
         }
@@ -122,9 +122,11 @@ class Publisher {
         }
     }
 
-    setupOptionParser(args: {
-        usage: string; description: string; settingsSpec: any; configSection: string; defaults: any;
-    }) {
+    public setupOptionParser(
+        args: {
+            usage: string; description: string; settingsSpec: any; configSection: string; defaults: any;
+        }
+    ) {
         const { usage, description, settingsSpec, configSection, defaults } = args;
         let settingsSpec2 = settingsSpec;
         if (configSection) {
@@ -148,10 +150,12 @@ class Publisher {
         return optionParser;
     }
 
-    processCommandLine(args: {
-        argv: string[]; usage: string; description: string; settingsSpec: SettingsSpec; configSection: string;
-        settingsOverrides: any;
-    }) {
+    public processCommandLine(
+        args: {
+            argv: string[]; usage: string; description: string; settingsSpec: SettingsSpec; configSection: string;
+            settingsOverrides: any;
+        }
+    ) {
         const optionParser = this.setupOptionParser({
             usage: args.usage,
             description: args.description,
@@ -167,7 +171,7 @@ class Publisher {
         this.settings = optionParser.parseArgs(argv);
     }
 
-    setIO(sourcePath?: string, destinationPath?: string) {
+    public setIO(sourcePath?: string, destinationPath?: string) {
         if (typeof this.source === 'undefined') {
             this.setSource({ sourcePath });
         }
@@ -176,7 +180,7 @@ class Publisher {
         }
     }
 
-    setSource(args: { source?: any; sourcePath?: string }) {
+    public setSource(args: { source?: any; sourcePath?: string }) {
         let sourcePath = args.sourcePath;
         let source = args.source;
         if (typeof sourcePath === 'undefined') {
@@ -197,7 +201,7 @@ class Publisher {
         }
     }
 
-    setDestination(args: { destination?: any; destinationPath?: string }) {
+    public setDestination(args: { destination?: any; destinationPath?: string }) {
         let destinationPath = args.destinationPath;
         let destination = args.destination;
         if (destinationPath === undefined) {
@@ -216,7 +220,7 @@ class Publisher {
         );
     }
 
-    applyTransforms() {
+    public applyTransforms() {
         this._document!.transformer.populateFromComponents(
             this.source!, this.reader!, this.reader!.parser,
             this.writer!, this.destination!,
@@ -224,7 +228,7 @@ class Publisher {
         this._document!.transformer.applyTransforms();
     }
 
-    publish2(args: any) {
+    public publish2(args: any) {
         /* eslint-disable-next-line no-unused-vars */
         const {
         /* eslint-disable-next-line no-unused-vars */
@@ -235,7 +239,7 @@ class Publisher {
     }
 
     /* This doesnt seem to return anything ? */
-    publish(args: any, cb: any) {
+    public publish(args: any, cb: any) {
 
         const {
             /* eslint-disable-next-line no-unused-vars */

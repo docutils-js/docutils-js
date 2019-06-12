@@ -18,11 +18,11 @@ class TransformSpec extends SettingsSpec {
      * @returns {Array} array of Transform classes (not instances)
      */
     // eslint-disable-next-line class-methods-use-this
-    getTransforms(): any[] {
+    public getTransforms(): any[] {
         return [];
     }
 
-    toString() {
+    public toString() {
         return `TransformSpec<${this.constructor.name}>`;
     }
 }

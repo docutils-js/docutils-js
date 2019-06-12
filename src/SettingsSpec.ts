@@ -14,7 +14,7 @@ class SettingsSpec {
     public configSection: string = '';
     public configSectionDependencies: string[] = [];
     /* eslint-disable-next-line no-unused-vars */
-    _init(...args: any[]) {
+    public _init(...args: any[]) {
         this.settingsSpec = [];
         this.settingsDefaults = null;
         this.settingsDefaultOverrides = null;

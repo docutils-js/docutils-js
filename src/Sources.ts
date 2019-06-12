@@ -8,7 +8,7 @@ export default class Source {
     private encoding: any;
     private source: any;
     private sourcePath: any;
-    constructor(args: SourceArgs) {
+    public constructor(args: SourceArgs) {
         const { source, sourcePath, encoding } = args;
         this.source = source;
         this.sourcePath = sourcePath;

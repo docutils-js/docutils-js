@@ -6,7 +6,7 @@ abstract class Parser extends Component {
     protected debugFn: any;
     protected debug: boolean;
 
-    constructor(args: ParserArgs = {}) {
+    public constructor(args: ParserArgs = {}) {
         super();
         this.componentType = 'parser';
         this.configSection = 'parsers';
@@ -18,7 +18,7 @@ abstract class Parser extends Component {
     /* eslint-disable-next-line no-unused-vars */
     abstract parse(inputstring: string, document: Document): any | any[] | void;
     /* eslint-disable-next-line no-unused-vars */
-    setupParse(inputstring: string, document: Document): void {
+    public setupParse(inputstring: string, document: Document): void {
     } ;
     abstract finishParse(): void;
 

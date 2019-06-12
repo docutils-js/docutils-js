@@ -13,7 +13,7 @@ class StateMachineWS extends StateMachine implements IStateMachineWS {
 
     public matchTitles?: boolean;
 
-    getIndented(labeled: GetIndentedArgs) {
+    public getIndented(labeled: GetIndentedArgs) {
         /* istanbul ignore if */
         const cArgs = {...labeled};
         if (typeof labeled.stripIndent === 'undefined') {
@@ -36,7 +36,7 @@ class StateMachineWS extends StateMachine implements IStateMachineWS {
         return [indented, indent, offset, blankFinish];
     }
 
-    getKnownIndented(labeled: GetIndentedArgs): any[] {
+    public getKnownIndented(labeled: GetIndentedArgs): any[] {
         const cArgs: GetIndentedArgs = {...labeled};
         /* istanbul ignore if */
         if (typeof cArgs.stripIndent === 'undefined') {
@@ -56,7 +56,7 @@ class StateMachineWS extends StateMachine implements IStateMachineWS {
         return [indented, offset, blankFinish];
     }
 
-    getFirstKnownIndented(args: GetIndentedArgs): any[] {
+    public getFirstKnownIndented(args: GetIndentedArgs): any[] {
         const cArgs: GetIndentedArgs = {...args};
         /* istanbul ignore if */
         if (cArgs.stripIndent === undefined) {

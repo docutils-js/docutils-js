@@ -7,7 +7,7 @@ export default class Transform {
     startNode?: INode;
     language: any;
     static defaultPriority: number;
-    constructor(document: Document, startNode?: INode) {
+    public constructor(document: Document, startNode?: INode) {
         this.document = document;
         this.startNode = startNode;
         this.language = getLanguage(document.settings.docutilsCoreOptionParser!.languageCode,
@@ -15,7 +15,7 @@ export default class Transform {
         this._init(document, startNode);
     }
 
-    protected _init(document: Document, startNode: INode | undefined) {
+    public _init(document: Document, startNode: INode | undefined) {
 
     }
 }

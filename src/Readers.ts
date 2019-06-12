@@ -3,7 +3,7 @@ import Reader from './Reader';
 import * as standalone from './readers/standalone';
 
 export class ReReader extends Reader {
-    getTransforms() {
+    public getTransforms() {
         // @ts-ignore
         return Component.getTransforms.bind(this)();
     }

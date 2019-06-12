@@ -34,8 +34,15 @@ class Reporter implements IReporter {
     private errorHandler: string;
     private stream: any;
     private encoding?: string;
-    constructor(source: string, reportLevel: number, haltLevel?: number, stream?: any, debug?: boolean, encoding?: string,
-        errorHandler: string = 'backslashreplace') {
+    public constructor(
+        source: string,
+        reportLevel: number,
+        haltLevel?: number,
+        stream?: any,
+        debug?: boolean,
+        encoding?: string,
+        errorHandler: string = 'backslashreplace'
+    ) {
         if (haltLevel === undefined) {
             haltLevel = 4;
         }
@@ -56,13 +63,12 @@ class Reporter implements IReporter {
         this.maxLevel = -1;
     }
 
-    setConditions() {
+    public setConditions() {
         throw new Unimp('');
     }
 
     /* need better system for arguments!! */
-    systemMessage(level: number, message: string | Error,
-        children?: INode[], kwargs?: any) {
+    public systemMessage(level: number, message: string | Error, children?: INode[], kwargs?: any) {
         if (typeof children === 'undefined') {
             children = [];
         }
@@ -113,18 +119,18 @@ class Reporter implements IReporter {
         return msg;
     }
 
-    notifyObservers(message: any) {
+    public notifyObservers(message: any) {
         this.observers.forEach(o => o(message));
     }
 
     // @ts-ignore
-    attachObserver(observer) {
+    public attachObserver(observer) {
         // @ts-ignore
         this.observers.push(observer);
     }
 
     // @ts-ignore
-    debug(...args) {
+    public debug(...args) {
         if (this.debugFlag) {
             // @ts-ignore
             return this.systemMessage(this.debugLevel, ...args);
@@ -133,25 +139,25 @@ class Reporter implements IReporter {
     }
 
     // @ts-ignore
-    info(...args) {
+    public info(...args) {
         // @ts-ignore
         return this.systemMessage(this.INFO_LEVEL, ...args);
     }
 
     // @ts-ignore
-    warning(...args) {
+    public warning(...args) {
         // @ts-ignore
         return this.systemMessage(this.WARNING_LEVEL, ...args);
     }
 
     // @ts-ignore
-    error(...args) {
+    public error(...args) {
         // @ts-ignore
         return this.systemMessage(this.ERROR_LEVEL, ...args);
     }
 
     // @ts-ignore
-    severe(...args) {
+    public severe(...args) {
         // @ts-ignore
         return this.systemMessage(this.SEVERE_LEVEL, ...args);
     }

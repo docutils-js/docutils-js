@@ -64,12 +64,14 @@ class StateMachine implements IStateMachine {
     private initialState?: string;
     private _stderr: any;
 
-    constructor(args: {
-        stateFactory: IStateFactory;
-        initialState: string;
-        debug?: boolean;
-        debugFn?: any;
-    }) {
+    public constructor(
+        args: {
+            stateFactory: IStateFactory;
+            initialState: string;
+            debug?: boolean;
+            debugFn?: any;
+        }
+    ) {
         const cArgs = { ... args };
         /* Perform some sanity checking on arguments */
         //        /* istanbul ignore if */
@@ -109,16 +111,16 @@ class StateMachine implements IStateMachine {
         // eslint-disable-next-line no-underscore-dangle
     }
 
-    _init() {
+    public _init() {
         // do-nothing
     }
 
-    forEachState(cb: (state: State) => void) {
+    public forEachState(cb: (state: State) => void) {
         // @ts-ignore
         Object.values(this.states).forEach(cb);
     }
 
-    unlink() {
+    public unlink() {
         this.forEachState(s =>s.unlink());
         this.states = undefined;
     }
@@ -144,7 +146,7 @@ class StateMachine implements IStateMachine {
     - `input_source`: name or path of source of `input_lines`.
     - `initial_state`: name of initial state.
     */
-    run(args: StateMachineRunArgs) {
+    public run(args: StateMachineRunArgs) {
         const cArgs: StateMachineRunArgs = { ...args };
         this.runtimeInit();
         if (cArgs.inputLines instanceof StringList) {
@@ -280,7 +282,7 @@ class StateMachine implements IStateMachine {
      *         the name of the next state.  Exception:
      *         `UnknownStateError` raised if `next_state` unknown.
      */
-    getState(nextState?: string) {
+    public getState(nextState?: string) {
         if (nextState) {
             if (this.debug && nextState !== this.currentState) {
                 this.debugFn(`StateMachine.getState: changing state from "${this.currentState}" to "${nextState}" (input line ${this.absLineNumber()})`);
@@ -294,7 +296,7 @@ class StateMachine implements IStateMachine {
     }
 
     /* Load `self.line` with the `n`'th next line and return it. */
-    nextLine(n = 1) {
+    public nextLine(n = 1) {
         // /     console.log('*** advancing to next line');
         this.lineOffset += n;
         if (this.lineOffset >= this.inputLines.length) {
@@ -309,19 +311,19 @@ class StateMachine implements IStateMachine {
         return this.line;
     }
 
-    isNextLineBlank() {
+    public isNextLineBlank() {
         return !(this.inputLines[this.lineOffset + 1].trim());
     }
 
-    atEof() {
+    public atEof() {
         return this.lineOffset >= this.inputLines.length - 1;
     }
 
-    atBof() {
+    public atBof() {
         return this.lineOffset <= 0;
     }
 
-    previousLine(n = 1) {
+    public previousLine(n = 1) {
         this.lineOffset -= n;
         if (this.lineOffset < 0) {
             this.line = '';
@@ -332,26 +334,26 @@ class StateMachine implements IStateMachine {
         return this.line;
     }
 
-    gotoLine(lineOffset: number): string  | undefined {
+    public gotoLine(lineOffset: number): string  | undefined {
         this.lineOffset = lineOffset - this.inputOffset;
         this.line = this.inputLines[this.lineOffset];
         this.notifyObservers();
         return this.line;
     }
 
-    getSource(lineOffset: number): string {
+    public getSource(lineOffset: number): string {
         return this.inputLines.source(lineOffset - this.inputOffset);
     }
 
-    absLineOffset(): number {
+    public absLineOffset(): number {
         return this.lineOffset + this.inputOffset;
     }
 
-    absLineNumber(): number {
+    public absLineNumber(): number {
         return this.lineOffset + this.inputOffset + 1;
     }
 
-    getSourceAndLine(lineno?: number) {
+    public getSourceAndLine(lineno?: number) {
         let offset;
         let srcoffset;
         let srcline;
@@ -373,7 +375,7 @@ class StateMachine implements IStateMachine {
 
 
     /* eslint-disable-next-line no-unused-vars */
-    insertInput(inputLines: any, source: any) {
+    public insertInput(inputLines: any, source: any) {
         // self.input_lines.insert(self.line_offset + 1, '',
         //     source='internal padding after '+source,
         //     offset=len(input_lines))
@@ -386,7 +388,7 @@ class StateMachine implements IStateMachine {
         throw new Unimp();
     }
 
-    getTextBlock(flushLeft = false) {
+    public getTextBlock(flushLeft = false) {
         let block;
         try {
             block = this.inputLines.getTextBlock(this.lineOffset,
@@ -420,7 +422,7 @@ class StateMachine implements IStateMachine {
  * When there is no match, ``state.no_match()`` is called and its return
  * value is returned.
  */
-    checkLine(context: any[], state: any, transitions: any[] | undefined | null) {
+    public checkLine(context: any[], state: any, transitions: any[] | undefined | null) {
         /* istanbul ignore if */
         if (!Array.isArray(context)) {
             throw new Error('context should be array');
@@ -459,7 +461,7 @@ class StateMachine implements IStateMachine {
         return state.noMatch(context, transitions);
     }
 
-    addState(stateClass: any) {
+    public addState(stateClass: any) {
         if (typeof stateClass === 'undefined') {
         // throw new InvalidArgumentsError('stateClass should be a class');
             return;
@@ -483,31 +485,31 @@ class StateMachine implements IStateMachine {
         this.states[stateName] = r;
     }
 
-    addStates(stateClasses: any[]) {
+    public addStates(stateClasses: any[]) {
         if (!stateClasses) {
             throw new Error('');
         }
         stateClasses.forEach(this.addState.bind(this));
     }
 
-    runtimeInit() {
+    public runtimeInit() {
         // @ts-ignore
         Object.values(this.states).forEach(s => s.runtimeInit());
     }
 
 
-    error() {
+    public error() {
     }
 
-    attachObserver(observer: any) {
+    public attachObserver(observer: any) {
         this.observers.push(observer);
     }
 
-    detachObserver(observer: any) {
+    public detachObserver(observer: any) {
         this.observers.splice(this.observers.indexOf(observer), 1);
     }
 
-    notifyObservers() {
+    public notifyObservers() {
         /* eslint-disable-next-line no-restricted-syntax */
         for (const observer of this.observers) {
         /* istanbul ignore if */

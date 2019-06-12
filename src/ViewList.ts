@@ -11,7 +11,13 @@ class ViewList extends Array {
 
     public parent?: ViewList;
 
-    constructor(initlist: any[], source?: string, items?: any[], parent?: any, parentOffset?: number) {
+    public constructor(
+        initlist: any[],
+        source?: string,
+        items?: any[],
+        parent?: any,
+        parentOffset?: number
+    ) {
         super(...initlist);
         this.items = [];
         this.parent = parent;
@@ -33,19 +39,19 @@ class ViewList extends Array {
         }
     }
 
-    source(i: number) {
+    public source(i: number) {
         return this.info(i)[0];
     }
 
-    offset(i: number) {
+    public offset(i: number) {
         return this.info(i)[1];
     }
 
-    disconnect() {
+    public disconnect() {
         this.parent = undefined;
     }
 
-    splice(index: number, num: number, ...elems: any[]) {
+    public splice(index: number, num: number, ...elems: any[]) {
         //        console.log(`enter slice ${index} ${num} [${elems.length}]`);
         //        console.log(`input: ${JSON.stringify(this)}`);
         const returnAry = [];
@@ -64,7 +70,7 @@ class ViewList extends Array {
         return new this.constructor(returnAry);
     }
 
-    slice(start = 0, end = this.length) {
+    public slice(start = 0, end = this.length) {
         const initList = [];
 
         const myEnd = Math.min(end, this.length);
@@ -75,7 +81,7 @@ class ViewList extends Array {
         return new this.constructor(initList);
     }
 
-    info(i: number) {
+    public info(i: number) {
         if (i === this.items.length && this.items.length > 0) {
             return [this.items[i - 1][0], null];
         }
@@ -86,7 +92,7 @@ class ViewList extends Array {
         return this.items[i];
     }
 
-    trimStart(n = 1) {
+    public trimStart(n = 1) {
         /* istanbul ignore if */
         if (n > this.length) {
             // fixme
@@ -103,7 +109,7 @@ class ViewList extends Array {
         }
     }
 
-    trimEnd(n = 1) {
+    public trimEnd(n = 1) {
         /* Remove items from the end of the list, without touching the parent. */
         /*        if n > len(self.data):
             raise IndexError("Size of trim too large; can't trim %s items "

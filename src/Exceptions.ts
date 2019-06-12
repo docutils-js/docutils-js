@@ -2,7 +2,7 @@ import {INode} from "./types";
 
 export class UnimplementedError extends Error {
     // @ts-ignore
-    constructor(message?: string, ...params) {
+    public constructor(message?: string, ...params) {
         super(...params);
         /* instanbul ignore else */
         if (Error.captureStackTrace) {
@@ -14,7 +14,7 @@ export class UnimplementedError extends Error {
 
 
 export class EOFError extends Error {
-    constructor(...params: any[]) {
+    public constructor(...params: any[]) {
         super(...params);
         /* instanbul ignore else */
         if (Error.captureStackTrace) {
@@ -25,7 +25,7 @@ export class EOFError extends Error {
 
 
 export class InvalidArgumentsError extends Error {
-    constructor(message: any, ...params: any[]) {
+    public constructor(message: any, ...params: any[]) {
         super(...params);
         this.message = message;
         /* instanbul ignore else */
@@ -41,7 +41,7 @@ export const InvalidArgumentError = InvalidArgumentsError;
 export class SystemMessage extends Error {
     msg: INode;
     level: number;
-    constructor(msg: INode, level: number, ...params: any[]) {
+    public constructor(msg: INode, level: number, ...params: any[]) {
         super(...params);
         this.message = msg.astext();
         this.msg = msg;
@@ -56,7 +56,7 @@ export class SystemMessage extends Error {
 export class ApplicationError extends Error {
     error: Error;
     args: any[];
-    constructor(...params: any[]) {
+    public constructor(...params: any[]) {
         super(...params);
         this.args = params;
         const [message, kwargs] = params; // eslint-disable-line no-unused-vars
@@ -69,7 +69,7 @@ export class ApplicationError extends Error {
 }
 
 export class DataError extends ApplicationError {
-    constructor(...params: any[]) {
+    public constructor(...params: any[]) {
         super(...params);
         /* instanbul ignore else */
         if (Error.captureStackTrace) {
@@ -79,7 +79,7 @@ export class DataError extends ApplicationError {
 }
 
 export class AssertError extends Error {
-    constructor(message: string, ...params: any[]) {
+    public constructor(message: string, ...params: any[]) {
         super(...params);
         /* instanbul ignore else */
         if (Error.captureStackTrace) {

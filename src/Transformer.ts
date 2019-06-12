@@ -24,7 +24,7 @@ class Transformer implements ITransformer {
      * Create transformer class
      * @param {nodes.myDoc} myDoc - document to transform
      */
-    constructor(myDoc: document) {
+    public constructor(myDoc: document) {
         this.transforms = [];
         this.unknownReferenceResolvers = [];
         this.document = myDoc;
@@ -38,7 +38,7 @@ class Transformer implements ITransformer {
      * populateFromComponents
      *
      */
-    populateFromComponents(...components: Component[]) {
+    public populateFromComponents(...components: Component[]) {
         /* eslint-disable-next-line no-restricted-syntax */
         for (const component of components) {
             if (!component) {
@@ -87,7 +87,7 @@ class Transformer implements ITransformer {
     /**
      * apply the transforms
      */
-    applyTransforms() {
+    public applyTransforms() {
         this.document.reporter.attachObserver(
             this.document.noteTransformMessage
                 .bind(this.document),
@@ -123,7 +123,7 @@ class Transformer implements ITransformer {
      * Store multiple transforms, with default priorities.
      * @param {Array} transformList - Array of transform classes (not instances).
      */
-    addTransforms(transformList: any[]) {
+    public addTransforms(transformList: any[]) {
         transformList.forEach((transformClass) => {
             if (!transformClass) {
                 throw new Error('invalid argument');
@@ -145,7 +145,7 @@ class Transformer implements ITransformer {
      *
      * This ensures FIFO order on transforms with identical priority.
      */
-    getPriorityString(class_: any, priority: number) {
+    public getPriorityString(class_: any, priority: number) {
         if (typeof class_ === 'undefined') {
             throw new Error('undefined');
         }
@@ -155,7 +155,7 @@ class Transformer implements ITransformer {
         return `${leftPad(priority, 3, '0')}-${leftPad(this.serialno, 3, '0')}`;
     }
 
-    addPending(pending: any, priority: any) {
+    public addPending(pending: any, priority: any) {
         // fixme implement
     }
 }

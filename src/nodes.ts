@@ -235,7 +235,7 @@ class NodeVisitor {
       * Create a NodeVisitor.
       * @param {nodes.document} document - document to visit
       */
-    constructor(document: Document) {
+    public constructor(document: Document) {
         if (!checkDocumentArg(document)) {
             throw new Error(`Invalid document arg: ${document}`);
         }
@@ -248,7 +248,7 @@ class NodeVisitor {
      * parameter.  If the ``visit_...`` method does not exist, call
      * this.unknown_visit.
      */
-    dispatchVisit(node: INode) {
+    public dispatchVisit(node: INode) {
         const nodeName = node.tagname;
         const methodName = `visit_${nodeName}`;
         let method = (<any> this)[methodName];
@@ -264,7 +264,7 @@ class NodeVisitor {
      * parameter.  If the ``depart_...`` method does not exist, call
      * this.unknown_departure.
      */
-    dispatchDeparture(node: INode) {
+    public dispatchDeparture(node: INode) {
         const nodeName = node.tagname;
         const method = (<any> this)[`depart_${nodeName}`] || this.unknownDeparture;
         this.document.reporter.debug(
@@ -278,7 +278,7 @@ class NodeVisitor {
      *
      * Raise an exception unless overridden.
      */
-    unknownVisit(node: INode) {
+    public unknownVisit(node: INode) {
         if (this.document!.settings.docutilsCoreOptionParser!.strictVisitor || !(this.optional.includes(node.tagname))) {
             throw new Error(`visiting unknown node type:${node.tagname}`);
         }
@@ -289,7 +289,7 @@ class NodeVisitor {
      *
      * Raise exception unless overridden.
      */
-    unknownDeparture(node: INode) {
+    public unknownDeparture(node: INode) {
         if (this.document.settings.docutilsCoreOptionParser!.strictVisitor || !(this.optional.includes(node.tagname))) {
             throw new Error(`departing unknown node type: ${node.tagname}`);
         }
@@ -322,19 +322,19 @@ class SparseNodeVisitor extends NodeVisitor {
 class GenericNodeVisitor extends NodeVisitor {
     static nodeClassNames = [];
 
-    constructor(document: Document) {
+    public constructor(document: Document) {
         super(document);
         // document this/
         _addNodeClassNames(nodeClassNames, this);
     }
 
     /* eslint-disable-next-line */
-    default_visit(node: INode) {
+    public default_visit(node: INode) {
         throw new Error('not implemented');
     }
 
     /* eslint-disable-next-line */
-    default_departure(node: INode) {
+    public default_departure(node: INode) {
         throw new Error('not implemented');
     }
 }
@@ -352,7 +352,7 @@ class Resolvable {
 class BackLinkable {
     backrefs: string[] = [];
 
-    addBackref(refid: string) {
+    public addBackref(refid: string) {
         this.backrefs.push(refid);
     }
 }
@@ -438,7 +438,7 @@ abstract class Node implements INode {
 
     childTextSeparator: string = '';
 
-    emptytag(): string {
+    public emptytag(): string {
         throw new Error('Method not implemented.');
     }
 
@@ -475,13 +475,13 @@ abstract class Node implements INode {
     /**
       * Create a node
       */
-    constructor() {
+    public constructor() {
         this.tagname = this.constructor.name;
         this.classTypes = [];
         this._init();
     }
 
-    _init() {
+    public _init() {
     }
 
 
@@ -492,7 +492,7 @@ abstract class Node implements INode {
     Parameter list is the same as of traverse.  Note that
     include_self defaults to 0, though.
     */
-    nextNode(args: TraverseArgs) {
+    public nextNode(args: TraverseArgs) {
         const iterable = this.traverse(args);
         if (iterable.length) {
             return iterable[0];
@@ -500,22 +500,22 @@ abstract class Node implements INode {
         return undefined;
     }
 
-    hasClassType(classType: any) {
+    public hasClassType(classType: any) {
         return this.classTypes.findIndex(c => c.prototype instanceof classType
                                          || c === classType) !== -1;
     }
 
-    isInline() {
+    public isInline() {
         return this.classTypes.findIndex(c => c.prototype instanceof Inline || c === Inline) !== -1;
     }
 
-    isAdmonition() {
+    public isAdmonition() {
         return this.classTypes.findIndex(
             c => c.prototype instanceof Admonition || c === Admonition,
         ) !== -1;
     }
 
-    asDOM(dom: any): any {
+    public asDOM(dom: any): any {
     }
 
     abstract pformat(indent: string, level: number): string;
@@ -528,7 +528,7 @@ abstract class Node implements INode {
 
     abstract _domNode(domroot: any): any;
 
-    protected setupChild(child: INode) {
+    public setupChild(child: INode) {
         child.parent = this;
         if (this.document) {
             child.document = this.document;
@@ -563,7 +563,7 @@ abstract class Node implements INode {
  *
  * Return true if we should stop the traversal.
  */
-    walk(visitor: any): boolean {
+    public walk(visitor: any): boolean {
         let stop = false;
         visitor.document.reporter.debug('docutils.nodes.Node.walk calling dispatch_visit for fixme');
         try {
@@ -603,7 +603,7 @@ abstract class Node implements INode {
         return stop;
     }
 
-    walkabout(visitor: any): boolean {
+    public walkabout(visitor: any): boolean {
         let callDepart = true;
         let stop = false;
         visitor.document.reporter.debug('docutils.nodes.Node.walkabout calling dispatch_visit');
@@ -652,7 +652,7 @@ abstract class Node implements INode {
         return stop;
     }
 
-    _fastTraverse(cls: any) {
+    public _fastTraverse(cls: any) {
         // Specialized traverse() that only supports instance checks.
         const result = [];
         if (this instanceof cls) {
@@ -674,7 +674,7 @@ abstract class Node implements INode {
         return result;
     }
 
-    _allTraverse() {
+    public _allTraverse() {
         // Specialized traverse() that doesn't check for a condition.
         const result = [];
         result.push(this);
@@ -686,7 +686,7 @@ abstract class Node implements INode {
         return result;
     }
 
-    traverse(args: TraverseArgs): any[] {
+    public traverse(args: TraverseArgs): any[] {
         const {
             condition, includeSelf = true, descend = true, siblings = false, ascend = false,
         } = args;
@@ -752,23 +752,23 @@ abstract class Node implements INode {
         return r;
     }
 
-    add(iNodes: INode[] | INode): void {
+    public add(iNodes: INode[] | INode): void {
         throw new UnimplementedError('');
     }
 
 
-    endtag(): string {
+    public endtag(): string {
         return '';
     }
 
-    starttag(quoteattr?: any): string {
+    public starttag(quoteattr?: any): string {
         return '';
     }
 
-    addBackref(prbid: any): void {
+    public addBackref(prbid: any): void {
     }
 
-    updateBasicAtts(dict_: any) {
+    public updateBasicAtts(dict_: any) {
         const dict2 = dict_ instanceof Node ? dict_.attributes : dict_;
         this.basicAttributes.forEach((att) => {
             const v = att in dict2 ? dict2[att] : [];
@@ -776,7 +776,7 @@ abstract class Node implements INode {
         });
     }
 
-    appendAttrList(attr: string, values: any[]) {
+    public appendAttrList(attr: string, values: any[]) {
     // List Concatenation
         values.forEach((value) => {
             if ((this.attributes[attr].filter((v: any) => v === value)).length === 0) {
@@ -785,21 +785,25 @@ abstract class Node implements INode {
         });
     }
 
-    replaceAttr(attr: string, value: any[] | any, force = true) {
+    public replaceAttr(attr: string, value: any[] | any, force = true) {
     // One or the other
         if (force || this.attributes[attr] == null) {
             this.attributes[attr] = value;
         }
     }
 
-    copyAttrConsistent(attr: string, value: any, replace?: boolean) {
+    public copyAttrConsistent(attr: string, value: any, replace?: boolean) {
         if (this.attributes[attr] !== value) {
             this.replaceAttr(attr, value, replace);
         }
     }
 
-    updateAllAtts(dict_: any, updateFun = this.copyAttrConsistent,
-        replace = true, andSource = false) {
+    public updateAllAtts(
+        dict_: any,
+        updateFun = this.copyAttrConsistent,
+        replace = true,
+        andSource = false
+    ) {
         const dict2 = dict_ instanceof Node ? dict_.attributes : dict_;
         // Include the source attribute when copying?
         let filterFun;
@@ -839,8 +843,7 @@ abstract class Node implements INode {
    attribute, though it may still be merged into a list depending
    on the value of update_fun.
    */
-    updateAllAttsConcatenating(dict_: any, replace: boolean = true,
-        andSource: boolean = false) {
+    public updateAllAttsConcatenating(dict_: any, replace: boolean = true, andSource: boolean = false) {
         this.updateAllAtts(dict_, this.copyAttrConcatenate, replace,
             andSource);
     }
@@ -849,7 +852,7 @@ abstract class Node implements INode {
    Returns True if and only if the given attribute is NOT one of the
    basic list attributes defined for all Elements.
    */
-    isNotListAttribute(attr: string) {
+    public isNotListAttribute(attr: string) {
         return !(attr in this.listAttributes);
     }
 
@@ -857,11 +860,11 @@ abstract class Node implements INode {
    Returns True if and only if the given attribute is NOT recognized by
    this class.
    */
-    isNotKnownAttribute(attr: string) {
+    public isNotKnownAttribute(attr: string) {
         return !(attr in this.knownAttributes);
     }
 
-    private copyAttrConcatenate(attr: string, value: any | any[], replace?: boolean) {
+    public copyAttrConcatenate(attr: string, value: any | any[], replace?: boolean) {
     /*
       """
       If attr is an attribute of self and both self[attr] and value are
@@ -879,7 +882,7 @@ abstract class Node implements INode {
         }
     }
 
-    getCustomAttr(attrName: string): any[] | any | undefined | null {
+    public getCustomAttr(attrName: string): any[] | any | undefined | null {
         return undefined;
     }
 }
@@ -947,7 +950,7 @@ class Element extends Node implements IElement {
      * @classdesc Abstracts a docutils Element.
      * @extends module:nodes~Node
      */
-    constructor(rawsource?: string, children: INode[] = [], attributes: IAttributes = { }) {
+    public constructor(rawsource?: string, children: INode[] = [], attributes: IAttributes = { }) {
         super();
         this.nodeName = Symbol.for('Element');
         this.children = children; // we want to do this, imo
@@ -975,7 +978,7 @@ class Element extends Node implements IElement {
         this.tagname = this.constructor.name;
     }
 
-    _init() {
+    public _init() {
         super._init();
         /* List attributes which are defined for every Element-derived class
            instance and can be safely transferred to a different node. */
@@ -1005,7 +1008,7 @@ class Element extends Node implements IElement {
     }
 
 
-    _domNode(domroot: any): any {
+    public _domNode(domroot: any): any {
         const element = domroot.createElement(this.tagname);
         const l = this.attlist();
         Object.keys(l).forEach((attribute) => {
@@ -1027,26 +1030,26 @@ class Element extends Node implements IElement {
         return element;
     }
 
-    emptytag() {
+    public emptytag() {
         return `<${[this.tagname, ...Object.entries(this.attlist())
             .map(([n, v]) => `${n}="${v}"`)].join(' ')}/>`;
     }
 
 
-    astext(): string {
+    public astext(): string {
         return this.children.map(x => x.astext()).join(this.childTextSeparator);
     }
 
-    extend(...items: any[]) {
+    public extend(...items: any[]) {
         items.forEach(this.append.bind(this));
     }
 
-    append(item: any) {
+    public append(item: any) {
         this.setupChild(item);
         this.children.push(item);
     }
 
-    add(item: INode[] | INode) {
+    public add(item: INode[] | INode) {
         if (Array.isArray(item)) {
             this.extend(...item);
         } else {
@@ -1054,7 +1057,7 @@ class Element extends Node implements IElement {
         }
     }
 
-    setupChild(child: INode) {
+    public setupChild(child: INode) {
     /* istanbul ignore if */
         if (!(child instanceof Node)) {
             throw new InvalidArgumentsError(`Expecting node instance ${child}`);
@@ -1077,7 +1080,7 @@ class Element extends Node implements IElement {
         }
     }
 
-    starttag(quoteAttr?: any) {
+    public starttag(quoteAttr?: any) {
         const q = quoteAttr || pseudoQuoteattr;
 
         const parts = [this.tagname];
@@ -1104,16 +1107,16 @@ class Element extends Node implements IElement {
         return `<${parts.join(' ')}>`;
     }
 
-    endtag(): string {
+    public endtag(): string {
         return `</${this.tagname}>`;
     }
 
-    attlist(): any {
+    public attlist(): any {
         const attlist = this.nonDefaultAttributes();
         return attlist;
     }
 
-    nonDefaultAttributes(): any {
+    public nonDefaultAttributes(): any {
         const atts: any = { };
         Object.entries(this.attributes).forEach(([key, value]) => {
             if (this.isNotDefault(key)) {
@@ -1123,7 +1126,7 @@ class Element extends Node implements IElement {
         return atts;
     }
 
-    isNotDefault(key: string) {
+    public isNotDefault(key: string) {
         if (Array.isArray(this.attributes[key])
             && this.attributes[key].length === 0
             && this.listAttributes.includes(key)) {
@@ -1142,8 +1145,7 @@ class Element extends Node implements IElement {
        - `start`: Initial index to check.
        - `end`: Initial index to *not* check.
     */
-    firstChildNotMatchingClass(childClass: any | any[], start = 0,
-        end = this.children.length): number | undefined {
+    public firstChildNotMatchingClass(childClass: any | any[], start = 0, end = this.children.length): number | undefined {
         const myChildClass = Array.isArray(childClass) ? childClass : [childClass];
         const r = this.children.slice(start,
             Math.min(this.children.length, end))
@@ -1173,16 +1175,16 @@ class Element extends Node implements IElement {
         return undefined;
     }
 
-    pformat(indent: string, level: number): string {
+    public pformat(indent: string, level: number): string {
         return `${indent.repeat(level)}${this.starttag()}\n${this.children.map(c => c.pformat(indent, level + 1)).join('')}`;
     }
 
-    copy(): INode {
+    public copy(): INode {
     // @ts-ignore
         return new this.constructor(this.rawsouce, this.children, this.attributes);
     }
 
-    deepcopy(): INode {
+    public deepcopy(): INode {
         return this.copy();
     }
 
@@ -1230,7 +1232,7 @@ class Element extends Node implements IElement {
   */
     /** Note that this Element has been referenced by its name
    `name` or id `id`. */
-    noteReferencedBy(name: string, id: string) {
+    public noteReferencedBy(name: string, id: string) {
         this.referenced = true;
         const byName = this.attributes.expect_referenced_by_name[name];
         const byId = this.attributes.expect_referenced_by_name[id];
@@ -1247,7 +1249,7 @@ class Element extends Node implements IElement {
 //  Decorative Elements
 // =====================
 class header extends Element {
-    constructor(rawsource?: string, children?: INode[], attributes?: IAttributes) {
+    public constructor(rawsource?: string, children?: INode[], attributes?: IAttributes) {
         super(rawsource, children, attributes);
         this.classTypes = [Decorative];
     }
@@ -1255,7 +1257,7 @@ class header extends Element {
 
 class footer extends Element {
     // @ts-ignore
-    constructor(...args) {
+    public constructor(...args) {
         // @ts-ignore
         super(...args);
         this.classTypes = [Decorative];
@@ -1264,20 +1266,20 @@ class footer extends Element {
 
 class decoration extends Element {
     // @ts-ignore
-    constructor(...args) {
+    public constructor(...args) {
         // @ts-ignore
         super(...args);
         this.classTypes = [Decorative];
     }
 
-    getHeader() {
+    public getHeader() {
         if (!this.children.length || !(this.children[0] instanceof header)) {
             this.children.splice(0, 0, new header());
         }
         return this.children[0];
     }
 
-    getFooter() {
+    public getFooter() {
         if (!this.children.length || !(this.children[this.children.length - 1] instanceof footer)) {
             this.add(new footer());
         }
@@ -1286,25 +1288,25 @@ class decoration extends Element {
 }
 
 class Text extends Node {
-    pformat(indent: string, level: number): string {
+    public pformat(indent: string, level: number): string {
         throw new Error('Method not implemented.');
     }
 
-    copy(): INode {
+    public copy(): INode {
         return this.constructor(this.data, this.rawsource);
     }
 
-    deepcopy(): INode {
+    public deepcopy(): INode {
         return this.copy();
     }
 
-    walk(any: any): boolean {
+    public walk(any: any): boolean {
         throw new Error('Method not implemented.');
     }
 
     private data: string;
 
-    constructor(data: string, rawsource = '') {
+    public constructor(data: string, rawsource = '') {
         super();
         if (typeof data === 'undefined') {
             throw new Error('data should not be undefined');
@@ -1315,30 +1317,35 @@ class Text extends Node {
         this.children = [];
     }
 
-    _domNode(domroot: any) {
+    public _domNode(domroot: any) {
         return domroot.createTextNode(this.data);
     }
 
-    astext() {
+    public astext() {
         return unescape(this.data);
     }
 
-    toString() {
+    public toString() {
         return this.astext();
     }
 
-    toSource() {
+    public toSource() {
         return this.toString();
     }
 
     // eslint-disable-next-line no-unused-vars
-    add(iNodes: INode[] | INode): void {
+    public add(iNodes: INode[] | INode): void {
         throw new UnimplementedError('');
     }
 }
 
 class TextElement extends Element implements ITextElement {
-    constructor(rawsource?: any, text?: string, children?: INode[], attributes?: IAttributes) {
+    public constructor(
+        rawsource?: any,
+        text?: string,
+        children?: INode[],
+        attributes?: IAttributes
+    ) {
         const cAry = children || [];
         /* istanbul ignore if */
         if (Array.isArray(text)) {
@@ -1410,7 +1417,13 @@ class document extends Element implements Document {
     private symbolFootnoteStart: number;
 
     /** Private constructor */
-    constructor(settings: Settings, reporter: IReporter, rawsource?: any, children?: INode[], attributes?: IAttributes) {
+    public constructor(
+        settings: Settings,
+        reporter: IReporter,
+        rawsource?: any,
+        children?: INode[],
+        attributes?: IAttributes
+    ) {
         super(rawsource, children, attributes);
         this.classTypes = [Root, Structural];
         this.tagname = 'document';
@@ -1442,7 +1455,7 @@ class document extends Element implements Document {
         this.document = this;
     }
 
-    setId(node: INode, msgnode?: INode) {
+    public setId(node: INode, msgnode?: INode) {
         let msg;
         let id;
         node.attributes.ids.forEach((myId: string) => {
@@ -1478,8 +1491,7 @@ class document extends Element implements Document {
         return id;
     }
 
-    setNameIdMap(node: INode, id: string, msgnode: INode,
-        explicit?: boolean) {
+    public setNameIdMap(node: INode, id: string, msgnode: INode, explicit?: boolean) {
         node.attributes.names.forEach((name: string) => {
             if (name in this.nameIds) {
                 this.setDuplicateNameId(node, id, name, msgnode, explicit);
@@ -1490,7 +1502,7 @@ class document extends Element implements Document {
         });
     }
 
-    setDuplicateNameId(node: INode, id: string, name: string, msgnode: INode, explicit?: boolean) {
+    public setDuplicateNameId(node: INode, id: string, name: string, msgnode: INode, explicit?: boolean) {
         const oldId = this.nameIds[name];
         const oldExplicit = this.nameTypes[name];
         this.nameTypes[name] = oldExplicit || explicit;
@@ -1547,21 +1559,21 @@ class document extends Element implements Document {
         }
     }
 
-    hasName(name: string) {
+    public hasName(name: string) {
         return Object.keys(this.nameIds).includes(name);
     }
 
-    noteImplicitTarget(target: INode, msgnode: INode) {
+    public noteImplicitTarget(target: INode, msgnode: INode) {
         const id = this.setId(target, msgnode);
         this.setNameIdMap(target, id, msgnode);
     }
 
-    noteExplicitTarget(target: INode, msgnode: INode) {
+    public noteExplicitTarget(target: INode, msgnode: INode) {
         const id = this.setId(target, msgnode);
         this.setNameIdMap(target, id, msgnode, true);
     }
 
-    noteRefname(node: INode) {
+    public noteRefname(node: INode) {
         const a = [node];
         if (this.refNames[node.refname!]) {
             this.refNames[node.refname!].push(node);
@@ -1570,7 +1582,7 @@ class document extends Element implements Document {
         }
     }
 
-    noteRefId(node: INode) {
+    public noteRefId(node: INode) {
         const a = [node];
         if (this.refIds[node.refid!]) {
             this.refIds[node.refid!].push(node);
@@ -1579,7 +1591,7 @@ class document extends Element implements Document {
         }
     }
 
-    noteIndirectTarget(target: INode) {
+    public noteIndirectTarget(target: INode) {
         this.indirectTargets.push(target);
         // check this fixme
         if (target.names) {
@@ -1587,36 +1599,36 @@ class document extends Element implements Document {
         }
     }
 
-    noteAnonymousTarget(target: INode) {
+    public noteAnonymousTarget(target: INode) {
         this.setId(target);
     }
 
-    noteAutofootnote(footnote: INode) {
+    public noteAutofootnote(footnote: INode) {
         this.setId(footnote);
         this.autofootnotes.push(footnote);
     }
 
-    noteAutofootnoteRef(ref: INode) {
+    public noteAutofootnoteRef(ref: INode) {
         this.setId(ref);
         this.autofootnoteRefs.push(ref);
     }
 
-    noteSymbolFootnote(footnote: INode) {
+    public noteSymbolFootnote(footnote: INode) {
         this.setId(footnote);
         this.symbolFootnotes.push(footnote);
     }
 
-    noteSymbolFootnoteRef(ref: INode) {
+    public noteSymbolFootnoteRef(ref: INode) {
         this.setId(ref);
         this.symbolFootnoteRefs.push(ref);
     }
 
-    noteFootnote(footnote: INode) {
+    public noteFootnote(footnote: INode) {
         this.setId(footnote);
         this.footnotes.push(footnote);
     }
 
-    noteFootnoteRef(ref: INode) {
+    public noteFootnoteRef(ref: INode) {
         this.setId(ref);
         const a = [ref];
         if (this.footnoteRefs[ref.refname!]) {
@@ -1627,11 +1639,11 @@ class document extends Element implements Document {
         this.noteRefname(ref);
     }
 
-    noteCitation(citation: INode) {
+    public noteCitation(citation: INode) {
         this.citations.push(citation);
     }
 
-    noteCitationRef(ref: INode) {
+    public noteCitationRef(ref: INode) {
         this.setId(ref);
         if (this.citationRefs[ref.refname!]) {
             this.citationRefs[ref.refname!].push(ref);
@@ -1641,7 +1653,7 @@ class document extends Element implements Document {
         this.noteRefname(ref);
     }
 
-    noteSubstitutionDef(subdef: INode, defName: string, msgnode: INode) {
+    public noteSubstitutionDef(subdef: INode, defName: string, msgnode: INode) {
         const name = whitespaceNormalizeName(defName);
         if (Object.keys(this.substitutionDefs).includes(name)) {
             const msg = this.reporter.error(`Duplicate substitution definition name: "${name}".`, { baseNode: subdef });
@@ -1655,23 +1667,23 @@ class document extends Element implements Document {
         this.substitutionNames[fullyNormalizeName(name)] = name;
     }
 
-    noteSubstitutionRef(subref: INode, refname: string) {
+    public noteSubstitutionRef(subref: INode, refname: string) {
         subref.refname = whitespaceNormalizeName(refname);
     }
 
-    notePending(pending: INode, priority: number) {
+    public notePending(pending: INode, priority: number) {
         this.transformer.addPending(pending, priority);
     }
 
-    noteParseMessage(message: any) {
+    public noteParseMessage(message: any) {
         this.parseMessages.push(message);
     }
 
-    noteTransformMessage(message: any) {
+    public noteTransformMessage(message: any) {
         this.transformMessages.push(message);
     }
 
-    noteSource(source: string, offset: number) {
+    public noteSource(source: string, offset: number) {
         this.currentSource = source;
         if (offset === undefined) {
             this.currentLine = offset;
@@ -1680,7 +1692,7 @@ class document extends Element implements Document {
         }
     }
 
-    getDecoration() {
+    public getDecoration() {
         if (!this.decoration) {
             this.decoration = new decoration();
             const index = this.firstChildNotMatchingClass(Titular);
@@ -1707,7 +1719,7 @@ class FixedTextElement extends TextElement {
 class title extends TextElement {
 /* eslint-disable-next-line no-useless-constructor */
     // @ts-ignore
-    constructor(...args) {
+    public constructor(...args) {
         // @ts-ignore
         super(...args);
         this.classTypes = [Titular, PreBibliographic];
@@ -1717,7 +1729,7 @@ class title extends TextElement {
 class subtitle extends TextElement {
 /* eslint-disable-next-line no-useless-constructor */
     // @ts-ignore
-    constructor(...args) {
+    public constructor(...args) {
         // @ts-ignore
         super(...args);
         this.classTypes = [Titular, PreBibliographic];
@@ -1727,7 +1739,7 @@ class subtitle extends TextElement {
 class rubric extends TextElement {
 /* eslint-disable-next-line no-useless-constructor */
     // @ts-ignore
-    constructor(...args) {
+    public constructor(...args) {
         // @ts-ignore
         super(...args);
         this.classTypes = [Titular];
@@ -1740,7 +1752,7 @@ class rubric extends TextElement {
 
 class docinfo extends Element {
     // @ts-ignore
-    constructor(...args) {
+    public constructor(...args) {
         // @ts-ignore
         super(...args);
         this.classTypes = [Bibliographic];
@@ -1749,7 +1761,7 @@ class docinfo extends Element {
 
 class author extends TextElement {
     // @ts-ignore
-    constructor(...args) {
+    public constructor(...args) {
         // @ts-ignore
         super(...args);
         this.classTypes = [Bibliographic];
@@ -1758,7 +1770,7 @@ class author extends TextElement {
 
 class authors extends Element {
     // @ts-ignore
-    constructor(...args) {
+    public constructor(...args) {
         // @ts-ignore
         super(...args);
         this.classTypes = [Bibliographic];
@@ -1767,7 +1779,7 @@ class authors extends Element {
 
 class organization extends TextElement {
     // @ts-ignore
-    constructor(...args) {
+    public constructor(...args) {
         // @ts-ignore
         super(...args);
         this.classTypes = [Bibliographic];
@@ -1776,7 +1788,7 @@ class organization extends TextElement {
 
 class address extends FixedTextElement {
     // @ts-ignore
-    constructor(...args) {
+    public constructor(...args) {
         // @ts-ignore
         super(...args);
         this.classTypes = [Bibliographic];
@@ -1785,7 +1797,7 @@ class address extends FixedTextElement {
 
 class contact extends TextElement {
     // @ts-ignore
-    constructor(...args) {
+    public constructor(...args) {
         // @ts-ignore
         super(...args);
         this.classTypes = [Bibliographic];
@@ -1794,7 +1806,7 @@ class contact extends TextElement {
 
 class version extends TextElement {
     // @ts-ignore
-    constructor(...args) {
+    public constructor(...args) {
         // @ts-ignore
         super(...args);
         this.classTypes = [Bibliographic];
@@ -1803,7 +1815,7 @@ class version extends TextElement {
 
 class revision extends TextElement {
     // @ts-ignore
-    constructor(...args) {
+    public constructor(...args) {
         // @ts-ignore
         super(...args);
         this.classTypes = [Bibliographic];
@@ -1812,7 +1824,7 @@ class revision extends TextElement {
 
 class status extends TextElement {
     // @ts-ignore
-    constructor(...args) {
+    public constructor(...args) {
         // @ts-ignore
         super(...args);
         this.classTypes = [Bibliographic];
@@ -1821,7 +1833,7 @@ class status extends TextElement {
 
 class date extends TextElement {
     // @ts-ignore
-    constructor(...args) {
+    public constructor(...args) {
         // @ts-ignore
         super(...args);
         this.classTypes = [Bibliographic];
@@ -1830,7 +1842,7 @@ class date extends TextElement {
 
 class copyright extends TextElement {
     // @ts-ignore
-    constructor(...args) {
+    public constructor(...args) {
         // @ts-ignore
         super(...args);
         this.classTypes = [Bibliographic];
@@ -1841,7 +1853,7 @@ class copyright extends TextElement {
 class section extends Element {
     /* eslint-disable-next-line no-useless-constructor */
     // @ts-ignore
-    constructor(...args) {
+    public constructor(...args) {
         // @ts-ignore
         super(...args);
         this.classTypes = [Structural];
@@ -1860,7 +1872,7 @@ class section extends Element {
  */
 class topic extends Element {
     // @ts-ignore
-    constructor(...args) {
+    public constructor(...args) {
         // @ts-ignore
         super(...args);
         this.classTypes = [Structural];
@@ -1883,7 +1895,7 @@ class topic extends Element {
 
 class sidebar extends Element {
     // @ts-ignore
-    constructor(...args) {
+    public constructor(...args) {
         // @ts-ignore
         super(...args);
         this.classTypes = [Structural];
@@ -1893,7 +1905,7 @@ class sidebar extends Element {
 class transition extends Element {
 /* eslint-disable-next-line no-useless-constructor */
     // @ts-ignore
-    constructor(...args) {
+    public constructor(...args) {
         // @ts-ignore
         super(...args);
         this.classTypes = [Structural];
@@ -1907,7 +1919,7 @@ class transition extends Element {
 class paragraph extends TextElement {
 /* eslint-disable-next-line no-useless-constructor */
     // @ts-ignore
-    constructor(...args) {
+    public constructor(...args) {
         // @ts-ignore
         super(...args);
         this.classTypes = [General];
@@ -1916,7 +1928,7 @@ class paragraph extends TextElement {
 
 class compound extends Element {
     // @ts-ignore
-    constructor(...args) {
+    public constructor(...args) {
         // @ts-ignore
         super(...args);
         this.classTypes = [General];
@@ -1926,7 +1938,7 @@ class compound extends Element {
 
 class container extends Element {
     // @ts-ignore
-    constructor(...args) {
+    public constructor(...args) {
         // @ts-ignore
         super(...args);
         this.classTypes = [General];
@@ -1936,7 +1948,7 @@ class container extends Element {
 class bullet_list extends Element {
 /* eslint-disable-next-line no-useless-constructor */
     // @ts-ignore
-    constructor(...args) {
+    public constructor(...args) {
         // @ts-ignore
         super(...args);
         this.classTypes = [Sequential];
@@ -1955,7 +1967,7 @@ class enumerated_list extends Element {
 
     /* eslint-disable-next-line no-useless-constructor */
     // @ts-ignore
-    constructor(...args) {
+    public constructor(...args) {
         // @ts-ignore
         super(...args);
         this.classTypes = [Sequential];
@@ -1966,7 +1978,7 @@ class enumerated_list extends Element {
 class list_item extends Element {
 /* eslint-disable-next-line no-useless-constructor */
     // @ts-ignore
-    constructor(...args) {
+    public constructor(...args) {
         // @ts-ignore
         super(...args);
         this.classTypes = [Part];
@@ -1977,7 +1989,7 @@ class list_item extends Element {
 class definition_list extends Element {
 /* eslint-disable-next-line no-useless-constructor */
     // @ts-ignore
-    constructor(...args) {
+    public constructor(...args) {
         // @ts-ignore
         super(...args);
         this.classTypes = [Sequential];
@@ -1988,7 +2000,7 @@ class definition_list extends Element {
 class definition_list_item extends Element {
 /* eslint-disable-next-line no-useless-constructor */
     // @ts-ignore
-    constructor(...args) {
+    public constructor(...args) {
         // @ts-ignore
         super(...args);
         this.classTypes = [Part];
@@ -1998,7 +2010,7 @@ class definition_list_item extends Element {
 class term extends TextElement {
 /* eslint-disable-next-line no-useless-constructor */
     // @ts-ignore
-    constructor(...args) {
+    public constructor(...args) {
         // @ts-ignore
         super(...args);
         this.classTypes = [Part];
@@ -2008,7 +2020,7 @@ class term extends TextElement {
 class classifier extends TextElement {
 /* eslint-disable-next-line no-useless-constructor */
     // @ts-ignore
-    constructor(...args) {
+    public constructor(...args) {
         // @ts-ignore
         super(...args);
         this.classTypes = [Part];
@@ -2017,7 +2029,7 @@ class classifier extends TextElement {
 class definition extends Element {
 /* eslint-disable-next-line no-useless-constructor */
     // @ts-ignore
-    constructor(...args) {
+    public constructor(...args) {
         // @ts-ignore
         super(...args);
         this.classTypes = [Part];
@@ -2030,7 +2042,7 @@ class classifier(Part, TextElement): pass
 class field_list extends Element {
 /* eslint-disable-next-line no-useless-constructor */
     // @ts-ignore
-    constructor(...args) {
+    public constructor(...args) {
         // @ts-ignore
         super(...args);
         this.classTypes = [Sequential];
@@ -2039,7 +2051,7 @@ class field_list extends Element {
 class field extends Element {
 /* eslint-disable-next-line no-useless-constructor */
     // @ts-ignore
-    constructor(...args) {
+    public constructor(...args) {
         // @ts-ignore
         super(...args);
         this.classTypes = [Part];
@@ -2049,7 +2061,7 @@ class field extends Element {
 class field_name extends TextElement {
 /* eslint-disable-next-line no-useless-constructor */
     // @ts-ignore
-    constructor(...args) {
+    public constructor(...args) {
         // @ts-ignore
         super(...args);
         this.classTypes = [Part];
@@ -2059,7 +2071,7 @@ class field_name extends TextElement {
 class field_body extends Element {
 /* eslint-disable-next-line no-useless-constructor */
     // @ts-ignore
-    constructor(...args) {
+    public constructor(...args) {
         // @ts-ignore
         super(...args);
         this.classTypes = [Part];
@@ -2068,7 +2080,7 @@ class field_body extends Element {
 
 class option extends Element {
     // @ts-ignore
-    constructor(...args) {
+    public constructor(...args) {
         // @ts-ignore
         super(...args);
         this.classTypes = [Part];
@@ -2079,14 +2091,14 @@ class option extends Element {
 /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
 class option_argument extends TextElement {
     // @ts-ignore
-    constructor(...args) {
+    public constructor(...args) {
         // @ts-ignore
         super(...args);
         this.classTypes = [Part];
     }
 
     // fixme test this
-    astext() {
+    public astext() {
         const r = super.astext();
         return (this.attributes.delimiter || ' ') + r;
     }
@@ -2095,7 +2107,7 @@ class option_argument extends TextElement {
 /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
 class option_group extends Element {
     // @ts-ignore
-    constructor(...args) {
+    public constructor(...args) {
         // @ts-ignore
         super(...args);
         this.classTypes = [Part];
@@ -2107,7 +2119,7 @@ class option_group extends Element {
 class option_list extends Element {
 /* eslint-disable-next-line no-useless-constructor */
     // @ts-ignore
-    constructor(...args) {
+    public constructor(...args) {
         // @ts-ignore
         super(...args);
         this.classTypes = [Sequential];
@@ -2117,7 +2129,7 @@ class option_list extends Element {
 class option_list_item extends Element {
 /* eslint-disable-next-line no-useless-constructor */
     // @ts-ignore
-    constructor(...args) {
+    public constructor(...args) {
         // @ts-ignore
         super(...args);
         this.classTypes = [Part];
@@ -2129,7 +2141,7 @@ class option_list_item extends Element {
 class option_string extends TextElement {
 /* eslint-disable-next-line no-useless-constructor */
     // @ts-ignore
-    constructor(...args) {
+    public constructor(...args) {
         // @ts-ignore
         super(...args);
         this.classTypes = [Part];
@@ -2138,7 +2150,7 @@ class option_string extends TextElement {
 class description extends Element {
 /* eslint-disable-next-line no-useless-constructor */
     // @ts-ignore
-    constructor(...args) {
+    public constructor(...args) {
         // @ts-ignore
         super(...args);
         this.classTypes = [Part];
@@ -2149,7 +2161,7 @@ class description extends Element {
 class literal_block extends FixedTextElement {
 /* eslint-disable-next-line no-useless-constructor */
     // @ts-ignore
-    constructor(...args) {
+    public constructor(...args) {
         // @ts-ignore
         super(...args);
         this.classTypes = [General];
@@ -2160,7 +2172,7 @@ class literal_block extends FixedTextElement {
 class doctest_block extends FixedTextElement {
 /* eslint-disable-next-line no-useless-constructor */
     // @ts-ignore
-    constructor(...args) {
+    public constructor(...args) {
         // @ts-ignore
         super(...args);
         this.classTypes = [General];
@@ -2171,7 +2183,7 @@ class doctest_block extends FixedTextElement {
 class math_block extends FixedTextElement {
 /* eslint-disable-next-line no-useless-constructor */
     // @ts-ignore
-    constructor(...args) {
+    public constructor(...args) {
         // @ts-ignore
         super(...args);
         this.classTypes = [General];
@@ -2181,7 +2193,7 @@ class math_block extends FixedTextElement {
 class line_block extends Element {
 /* eslint-disable-next-line no-useless-constructor */
     // @ts-ignore
-    constructor(...args) {
+    public constructor(...args) {
         // @ts-ignore
         super(...args);
         this.classTypes = [General];
@@ -2191,7 +2203,7 @@ class line_block extends Element {
 class line extends TextElement implements HasIndent {
     indent: any;
 
-    _init() {
+    public _init() {
         super._init();
         this.indent = undefined;
         this.classTypes = [Part];
@@ -2202,7 +2214,7 @@ class line extends TextElement implements HasIndent {
 class block_quote extends Element {
 /* eslint-disable-next-line no-useless-constructor */
     // @ts-ignore
-    constructor(...args) {
+    public constructor(...args) {
         // @ts-ignore
         super(...args);
         this.classTypes = [General];
@@ -2211,7 +2223,7 @@ class block_quote extends Element {
 class attribution extends TextElement {
 /* eslint-disable-next-line no-useless-constructor */
     // @ts-ignore
-    constructor(...args) {
+    public constructor(...args) {
         // @ts-ignore
         super(...args);
         this.classTypes = [Part];
@@ -2220,7 +2232,7 @@ class attribution extends TextElement {
 class attention extends Element {
 /* eslint-disable-next-line no-useless-constructor */
     // @ts-ignore
-    constructor(...args) {
+    public constructor(...args) {
         // @ts-ignore
         super(...args);
         this.classTypes = [Admonition];
@@ -2229,7 +2241,7 @@ class attention extends Element {
 class caution extends Element {
 /* eslint-disable-next-line no-useless-constructor */
     // @ts-ignore
-    constructor(...args) {
+    public constructor(...args) {
         // @ts-ignore
         super(...args);
         this.classTypes = [Admonition];
@@ -2238,7 +2250,7 @@ class caution extends Element {
 class danger extends Element {
 /* eslint-disable-next-line no-useless-constructor */
     // @ts-ignore
-    constructor(...args) {
+    public constructor(...args) {
         // @ts-ignore
         super(...args);
         this.classTypes = [Admonition];
@@ -2247,7 +2259,7 @@ class danger extends Element {
 class error extends Element {
 /* eslint-disable-next-line no-useless-constructor */
     // @ts-ignore
-    constructor(...args) {
+    public constructor(...args) {
         // @ts-ignore
         super(...args);
         this.classTypes = [Admonition];
@@ -2256,7 +2268,7 @@ class error extends Element {
 class important extends Element {
 /* eslint-disable-next-line no-useless-constructor */
     // @ts-ignore
-    constructor(...args) {
+    public constructor(...args) {
         // @ts-ignore
         super(...args);
         this.classTypes = [Admonition];
@@ -2265,7 +2277,7 @@ class important extends Element {
 class note extends Element {
 /* eslint-disable-next-line no-useless-constructor */
     // @ts-ignore
-    constructor(...args) {
+    public constructor(...args) {
         // @ts-ignore
         super(...args);
         this.classTypes = [Admonition];
@@ -2275,7 +2287,7 @@ class note extends Element {
 class tip extends Element {
 /* eslint-disable-next-line no-useless-constructor */
     // @ts-ignore
-    constructor(...args) {
+    public constructor(...args) {
         // @ts-ignore
         super(...args);
         this.classTypes = [Admonition];
@@ -2284,7 +2296,7 @@ class tip extends Element {
 class hint extends Element {
 /* eslint-disable-next-line no-useless-constructor */
     // @ts-ignore
-    constructor(...args) {
+    public constructor(...args) {
         // @ts-ignore
         super(...args);
         this.classTypes = [Admonition];
@@ -2293,7 +2305,7 @@ class hint extends Element {
 class warning extends Element {
 /* eslint-disable-next-line no-useless-constructor */
     // @ts-ignore
-    constructor(...args) {
+    public constructor(...args) {
         // @ts-ignore
         super(...args);
         this.classTypes = [Admonition];
@@ -2302,7 +2314,7 @@ class warning extends Element {
 class admonition extends Element {
 /* eslint-disable-next-line no-useless-constructor */
     // @ts-ignore
-    constructor(...args) {
+    public constructor(...args) {
         // @ts-ignore
         super(...args);
         this.classTypes = [Admonition];
@@ -2311,7 +2323,7 @@ class admonition extends Element {
 class comment extends FixedTextElement {
 /* eslint-disable-next-line no-useless-constructor */
     // @ts-ignore
-    constructor(...args) {
+    public constructor(...args) {
         // @ts-ignore
         super(...args);
         this.classTypes = [Special, Invisible, Inline, Targetable];
@@ -2321,7 +2333,7 @@ class comment extends FixedTextElement {
 class substitution_definition extends TextElement {
 /* eslint-disable-next-line no-useless-constructor */
     // @ts-ignore
-    constructor(...args) {
+    public constructor(...args) {
         // @ts-ignore
         super(...args);
         this.classTypes = [Special, Invisible];
@@ -2332,7 +2344,7 @@ class target extends TextElement {
 
     /* eslint-disable-next-line no-useless-constructor */
     // @ts-ignore
-    constructor(...args) {
+    public constructor(...args) {
         // @ts-ignore
         super(...args);
         this.classTypes = [Special, Invisible, Inline, Targetable];
@@ -2341,7 +2353,7 @@ class target extends TextElement {
 class footnote extends Element {
 /* eslint-disable-next-line no-useless-constructor */
     // @ts-ignore
-    constructor(...args) {
+    public constructor(...args) {
         // @ts-ignore
         super(...args);
         this.classTypes = [General, BackLinkable, Labeled, Targetable];
@@ -2350,7 +2362,7 @@ class footnote extends Element {
 class citation extends Element {
 /* eslint-disable-next-line no-useless-constructor */
     // @ts-ignore
-    constructor(...args) {
+    public constructor(...args) {
         // @ts-ignore
         super(...args);
         this.classTypes = [General, BackLinkable, Labeled, Targetable];
@@ -2359,7 +2371,7 @@ class citation extends Element {
 class label extends TextElement {
 /* eslint-disable-next-line no-useless-constructor */
     // @ts-ignore
-    constructor(...args) {
+    public constructor(...args) {
         // @ts-ignore
         super(...args);
         this.classTypes = [Part];
@@ -2368,7 +2380,7 @@ class label extends TextElement {
 class figure extends Element {
 /* eslint-disable-next-line no-useless-constructor */
     // @ts-ignore
-    constructor(...args) {
+    public constructor(...args) {
         // @ts-ignore
         super(...args);
         this.classTypes = [General];
@@ -2377,7 +2389,7 @@ class figure extends Element {
 class caption extends TextElement {
 /* eslint-disable-next-line no-useless-constructor */
     // @ts-ignore
-    constructor(...args) {
+    public constructor(...args) {
         // @ts-ignore
         super(...args);
         this.classTypes = [Part];
@@ -2386,7 +2398,7 @@ class caption extends TextElement {
 class legend extends Element {
 /* eslint-disable-next-line no-useless-constructor */
     // @ts-ignore
-    constructor(...args) {
+    public constructor(...args) {
         // @ts-ignore
         super(...args);
         this.classTypes = [Part];
@@ -2396,7 +2408,7 @@ class legend extends Element {
 class table extends Element {
 /* eslint-disable-next-line no-useless-constructor */
     // @ts-ignore
-    constructor(...args) {
+    public constructor(...args) {
         // @ts-ignore
         super(...args);
         this.classTypes = [General];
@@ -2406,7 +2418,7 @@ class tgroup extends Element {
     stubs?: any[];
     /* eslint-disable-next-line no-useless-constructor */
     // @ts-ignore
-    constructor(...args) {
+    public constructor(...args) {
         // @ts-ignore
         super(...args);
         this.classTypes = [Part];
@@ -2415,7 +2427,7 @@ class tgroup extends Element {
 class colspec extends Element {
 /* eslint-disable-next-line no-useless-constructor */
     // @ts-ignore
-    constructor(...args) {
+    public constructor(...args) {
         // @ts-ignore
         super(...args);
         this.classTypes = [Part];
@@ -2424,7 +2436,7 @@ class colspec extends Element {
 class thead extends Element {
 /* eslint-disable-next-line no-useless-constructor */
     // @ts-ignore
-    constructor(...args) {
+    public constructor(...args) {
         // @ts-ignore
         super(...args);
         this.classTypes = [Part];
@@ -2433,7 +2445,7 @@ class thead extends Element {
 class tbody extends Element {
 /* eslint-disable-next-line no-useless-constructor */
     // @ts-ignore
-    constructor(...args) {
+    public constructor(...args) {
         // @ts-ignore
         super(...args);
         this.classTypes = [Part];
@@ -2443,7 +2455,7 @@ class row extends Element {
     column?: number;
     /* eslint-disable-next-line no-useless-constructor */
     // @ts-ignore
-    constructor(...args) {
+    public constructor(...args) {
         // @ts-ignore
         super(...args);
         this.classTypes = [Part];
@@ -2452,7 +2464,7 @@ class row extends Element {
 class entry extends Element {
 /* eslint-disable-next-line no-useless-constructor */
     // @ts-ignore
-    constructor(...args) {
+    public constructor(...args) {
         // @ts-ignore
         super(...args);
         this.classTypes = [Part];
@@ -2461,7 +2473,7 @@ class entry extends Element {
 
 /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
 class system_message extends Element {
-    constructor(message: any, children: INode[], attributes: IAttributes) {
+    public constructor(message: any, children: INode[], attributes: IAttributes) {
         super((attributes.rawsource || ''),
             (message ? [new paragraph('', message), ...children] : children),
             attributes);
@@ -2499,11 +2511,13 @@ class pending extends Element {
 
     transform: any;
 
-    constructor(transform: any,
+    public constructor(
+        transform: any,
         details: any,
         rawsource = '',
         children: INode[],
-        attributes: IAttributes) {
+        attributes: IAttributes
+    ) {
         super(rawsource, children, attributes);
         /** The `docutils.transforms.Transform` class implementing the pending
      operation. */
@@ -2554,7 +2568,7 @@ class pending extends Element {
 
 class raw extends FixedTextElement {
     // @ts-ignore
-    constructor(...args) {
+    public constructor(...args) {
         // @ts-ignore
         super(...args);
         this.classTypes = [Special, Inline, PreBibliographic];
@@ -2567,7 +2581,7 @@ class raw extends FixedTextElement {
 class emphasis extends TextElement {
 /* eslint-disable-next-line no-useless-constructor */
     // @ts-ignore
-    constructor(...args) {
+    public constructor(...args) {
         // @ts-ignore
         super(...args);
         this.classTypes = [Inline];
@@ -2576,7 +2590,7 @@ class emphasis extends TextElement {
 class strong extends TextElement {
 /* eslint-disable-next-line no-useless-constructor */
     // @ts-ignore
-    constructor(...args) {
+    public constructor(...args) {
         // @ts-ignore
         super(...args);
         this.classTypes = [Inline];
@@ -2585,7 +2599,7 @@ class strong extends TextElement {
 class literal extends TextElement {
 /* eslint-disable-next-line no-useless-constructor */
     // @ts-ignore
-    constructor(...args) {
+    public constructor(...args) {
         // @ts-ignore
         super(...args);
         this.classTypes = [Inline];
@@ -2595,7 +2609,7 @@ class reference extends TextElement {
     indirectReferenceName: string | undefined;
     /* eslint-disable-next-line no-useless-constructor */
     // @ts-ignore
-    constructor(...args) {
+    public constructor(...args) {
         // @ts-ignore
         super(...args);
         this.classTypes = [General, Inline, Referential];
@@ -2605,7 +2619,7 @@ class reference extends TextElement {
 class footnote_reference extends TextElement {
 /* eslint-disable-next-line no-useless-constructor */
     // @ts-ignore
-    constructor(...args) {
+    public constructor(...args) {
         // @ts-ignore
         super(...args);
         this.classTypes = [General, Inline, Referential];
@@ -2615,7 +2629,7 @@ class footnote_reference extends TextElement {
 class citation_reference extends TextElement {
 /* eslint-disable-next-line no-useless-constructor */
     // @ts-ignore
-    constructor(...args) {
+    public constructor(...args) {
         // @ts-ignore
         super(...args);
         this.classTypes = [General, Inline, Referential];
@@ -2625,7 +2639,7 @@ class citation_reference extends TextElement {
 class substitution_reference extends TextElement {
 /* eslint-disable-next-line no-useless-constructor */
     // @ts-ignore
-    constructor(...args) {
+    public constructor(...args) {
         // @ts-ignore
         super(...args);
         this.classTypes = [Inline];
@@ -2635,7 +2649,7 @@ class substitution_reference extends TextElement {
 class title_reference extends TextElement {
 /* eslint-disable-next-line no-useless-constructor */
     // @ts-ignore
-    constructor(...args) {
+    public constructor(...args) {
         // @ts-ignore
         super(...args);
         this.classTypes = [Inline];
@@ -2646,7 +2660,7 @@ class title_reference extends TextElement {
 class abbreviation extends TextElement {
 /* eslint-disable-next-line no-useless-constructor */
     // @ts-ignore
-    constructor(...args) {
+    public constructor(...args) {
         // @ts-ignore
         super(...args);
         this.classTypes = [Inline];
@@ -2656,7 +2670,7 @@ class abbreviation extends TextElement {
 class acronym extends TextElement {
 /* eslint-disable-next-line no-useless-constructor */
     // @ts-ignore
-    constructor(...args) {
+    public constructor(...args) {
         // @ts-ignore
         super(...args);
         this.classTypes = [Inline];
@@ -2666,7 +2680,7 @@ class acronym extends TextElement {
 class superscript extends TextElement {
 /* eslint-disable-next-line no-useless-constructor */
     // @ts-ignore
-    constructor(...args) {
+    public constructor(...args) {
         // @ts-ignore
         super(...args);
         this.classTypes = [Inline];
@@ -2676,7 +2690,7 @@ class superscript extends TextElement {
 class subscript extends TextElement {
 /* eslint-disable-next-line no-useless-constructor */
     // @ts-ignore
-    constructor(...args) {
+    public constructor(...args) {
         // @ts-ignore
         super(...args);
         this.classTypes = [Inline];
@@ -2685,7 +2699,7 @@ class subscript extends TextElement {
 class math extends TextElement {
 /* eslint-disable-next-line no-useless-constructor */
     // @ts-ignore
-    constructor(...args) {
+    public constructor(...args) {
         // @ts-ignore
         super(...args);
         this.classTypes = [Inline];
@@ -2694,13 +2708,13 @@ class math extends TextElement {
 class image extends Element {
 /* eslint-disable-next-line no-useless-constructor */
     // @ts-ignore
-    constructor(...args) {
+    public constructor(...args) {
         // @ts-ignore
         super(...args);
         this.classTypes = [General, Inline];
     }
 
-    astext() {
+    public astext() {
         return this.attributes.alt || '';
     }
 }
@@ -2709,7 +2723,7 @@ class image extends Element {
 class inline extends TextElement {
 /* eslint-disable-next-line no-useless-constructor */
     // @ts-ignore
-    constructor(...args) {
+    public constructor(...args) {
         // @ts-ignore
         super(...args);
         this.classTypes = [Inline];
@@ -2719,7 +2733,7 @@ class inline extends TextElement {
 class problematic extends TextElement {
 /* eslint-disable-next-line no-useless-constructor */
     // @ts-ignore
-    constructor(...args) {
+    public constructor(...args) {
         // @ts-ignore
         super(...args);
         this.classTypes = [Inline];
@@ -2729,7 +2743,7 @@ class problematic extends TextElement {
 class generated extends TextElement {
 /* eslint-disable-next-line no-useless-constructor */
     // @ts-ignore
-    constructor(...args) {
+    public constructor(...args) {
         // @ts-ignore
         super(...args);
         this.classTypes = [Inline];

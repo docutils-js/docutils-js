@@ -2,21 +2,21 @@ export default class OptionParser {
     private rargs?: string[];
     private largs?: string[];
     private values: any;
-    constructor(args: any) {
+    public constructor(args: any) {
 
     }
-    _getArgs(args: string[]) {
+    public _getArgs(args: string[]) {
         if (args === undefined) {
             args = process.argv.slice(2);
         }
         return args;
     }
 
-    getDefaultValues() {
+    public getDefaultValues() {
         return {};
     }
 
-    _processArgs(largs: string[], rargs: string[], values: any) {
+    public _processArgs(largs: string[], rargs: string[], values: any) {
         while (rargs.length) {
             const arg = rargs[0];
             //          console.log(`arg is ${arg}`)
@@ -32,7 +32,7 @@ export default class OptionParser {
         }
     }
 
-    parseArgs(args: string[], values?: any ): any {
+    public parseArgs(args: string[], values?: any): any {
         /* no idea what is what */
         //      console.log(`in base opton parser`);
         const rargs = this._getArgs(args);
@@ -56,11 +56,11 @@ export default class OptionParser {
         return this.checkValues(values, args);
     }
 
-    private _processLongOpt(rargs: string[], values: any) {
+    public _processLongOpt(rargs: string[], values: any) {
 
     }
 
-    private checkValues(values: any, args: any) {
+    public checkValues(values: any, args: any) {
 
     }
 }
