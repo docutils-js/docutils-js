@@ -68,15 +68,15 @@ class DraftTranslator extends GenericNodeVisitor {
         this.text = '';
     }
 
-    /* eslint-disable-next-line camelcase,no-unused-vars,no-empty */
+    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,no-unused-vars,no-empty */
     visit_document(node: INode) {
     }
 
-    /* eslint-disable-next-line camelcase,no-unused-vars,no-empty */
+    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,no-unused-vars,no-empty */
     depart_document(node: INode) {
     }
 
-    /* eslint-disable-next-line camelcase */
+    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
     default_visit(node: INode) {
         if (node.isInline()) {
             const mappedStyle = inlineNodeMap[node.tagname];
@@ -101,7 +101,7 @@ class DraftTranslator extends GenericNodeVisitor {
         this.level += 1;
     }
 
-    /* eslint-disable-next-line camelcase,no-unused-vars */
+    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,no-unused-vars */
     default_departure(node: INode) {
         if (node.isInline()) {
             const mappedStyle = inlineNodeMap[node.tagname];
@@ -144,12 +144,12 @@ class DraftTranslator extends GenericNodeVisitor {
         this.level -= 1;
     }
 
-    /* eslint-disable-next-line camelcase */
+    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
     visit_Text(node: INode) {
         this.ancestors[this.ancestors.length - 1][2].push(node.astext());
     }
 
-    /* eslint-disable-next-line camelcase,no-unused-vars */
+    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,no-unused-vars */
     depart_Text(node: INode) {
         const text = node.astext();
         /* eslint-disable-next-line no-console */

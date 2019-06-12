@@ -239,7 +239,7 @@ abstract class RSTState extends StateWS {
         return undefined;
     }
 
-    /* eslint-disable-next-line camelcase */
+    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
     title_inconsistent(sourcetext: string, lineno: number) {
         const error = this.reporter!.severe(
             'Title level inconsistent:', [new nodes.literal_block('', sourcetext)], {line: lineno},
@@ -311,7 +311,7 @@ abstract class RSTState extends StateWS {
         return [[p, ...messages], literalNext];
     }
 
-    /* eslint-disable-next-line camelcase */
+    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
     inline_text(text: string, lineno: number) {
         const r = this.inliner!.parse(text, {lineno, memo: this.memo, parent: this.parent!});
         return r;

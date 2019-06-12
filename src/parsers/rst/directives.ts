@@ -106,7 +106,7 @@ function directive(directiveName: string, languageModule: IRSTLanguage, document
 
  Raise ``ValueError`` if no argument is found.
  */
-/* eslint-disable-next-line camelcase */
+/* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
 function class_option(argument: any) {
 /*
     if argument is None:

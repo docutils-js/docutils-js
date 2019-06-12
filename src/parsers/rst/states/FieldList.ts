@@ -3,7 +3,7 @@ import SpecializedBody from './SpecializedBody';
 /** Second and subsequent field_list fields. */
 class FieldList extends SpecializedBody {
     /** Field list field. */
-    /* eslint-disable-next-line camelcase */
+    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
     // @ts-ignore
     field_marker(match, context, nextState) {
         const [field, blankFinish] = this.field(match);

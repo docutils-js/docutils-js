@@ -30,7 +30,7 @@ class SpecializedBody extends Body {
     }
 
     /* istanbul ignore next */
-    /* eslint-disable-next-line camelcase,no-unused-vars */
+    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,no-unused-vars */
     // @ts-ignore
     field_marker() {
         // @ts-ignore
@@ -38,7 +38,7 @@ class SpecializedBody extends Body {
     }
 
     /* istanbul ignore next */
-    /* eslint-disable-next-line camelcase,no-unused-vars */
+    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,no-unused-vars */
     // @ts-ignore
     option_marker() {
         // @ts-ignore
@@ -53,7 +53,7 @@ class SpecializedBody extends Body {
     }
 
     /* istanbul ignore next */
-    /* eslint-disable-next-line camelcase,no-unused-vars */
+    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,no-unused-vars */
     // @ts-ignore
     line_block() {
         // @ts-ignore
@@ -61,7 +61,7 @@ class SpecializedBody extends Body {
     }
 
     /* istanbul ignore next */
-    /* eslint-disable-next-line camelcase,no-unused-vars */
+    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,no-unused-vars */
     // @ts-ignore
     grid_table_top() {
         // @ts-ignore
@@ -69,7 +69,7 @@ class SpecializedBody extends Body {
     }
 
     /* istanbul ignore next */
-    /* eslint-disable-next-line camelcase,no-unused-vars */
+    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,no-unused-vars */
     // @ts-ignore
     simple_table_top() {
         // @ts-ignore
@@ -77,7 +77,7 @@ class SpecializedBody extends Body {
     }
 
     /* istanbul ignore next */
-    /* eslint-disable-next-line camelcase,no-unused-vars */
+    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,no-unused-vars */
     // @ts-ignore
     explicit_markup() {
         // @ts-ignore
@@ -106,7 +106,7 @@ class SpecializedBody extends Body {
     }
 
     /* istanbul ignore next */
-    /* eslint-disable-next-line camelcase,no-unused-vars */
+    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,no-unused-vars */
     invalid_input(match: any, context: any[], nextState: any): any[] {
         this.rstStateMachine.previousLine();
         throw new EOFError();

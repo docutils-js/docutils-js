@@ -43,7 +43,7 @@ class POJOTranslator extends GenericNodeVisitor {
         this.output = {};
     }
 
-    /* eslint-disable-next-line camelcase */
+    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
     default_visit(node: IElement | INode) {
         if ((<IElement>node).attlist) {
 
@@ -54,7 +54,7 @@ class POJOTranslator extends GenericNodeVisitor {
         }
     }
 
-    /* eslint-disable-next-line camelcase,no-unused-vars */
+    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,no-unused-vars */
     default_departure(node: INode) {
         const me = this.ancestors.pop();
         if (this.level === 1) {
@@ -67,14 +67,14 @@ class POJOTranslator extends GenericNodeVisitor {
         this.level -= 1;
     }
 
-    /* eslint-disable-next-line camelcase */
+    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
     visit_Text(node: Text) {
         this.ancestors[this.ancestors.length - 1][2].push(node.astext());
         //      const text = escapeXml(node.astext())
         //      this.output.push(text);
     }
 
-    /* eslint-disable-next-line camelcase,no-unused-vars */
+    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,no-unused-vars */
     depart_Text(node: Text) {
     }
 }

@@ -17,7 +17,7 @@ class SubstitutionDef extends Body {
     }
 
 /** Return a list of nodes. */
-    /* eslint-disable-next-line camelcase,no-unused-vars */
+    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,no-unused-vars */
     // @ts-ignore
     literal_block(match, context, nextState) {
         /* eslint-disable-next-line no-unused-vars */
@@ -40,7 +40,7 @@ class SubstitutionDef extends Body {
         return nodelist;
     }
 
-    /* eslint-disable-next-line camelcase,no-unused-vars */
+    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,no-unused-vars */
     quoted_literal_block() {
         const absLineOffset = this.rstStateMachine.absLineOffset();
         const offset = this.rstStateMachine.lineOffset;
@@ -62,7 +62,7 @@ class SubstitutionDef extends Body {
         return parentNode.children;
     }
 
-    /* eslint-disable-next-line camelcase,no-unused-vars */
+    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,no-unused-vars */
     // @ts-ignore
     embedded_directive(match, context, nextState) {
         const [nodelist, blankFinish] = this.directive(

@@ -4,7 +4,7 @@ import MarkupError from '../MarkupError';
 class Explicit extends SpecializedBody {
     private explicit: any;
     /** Footnotes, hyperlink targets, directives, comments. */
-    /* eslint-disable-next-line camelcase */
+    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
     // @ts-ignore
     explicit_markup(match, context, nextState) {
         const [nodelist, blankFinish] = this.explicit_construct(match);
@@ -14,7 +14,7 @@ class Explicit extends SpecializedBody {
     }
 
     /** Determine which explicit construct this is, parse & return it. */
-    /* eslint-disable-next-line camelcase */
+    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
     explicit_construct(match: any) {
         const errors = [];
         /* eslint-disable-next-line no-restricted-syntax */

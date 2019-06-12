@@ -69,7 +69,7 @@ class QuotedLiteralBlock extends RSTState {
     }
 
     /** Match arbitrary quote character on the first line only. */
-    /* eslint-disable-next-line camelcase */
+    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
     // @ts-ignore
     initial_quoted(match, context, nextState) {
         this.removeTransition('initial_quoted');

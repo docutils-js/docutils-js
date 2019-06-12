@@ -159,7 +159,7 @@ export interface Document extends IElement {
     reporter: IReporter;
     settings: Settings;
 
-    // eslint-disable-next-line camelcase
+    // eslint-disable-next-line @typescript-eslint/camelcase,camelcase
     transformer: Transformer;
 
     noteTransformMessage(message: any): void;

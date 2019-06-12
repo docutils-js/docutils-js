@@ -329,12 +329,12 @@ settingsOverrides, configSection, enableExitStatus } */
                       const document = pub.document!;
 
                       const Visitor = class extends nodes.GenericNodeVisitor {
-                          /* eslint-disable-next-line camelcase,no-unused-vars */
+                          /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,no-unused-vars */
                           default_departure(node: INode) {
                               /**/
                           }
 
-                          /* eslint-disable-next-line camelcase */
+                          /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
                           default_visit(node: INode) {
                               if (node.attributes && node.attributes.refuri) {
 //                                console.log(node.attributes.refuri);

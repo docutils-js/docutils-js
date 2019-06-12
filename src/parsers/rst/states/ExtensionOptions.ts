@@ -7,7 +7,7 @@ class ExtensionOptions extends FieldList {
     /* No nested parsing is done (including inline markup parsing). */
 
     /** Override `Body.parse_field_body` for simpler parsing. */
-    /* eslint-disable-next-line camelcase */
+    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
     parse_field_body(indented: string[], offset: number, node: INode) {
         const lines = [];
         /* eslint-disable-next-line no-restricted-syntax */

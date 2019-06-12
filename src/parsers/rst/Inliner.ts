@@ -139,7 +139,7 @@ class Inliner {
         this.nonUnescapedWhitespaceEscapeBefore = '(?<!(?<!\\x00)[\\s\\x00])';
     }
 
-    /* eslint-disable-next-line camelcase */
+    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
     inline_internal_target(match: any, lineno: number) {
         const [before, inlines, remaining,
                /* eslint-disable-next-line no-unused-vars */
@@ -157,7 +157,7 @@ class Inliner {
         return [before, inlines, remaining, sysmessages];
     }
 
-    /* eslint-disable-next-line camelcase */
+    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
     substitution_reference(match: any, lineno: number) {
         const [before, inlines, remaining, sysmessages, endstring] = this.inline_obj(
             match, lineno, this.patterns.substitution_ref,
@@ -186,7 +186,7 @@ class Inliner {
         return [before, inlines, remaining, sysmessages];
     }
 
-    /* eslint-disable-next-line camelcase,no-unused-vars */
+    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,no-unused-vars */
     footnote_reference(match: any, lineno: number) {
         const label = match.groups.footnotelabel;
         let refname = nodes.fullyNormalizeName(label);
@@ -246,7 +246,7 @@ class Inliner {
         return [string.substring(0, matchstart), [referencenode], string.substring(matchend), []];
     }
 
-    /* eslint-disable-next-line camelcase */
+    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
     anonymous_reference(match: any, lineno: number) {
         return this.reference(match, lineno, true);
     }
@@ -278,7 +278,7 @@ class Inliner {
         return [before, inlines, remaining, sysmessages];
     }
 
-    /* eslint-disable-next-line camelcase */
+    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
     interpreted_or_phrase_ref(match: any, lineno: number) {
         const endPattern = this.patterns.interpreted_or_phrase_ref;
         const string = match.match.input;
@@ -346,7 +346,7 @@ class Inliner {
         return [string.substring(0, match.match.index), [prb], string.substring(matchend), [msg]];
     }
 
-    /* eslint-disable-next-line camelcase */
+    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
     phrase_ref(before:any, after: any, rawsource: any, escaped: any, text: any) {
         const match = this.patterns.embedded_link.exec(escaped);
         let aliastype;
@@ -439,7 +439,7 @@ class Inliner {
            of matching opening/closing delimiters (not necessarily quotes)
            or at the end of the match.
     */
-    /* eslint-disable-next-line camelcase */
+    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
     quoted_start(match: any) {
         const string = match.result.input;
         const start = match.result.index;
@@ -457,7 +457,7 @@ class Inliner {
         return matchChars(prestart, poststart);
     }
 
-    /* eslint-disable-next-line camelcase */
+    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
     inline_obj(match: any, lineno: number, endPattern: any, nodeclass: any,
                restore_backslashes = false) {
         /* istanbul ignore if */
@@ -655,7 +655,7 @@ class Inliner {
         return [processed, messages];
     }
 
-    /* eslint-disable-next-line camelcase,no-unused-vars */
+    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,no-unused-vars */
     implicit_inline(text: string, lineno: number) {
         /*
           Check each of the patterns in `self.implicit_dispatch` for a match,

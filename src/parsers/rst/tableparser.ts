@@ -72,7 +72,7 @@ abstract class TableParser {
     /**
      * Look for a head/body row separator line; store the line index.
      */
-    /* eslint-disable-next-line camelcase */
+    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
     findHeadBodySep() {
         let i;
         for (i = 0; i < this.block.length; i += 1) {
@@ -100,7 +100,7 @@ abstract class TableParser {
 
 }
 
-/* eslint-disable-next-line camelcase */
+/* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
 function update_dict_of_lists(master: any, newdata: any) {
     Object.entries(newdata).forEach((d) => {
         const key: string = d[0];
@@ -200,7 +200,7 @@ class GridTableParser extends TableParser {
         We'll end up knowing all the row and column boundaries, cell positions
         and their dimensions.
          */
-    /* eslint-disable-next-line camelcase */
+    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
     parse_table() {
         const corners: number[][] = [[0, 0]];
         while (corners.length) {
@@ -250,7 +250,7 @@ class GridTableParser extends TableParser {
     }
 
         /** For keeping track of how much of each text column has been seen. */
-        /* eslint-disable-next-line camelcase */
+        /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
     mark_done(top: number, left: number, bottom: number, right: number) {
         // const before = top - 1; // part of assert
         const after = bottom - 1;
@@ -261,7 +261,7 @@ class GridTableParser extends TableParser {
     }
 
         /** Each text column should have been completely seen. */
-        /* eslint-disable-next-line camelcase */
+        /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
     check_parse_complete() {
         const last = this.bottom - 1;
         for (let i = 0; i < this.right; i += 1) {
@@ -274,7 +274,7 @@ class GridTableParser extends TableParser {
     }
 
         /** Starting at the top-left corner, start tracing out a cell. */
-        /* eslint-disable-next-line camelcase */
+        /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
     scan_cell(top: number, left: number) {
         // assert this.block[top][left] == '+'
         if (this.block[top][left] !== '+') {
@@ -290,7 +290,7 @@ class GridTableParser extends TableParser {
         boundaries ('+').
 
 */
-        /* eslint-disable-next-line camelcase */
+        /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
         scan_right(top: number, left: number) {
             const colseps: any = {};
         const line = this.block[top];
@@ -314,7 +314,7 @@ class GridTableParser extends TableParser {
              Look for the bottom-right corner of the cell, making note of all row
              boundaries.
              */
-        /* eslint-disable-next-line camelcase */
+        /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
     scan_down(top: number, left: number, right: number) {
         /* istanbul ignore if */
 if (typeof right === 'undefined') {
@@ -343,7 +343,7 @@ if (typeof right === 'undefined') {
         It must line up with the starting point.
         */
 
-        /* eslint-disable-next-line camelcase */
+        /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
     scan_left(top: number, left: number, bottom: number, right: number) {
         const colseps: any = {};
         const line = this.block[bottom];
@@ -369,7 +369,7 @@ if (typeof right === 'undefined') {
         /**
                 Noting row boundaries, see if we can return to the starting point.
          */
-    /* eslint-disable-next-line camelcase,no-unused-vars */
+    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,no-unused-vars */
     scan_up(top: number, left: number, bottom: number, right: number) {
         const rowseps: any = {};
         for (let i = bottom - 1; i > top; i -= 1) {
@@ -387,7 +387,7 @@ if (typeof right === 'undefined') {
         From the data collected by `scan_cell()`, convert to the final data
         structure.
         */
-    /* eslint-disable-next-line camelcase */
+    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
     structure_from_cells() {
         const rowseps: number[] = Object.keys(this.rowseps).map(parseInt); // .keys()   # list of row boundaries
         rowseps.sort((a, b) => a - b);
@@ -530,7 +530,7 @@ class SimpleTableParser extends TableParser {
         lines until a row is complete.  Call `this.parse_row` to finish the
         job.
         */
-    /* eslint-disable-next-line camelcase */
+    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
         parse_table() {
             // Top border must fully describe all table columns.
         if (!this.block[0]) {
@@ -565,7 +565,7 @@ class SimpleTableParser extends TableParser {
     }
 
 /**     Given a column span underline, return a list of (begin, end) pairs. */
-    /* eslint-disable-next-line camelcase */
+    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
     parse_columns(line: string, offset: number) {
 //        console.log(`parsing columns from ${line}, ${offset}`);
         const cols = [];
@@ -602,7 +602,7 @@ class SimpleTableParser extends TableParser {
         return cols;
     }
 
-    /* eslint-disable-next-line camelcase */
+    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
     init_row(colspec: number[][], offset: number) {
         let i = 0;
         const cells = [];
@@ -640,7 +640,7 @@ class SimpleTableParser extends TableParser {
         text from each line, and check for text in column margins.  Finally,
         adjust for insignificant whitespace.
          */
-    /* eslint-disable-next-line camelcase */
+    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
     parse_row(lines: StringList, start: number, spanline?: any[]) {
         if (!((lines && lines.length) || spanline)) {
             // # No new row, just blank lines.
@@ -673,7 +673,7 @@ class SimpleTableParser extends TableParser {
         Raise TableMarkupError if anything but whitespace is in column margins.
         Adjust the end value for the last column if there is text overflow.
         */
-    /* eslint-disable-next-line camelcase */
+    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
     check_columns(lines: any, firstLine: number, columns: any | any[]) {
         // "Infinite" value for a dummy last column's beginning, used to
         // check for text overflow:
@@ -712,7 +712,7 @@ class SimpleTableParser extends TableParser {
         columns.pop();
     }
 
-    /* eslint-disable-next-line camelcase */
+    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
     structure_from_cells() {
         const colspecs = this.columns.map(([start, end]) => end - start);
         let firstBodyRow = 0;

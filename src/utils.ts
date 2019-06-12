@@ -54,7 +54,7 @@ export function isIterable(obj: any) {
     return typeof obj[Symbol.iterator] === "function";
 }
 
-/* eslint-disable-next-line camelcase */
+/* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
 export const punctuation_chars = {
     openers: "\"\\'(<\\\\[{\\u0f3a\\u0f3c\\u169b\\u2045\\u207d\\u208d\\u2329\\u2768"
     + "\\u276a\\u276c\\u276e\\u2770\\u2772\\u2774\\u27c5\\u27e6\\u27e8\\u27ea"

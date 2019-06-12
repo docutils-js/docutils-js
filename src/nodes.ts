@@ -1932,7 +1932,7 @@ class container extends Element {
         this.classTypes = [General];
     }
 }
-/* eslint-disable-next-line camelcase */
+/* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
 class bullet_list extends Element {
 /* eslint-disable-next-line no-useless-constructor */
     // @ts-ignore
@@ -1943,7 +1943,7 @@ class bullet_list extends Element {
     }
 }
 
-/* eslint-disable-next-line camelcase */
+/* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
 class enumerated_list extends Element {
     start?: number;
 
@@ -1962,7 +1962,7 @@ class enumerated_list extends Element {
     }
 }
 
-/* eslint-disable-next-line camelcase */
+/* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
 class list_item extends Element {
 /* eslint-disable-next-line no-useless-constructor */
     // @ts-ignore
@@ -1973,7 +1973,7 @@ class list_item extends Element {
     }
 }
 
-/* eslint-disable-next-line camelcase */
+/* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
 class definition_list extends Element {
 /* eslint-disable-next-line no-useless-constructor */
     // @ts-ignore
@@ -1984,7 +1984,7 @@ class definition_list extends Element {
     }
 }
 
-/* eslint-disable-next-line camelcase */
+/* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
 class definition_list_item extends Element {
 /* eslint-disable-next-line no-useless-constructor */
     // @ts-ignore
@@ -2026,7 +2026,7 @@ class definition extends Element {
 /*
 class classifier(Part, TextElement): pass
 */
-/* eslint-disable-next-line camelcase */
+/* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
 class field_list extends Element {
 /* eslint-disable-next-line no-useless-constructor */
     // @ts-ignore
@@ -2045,7 +2045,7 @@ class field extends Element {
         this.classTypes = [Part];
     }
 } // (Part
-/* eslint-disable-next-line camelcase */
+/* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
 class field_name extends TextElement {
 /* eslint-disable-next-line no-useless-constructor */
     // @ts-ignore
@@ -2055,7 +2055,7 @@ class field_name extends TextElement {
         this.classTypes = [Part];
     }
 } // (Part
-/* eslint-disable-next-line camelcase */
+/* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
 class field_body extends Element {
 /* eslint-disable-next-line no-useless-constructor */
     // @ts-ignore
@@ -2076,7 +2076,7 @@ class option extends Element {
     }
 }
 
-/* eslint-disable-next-line camelcase */
+/* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
 class option_argument extends TextElement {
     // @ts-ignore
     constructor(...args) {
@@ -2092,7 +2092,7 @@ class option_argument extends TextElement {
     }
 }
 
-/* eslint-disable-next-line camelcase */
+/* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
 class option_group extends Element {
     // @ts-ignore
     constructor(...args) {
@@ -2103,7 +2103,7 @@ class option_group extends Element {
     }
 }
 
-/* eslint-disable-next-line camelcase */
+/* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
 class option_list extends Element {
 /* eslint-disable-next-line no-useless-constructor */
     // @ts-ignore
@@ -2113,7 +2113,7 @@ class option_list extends Element {
         this.classTypes = [Sequential];
     }
 } // Sequential
-/* eslint-disable-next-line camelcase */
+/* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
 class option_list_item extends Element {
 /* eslint-disable-next-line no-useless-constructor */
     // @ts-ignore
@@ -2125,7 +2125,7 @@ class option_list_item extends Element {
     }
 }
 
-/* eslint-disable-next-line camelcase */
+/* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
 class option_string extends TextElement {
 /* eslint-disable-next-line no-useless-constructor */
     // @ts-ignore
@@ -2145,7 +2145,7 @@ class description extends Element {
     }
 } // (Part
 
-/* eslint-disable-next-line camelcase */
+/* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
 class literal_block extends FixedTextElement {
 /* eslint-disable-next-line no-useless-constructor */
     // @ts-ignore
@@ -2156,7 +2156,7 @@ class literal_block extends FixedTextElement {
     }
 }
 
-/* eslint-disable-next-line camelcase */
+/* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
 class doctest_block extends FixedTextElement {
 /* eslint-disable-next-line no-useless-constructor */
     // @ts-ignore
@@ -2167,7 +2167,7 @@ class doctest_block extends FixedTextElement {
     }
 }
 
-/* eslint-disable-next-line camelcase */
+/* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
 class math_block extends FixedTextElement {
 /* eslint-disable-next-line no-useless-constructor */
     // @ts-ignore
@@ -2177,7 +2177,7 @@ class math_block extends FixedTextElement {
         this.classTypes = [General];
     }
 }
-/* eslint-disable-next-line camelcase */
+/* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
 class line_block extends Element {
 /* eslint-disable-next-line no-useless-constructor */
     // @ts-ignore
@@ -2198,7 +2198,7 @@ class line extends TextElement implements HasIndent {
     }
 } // Part
 
-/* eslint-disable-next-line camelcase */
+/* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
 class block_quote extends Element {
 /* eslint-disable-next-line no-useless-constructor */
     // @ts-ignore
@@ -2317,7 +2317,7 @@ class comment extends FixedTextElement {
         this.classTypes = [Special, Invisible, Inline, Targetable];
     }
 }
-/* eslint-disable-next-line camelcase */
+/* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
 class substitution_definition extends TextElement {
 /* eslint-disable-next-line no-useless-constructor */
     // @ts-ignore
@@ -2459,7 +2459,7 @@ class entry extends Element {
     }
 }
 
-/* eslint-disable-next-line camelcase */
+/* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
 class system_message extends Element {
     constructor(message: any, children: INode[], attributes: IAttributes) {
         super((attributes.rawsource || ''),
@@ -2601,7 +2601,7 @@ class reference extends TextElement {
         this.classTypes = [General, Inline, Referential];
     }
 } // General, Inline, Referential
-/* eslint-disable-next-line camelcase */
+/* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
 class footnote_reference extends TextElement {
 /* eslint-disable-next-line no-useless-constructor */
     // @ts-ignore
@@ -2611,7 +2611,7 @@ class footnote_reference extends TextElement {
         this.classTypes = [General, Inline, Referential];
     }
 } // General, Inline, Referential
-/* eslint-disable-next-line camelcase */
+/* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
 class citation_reference extends TextElement {
 /* eslint-disable-next-line no-useless-constructor */
     // @ts-ignore
@@ -2621,7 +2621,7 @@ class citation_reference extends TextElement {
         this.classTypes = [General, Inline, Referential];
     }
 } // General, Inline, Referential
-/* eslint-disable-next-line camelcase */
+/* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
 class substitution_reference extends TextElement {
 /* eslint-disable-next-line no-useless-constructor */
     // @ts-ignore
@@ -2631,7 +2631,7 @@ class substitution_reference extends TextElement {
         this.classTypes = [Inline];
     }
 } // General, Inline, Referential
-/* eslint-disable-next-line camelcase */
+/* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
 class title_reference extends TextElement {
 /* eslint-disable-next-line no-useless-constructor */
     // @ts-ignore
@@ -2642,7 +2642,7 @@ class title_reference extends TextElement {
     }
 } // General, Inline, Referential
 
-/* eslint-disable-next-line camelcase */
+/* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
 class abbreviation extends TextElement {
 /* eslint-disable-next-line no-useless-constructor */
     // @ts-ignore
@@ -2757,33 +2757,33 @@ export {
     Node, whitespaceNormalizeName, NodeVisitor, GenericNodeVisitor,
     SparseNodeVisitor, nodeToXml, Element, TextElement,
     Text, abbreviation, acronym, address, admonition, attention,
-    /* eslint-disable-next-line camelcase */
+    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
     attribution, author, authors, block_quote, bullet_list, caption,
-    /* eslint-disable-next-line camelcase */
+    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
     caution, citation, citation_reference, classifier, colspec, comment,
     compound, contact, container, copyright, danger, date, decoration,
-    /* eslint-disable-next-line camelcase */
+    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
     definition, definition_list, definition_list_item, description,
-    /* eslint-disable-next-line camelcase */
+    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
     docinfo, doctest_block, document, emphasis, entry, enumerated_list,
-    /* eslint-disable-next-line camelcase */
+    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
     error, field, field_body, field_list, field_name, figure, footer,
-    /* eslint-disable-next-line camelcase */
+    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
     footnote, footnote_reference, generated, header, hint, image,
-    /* eslint-disable-next-line camelcase */
+    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
     important, inline, label, legend, line, line_block, list_item,
-    /* eslint-disable-next-line camelcase */
+    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
     literal, literal_block, math, math_block, note, option,
-    /* eslint-disable-next-line camelcase */
+    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
     option_argument, option_group, option_list, option_list_item,
-    /* eslint-disable-next-line camelcase */
+    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
     option_string, organization, paragraph, pending, problematic, raw,
     reference, revision, row, rubric, section, sidebar, status, strong,
-    /* eslint-disable-next-line camelcase */
+    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
     subscript, substitution_definition, substitution_reference, subtitle,
-    /* eslint-disable-next-line camelcase */
+    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
     superscript, system_message, table, target, tbody, term, tgroup,
-    /* eslint-disable-next-line camelcase */
+    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
     thead, tip, title, title_reference, topic, transition, version,
     warning,
 

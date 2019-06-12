@@ -6,7 +6,8 @@
   "author": "Kay McCormick <kay@kaymccormick.com>",
   "license": "MIT",
   "scripts": {
-    "tslint": "tslint -p .",
+      "tslint": "tslint -p .",
+      "eslint": "eslint src/*.ts src/**/*.ts",
     "test": "jest",
     "extractSettings": "python3 ../tools/docutils-export.py > build/settingsSpec.json",
     "convertSettings": "node ./scripts/convertSettingsSpec.js",
