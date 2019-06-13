@@ -1,8 +1,8 @@
 class DuplicateTransitionError extends Error {
-    message: string;
-    transition: any;
-    constructor(transition: any, ...params: any[]) {
-        super(...params);
+    public message: string;
+    public transition: string;
+    public constructor(transition: string) {
+        super();
         if (Error.captureStackTrace) {
             Error.captureStackTrace(this, DuplicateTransitionError);
         }

@@ -3,12 +3,13 @@ import * as statemachine from '../StateMachine';
 import RSTStateMachine from './rst/RSTStateMachine';
 import StateFactory from './rst/StateFactory';
 import {Document, ParserArgs} from "../types";
+import { InlinerInterface } from "./rst/types";
 
 class Parser extends BaseParser {
-    private inliner: any;
+    private inliner: InlinerInterface;
     private initialState: string;
     private stateMachine?: RSTStateMachine;
-    constructor(args: ParserArgs = {}) {
+    public constructor(args: ParserArgs = {}) {
         super(args);
         this.configSection = 'restructuredtext parser';
         this.configSectionDependencies = ['parsers'];
@@ -21,7 +22,7 @@ class Parser extends BaseParser {
         this.inliner = args.inliner;
     }
 
-    parse(inputstring: string, document: Document) {
+    public parse(inputstring: string, document: Document): void {
         if(!inputstring.split) {
             throw new Error('not a string');
         }
@@ -37,9 +38,10 @@ class Parser extends BaseParser {
             debugFn: this.debugFn,
             debug: document.reporter.debugFlag,
         });
+        let tabWidth = document.settings.docutilsParsersRstParser!.tabWidth;
         const inputLines = statemachine.string2lines(
             inputstring, {
-                tabWidth: document.settings.docutilsParsersRstParser!.tabWidth,
+                tabWidth: tabWidth,
                 convertWhitespace: true,
             },
         );
@@ -52,7 +54,7 @@ class Parser extends BaseParser {
         this.finishParse();
     }
 
-    finishParse(): void {
+    public finishParse(): void {
     }
 
 }

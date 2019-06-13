@@ -1,14 +1,14 @@
-import * as nodes from './nodes';
-import {isIterable} from './utils';
-import {SystemMessage, UnimplementedError as Unimp} from './Exceptions';
-import {INode, IReporter} from "./types";
+import * as nodes from "./nodes";
+import { isIterable } from "./utils";
+import { SystemMessage, UnimplementedError as Unimp } from "./Exceptions";
+import { NodeInterface, ObserverCallback, ReporterInterface } from "./types";
 
 /**
     Return the "source" and "line" attributes from the `node` given or from
     its closest ancestor.
  */
-function getSourceLine(node: INode) {
-    let myNode: INode | undefined = node;
+function getSourceLine(node: NodeInterface): [string | undefined, number | undefined] {
+    let myNode: NodeInterface | undefined = node;
     while (myNode) {
         if (myNode.source || myNode.line) {
             return [myNode.source, myNode.line];
@@ -18,9 +18,9 @@ function getSourceLine(node: INode) {
     return [undefined, undefined];
 }
 
-class Reporter implements IReporter {
+class Reporter implements ReporterInterface {
     private source: string;
-    private observers: any[];
+    private observers: ObserverCallback[];
     private maxLevel: number;
     private debugLevel: number = 0;
     public  DEBUG_LEVEL: number;
@@ -28,17 +28,17 @@ class Reporter implements IReporter {
     public WARNING_LEVEL: number;
     public  ERROR_LEVEL: number;
     private SEVERE_LEVEL: number;
-    debugFlag?: boolean;
-    reportLevel: number;
+    public debugFlag?: boolean;
+    public reportLevel: number;
     private haltLevel: number;
     private errorHandler: string;
-    private stream: any;
+    private stream: {};
     private encoding?: string;
     public constructor(
         source: string,
         reportLevel: number,
         haltLevel?: number,
-        stream?: any,
+        stream?: {},
         debug?: boolean,
         encoding?: string,
         errorHandler: string = 'backslashreplace'
@@ -63,12 +63,12 @@ class Reporter implements IReporter {
         this.maxLevel = -1;
     }
 
-    public setConditions() {
+    public setConditions(): void | never {
         throw new Unimp('');
     }
 
     /* need better system for arguments!! */
-    public systemMessage(level: number, message: string | Error, children?: INode[], kwargs?: any) {
+    public systemMessage(level: number, message: string | Error, children?: NodeInterface[], kwargs?: {}): NodeInterface {
         if (typeof children === 'undefined') {
             children = [];
         }
@@ -81,8 +81,9 @@ class Reporter implements IReporter {
             kwargs = {};
         }
 
+        let myMessage = message;
         if (message instanceof Error) {
-            message = message.message;
+            myMessage = message.message;
         }
 
         const attributes = { ...kwargs };
@@ -100,7 +101,7 @@ class Reporter implements IReporter {
             // fixme
         }
 
-        const msg = new nodes.system_message(message, children, attributes);
+        const msg = new nodes.system_message(myMessage, children, attributes);
         if (this.stream) { // fixme
             this.stream.write(`${msg.astext()}\n`);
         }
@@ -119,50 +120,38 @@ class Reporter implements IReporter {
         return msg;
     }
 
-    public notifyObservers(message: any) {
-        this.observers.forEach(o => o(message));
+    public notifyObservers(message: {}): void {
+        this.observers.forEach((o): void => o(message));
     }
 
-    // @ts-ignore
-    public attachObserver(observer) {
-        // @ts-ignore
+    public attachObserver(observer: ObserverCallback): void {
         this.observers.push(observer);
     }
 
-    // @ts-ignore
-    public debug(...args) {
+    public debug(...args: {}[]): undefined | {} {
         if (this.debugFlag) {
-            // @ts-ignore
             return this.systemMessage(this.debugLevel, ...args);
         }
         return undefined;
     }
 
-    // @ts-ignore
-    public info(...args) {
-        // @ts-ignore
+    public info(...args: {}[]): {} {
         return this.systemMessage(this.INFO_LEVEL, ...args);
     }
 
-    // @ts-ignore
-    public warning(...args) {
-        // @ts-ignore
+    public warning(...args: {}[]): {} {
         return this.systemMessage(this.WARNING_LEVEL, ...args);
     }
 
-    // @ts-ignore
-    public error(...args) {
-        // @ts-ignore
+    public error(...args: {}[]): {}[] {
         return this.systemMessage(this.ERROR_LEVEL, ...args);
     }
 
-    // @ts-ignore
-    public severe(...args) {
-        // @ts-ignore
+    public severe(...args: {}[]): {} {
         return this.systemMessage(this.SEVERE_LEVEL, ...args);
     }
 
-    getSourceAndLine?: (lineno?: number) => any[];
+    public getSourceAndLine?: (lineno?: number) => [string, number] | undefined;
 
 
 }

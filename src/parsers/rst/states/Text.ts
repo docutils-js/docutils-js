@@ -6,26 +6,26 @@ import * as RegExps from '../RegExps';
 import TransitionCorrection from '../../../TransitionCorrection';
 import UnexpectedIndentationError from '../../../error/UnexpectedIndentationError';
 import {EOFError} from '../../../Exceptions';
-import {INode} from "../../../types";
+import {NodeInterface} from "../../../types";
 import State from "../../../states/State";
 import RSTStateMachine from "../RSTStateMachine";
 import {RSTStateArgs} from "../types";
 
 class Text extends RSTState {
-    _init(stateMachine: RSTStateMachine, args: RSTStateArgs) {
+    public _init(stateMachine: RSTStateMachine, args: RSTStateArgs) {
         super._init(stateMachine, args);
         this.patterns = {
- underline: '([!-/:-@[-`{-~])\\1* *$',
-                         text: '',
-};
+            underline: '([!-/:-@[-`{-~])\\1* *$',
+            text: '',
+        };
         this.initialTransitions = [['underline', 'Body'], ['text', 'Body']];
     }
 
-    /* eslint-disable-next-line no-unused-vars */
-    blank(match: any, context: any[], nextState: any) {
+    /* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */
+    public blank(match: any, context: any[], nextState: any) {
         const [paragraph, literalNext] = this.paragraph(
-        context, this.rstStateMachine.absLineNumber() - 1,
-);
+            context, this.rstStateMachine.absLineNumber() - 1,
+        );
         this.parent!.add(paragraph);
         if (literalNext) {
             this.parent!.add(this.literal_block());
@@ -34,7 +34,7 @@ class Text extends RSTState {
         return [[], 'Body', []];
     }
 
-    eof(context: any[]): any[] {
+    public eof(context: {}[]): {}[] {
         if ((context != null && !isIterable(context)) || context.length > 0) {
             this.blank(null, context, null);
         }
@@ -42,8 +42,8 @@ class Text extends RSTState {
     }
 
     /** Definition list item. */
-    /* eslint-disable-next-line no-unused-vars */
-    indent(match: any, context: any[], nextState: any) {
+    /* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */
+    public indent(match: any, context: any[], nextState: any) {
         const definitionlist = new nodes.definition_list();
         const [definitionlistitem, blankFinish1] = this.definition_list_item(context);
         let blankFinish = blankFinish1;
@@ -53,12 +53,12 @@ class Text extends RSTState {
         const [newlineOffset, blankFinish2] = this.nestedListParse(
             this.rstStateMachine.inputLines.slice(offset),
             {
- inputOffset: this.rstStateMachine.absLineOffset() + 1,
-              node: definitionlist as INode,
-initialState: 'DefinitionList',
-              blankFinish,
-blankFinishState: 'Definition',
-},
+                inputOffset: this.rstStateMachine.absLineOffset() + 1,
+                node: definitionlist as NodeInterface,
+                initialState: 'DefinitionList',
+                blankFinish,
+                blankFinishState: 'Definition',
+            },
         );
         blankFinish = blankFinish2;
         this.gotoLine(newlineOffset);
@@ -84,7 +84,7 @@ blankFinishState: 'Definition',
                     const msg = this.reporter!.info(
                         'Possible title underline, too short for the title.\n'
                         + "Treating it as ordinary text because it's so short.", [], { line: lineno },
-);
+                    );
                     this.parent!.add(msg);
                     throw new TransitionCorrection('text');
                 }
@@ -93,7 +93,7 @@ blankFinishState: 'Definition',
                 const msg = this.reporter!.warning(
                     'Title underline too short.',
                     [new nodes.literal_block(blocktext, blocktext)], { line: lineno },
-);
+                );
                 messages.push(msg);
             }
         }
@@ -104,7 +104,7 @@ blankFinishState: 'Definition',
             const msg = this.reporter!.severe(
                 'Unexpected section title.',
                 [new nodes.literal_block(blocktext, blocktext)], { source: src, line: srcline },
-);
+            );
             this.parent!.add(messages);
             this.parent!.add(msg);
             return [[], nextState, []];
@@ -112,8 +112,8 @@ blankFinishState: 'Definition',
         const style = underline[0];
         context.length = 0;
         this.section({
- title, source, style, lineno: lineno - 1, messages,
-});
+            title, source, style, lineno: lineno - 1, messages,
+        });
 
         return [[], nextState, []];
     }
@@ -127,10 +127,10 @@ blankFinishState: 'Definition',
         } catch (error) {
             if (error instanceof UnexpectedIndentationError) {
                 let src; let
-srcline;
+                    srcline;
                 [block, src, srcline] = error.args;
                 msg = this.reporter!.error('Unexpected indentation.',
-                                          { source: src, line: srcline });
+                    { source: src, line: srcline });
             } else {
                 throw error;
             }
@@ -157,9 +157,9 @@ srcline;
     }
 
     /** Return a list of nodes. */
-    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,no-unused-vars */
+    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,@typescript-eslint/no-unused-vars,no-unused-vars */
     literal_block() {
-        /* eslint-disable-next-line no-unused-vars */
+        /* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */
         const [indented, indent, offset, blankFinish] = this.rstStateMachine.getIndented({});
         while (indented && indented.length && !indented[indented.length - 1].trim()) {
             indented.trimEnd();
@@ -169,17 +169,17 @@ srcline;
         }
         const data = indented.join('\n');
         const literalBlock = new nodes.literal_block(data, data);
-            const [source, line] = this.rstStateMachine.getSourceAndLine(offset + 1);
+        const [source, line] = this.rstStateMachine.getSourceAndLine(offset + 1);
         literalBlock.source = source;
         literalBlock.line = line;
-        const nodelist: INode[] = [literalBlock];
+        const nodelist: NodeInterface[] = [literalBlock];
         if (!blankFinish) {
             nodelist.push(this.unindentWarning('Literal block'));
         }
         return nodelist;
     }
 
-    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,no-unused-vars */
+    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,@typescript-eslint/no-unused-vars,no-unused-vars */
     quoted_literal_block() {
         const absLineOffset = this.rstStateMachine.absLineOffset();
         const offset = this.rstStateMachine.lineOffset;
@@ -187,30 +187,30 @@ srcline;
         // @ts-ignore
         const newAbsOffset = this.nestedParse(
             {
-            inputLines: this.rstStateMachine.inputLines.slice(offset),
- inputOffset: absLineOffset,
-              node: parentNode,
-              matchTitles: false,
+                inputLines: this.rstStateMachine.inputLines.slice(offset),
+                inputOffset: absLineOffset,
+                node: parentNode,
+                matchTitles: false,
                 stateMachineKwargs: {
                     stateFactory: this.rstStateMachine.stateFactory.withStateClasses(['QuotedLiteralBlock']),
                     initialState: 'QuotedLiteralBlock',
-},
-},
-);
+                },
+            },
+        );
         this.gotoLine(newAbsOffset);
         return parentNode.children;
     }
 
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
     definition_list_item(termline: string[]) {
-        /* eslint-disable-next-line no-unused-vars */
+        /* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */
         const [indented, indent, lineOffset, blankFinish] = this.rstStateMachine.getIndented({});
         const itemnode = new nodes.definition_list_item(
             [...termline, ...indented].join('\b'),
-);
+        );
         const lineno = this.rstStateMachine.absLineNumber() - 1;
         [itemnode.source,
-         itemnode.line] = this.rstStateMachine.getSourceAndLine(lineno);
+            itemnode.line] = this.rstStateMachine.getSourceAndLine(lineno);
         const [termlist, messages] = this.term(termline, lineno);
         itemnode.add(termlist);
         const definition = new nodes.definition('', messages);
@@ -220,19 +220,20 @@ srcline;
                 'Blank line missing before literal block (after the "::")? '
                     + 'Interpreted as a definition list item.', [],
                 { line: lineno + 1 },
-));
+            ));
         }
         this.nestedParse( { inputLines: indented, inputOffset: lineOffset, node: definition });
         return [itemnode, blankFinish];
     }
 
-    term(lines: any[], lineno: number) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    public term(lines: any[], lineno: number): {}[] {
         const [textNodes, messages] = this.inline_text(lines[0], lineno);
         const termNode = new nodes.term(lines[0]);
-   //     [termNode.source,
-    //     termNode.line] = this.rstStateMachine.getSourceAndLine(lineno)
+        //     [termNode.source,
+        //     termNode.line] = this.rstStateMachine.getSourceAndLine(lineno)
         const nodeList = [termNode];
-        textNodes.forEach((node) => {
+        textNodes.forEach((node): void => {
             if (node instanceof nodes.Text) {
                 const parts = node.astext().split(RegExps.classifierDelimiterRegexp);
                 if (parts.length === 1) {
@@ -240,8 +241,8 @@ srcline;
                 } else {
                     const text = parts[0].trimRight();
                     const textnode = new nodes.Text(unescape(text, true));
-                    nodeList[nodeList.length - 1].add(textnode as INode);
-                    parts.slice(1).forEach((part) => {
+                    nodeList[nodeList.length - 1].add(textnode as NodeInterface);
+                    parts.slice(1).forEach((part): void => {
                         nodeList.push(
                             new nodes.classifier(unescape(part, false), part),
                         );

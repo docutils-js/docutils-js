@@ -1,24 +1,29 @@
-import {document} from "./nodes";
-import {Document, ITransformer} from "./types";
-import Component from "./Component";
-import TransformSpec from "./TransformSpec";
-import {ApplicationError} from "./Exceptions";
+import { document } from "./nodes";
+import { ComponentInterface, Components, Document, NodeInterface, TransformerInterface } from "./types";
+import { ApplicationError } from "./Exceptions";
 
-function leftPad(num: number, len: number, pad: string) {
+function leftPad(num: number, len: number, pad: string): string {
     return pad.repeat(len - num.toString().length) + num.toString();
+}
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+interface ReferenceResolver {
+    priority: number;
 }
 
 /**
  * Transformer class responsible for transforming document output
  */
-class Transformer implements ITransformer {
-    transforms: any[];
-    unknownReferenceResolvers: any[];
-    document: Document;
-    applied: any[];
-    sorted: number;
-    components: any;
-    serialno: number;
+class Transformer implements TransformerInterface {
+    public transforms: {}[];
+    public unknownReferenceResolvers: ReferenceResolver[];
+    public document: Document;
+    // this.applied.push([priority, TransformClass, pending, kwargs]);
+
+    public applied: [number, {}, NodeInterface, {}];
+    public sorted: number;
+    public components: Components;
+    public serialno: number;
 
     /**
      * Create transformer class
@@ -38,7 +43,7 @@ class Transformer implements ITransformer {
      * populateFromComponents
      *
      */
-    public populateFromComponents(...components: Component[]) {
+    public populateFromComponents(...components: ComponentInterface[]): void {
         /* eslint-disable-next-line no-restricted-syntax */
         for (const component of components) {
             if (!component) {
@@ -47,13 +52,13 @@ class Transformer implements ITransformer {
             }
             //          console.log(`processing ${component.toString()} ${component.componentType}`);
             const transforms = component.getTransforms() || [];
-            transforms.forEach((t) => {
+            transforms.forEach((t): void => {
                 if (typeof t === 'undefined') {
                     throw new Error(`got invalid transform from ${component}`);
                 }
             });
 
-            if (transforms.filter(x => typeof x === 'undefined').length !== 0) {
+            if (transforms.filter((x): boolean => typeof x === 'undefined').length !== 0) {
                 throw new Error(`got invalid transform from ${component}`);
             }
 
@@ -61,13 +66,13 @@ class Transformer implements ITransformer {
             this.components[component.componentType] = component;
         }
         this.sorted = 0;
-        const urr: any[] = [];
+        const urr: ReferenceResolver[] = [];
         /* eslint-disable-next-line no-restricted-syntax */
         for (const i of components) {
             if (typeof i !== 'undefined') {
                 //              console.log(`collecting unknownReferenceResolver from component ${i}`);
                 if (i.unknownReferenceResolvers) {
-                    urr.push(i.unknownReferenceResolvers);
+                    urr.push(...i.unknownReferenceResolvers);
                 }
             } else {
                 //              console.log('component is undefined. fixme');
@@ -79,22 +84,22 @@ class Transformer implements ITransformer {
                 throw new ApplicationError('Unexpected undefined value in ist of unknown reference resolvers');
             }
         }
-        const decoratedList = urr.map(f => [f.priority, f]);
+        const decoratedList = urr.map((f): [number, ReferenceResolver] => [f.priority, f]);
         decoratedList.sort();
-        this.unknownReferenceResolvers.push(...decoratedList.map(f => f[1]));
+        this.unknownReferenceResolvers.push(...decoratedList.map((f): ReferenceResolver => f[1]));
     }
 
     /**
      * apply the transforms
      */
-    public applyTransforms() {
+    public applyTransforms(): void {
         this.document.reporter.attachObserver(
             this.document.noteTransformMessage
                 .bind(this.document),
         );
         while (this.transforms.length) {
             if (!this.sorted) {
-                this.transforms.sort((el1, el2) => {
+                this.transforms.sort((el1, el2): number => {
                     if (el1[0] < el2[0]) {
                         return -1;
                     }
@@ -123,8 +128,8 @@ class Transformer implements ITransformer {
      * Store multiple transforms, with default priorities.
      * @param {Array} transformList - Array of transform classes (not instances).
      */
-    public addTransforms(transformList: any[]) {
-        transformList.forEach((transformClass) => {
+    public addTransforms(transformList: {}[]): void {
+        transformList.forEach((transformClass): void => {
             if (!transformClass) {
                 throw new Error('invalid argument');
             }
@@ -145,17 +150,17 @@ class Transformer implements ITransformer {
      *
      * This ensures FIFO order on transforms with identical priority.
      */
-    public getPriorityString(class_: any, priority: number) {
+    public getPriorityString(class_: {}, priority: number): string {
         if (typeof class_ === 'undefined') {
             throw new Error('undefined');
         }
 
         this.serialno += 1;
-        const p = class_[priority];
         return `${leftPad(priority, 3, '0')}-${leftPad(this.serialno, 3, '0')}`;
     }
 
-    public addPending(pending: any, priority: any) {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    public addPending(pending: NodeInterface, priority: number): void {
         // fixme implement
     }
 }

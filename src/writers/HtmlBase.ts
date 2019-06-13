@@ -6,13 +6,13 @@ import { basename } from '../utils/paths';
 import { getLanguage } from '../languages';
 import { UnimplementedError } from '../Exceptions';
 import {Settings} from "../../gen/Settings";
-import {Document, IAttributes, INode} from "../types";
+import {Document, Attributes, NodeInterface} from "../types";
 import {row, tgroup} from "../nodes";
 
-/* eslint-disable-next-line no-unused-vars */
+/* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */
 const __docformat__ = 'reStructuredText';
 
-/* eslint-disable-next-line no-unused-vars */
+/* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */
 const __version__ = '';
 
 const defaultTemplate = `<%- head_prefix %>
@@ -74,7 +74,7 @@ class HTMLTranslator extends nodes.NodeVisitor {
     private bodySuffix: string[];
     private bodyPrefix: string[];
 
-    constructor(document: Document) {
+    public constructor(document: Document) {
         super(document);
         this.settings = document.settings;
         const settings = this.settings;
@@ -136,7 +136,7 @@ class HTMLTranslator extends nodes.NodeVisitor {
      * @param {String} text - text to cleanse
      * @param {RegExp} whitespace - regexp for matching whitespace.
      */
-    attVal(text: string, whitespace: RegExp = /[\n\r\t\v\f]/g) {
+    public attVal(text: string, whitespace: RegExp = /[\n\r\t\v\f]/g) {
         if (!text) {
             text = '';
         }
@@ -153,8 +153,13 @@ class HTMLTranslator extends nodes.NodeVisitor {
      * Construct and return a start tag given a node (id & class attributes
      * are extracted), tag name, and optional attributes.
      */
-    starttag(node: INode, tagname: string = '', suffix: string = '\n', empty: boolean = false,
-        attributes: IAttributes = {}) {
+    public starttag(
+        node: NodeInterface,
+        tagname: string = '',
+        suffix: string = '\n',
+        empty: boolean = false,
+        attributes: Attributes = {}
+    ) {
         if (typeof suffix !== 'string') {
             throw new Error('suffix should be a string!!');
         }
@@ -251,31 +256,31 @@ class HTMLTranslator extends nodes.NodeVisitor {
     /**
      * Construct and return an XML-compatible empty tag.
      */
-    emptytag(node: INode, tagname: string, suffix = '\n', attributes: IAttributes = {}): string {
+    public emptytag(node: NodeInterface, tagname: string, suffix = '\n', attributes: Attributes = {}): string {
         return this.starttag(node, tagname, suffix, true, attributes);
     }
 
 
-    encode(text: string): string {
+    public encode(text: string): string {
         return text; // fixme
     }
 
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
-    visit_section(node: INode) {
+    public visit_section(node: NodeInterface) {
         this.sectionLevel += 1;
         this.body.push(
             this.starttag(node, 'div', '\n', false, { CLASS: 'section' }),
         );
     }
 
-    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,no-unused-vars */
-    depart_section(node: INode) {
+    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,@typescript-eslint/no-unused-vars,no-unused-vars */
+    public depart_section(node: NodeInterface) {
         this.sectionLevel -= 1;
         this.body.push('</div>\n');
     }
 
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
-    visit_Text(node: INode) {
+    public visit_Text(node: NodeInterface) {
         const text = node.astext();
         let encoded = this.encode(text);
         if (this.inMailto && this.settings.docutilsWritersHtml4Css1Writer!.cloakEmailAddresses) {
@@ -284,57 +289,57 @@ class HTMLTranslator extends nodes.NodeVisitor {
         this.body.push(encoded);
     }
 
-    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,no-unused-vars */
-    depart_Text(node: INode) {
+    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,@typescript-eslint/no-unused-vars,no-unused-vars */
+    public depart_Text(node: NodeInterface) {
 
     }
 
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
-    visit_abbreviation(node: INode) {
+    public visit_abbreviation(node: NodeInterface) {
         // @@@ implementation incomplete ("title" attribute)
         this.body.push(this.starttag(node, 'abbr', ''));
     }
 
-    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,no-unused-vars */
-    depart_abbreviation(node: INode) {
+    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,@typescript-eslint/no-unused-vars,no-unused-vars */
+    public depart_abbreviation(node: NodeInterface) {
         this.body.push('</abbr>');
     }
 
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
-    visit_acronym(node: INode) {
+    public visit_acronym(node: NodeInterface) {
         // @@@ implementation incomplete ("title" attribute)
         this.body.push(this.starttag(node, 'acronym', ''));
     }
 
-    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,no-unused-vars */
-    depart_acronym(node: INode) {
+    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,@typescript-eslint/no-unused-vars,no-unused-vars */
+    public depart_acronym(node: NodeInterface) {
         this.body.push('</acronym>');
     }
 
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
     /*
-      visit_address(node: INode) {
+      visit_address(node: NodeInterface) {
       this.visitDocinfoItem(node, 'address', meta = false);
       this.body.push(this.starttag(node, 'pre',
       suffix = '', false, { CLASS: 'address' }));
       }
 
-      depart_address(node: INode) {
+      depart_address(node: NodeInterface) {
       this.body.push('\n</pre>\n');
       this.departDocinfoItem();
       } */
 
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
-    visit_admonition(node: INode) {
+    public visit_admonition(node: NodeInterface) {
         node.attributes.classes.splice(0, 0, 'admonition');
         this.body.push(this.starttag(node, 'div'));
     }
 
-    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,no-unused-vars */
-    depart_admonition(node: INode) {
+    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,@typescript-eslint/no-unused-vars,no-unused-vars */
+    public depart_admonition(node: NodeInterface) {
         this.body.push('</div>\n');
 
-        /* eslint-disable-next-line no-unused-vars */
+        /* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */
         const attributionFormats = {
             dash: ['\u2014', ''],
             parentheses: ['(', ')'],
@@ -344,7 +349,7 @@ class HTMLTranslator extends nodes.NodeVisitor {
     }
 
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
-    visit_attribution(node: INode) {
+    public visit_attribution(node: NodeInterface) {
         const [prefix, suffix] = this.attribution_formats[this.settings.docutilsWritersHtml4Css1Writer!.attribution];
         this.context.push(suffix);
         this.body.push(
@@ -352,13 +357,13 @@ class HTMLTranslator extends nodes.NodeVisitor {
         );
     }
 
-    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,no-unused-vars */
-    depart_attribution(node: INode) {
+    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,@typescript-eslint/no-unused-vars,no-unused-vars */
+    public depart_attribution(node: NodeInterface) {
         this.body.push(`${this.context.pop()}</p>\n`);
     }
 
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
-    visit_author(node: INode) {
+    public visit_author(node: NodeInterface) {
         if (!(node.parent instanceof nodes.authors)) {
             this.visitDocinfoItem(node, 'author');
         }
@@ -366,7 +371,7 @@ class HTMLTranslator extends nodes.NodeVisitor {
     }
 
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
-    depart_author(node: INode) {
+    public depart_author(node: NodeInterface) {
         this.body.push('</p>');
         if (!(node.parent instanceof nodes.authors)) {
             this.body.push('\n');
@@ -376,22 +381,22 @@ class HTMLTranslator extends nodes.NodeVisitor {
     }
 
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
-    visit_authors(node: INode) {
+    public visit_authors(node: NodeInterface) {
         this.visitDocinfoItem(node, 'authors');
     }
 
-    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,no-unused-vars */
-    depart_authors(node: INode) {
+    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,@typescript-eslint/no-unused-vars,no-unused-vars */
+    public depart_authors(node: NodeInterface) {
         this.departDocinfoItem();
     }
 
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
-    visit_block_quote(node: INode) {
+    public visit_block_quote(node: NodeInterface) {
         this.body.push(this.starttag(node, 'blockquote'));
     }
 
-    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,no-unused-vars */
-    depart_block_quote(node: INode) {
+    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,@typescript-eslint/no-unused-vars,no-unused-vars */
+    public depart_block_quote(node: NodeInterface) {
         this.body.push('</blockquote>\n');
     }
 
@@ -400,7 +405,7 @@ class HTMLTranslator extends nodes.NodeVisitor {
      */
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
     /*
-      checkSimpleList(node: INode) {
+      checkSimpleList(node: NodeInterface) {
       const visitor = new SimpleListChecker(this.document);
       try {
       node.walk(visitor);
@@ -422,7 +427,7 @@ class HTMLTranslator extends nodes.NodeVisitor {
       */
 
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
-    isCompactable(node: INode): boolean {
+    public isCompactable(node: NodeInterface): boolean {
         // print "isCompactable %s ?" % node.__class__,
         // explicite class arguments have precedence
         if ('compact' in node.attributes.classes) {
@@ -454,12 +459,12 @@ class HTMLTranslator extends nodes.NodeVisitor {
     }
 
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
-    visit_caption(node: INode) {
+    public visit_caption(node: NodeInterface) {
         this.body.push(this.starttag(node, 'p', '', false, { CLASS: 'caption' }));
     }
 
-    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,no-unused-vars */
-    depart_caption(node: INode) {
+    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,@typescript-eslint/no-unused-vars,no-unused-vars */
+    public depart_caption(node: NodeInterface) {
         this.body.push('</p>\n');
     }
 
@@ -468,8 +473,8 @@ class HTMLTranslator extends nodes.NodeVisitor {
     // Use definition list instead of table for bibliographic references.
     // Join adjacent citation entries.
 
-    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,no-unused-vars */
-    visit_citation(node: INode) {
+    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,@typescript-eslint/no-unused-vars,no-unused-vars */
+    public visit_citation(node: NodeInterface) {
         if (!this.inFootnoteList) {
             this.body.push('<dl class="citation">\n');
         }
@@ -477,7 +482,7 @@ class HTMLTranslator extends nodes.NodeVisitor {
     }
 
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
-    depart_citation(node: INode) {
+    public depart_citation(node: NodeInterface) {
         this.body.push('</dd>\n');
         if (!(node.nextNode({ descend: false, siblings: true }) instanceof nodes.citation)) {
             this.body.push('</dl>\n');
@@ -486,7 +491,7 @@ class HTMLTranslator extends nodes.NodeVisitor {
     }
 
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
-    visit_citation_reference(node: INode) {
+    public visit_citation_reference(node: NodeInterface) {
         let href = '#';
         if ('refid' in node.attributes) {
             href += node.attributes.refid;
@@ -501,8 +506,8 @@ class HTMLTranslator extends nodes.NodeVisitor {
     }
 
 
-    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,no-unused-vars */
-    depart_citation_reference(node: INode) {
+    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,@typescript-eslint/no-unused-vars,no-unused-vars */
+    public depart_citation_reference(node: NodeInterface) {
         this.body.push(']</a>');
 
         // classifier
@@ -511,24 +516,24 @@ class HTMLTranslator extends nodes.NodeVisitor {
     }
 
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
-    visit_classifier(node: INode) {
+    public visit_classifier(node: NodeInterface) {
         this.body.push(this.starttag(node, 'span', '', false, { CLASS: 'classifier' }));
     }
 
-    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,no-unused-vars */
-    depart_classifier(node: INode) {
+    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,@typescript-eslint/no-unused-vars,no-unused-vars */
+    public depart_classifier(node: NodeInterface) {
         this.body.push('</span>');
     }
 
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
-    visit_colspec(node: INode) {
+    public visit_colspec(node: NodeInterface) {
         this.colspecs.push(node);
         // "stubs" list is an attribute of the tgroup element:
         //node.parent!.stubs.push(node.attributes.stub); fixme
     }
 
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
-    depart_colspec(node: INode) {
+    public depart_colspec(node: NodeInterface) {
         // write out <colgroup> when all colspecs are processed
         if (node.nextNode({ descend: false, siblings: true }) instanceof nodes.colspec) {
             return;
@@ -538,7 +543,7 @@ class HTMLTranslator extends nodes.NodeVisitor {
                 && (!('colwidths-given' in node.parent!.parent!.attributes.classes)))) {
             return;
         }
-        /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,no-unused-vars */
+        /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,@typescript-eslint/no-unused-vars,no-unused-vars */
         const totalWidth = this.colspecs.map(subNode => subNode.attributes.colwidth)
             .reduce((a, c) => a + c);
         this.body.push(this.starttag(node, 'colgroup'));
@@ -558,81 +563,81 @@ class HTMLTranslator extends nodes.NodeVisitor {
       raise nodes.SkipNode
       }
 
-      visit_compound(node: INode) {
+      visit_compound(node: NodeInterface) {
       this.body.push(this.starttag(node, 'div', { CLASS: 'compound' }))
-      if len(node: INode) > 1:
+      if len(node: NodeInterface) > 1:
       node.attributes[0]['classes'].push('compound-first')
       node.attributes[-1]['classes'].push('compound-last')
       for child in node.attributes[1:-1]:
       child['classes'].push('compound-middle')
       }
 
-      depart_compound(node: INode) {
+      depart_compound(node: NodeInterface) {
       this.body.push('</div>\n')
       }
 
     */
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
-    visit_container(node: INode) {
+    public visit_container(node: NodeInterface) {
         this.body.push(this.starttag(node, 'div', '\n', false, { CLASS: 'docutils container' }));
     }
 
-    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,no-unused-vars */
-    depart_container(node: INode) {
+    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,@typescript-eslint/no-unused-vars,no-unused-vars */
+    public depart_container(node: NodeInterface) {
         this.body.push('</div>\n');
     }
 
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
-    visit_contact(node: INode) {
+    public visit_contact(node: NodeInterface) {
         this.visitDocinfoItem(node, 'contact', false);
     }
 
-    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,no-unused-vars */
-    depart_contact(node: INode) {
+    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,@typescript-eslint/no-unused-vars,no-unused-vars */
+    public depart_contact(node: NodeInterface) {
         this.departDocinfoItem();
     }
 
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
-    visit_copyright(node: INode) {
+    public visit_copyright(node: NodeInterface) {
         this.visitDocinfoItem(node, 'copyright');
     }
 
-    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,no-unused-vars */
-    depart_copyright(node: INode) {
+    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,@typescript-eslint/no-unused-vars,no-unused-vars */
+    public depart_copyright(node: NodeInterface) {
         this.departDocinfoItem();
     }
 
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
-    visit_date(node: INode) {
+    public visit_date(node: NodeInterface) {
         this.visitDocinfoItem(node, 'date');
     }
 
-    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,no-unused-vars */
-    depart_date(node: INode) {
+    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,@typescript-eslint/no-unused-vars,no-unused-vars */
+    public depart_date(node: NodeInterface) {
         this.departDocinfoItem();
     }
 
-    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,no-unused-vars */
-    visit_decoration(node: INode) {
+    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,@typescript-eslint/no-unused-vars,no-unused-vars */
+    public visit_decoration(node: NodeInterface) {
     }
 
-    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,no-unused-vars */
-    depart_decoration(node: INode) {
+    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,@typescript-eslint/no-unused-vars,no-unused-vars */
+    public depart_decoration(node: NodeInterface) {
     }
 
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
-    visit_definition(node: INode) {
+    public visit_definition(node: NodeInterface) {
         this.body.push('</dt>\n');
         this.body.push(this.starttag(node, 'dd', ''));
     }
 
-    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,no-unused-vars */
-    depart_definition(node: INode) {
+    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,@typescript-eslint/no-unused-vars,no-unused-vars */
+    public depart_definition(node: NodeInterface) {
         this.body.push('</dd>\n');
     }
 
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
-    visit_definition_list(node: INode) {
+    public visit_definition_list(node: NodeInterface) {
         if (node.attributes.classes == null) {
             node.attributes.classes = [];
         }
@@ -643,35 +648,35 @@ class HTMLTranslator extends nodes.NodeVisitor {
         this.body.push(this.starttag(node, 'dl'));
     }
 
-    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,no-unused-vars */
-    depart_definition_list(node: INode) {
+    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,@typescript-eslint/no-unused-vars,no-unused-vars */
+    public depart_definition_list(node: NodeInterface) {
         this.body.push('</dl>\n');
     }
 
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
-    visit_definition_list_item(node: INode) {
+    public visit_definition_list_item(node: NodeInterface) {
         // pass class arguments, ids and names to definition term:
         node.children[0].attributes.classes.splice(0, 0, ...(node.attributes.classes || []));
         node.children[0].attributes.ids.splice(0, 0, ...(node.attributes.ids || []));
         node.children[0].attributes.names.splice(0, 0, ...(node.attributes.names || []));
     }
 
-    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,no-unused-vars */
-    depart_definition_list_item(node: INode) {
+    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,@typescript-eslint/no-unused-vars,no-unused-vars */
+    public depart_definition_list_item(node: NodeInterface) {
     }
 
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
-    visit_description(node: INode) {
+    public visit_description(node: NodeInterface) {
         this.body.push(this.starttag(node, 'dd', ''));
     }
 
-    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,no-unused-vars */
-    depart_description(node: INode) {
+    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,@typescript-eslint/no-unused-vars,no-unused-vars */
+    public depart_description(node: NodeInterface) {
         this.body.push('</dd>\n');
     }
 
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
-    visit_docinfo(node: INode) {
+    public visit_docinfo(node: NodeInterface) {
         this.context.push(this.body.length.toString());
         let classes = 'docinfo';
         if (this.isCompactable(node)) {
@@ -680,15 +685,15 @@ class HTMLTranslator extends nodes.NodeVisitor {
         this.body.push(this.starttag(node, 'dl', '\n', false, { CLASS: classes }));
     }
 
-    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,no-unused-vars */
-    depart_docinfo(node: INode) {
+    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,@typescript-eslint/no-unused-vars,no-unused-vars */
+    public depart_docinfo(node: NodeInterface) {
         this.body.push('</dl>\n');
         const start = this.context.pop()!;
         this.docinfo = this.body.slice(parseInt(start, 10));
         this.body = [];
     }
 
-    visitDocinfoItem(node: INode, name: string, meta: boolean= true) {
+    public visitDocinfoItem(node: NodeInterface, name: string, meta: boolean= true) {
         if (meta) {
             const metaTag = `<meta name="${name}" content="${this.attVal(node.astext())}" />\n`;
             this.addMeta(metaTag);
@@ -697,30 +702,30 @@ class HTMLTranslator extends nodes.NodeVisitor {
         this.body.push(this.starttag(node, 'dd', '', false, { CLASS: name }));
     }
 
-    /* eslint-disable-next-line no-unused-vars */
-    departDocinfoItem() {
+    /* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */
+    public departDocinfoItem() {
         this.body.push('</dd>\n');
     }
 
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
-    visit_doctest_block(node: INode) {
+    public visit_doctest_block(node: NodeInterface) {
         this.body.push(this.starttag(node, 'pre', '', false,
             { CLASS: 'code javascript doctest' }));
     }
 
-    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,no-unused-vars */
-    depart_doctest_block(node: INode) {
+    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,@typescript-eslint/no-unused-vars,no-unused-vars */
+    public depart_doctest_block(node: NodeInterface) {
         this.body.push('\n</pre>\n');
     }
 
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
-    visit_document(node: INode) {
+    public visit_document(node: NodeInterface) {
         const title = ((node.attributes.title || '') || basename(node.attributes.source) || 'docutils document without title');
         this.head.push(`<title>${this.encode(title)}</title>\n`);
     }
 
-    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,no-unused-vars */
-    depart_document(node: INode) {
+    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,@typescript-eslint/no-unused-vars,no-unused-vars */
+    public depart_document(node: NodeInterface) {
         this.headPrefix.push(this.doctype);
     }
 
@@ -750,17 +755,17 @@ class HTMLTranslator extends nodes.NodeVisitor {
       }
     */
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
-    visit_emphasis(node: INode) {
+    public visit_emphasis(node: NodeInterface) {
         this.body.push(this.starttag(node, 'em', ''));
     }
 
-    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,no-unused-vars */
-    depart_emphasis(node: INode) {
+    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,@typescript-eslint/no-unused-vars,no-unused-vars */
+    public depart_emphasis(node: NodeInterface) {
         this.body.push('</em>');
     }
 
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
-    visit_entry(node: INode) {
+    public visit_entry(node: NodeInterface) {
         const atts: any = { class: [] };
         if (node.parent!.parent instanceof nodes.thead) {
             atts.class.push('head');
@@ -792,34 +797,34 @@ class HTMLTranslator extends nodes.NodeVisitor {
         this.body.push(this.starttag(node, tagname, '', false, atts));
         this.context.push(`</${tagname.toLowerCase()}>\n`);
         // TODO: why does the html4css1 writer insert an NBSP into empty cells?
-        // if len(node: INode) == 0:              // empty cell
+        // if len(node: NodeInterface) == 0:              // empty cell
         //     this.body.push('&//0160;') // no-break space
     }
 
-    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,no-unused-vars */
-    depart_entry(node: INode) {
+    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,@typescript-eslint/no-unused-vars,no-unused-vars */
+    public depart_entry(node: NodeInterface) {
         this.body.push(this.context.pop()!);
     }
 
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
     /*
-      visit_enumerated_list(node: INode) {
+      visit_enumerated_list(node: NodeInterface) {
       atts = {}
       if 'start' in node:
       atts['start'] = node.attributes['start']
       if 'enumtype' in node:
       atts['class'] = node.attributes['enumtype']
-      if this.isCompactable(node: INode):
+      if this.isCompactable(node: NodeInterface):
       atts['class'] = (atts.get('class', '') + ' simple').strip()
       this.body.push(this.starttag(node, 'ol', **atts))
       }
 
-      depart_enumerated_list(node: INode) {
+      depart_enumerated_list(node: NodeInterface) {
       this.body.push('</ol>\n')
       }
     */
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
-    visit_field_list(node: INode) {
+    public visit_field_list(node: NodeInterface) {
         // Keep simple paragraphs in the field_body to enable CSS
         // rule to start body on new line if the label is too long
         let classes = 'field-list';
@@ -829,34 +834,34 @@ class HTMLTranslator extends nodes.NodeVisitor {
         this.body.push(this.starttag(node, 'dl', '\n', false, { CLASS: classes }));
     }
 
-    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,no-unused-vars */
-    depart_field_list(node: INode) {
+    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,@typescript-eslint/no-unused-vars,no-unused-vars */
+    public depart_field_list(node: NodeInterface) {
         this.body.push('</dl>\n');
     }
 
-    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,no-unused-vars */
-    visit_field(node: INode) {
+    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,@typescript-eslint/no-unused-vars,no-unused-vars */
+    public visit_field(node: NodeInterface) {
     }
 
-    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,no-unused-vars */
-    depart_field(node: INode) {
+    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,@typescript-eslint/no-unused-vars,no-unused-vars */
+    public depart_field(node: NodeInterface) {
     }
 
     // as field is ignored, pass class arguments to field-name and field-body:
 
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
-    visit_field_name(node: INode) {
+    public visit_field_name(node: NodeInterface) {
         this.body.push(this.starttag(node, 'dt', '', false,
             { CLASS: node.parent!.attributes.classes.join(' ') }));
     }
 
-    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,no-unused-vars */
-    depart_field_name(node: INode) {
+    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,@typescript-eslint/no-unused-vars,no-unused-vars */
+    public depart_field_name(node: NodeInterface) {
         this.body.push('</dt>\n');
     }
 
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
-    visit_field_body(node: INode) {
+    public visit_field_body(node: NodeInterface) {
         this.body.push(this.starttag(node, 'dd', '', false,
             { CLASS: node.parent!.attributes.classes.join(' ') }));
 
@@ -866,14 +871,14 @@ class HTMLTranslator extends nodes.NodeVisitor {
         }
     }
 
-    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,no-unused-vars */
-    depart_field_body(node: INode) {
+    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,@typescript-eslint/no-unused-vars,no-unused-vars */
+    public depart_field_body(node: NodeInterface) {
         this.body.push('</dd>\n');
     }
 
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
     /*
-      visit_figure(node: INode) {
+      visit_figure(node: NodeInterface) {
       atts = {'class': 'figure'}
       if node.get('width'):
       atts['style'] = 'width: %s' % node.attributes['width']
@@ -882,16 +887,16 @@ class HTMLTranslator extends nodes.NodeVisitor {
       this.body.push(this.starttag(node, 'div', **atts))
       }
 
-      depart_figure(node: INode) {
+      depart_figure(node: NodeInterface) {
       this.body.push('</div>\n')
       }
 
       // use HTML 5 <footer> element?
-      visit_footer(node: INode) {
+      visit_footer(node: NodeInterface) {
       this.context.push(len(this.body))
       }
 
-      depart_footer(node: INode) {
+      depart_footer(node: NodeInterface) {
       start = this.context.pop()
       footer = [this.starttag(node, 'div', { CLASS: 'footer' }),
       '<hr class="footer" />\n']
@@ -908,8 +913,8 @@ class HTMLTranslator extends nodes.NodeVisitor {
       // TODO: use the new HTML5 element <aside>? (Also for footnote text)
       }
     */
-    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,no-unused-vars */
-    visit_footnote(node: INode) {
+    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,@typescript-eslint/no-unused-vars,no-unused-vars */
+    public visit_footnote(node: NodeInterface) {
         if (!this.inFootnoteList) {
             const classes = `footnote ${this.settings.docutilsWritersHtml4Css1Writer!.footnoteReferences}`;
             this.body.push(`<dl class="${classes}">\n`);
@@ -918,7 +923,7 @@ class HTMLTranslator extends nodes.NodeVisitor {
     }
 
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
-    depart_footnote(node: INode) {
+    public depart_footnote(node: NodeInterface) {
         this.body.push('</dd>\n');
         if (!(node.nextNode({ descend: false, siblings: true}) instanceof nodes.footnote)) {
             this.body.push('</dl>\n');
@@ -928,7 +933,7 @@ class HTMLTranslator extends nodes.NodeVisitor {
 
     /* whoops this requires references transform!! */
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
-    visit_footnote_reference(node: INode) {
+    public visit_footnote_reference(node: NodeInterface) {
         if (!node.attributes.refid) {
             /* eslint-disable-next-line no-console */
             console.log('warning, no refid ( implement transforms )');
@@ -940,27 +945,27 @@ class HTMLTranslator extends nodes.NodeVisitor {
             { CLASS: classes, href }));
     }
 
-    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,no-unused-vars */
-    depart_footnote_reference(node: INode) {
+    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,@typescript-eslint/no-unused-vars,no-unused-vars */
+    public depart_footnote_reference(node: NodeInterface) {
         this.body.push('</a>');
     }
 
     // Docutils-generated text: put section numbers in a span for CSS styling:
-    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,no-unused-vars */
-    visit_generated(node: INode) {
+    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,@typescript-eslint/no-unused-vars,no-unused-vars */
+    public visit_generated(node: NodeInterface) {
         /* generating error */
     }
 
-    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,no-unused-vars */
-    depart_generated(node: INode) {
+    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,@typescript-eslint/no-unused-vars,no-unused-vars */
+    public depart_generated(node: NodeInterface) {
     }
 
     /*
-          visit_header(node: INode) {
+          visit_header(node: NodeInterface) {
           this.context.push(len(this.body))
           }
 
-          depart_header(node: INode) {
+          depart_header(node: NodeInterface) {
           start = this.context.pop()
           header = [this.starttag(node, 'div', { CLASS: 'header' })]
           header.extend(this.body[start:])
@@ -973,7 +978,7 @@ class HTMLTranslator extends nodes.NodeVisitor {
           // Image types to place in an <object> element
           object_image_types = {'.swf': 'application/x-shockwave-flash'}
 
-          visit_image(node: INode) {
+          visit_image(node: NodeInterface) {
           atts = {}
           uri = node.attributes['uri']
           ext = os.path.splitext(uri)[1].lower()
@@ -1039,22 +1044,22 @@ class HTMLTranslator extends nodes.NodeVisitor {
           this.body.push(this.emptytag(node, 'img', suffix, **atts))
           }
 
-          depart_image(node: INode) {
+          depart_image(node: NodeInterface) {
           // this.body.push(this.context.pop())
           }
           pass
 
-          visit_inline(node: INode) {
+          visit_inline(node: NodeInterface) {
           this.body.push(this.starttag(node, 'span', ''))
           }
 
-          depart_inline(node: INode) {
+          depart_inline(node: NodeInterface) {
           this.body.push('</span>')
           }
     */
     // footnote and citation labels:
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
-    visit_label(node: INode) {
+    public visit_label(node: NodeInterface) {
         let classes;
         if (node.parent instanceof nodes.footnote) {
             classes = this.settings.docutilsWritersHtml4Css1Writer!.footnoteReferences;
@@ -1074,7 +1079,7 @@ class HTMLTranslator extends nodes.NodeVisitor {
     }
 
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
-    depart_label(node: INode) {
+    public depart_label(node: NodeInterface) {
         let backrefs = [];
         if (this.settings.docutilsCoreOptionParser!.footnoteBacklinks) {
             backrefs = node.parent!.attributes.backrefs;
@@ -1091,43 +1096,43 @@ class HTMLTranslator extends nodes.NodeVisitor {
     }
 
     /*
-      visit_legend(node: INode) {
+      visit_legend(node: NodeInterface) {
       this.body.push(this.starttag(node, 'div', { CLASS: 'legend' }))
       }
 
-      depart_legend(node: INode) {
+      depart_legend(node: NodeInterface) {
       this.body.push('</div>\n')
       }
 
-      visit_line(node: INode) {
+      visit_line(node: NodeInterface) {
       this.body.push(this.starttag(node, 'div', suffix='', { CLASS: 'line' }))
-      if not len(node: INode):
+      if not len(node: NodeInterface):
       this.body.push('<br />')
       }
 
-      depart_line(node: INode) {
+      depart_line(node: NodeInterface) {
       this.body.push('</div>\n')
       }
 
-      visit_line_block(node: INode) {
+      visit_line_block(node: NodeInterface) {
       this.body.push(this.starttag(node, 'div', { CLASS: 'line-block' }))
       }
 
-      depart_line_block(node: INode) {
+      depart_line_block(node: NodeInterface) {
       this.body.push('</div>\n')
       }
 
-      visit_list_item(node: INode) {
+      visit_list_item(node: NodeInterface) {
       this.body.push(this.starttag(node, 'li', ''))
       }
 
-      depart_list_item(node: INode) {
+      depart_list_item(node: NodeInterface) {
       this.body.push('</li>\n')
       }
     */
     // inline literal
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
-    visit_literal(node: INode) {
+    public visit_literal(node: NodeInterface) {
         // special case: "code" role
         const classes = node.attributes.classes || [];
         if (classes.indexOf('code') !== -1) {
@@ -1135,7 +1140,7 @@ class HTMLTranslator extends nodes.NodeVisitor {
             // fixme //node.attributes['classes'] = [cls for cls in classes if cls != 'code']
             return this.body.push(this.starttag(node, 'span', '', false, { CLASS: 'docutils literal' }));
         }
-        /* eslint-disable-next-line no-unused-vars */
+        /* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */
         let text = node.astext();
         // remove hard line breaks (except if in a parsed-literal block)
         if (!(node.parent instanceof nodes.literal_block)) {
@@ -1157,22 +1162,22 @@ class HTMLTranslator extends nodes.NodeVisitor {
         throw new nodes.SkipNode();
     }
 
-    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,no-unused-vars */
-    depart_literal(node: INode) {
+    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,@typescript-eslint/no-unused-vars,no-unused-vars */
+    public depart_literal(node: NodeInterface) {
         // skipped unless literal element is from "code" role:
         this.body.push('</code>');
     }
 
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
-    visit_literal_block(node: INode) {
+    public visit_literal_block(node: NodeInterface) {
         this.body.push(this.starttag(node, 'pre', '', false, { CLASS: 'literal-block' }));
         if ((node.attributes.classes || []).indexOf('code') !== -1) {
             this.body.push('<code>');
         }
     }
 
-    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,no-unused-vars */
-    depart_literal_block(node: INode) {
+    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,@typescript-eslint/no-unused-vars,no-unused-vars */
+    public depart_literal_block(node: NodeInterface) {
         if ((node.attributes.classes || []).indexOf('code') !== -1) {
             this.body.push('</code>');
         }
@@ -1183,7 +1188,7 @@ class HTMLTranslator extends nodes.NodeVisitor {
         // for the math-output: LaTeX and MathJax simply wrap the content,
         // HTML and MathML also convert the math_code.
         // HTML container
-        /* eslint-disable-next-line no-unused-vars */
+        /* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */
         const mathTags = {// math_output: (block, inline, class-arguments)
             mathml: ['div', '', ''],
             html: ['div', 'span', 'formula'],
@@ -1296,28 +1301,28 @@ class HTMLTranslator extends nodes.NodeVisitor {
       // Content already processed:
       raise nodes.SkipNode
 
-      depart_math(node: INode) {
+      depart_math(node: NodeInterface) {
       }
       pass // never reached
 
-      visit_math_block(node: INode) {
+      visit_math_block(node: NodeInterface) {
       // print node.astext().encode('utf8')
       math_env = pick_math_environment(node.astext())
       this.visit_math(node, math_env=math_env)
       }
 
-      depart_math_block(node: INode) {
+      depart_math_block(node: NodeInterface) {
       }
       pass // never reached
 
       // Meta tags: 'lang' attribute replaced by 'xml:lang' in XHTML 1.1
       // HTML5/polyglot recommends using both
-      visit_meta(node: INode) {
+      visit_meta(node: NodeInterface) {
       meta = this.emptytag(node, 'meta', **node.non_default_attributes())
       this.add_meta(meta)
       }
 
-      depart_meta(node: INode) {
+      depart_meta(node: NodeInterface) {
       }
       pass
 
@@ -1326,61 +1331,61 @@ class HTMLTranslator extends nodes.NodeVisitor {
       this.head.push(tag)
       }
 
-      visit_option(node: INode) {
+      visit_option(node: NodeInterface) {
       this.body.push(this.starttag(node, 'span', '', { CLASS: 'option' }))
       }
 
-      depart_option(node: INode) {
+      depart_option(node: NodeInterface) {
       this.body.push('</span>')
       if isinstance(node.next_node(descend=false, siblings=true),
       nodes.option):
       this.body.push(', ')
       }
 
-      visit_option_argument(node: INode) {
+      visit_option_argument(node: NodeInterface) {
       this.body.push(node.get('delimiter', ' '))
       this.body.push(this.starttag(node, 'var', ''))
       }
 
-      depart_option_argument(node: INode) {
+      depart_option_argument(node: NodeInterface) {
       this.body.push('</var>')
       }
 
-      visit_option_group(node: INode) {
+      visit_option_group(node: NodeInterface) {
       this.body.push(this.starttag(node, 'dt', ''))
       this.body.push('<kbd>')
       }
 
-      depart_option_group(node: INode) {
+      depart_option_group(node: NodeInterface) {
       this.body.push('</kbd></dt>\n')
       }
 
-      visit_option_list(node: INode) {
+      visit_option_list(node: NodeInterface) {
       this.body.push(
       this.starttag(node, 'dl', { CLASS: 'option-list' }))
       }
 
-      depart_option_list(node: INode) {
+      depart_option_list(node: NodeInterface) {
       this.body.push('</dl>\n')
       }
 
-      visit_option_list_item(node: INode) {
+      visit_option_list_item(node: NodeInterface) {
       }
 
-      depart_option_list_item(node: INode) {
+      depart_option_list_item(node: NodeInterface) {
       }
 
-      visit_option_string(node: INode) {
+      visit_option_string(node: NodeInterface) {
       }
 
-      depart_option_string(node: INode) {
+      depart_option_string(node: NodeInterface) {
       }
 
-      visit_organization(node: INode) {
+      visit_organization(node: NodeInterface) {
       this.visitDocinfoItem(node, 'organization')
       }
 
-      depart_organization(node: INode) {
+      depart_organization(node: NodeInterface) {
       this.departDocinfoItem()
 
       // Do not omit <p> tags
@@ -1399,11 +1404,11 @@ class HTMLTranslator extends nodes.NodeVisitor {
       //
       // TODO: omit paragraph tags in simple table cells?
 
-      visit_paragraph(node: INode) {
+      visit_paragraph(node: NodeInterface) {
       this.body.push(this.starttag(node, 'p', ''))
       }
 
-      depart_paragraph(node: INode) {
+      depart_paragraph(node: NodeInterface) {
       this.body.push('</p>')
       if not (isinstance(node.parent, (nodes.list_item, nodes.entry)) and
       (len(node.parent) == 1)):
@@ -1411,7 +1416,7 @@ class HTMLTranslator extends nodes.NodeVisitor {
       }
     */
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
-    visit_problematic(node: INode) {
+    public visit_problematic(node: NodeInterface) {
         if (typeof node.attributes.refid !== 'undefined') {
             this.body.push(`<a href="//${node.attributes.refid}">`);
             this.context.push('</a>');
@@ -1421,14 +1426,14 @@ class HTMLTranslator extends nodes.NodeVisitor {
         }
     }
 
-    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,no-unused-vars */
-    depart_problematic(node: INode) {
+    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,@typescript-eslint/no-unused-vars,no-unused-vars */
+    public depart_problematic(node: NodeInterface) {
         this.body.push('</span>');
         this.body.push(this.context.pop()!);
     }
 
     /*
-      visit_raw(node: INode) {
+      visit_raw(node: NodeInterface) {
       if 'html' in node.get('format', '').split():
       t = isinstance(node.parent, nodes.TextElement) and 'span' or 'div'
       if node.attributes['classes']:
@@ -1441,7 +1446,7 @@ class HTMLTranslator extends nodes.NodeVisitor {
       }
     */
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
-    visit_reference(node: INode) {
+    public visit_reference(node: NodeInterface) {
         const atts: any = { class: 'reference' };
         if ('refuri' in node.attributes) {
             atts.href = node.attributes.refuri;
@@ -1458,14 +1463,14 @@ class HTMLTranslator extends nodes.NodeVisitor {
         }
 
         if (!(node.parent instanceof nodes.TextElement)) {
-            // assert len(node: INode) == 1 and isinstance(node.attributes[0], nodes.image)
+            // assert len(node: NodeInterface) == 1 and isinstance(node.attributes[0], nodes.image)
             atts.class += ' image-reference';
         }
         this.body.push(this.starttag(node, 'a', '', false, atts));
     }
 
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
-    depart_reference(node: INode) {
+    public depart_reference(node: NodeInterface) {
         this.body.push('</a>');
         if (!(node.parent instanceof nodes.TextElement)) {
             this.body.push('\n');
@@ -1474,103 +1479,103 @@ class HTMLTranslator extends nodes.NodeVisitor {
     }
 
     /*
-      visit_revision(node: INode) {
+      visit_revision(node: NodeInterface) {
       this.visitDocinfoItem(node, 'revision', meta=false)
       }
 
-      depart_revision(node: INode) {
+      depart_revision(node: NodeInterface) {
       this.departDocinfoItem()
       }
     */
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
-    visit_row(node: row) {
+    public visit_row(node: row) {
         this.body.push(this.starttag(node, 'tr', ''));
         node.column = 0;
     }
 
-    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,no-unused-vars */
-    depart_row(node: INode) {
+    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,@typescript-eslint/no-unused-vars,no-unused-vars */
+    public depart_row(node: NodeInterface) {
         this.body.push('</tr>\n');
     }
 
     /*
-      visit_rubric(node: INode) {
+      visit_rubric(node: NodeInterface) {
       this.body.push(this.starttag(node, 'p', '', { CLASS: 'rubric' }))
       }
 
-      depart_rubric(node: INode) {
+      depart_rubric(node: NodeInterface) {
       this.body.push('</p>\n')
       }
 
       // TODO: use the new HTML 5 element <section>?
-      visit_section(node: INode) {
+      visit_section(node: NodeInterface) {
       this.section_level += 1
       this.body.push(
       this.starttag(node, 'div', { CLASS: 'section' }))
       }
 
-      depart_section(node: INode) {
+      depart_section(node: NodeInterface) {
       this.section_level -= 1
       this.body.push('</div>\n')
 
       // TODO: use the new HTML5 element <aside>? (Also for footnote text)
       }
-      visit_sidebar(node: INode) {
+      visit_sidebar(node: NodeInterface) {
       this.body.push(
       this.starttag(node, 'div', { CLASS: 'sidebar' }))
       this.in_sidebar = true
       }
 
-      depart_sidebar(node: INode) {
+      depart_sidebar(node: NodeInterface) {
       this.body.push('</div>\n')
       this.in_sidebar = false
       }
 
-      visit_status(node: INode) {
+      visit_status(node: NodeInterface) {
       this.visitDocinfoItem(node, 'status', meta=false)
       }
 
-      depart_status(node: INode) {
+      depart_status(node: NodeInterface) {
       this.departDocinfoItem()
       }
 
     */
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
-    visit_strong(node: INode) {
+    public visit_strong(node: NodeInterface) {
         this.body.push(this.starttag(node, 'strong', ''));
     }
 
-    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,no-unused-vars */
-    depart_strong(node: INode) {
+    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,@typescript-eslint/no-unused-vars,no-unused-vars */
+    public depart_strong(node: NodeInterface) {
         this.body.push('</strong>');
     }
 
     /*
-      visit_subscript(node: INode) {
+      visit_subscript(node: NodeInterface) {
       this.body.push(this.starttag(node, 'sub', ''))
       }
 
-      depart_subscript(node: INode) {
+      depart_subscript(node: NodeInterface) {
       this.body.push('</sub>')
       }
 */
 
     /** Internal only. */
-    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,no-unused-vars */
-    visit_substitution_definition(node: INode) {
+    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,@typescript-eslint/no-unused-vars,no-unused-vars */
+    public visit_substitution_definition(node: NodeInterface) {
         throw new nodes.SkipNode();
     }
 
     /*
-      visit_substitution_reference(node: INode) {
-      this.unimplemented_visit(node: INode)
+      visit_substitution_reference(node: NodeInterface) {
+      this.unimplemented_visit(node: NodeInterface)
       }
 
       // h1 h6 elements must not be used to markup subheadings, subtitles,
       // alternative titles and taglines unless intended to be the heading for a
       // new section or subsection.
       // -- http://www.w3.org/TR/html/sections.html//headings-and-sections
-      visit_subtitle(node: INode) {
+      visit_subtitle(node: NodeInterface) {
       if isinstance(node.parent, nodes.sidebar):
       classes = 'sidebar-subtitle'
       elif isinstance(node.parent, nodes.document):
@@ -1581,7 +1586,7 @@ class HTMLTranslator extends nodes.NodeVisitor {
       this.body.push(this.starttag(node, 'p', '', CLASS=classes))
       }
 
-      depart_subtitle(node: INode) {
+      depart_subtitle(node: NodeInterface) {
       this.body.push('</p>\n')
       if isinstance(node.parent, nodes.document):
       this.subtitle = this.body[this.in_document_title:-1]
@@ -1591,17 +1596,17 @@ class HTMLTranslator extends nodes.NodeVisitor {
       del this.body[:]
       }
 
-      visit_superscript(node: INode) {
+      visit_superscript(node: NodeInterface) {
       this.body.push(this.starttag(node, 'sup', ''))
       }
 
-      depart_superscript(node: INode) {
+      depart_superscript(node: NodeInterface) {
       this.body.push('</sup>')
       }
 
     */
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
-    visit_system_message(node: INode) {
+    public visit_system_message(node: NodeInterface) {
         this.body.push(this.starttag(node, 'div', '\n', false, { CLASS: 'system-message' }));
         this.body.push('<p class="system-message-title">');
         let backrefText = '';
@@ -1623,13 +1628,13 @@ class HTMLTranslator extends nodes.NodeVisitor {
         this.body.push(`System Message: ${node.attributes.type}/${node.attributes.level} (<span class="docutils literal">${this.encode(node.attributes.source)}</span>${line})${backrefText}</p>\n`);
     }
 
-    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,no-unused-vars */
-    depart_system_message(node: INode) {
+    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,@typescript-eslint/no-unused-vars,no-unused-vars */
+    public depart_system_message(node: NodeInterface) {
         this.body.push('</div>\n');
     }
 
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
-    visit_table(node: INode) {
+    public visit_table(node: NodeInterface) {
         const atts: any = {};
         const classes = this.settings.docutilsWritersHtml4Css1Writer!.tableStyle.split(',').map((cls: string) => cls.replace(/^[ \t\n]*/, '').replace(/[ \t\n]$/, ''));
         if ('align' in node.attributes) {
@@ -1642,13 +1647,13 @@ class HTMLTranslator extends nodes.NodeVisitor {
         this.body.push(tag);
     }
 
-    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,no-unused-vars */
-    depart_table(node: INode) {
+    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,@typescript-eslint/no-unused-vars,no-unused-vars */
+    public depart_table(node: NodeInterface) {
         this.body.push('</table>\n');
     }
 
     /*
-      visit_target(node: INode) {
+      visit_target(node: NodeInterface) {
       if not ('refuri' in node or 'refid' in node
       or 'refname' in node):
       this.body.push(this.starttag(node, 'span', '', { CLASS: 'target' }))
@@ -1657,109 +1662,109 @@ class HTMLTranslator extends nodes.NodeVisitor {
       this.context.push('')
       }
 
-      depart_target(node: INode) {
+      depart_target(node: NodeInterface) {
       this.body.push(this.context.pop())
       }
 
     */
     // no hard-coded vertical alignment in table body
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
-    visit_tbody(node: INode) {
+    public visit_tbody(node: NodeInterface) {
         this.body.push(this.starttag(node, 'tbody'));
     }
 
-    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,no-unused-vars */
-    depart_tbody(node: INode) {
+    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,@typescript-eslint/no-unused-vars,no-unused-vars */
+    public depart_tbody(node: NodeInterface) {
         this.body.push('</tbody>\n');
     }
 
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
-    visit_term(node: INode) {
+    public visit_term(node: NodeInterface) {
         this.body.push(this.starttag(node, 'dt', ''));
     }
 
     /**
      * Leave the end tag to `this.visit_definition()`, in case there's a classifier.
      */
-    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,no-unused-vars */
-    depart_term(node: INode) {
+    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,@typescript-eslint/no-unused-vars,no-unused-vars */
+    public depart_term(node: NodeInterface) {
     }
 
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
-    visit_tgroup(node: tgroup) {
+    public visit_tgroup(node: tgroup) {
         this.colspecs = [];
         node.stubs = [];
     }
 
-    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,no-unused-vars */
-    depart_tgroup(node: INode) {
+    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,@typescript-eslint/no-unused-vars,no-unused-vars */
+    public depart_tgroup(node: NodeInterface) {
     }
 
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
-    visit_thead(node: INode) {
+    public visit_thead(node: NodeInterface) {
         this.body.push(this.starttag(node, 'thead'));
     }
 
-    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,no-unused-vars */
-    depart_thead(node: INode) {
+    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,@typescript-eslint/no-unused-vars,no-unused-vars */
+    public depart_thead(node: NodeInterface) {
         this.body.push('</thead>\n');
     }
 
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
-    visit_title_reference(node: INode) {
+    public visit_title_reference(node: NodeInterface) {
         this.body.push(this.starttag(node, 'cite', ''));
     }
 
-    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,no-unused-vars */
-    depart_title_reference(node: INode) {
+    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,@typescript-eslint/no-unused-vars,no-unused-vars */
+    public depart_title_reference(node: NodeInterface) {
         this.body.push('</cite>');
 
         // TODO: use the new HTML5 element <aside>? (Also for footnote text)
     }
 
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
-    visit_topic(node: INode) {
+    public visit_topic(node: NodeInterface) {
         this.body.push(this.starttag(node, 'div', '\n', false, { CLASS: 'topic' }));
         this.topic.classes = node.attributes.classes;
     }
     // TODO: replace with ::
     //   this.in_contents = 'contents' in node.attributes['classes']
 
-    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,no-unused-vars */
-    depart_topic(node: INode) {
+    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,@typescript-eslint/no-unused-vars,no-unused-vars */
+    public depart_topic(node: NodeInterface) {
         this.body.push('</div>\n');
         this.topicClasses = [];
         // TODO this.in_contents = false
     }
 
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
-    visit_transition(node: INode) {
+    public visit_transition(node: NodeInterface) {
         this.body.push(this.emptytag(node, 'hr', '\n', { CLASS: 'docutils' }));
     }
 
-    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,no-unused-vars */
-    depart_transition(node: INode) {
+    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,@typescript-eslint/no-unused-vars,no-unused-vars */
+    public depart_transition(node: NodeInterface) {
     }
 
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
-    visit_version(node: INode) {
+    public visit_version(node: NodeInterface) {
         this.visitDocinfoItem(node, 'version', false);
     }
 
-    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,no-unused-vars */
-    depart_version(node: INode) {
+    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,@typescript-eslint/no-unused-vars,no-unused-vars */
+    public depart_version(node: NodeInterface) {
         this.departDocinfoItem();
     }
 
-    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,no-unused-vars */
-    unimplemented_visit(node: INode) {
+    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,@typescript-eslint/no-unused-vars,no-unused-vars */
+    public unimplemented_visit(node: NodeInterface) {
         throw new UnimplementedError(`visiting unimplemented node type: ${node.tagname}`);
     }
 
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
-    visit_title(node: INode) {
+    public visit_title(node: NodeInterface) {
         // Only 6 section levels are supported by HTML.
-        /* eslint-disable-next-line no-unused-vars */
+        /* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */
         const checkId = 0; // TODO: is this a bool (false) or a counter?
         let closeTag = '</p>\n';
         if (node.parent instanceof nodes.topic) {
@@ -1809,8 +1814,8 @@ class HTMLTranslator extends nodes.NodeVisitor {
         this.context.push(closeTag);
     }
 
-    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,no-unused-vars */
-    depart_title(node: INode) {
+    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,@typescript-eslint/no-unused-vars,no-unused-vars */
+    public depart_title(node: NodeInterface) {
         this.body.push(this.context.pop()!);
         if (this.inDocumentTitle) {
             this.title = this.body.slice(this.inDocumentTitle, this.body.length - 2);
@@ -1822,7 +1827,7 @@ class HTMLTranslator extends nodes.NodeVisitor {
     }
 
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
-    visit_bullet_list(node: INode) {
+    public visit_bullet_list(node: NodeInterface) {
         const atts: any = {};
         const oldCompactSimple = this.compactSimple;
         this.compactParagraph = undefined;
@@ -1833,30 +1838,30 @@ class HTMLTranslator extends nodes.NodeVisitor {
         this.body.push(this.starttag(node, 'ul', '', false, atts));
     }
 
-    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,no-unused-vars */
-    depart_bullet_list(node: INode) {
+    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,@typescript-eslint/no-unused-vars,no-unused-vars */
+    public depart_bullet_list(node: NodeInterface) {
         this.compactSimple = this.context.pop()!.length > 0;
         this.compactParagraph = this.compactSimple;
         this.body.push('</ul>\n');
     }
 
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
-    visit_list_item(node: INode) {
+    public visit_list_item(node: NodeInterface) {
         this.body.push(this.starttag(node, 'li', ''));
     }
 
-    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,no-unused-vars */
-    depart_list_item(node: INode) {
+    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,@typescript-eslint/no-unused-vars,no-unused-vars */
+    public depart_list_item(node: NodeInterface) {
         this.body.push('</li>\n');
     }
 
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
-    visit_paragraph(node: INode) {
+    public visit_paragraph(node: NodeInterface) {
         this.body.push(this.starttag(node, 'p', ''));
     }
 
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
-    depart_paragraph(node: INode) {
+    public depart_paragraph(node: NodeInterface) {
         this.body.push('</p>');
         if (!((node.parent instanceof nodes.list_item
                || node.parent instanceof nodes.entry)
@@ -1865,24 +1870,24 @@ class HTMLTranslator extends nodes.NodeVisitor {
         }
     }
 
-    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,no-unused-vars */
-    passNode(node: INode) {
+    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,@typescript-eslint/no-unused-vars,no-unused-vars */
+    public passNode(node: NodeInterface) {
     }
 
-    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,no-unused-vars */
-    ignoreNode(node: INode) {
+    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,@typescript-eslint/no-unused-vars,no-unused-vars */
+    public ignoreNode(node: NodeInterface) {
         throw new nodes.SkipNode();
     }
 
-    private cloakMailto(href: any) {
+    public cloakMailto(href: any) {
 
     }
 
-    private addMeta(metaTag: string) {
+    public addMeta(metaTag: string) {
 
     }
 
-    private checkSimpleList(node: any): boolean {
+    public checkSimpleList(node: any): boolean {
         //fixme
     //     """Check for a simple list that can be rendered compactly."""
     //     visitor = SimpleListChecker(self.document)
@@ -1896,7 +1901,7 @@ class HTMLTranslator extends nodes.NodeVisitor {
         return false;
     }
 
-    private cloakEmail(encoded: string): string {
+    public cloakEmail(encoded: string): string {
         return encoded;
 
     }
@@ -1916,13 +1921,13 @@ class HTMLBaseWriter extends BaseWriter {
      * Create HTMLBaseWriter.
      * @param {Object} args - arguments to function
      */
-    constructor() {
+    public constructor() {
         super();
         this.attr = {};
         this.translatorClass = HTMLTranslator;
     }
 
-    _init() {
+    public _init() {
         super._init();
         this.defaultTemplateContent = defaultTemplate;
         this.template = template;
@@ -1935,7 +1940,7 @@ class HTMLBaseWriter extends BaseWriter {
     }
 
 
-    translate() {
+    public translate() {
         this.visitor = new this.translatorClass(this.document);
         const visitor = this.visitor;
         if (!visitor) {
@@ -1950,8 +1955,8 @@ class HTMLBaseWriter extends BaseWriter {
         //        console.log(this.output);
     }
 
-    applyTemplate() {
-        /* eslint-disable-next-line no-unused-vars */
+    public applyTemplate() {
+        /* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */
         const templateContent = this.defaultTemplateContent;
         /*        template_file = open(this.document.settings.template, 'rb')
                   template = unicode(template_file.read(), 'utf-8')
@@ -1962,7 +1967,7 @@ class HTMLBaseWriter extends BaseWriter {
         return template(this.templateVars());
     }
 
-    templateVars() {
+    public templateVars() {
         const vars: any = {};
         const settings = this.document!.settings;
         // @ts-ignore
@@ -1977,7 +1982,7 @@ class HTMLBaseWriter extends BaseWriter {
         return vars;
     }
 
-    assembleParts() {
+    public assembleParts() {
         super.assembleParts();
         this.visitorAttributes.forEach((part) => {
             // @ts-ignore
@@ -1995,11 +2000,11 @@ class HTMLBaseWriter extends BaseWriter {
  *      This version also checks for simple field lists and docinfo.
  */
 class SimpleListChecker extends nodes.GenericNodeVisitor {
-    default_visit(node: INode) {
+    public default_visit(node: NodeInterface) {
         super.default_visit(node);
     }
 
-    default_departure(node: INode) {
+    public default_departure(node: NodeInterface) {
         super.default_departure(node);
     }
 }

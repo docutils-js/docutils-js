@@ -1,7 +1,8 @@
 export default class UnexpectedIndentationError extends Error {
-    args: any[];
+    public args: ({}|{}[])[];
 
-    constructor(...params: any[]) {
+    public constructor(...params: {}[]) {
+        // @ts-ignore
         super(...params);
         this.args = params;
         if (Error.captureStackTrace) {

@@ -1,7 +1,7 @@
-import * as nodes from '../../nodes';
-import * as directives from './directives';
-import Inliner from './Inliner';
-import { IReporter } from '../../types';
+import * as nodes from "../../nodes";
+import * as directives from "./directives";
+import { ReporterInterface } from "../../types";
+import { InlinerInterface } from "./types";
 
 const DEFAULT_INTERPRETED_ROLE = 'title-reference';
 
@@ -26,8 +26,8 @@ class GenericRole {
       this.nodeClass = nodeClass;
     }
 
-    /* eslint-disable-next-line no-unused-vars */
-    invoke(myRole: any, rawtext: any, text: any, lineno: number, inliner: Inliner, options: any, content: any) {
+    /* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */
+    invoke(myRole: any, rawtext: any, text: any, lineno: number, inliner: InlinerInterface, options: any, content: any) {
       const myOptions = options || {};
       setClasses(myOptions);
       return [[new this.nodeClass(rawtext, unescape(text), [], myOptions)], []];
@@ -66,7 +66,7 @@ function registerLocalRole(name: string, roleFn: any) {
  language, check English.  Return a 2-tuple: role function (``None`` if the
  named role cannot be found) and a list of system messages.
  */
-function roleInterface(roleName: string, languageModule: any, lineno: number, reporter: IReporter) {
+function roleInterface(roleName: string, languageModule: any, lineno: number, reporter: ReporterInterface) {
   const normname = roleName.toLowerCase();
   const messages: any[] = [];
   const msgText: any[] = [];

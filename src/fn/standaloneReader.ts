@@ -2,15 +2,16 @@ import * as references from '../transforms/references';
 import * as frontmatter from '../transforms/frontmatter';
 import baseReaderTransforms from
     './baseReaderTransforms';
+import { TransformType } from "../types";
 
-/* eslint-disable-next-line no-unused-vars */
+/* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */
 const __docformat__ = 'reStructuredText';
 
 const supported = ['standalone'];
 const transforms = '';
 
 
-function getTransforms() {
+function getTransforms(): TransformType[] {
     const s = baseReaderTransforms;
     // @ts-ignore
     const r = [...s, references.PropagateTargets,

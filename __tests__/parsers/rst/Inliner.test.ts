@@ -10,7 +10,7 @@ const currentLogLines: string[] = [];
 
 afterEach(() => {
     if (currentLogLines.length) {
-        /* eslint-disable-next-line no-unused-vars */
+        /* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */
         currentLogLines.forEach((line) => {});
         currentLogLines.length = 0;
     }

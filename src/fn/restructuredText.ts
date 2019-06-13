@@ -9,7 +9,7 @@ import {Document} from "../types";
  * @param document
  */
 
-function parse(inputstring: string, document: Document) {
+function parse(inputstring: string, document: Document): Document {
     const initialState = 'Body';
     const stateMachine = new RSTStateMachine({
         stateFactory: new StateFactory(),
@@ -17,9 +17,13 @@ function parse(inputstring: string, document: Document) {
         /*        debugFn: this.debugFn,
         debug: document.reporter.debugFlag, */ // fixme
     });
+    let tabWidth;
+    if(document.settings.docutilsParsersRstParser !== undefined) {
+        tabWidth = document.settings.docutilsParsersRstParser.tabWidth;
+    }
     const inputLines = statemachine.string2lines(
         inputstring, {
-            tabWidth: document.settings.docutilsParsersRstParser!.tabWidth,
+            tabWidth,
             convertWhitespace: true,
         },
     );

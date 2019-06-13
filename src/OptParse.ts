@@ -1,22 +1,22 @@
 export default class OptionParser {
     private rargs?: string[];
     private largs?: string[];
-    private values: any;
-    public constructor(args: any) {
-
+    private values?: {};
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    public constructor(args: {}) {
     }
-    public _getArgs(args: string[]) {
+    public _getArgs(args: string[]): string[] {
         if (args === undefined) {
             args = process.argv.slice(2);
         }
         return args;
     }
 
-    public getDefaultValues() {
+    public getDefaultValues(): {} {
         return {};
     }
 
-    public _processArgs(largs: string[], rargs: string[], values: any) {
+    public _processArgs(largs: string[], rargs: string[], values: {}): void {
         while (rargs.length) {
             const arg = rargs[0];
             //          console.log(`arg is ${arg}`)
@@ -32,7 +32,7 @@ export default class OptionParser {
         }
     }
 
-    public parseArgs(args: string[], values?: any): any {
+    public parseArgs(args: string[], values?: {}): {} {
         /* no idea what is what */
         //      console.log(`in base opton parser`);
         const rargs = this._getArgs(args);
@@ -45,7 +45,7 @@ export default class OptionParser {
         const largs = this.largs;
         this.values = values;
 
-        let stop; // eslint-disable-line no-unused-vars
+        let stop; // eslint-disable-line @typescript-eslint/no-unused-vars,no-unused-vars
         try {
             stop = this._processArgs(largs, rargs, values);
         } catch (error) {
@@ -56,11 +56,13 @@ export default class OptionParser {
         return this.checkValues(values, args);
     }
 
-    public _processLongOpt(rargs: string[], values: any) {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    public _processLongOpt(rargs: string[], values: {}): void {
 
     }
 
-    public checkValues(values: any, args: any) {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    public checkValues(values: {}, args: string[]): {} {
 
     }
 }

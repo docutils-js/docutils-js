@@ -1,50 +1,72 @@
-import Component from './Component';
-import * as universal from './transforms/universal';
-import parsers from './parsers';
-import newDocument from './newDocument';
-import {Document} from "./types";
-import {Settings} from "../gen/Settings";
+import Component from "./Component";
+import * as universal from "./transforms/universal";
+import parsers from "./parsers";
+import newDocument from "./newDocument";
+import { DebugFunction, Document, ReadCallback, TransformType } from "./types";
+import { Settings } from "../gen/Settings";
+import Source from "./Sources";
+import Parser from "./Parser";
+import Input from "./io/Input";
+import { InvalidStateError } from "./Exceptions";
 
-/* eslint-disable-next-line no-unused-vars */
+/* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */
 const __docformat__ = 'reStructuredText';
 
+interface ParseFunction {
+    (source: string, settings?: Settings): Document;
+}
+
+interface TransformClass {
+    apply(): void;
+}
+
 export default class Reader extends Component {
-    componentType: string = 'reader';
-    document?: Document;
-    protected parseFn: any;
+    public componentType: string = 'reader';
+    public  document?: Document;
+    protected parseFn?: ParseFunction;
     private settings?: Settings;
-    protected source: any;
-    protected input: any;
-    public parser: any;
-    private debug: boolean;
-    private debugFn: any;
-    public getTransforms() {
+    protected source: Source;
+    protected input: string = '';
+    public parser?: Parser;
+    private debug: boolean = false;
+    private debugFn?: DebugFunction;
+    public getTransforms(): TransformType[] {
         return [...super.getTransforms(), universal.Decorations]; // fixme
         //               universal.ExportInternals, universal.StripComments ];
     }
 
     public constructor(
-        args: { parser?: any; parseFn?: any; parserName?: string; debugFn?: any;
+        args: { parser?: Parser; parseFn?: ParseFunction; parserName?: string;
+            debugFn?: DebugFunction;
             debug?: boolean; }
     ) {
         super();
         const { parser, parseFn, parserName } = args;
         this.componentType = 'reader';
         this.configSection = 'readers';
-        this.parser = parser;
-        this.parseFn = parseFn;
-        this.debugFn = args.debugFn;
-        this.debug = args.debug || false;
+        if(parser !== undefined) {
+            this.parser = parser;
+        }
+        if(parseFn !== undefined) {
+            this.parseFn = parseFn;
+        }
+
+        if(args.debugFn) {
+            this.debugFn = args.debugFn;
+        }
+        if(args.debug) {
+            this.debug = args.debug || false;
+        }
         if (parser === undefined) {
             if (parserName) {
                 this.setParser(parserName);
             }
         }
         this.source = undefined;
-        this.input = undefined;
+        this.input = '';
     }
 
-    public setParser(parserName: string) {
+    public setParser(parserName: string): void {
         const ParserClass = parsers.getParserClass(parserName);
         this.parser = new ParserClass({
             debug: this.debug,
@@ -58,7 +80,7 @@ export default class Reader extends Component {
       *   test123
       *
       */
-    public read(source: any, parser: any, settings: Settings, cb: any) {
+    public read(source: Input, parser: Parser, settings: Settings, cb: ReadCallback): void {
         this.source = source;
         if (!this.parser) {
             this.parser = parser;
@@ -68,9 +90,9 @@ export default class Reader extends Component {
             throw new Error('Need source');
         }
 
-        this.source.read((error: Error, data: string) => {
+        this.source.read((error: Error, data: string): void => {
             if (error) {
-                cb(error);
+                cb(error, undefined);
                 return;
             }
             this.input = data;
@@ -80,7 +102,7 @@ export default class Reader extends Component {
     }
 
     /* read method without callbcks and other junk */
-    public read2(input: any, settings: Settings) {
+    public read2(input: string, settings: Settings): Document|undefined {
         this.input = input;
         this.settings = settings;
         this.parse();
@@ -90,7 +112,7 @@ export default class Reader extends Component {
 
     /* Delegates to this.parser, providing arguments
        based on instance variables */
-    public parse() {
+    public parse(): void {
         if (this.parser) {
             const document = this.newDocument();
             this.parser.parse(this.input, document);
@@ -98,20 +120,25 @@ export default class Reader extends Component {
             if (this.input === undefined) {
                 throw new Error(`need input, i have ${this.input}`);
             }
-        } else {
+        } else if(this.parseFn !== undefined) {
             const document = this.parseFn(this.input);
             this.document = document;
+        } else {
+            throw new InvalidStateError();
         }
-        this.document!.currentSource = '';
-        this.document!.currentLine = 0;
+        //this.document!.currentSource = '';
+        //this.document!.currentLine = 0;
     }
 
-    public newDocument() {
+    public newDocument(): Document {
+        if(!this.settings) {
+            throw new InvalidStateError("need settings");
+        }
         const document = newDocument({
             sourcePath:
                                        this.source && this.source.sourcePath,
         },
-        this.settings!);
+        this.settings);
         return document;
     }
 }

@@ -5,8 +5,8 @@ export const __docformat__ = 'reStructuredText';
 
 export class PropagateTargets extends Transform {
 
-    apply() {
-        /* eslint-disable-next-line no-unused-vars */
+    public apply() {
+        /* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */
         this.document.traverse({ condition: nodes.target }).forEach((target) => {
             // console.log(`target is ${target}`);
         });
@@ -38,7 +38,7 @@ PropagateTargets.defaultPriority = 260;
  */
 
 class AnonymousHyperlinks extends Transform {
-    apply() {
+    public apply() {
         const anonymousRefs = [];
         const anonymousTargets = [];
         this.document.traverse({ condition: nodes.reference }).forEach((node) => {

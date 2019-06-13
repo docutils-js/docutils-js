@@ -1,6 +1,7 @@
 export default class StateCorrection extends Error {
-    public args: any[];
-    public constructor(...args: any[]) {
+    public args: {}[];
+    public constructor(...args: {}[]) {
+        // @ts-ignore
         super(...args);
         this.args = args;
         if (Error.captureStackTrace) {

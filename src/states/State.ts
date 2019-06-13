@@ -1,17 +1,16 @@
-import {InvalidArgumentsError} from '../Exceptions';
-import UnknownTransitionError from '../error/UnknownTransitionError';
-import DuplicateTransitionError from '../error/DuplicateTransitionError';
-import {IReporter, IState, IStateMachine} from "../types";
-import {StateMachine} from "../StateMachine";
-import StateMachineWS from "../StateMachineWS";
-import {RSTStateArgs} from "../parsers/rst/types";
+import { InvalidArgumentsError } from "../Exceptions";
+import UnknownTransitionError from "../error/UnknownTransitionError";
+import DuplicateTransitionError from "../error/DuplicateTransitionError";
+import { ReporterInterface, StateInterface, Transitions } from "../types";
+import { StateMachine } from "../StateMachine";
+import { RSTStateArgs } from "../parsers/rst/types";
 
-class State implements IState {
+class State implements StateInterface {
     /**
       * {Name: pattern} mapping, used by `make_transition()`. Each pattern may
       * be a string or a compiled `re` pattern. Override in subclasses.
      */
-    public patterns: any;
+    public patterns?: {};
     /**
      * A list of transitions to initialize when a `State` is instantiated.
      * Each entry is either a transition name string, or a (transition name, next
@@ -25,18 +24,18 @@ class State implements IState {
     protected nestedSmKwargs?: any;
 
     protected knownIndentSm: any;
-    protected debug: boolean;
+    protected debug?: boolean;
     protected knownIndentSmKwargs: any;
     protected indentSmKwargs: any;
 
-    protected transitionOrder: string[] = [];
-    protected transitions: any = { };
-    protected reporter?: IReporter;
+    public transitionOrder: string[] = [];
+    protected transitions: Transitions = { };
+    protected reporter?: ReporterInterface;
     private stateMachine?: StateMachine;
 
-    constructor(stateMachine: StateMachine, args: { debug?: boolean}) {
+    public constructor(stateMachine: StateMachine, args: { debug?: boolean}) {
         this.stateMachine = stateMachine;
-        this.debug = args.debug!;
+        this.debug = args.debug;
         this._init(stateMachine, args);
 
         this.addInitialTransitions();
@@ -65,30 +64,30 @@ class State implements IState {
         }
     }
 
-    // eslint-disable-next-line no-unused-vars
-    _init(stateMachine: StateMachine, args: RSTStateArgs) {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars
+    public _init(stateMachine: StateMachine, args: RSTStateArgs) {
         /* empty */
         this.patterns = {};
         this.initialTransitions = undefined;
         this.nestedSm = null;
     }
 
-    runtimeInit() {
+    public runtimeInit(): void {
         /* empty */
     }
 
-    unlink() {
+    public unlink(): void {
         this.stateMachine = undefined;
     }
 
-    addInitialTransitions() {
+    public addInitialTransitions(): void {
         if (this.initialTransitions) {
             const [names, transitions] = this.makeTransitions(this.initialTransitions);
             this.addTransitions(names as any[], transitions);
         }
     }
 
-    addTransitions(names: any[], transitions: any) {
+    public addTransitions(names: string[], transitions: Transitions): void {
         names.forEach(((name) => {
             if (name in this.transitions) {
                 throw new DuplicateTransitionError(name);
@@ -98,22 +97,22 @@ class State implements IState {
             }
         }));
         this.transitionOrder.splice(0, 0, ...names);
-        Object.keys(transitions).forEach((key: string) => {
+        Object.keys(transitions).forEach((key: string): void => {
             this.transitions[key] = transitions[key];
         });
     }
 
-    addTransition(name: any, transition: any) {
+    public addTransition(name: string, transition: any) {
         this.transitionOrder.splice(0, 0, name);
         this.transitions[name] = transition;
     }
 
-    removeTransition(name: string) {
+    public removeTransition(name: string) {
         delete this.transitions[name];
         this.transitionOrder.splice(this.transitionOrder.indexOf(name), 1);
     }
 
-    makeTransition(name: string, nextState?: any) {
+    public makeTransition(name: string, nextState?: any) {
         if (name == null) {
             throw new InvalidArgumentsError('need transition name');
         }
@@ -121,6 +120,7 @@ class State implements IState {
             nextState = this.constructor.name;
         }
 
+        // @ts-ignore
         let pattern = this.patterns[name];
         if (!(pattern instanceof RegExp)) {
             try {
@@ -140,7 +140,7 @@ class State implements IState {
         return [pattern, method, nextState];
     }
 
-    makeTransitions(nameList: any[]) {
+    public makeTransitions(nameList: string[]): [string, {}][] {
         const names: any[] = [];
         const transitions: any = {};
         /* istanbul ignore if */
@@ -167,21 +167,22 @@ class State implements IState {
         return [names, transitions];
     }
 
-    /* eslint-disable-next-line no-unused-vars */
-    noMatch(context: any[], transitions: any): any[] {
+    /* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars,@typescript-eslint/no-explicit-any */
+    public noMatch(context: any[], transitions: any): any[] {
         return [context, null, []];
     }
 
-    bof(context: any[]): any[] {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    public bof(context: any[]): any[] {
         return [context, []];
     }
 
-    /* eslint-disable-next-line no-unused-vars */
-    eof(context: any): any[] {
+    /* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars,@typescript-eslint/no-explicit-any */
+    public eof(context: any): any[] {
         return [];
     }
 
-    nop(match: any, context: any[], nextState: any): any[] {
+    public nop(match: {}, context: {}[], nextState: {}): {}[] {
         return [context, nextState, []];
     }
 }

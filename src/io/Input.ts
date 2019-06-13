@@ -1,17 +1,20 @@
 import TransformSpec from '../TransformSpec';
+import { ReadCallback } from "../types";
 
 abstract class Input extends TransformSpec {
     public componentType: string = "input";
     public supported: string[] = [];
-    private successfulEncoding: any;
-    private defaultSourcePath: any;
-    private encoding: any;
-    private errorHandler: any;
-    protected sourcePath: any;
-    protected source: any;
-    constructor(args: {
-        source: any; sourcePath: string; encoding: string; errorHandler: string;
-    }) {
+    private successfulEncoding: string | undefined;
+    private defaultSourcePath?: string;
+    private encoding?: string;
+    private errorHandler?: string;
+    protected sourcePath?: string;
+    protected source?: {};
+    public constructor(
+        args: {
+            source?: {}; sourcePath?: string; encoding?: string; errorHandler?: string;
+        }
+    ) {
         super();
         const { source, sourcePath, encoding, errorHandler } = args;
         this.encoding = encoding;
@@ -25,15 +28,15 @@ abstract class Input extends TransformSpec {
     }
 
     /* istanbul ignore method */
-    abstract read(cb?: any): void;
+    abstract read(cb: ReadCallback): void;
 
     /* istanbul ignore method */
-    decode(data: string): string {
+    public decode(data: string): string {
         return data;
     }
 
     /* istanbul ignore method */
-    toString() {
+    public toString(): string {
         return `Input<${this.constructor.name}>`;
     }
 }

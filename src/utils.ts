@@ -1,6 +1,7 @@
 import { combining } from "./utils/combining";
 import { Settings } from "../gen/Settings";
-import { Document, INode } from "./types";
+import { Document, NodeInterface } from "./types";
+import { nodes } from "./index";
 
 /** Return indices of all combining chars in  Unicode string `text`.
 
@@ -9,13 +10,13 @@ import { Document, INode } from "./types";
  [3, 6, 9]
 
  */
-function findCombiningChars(text: string) {
-    return text.split("").map((c, i) => {
+function findCombiningChars(text: string): number[] {
+    return text.split("").map((c, i): number[][] => {
     // @ts-ignore
         const r = combining[text.codePointAt(i)];
         return [r, i];
-    /* eslint-disable-next-line no-unused-vars */
-    }).filter(([r, i]) => r).map(([r, i]) => i);
+    /* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */
+    }).filter(([r, i]): number => r).map(([r, i]): number => i);
 }
 
 
@@ -28,8 +29,8 @@ If trim_footnote_reference_space is None, return False unless the
 footnote reference style is 'superscript'.
 */
 
-/* eslint-disable-next-line no-unused-vars */
-export function getTrimFootnoteRefSpace(settings: Settings) { // fixme
+/* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */
+export function getTrimFootnoteRefSpace(settings: Settings): boolean { // fixme
     return false;
 }
 
@@ -41,14 +42,14 @@ export function getTrimFootnoteRefSpace(settings: Settings) { // fixme
         return settings.trim_footnote_reference_space
 */
 
-function columnWidth(text: string) { // fixme
+function columnWidth(text: string): number { // fixme
     return text.length;
 }
 
-export function isIterable(obj: any) {
+export function isIterable(obj?: {}): boolean {
     // checks for null and undefined
     /* instanbul ignore if */
-    if (obj == null) {
+    if (obj === undefined) {
         return false;
     }
     return typeof obj[Symbol.iterator] === "function";
@@ -117,16 +118,16 @@ function splitEscapedWhitespace(text: string): string[] {
  >>> from docutils.utils import column_indices
  >>> column_indices(u'A t ab le ')
  [0, 1, 2, 4, 5, 7, 8] */
-function columnIndicies(text: string) {
+function columnIndicies(text: string): number[] {
     const stringIndicies = new Array(text.length);
     for (let i = 0; i < text.length; i += 1) {
         stringIndicies[i] = i;
     }
-    findCombiningChars(text).forEach((index) => {
+    findCombiningChars(text).forEach((index): void => {
         stringIndicies[index] = undefined;
     });
 
-    return stringIndicies.filter(i => typeof i !== "undefined");
+    return stringIndicies.filter((i): boolean => typeof i !== "undefined");
 }
 
 // TODO: account for asian wide chars here instead of using dummy
@@ -138,30 +139,30 @@ function columnIndicies(text: string) {
     return [i for i in string_indices if i is not None]
 }
 */
-export function escapeRegExp(strVal: string) {
+export function escapeRegExp(strVal: string): string {
     return strVal.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); // $& means the whole matched string
 }
 
 // export default {
 //    newDocument,
 // };
-export function stripCombiningChars(text: string) {
+export function stripCombiningChars(text: string): string {
     return text;// fixme
     // return u''.join([c for c in text if not unicodedata.combining(c)])
 }
 
-export function pySplit(text: string, max?: number) {
-    return text.trim().split(/s+/);
+export function pySplit(text: string, max?: number): string[] {
+    return text.trim().split(/s+/, max);
 }
 
-export function checkDocumentArg(document: Document) {
+export function checkDocumentArg(document: Document): boolean | never {
     if (typeof document === "undefined") {
         throw new Error("undefined document");
     }
     return true;
 }
 
-export function relativePath(source: string, target: string) {
+export function relativePath(source: string, target: string): string {
     /*
       Build and return a path to `target`, relative to `source` (both files).
 
@@ -200,14 +201,17 @@ export function relativePath(source: string, target: string) {
  >>> normalize_language_tag('de-CH-x_altquot')
  ['de-ch-x-altquot', 'de-ch', 'de-x-altquot', 'de']
  */
-function normalizedLanguageTag(tag: string) {
+function normalizedLanguageTag(tag: string): string {
     // normalize:
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     let myTag = tag.toLowerCase().replace(/-/g, "_");
     // split (except singletons, which mark the following tag as non-standard):
     tag = tag.replace(/_([a-zA-Z0-9])_/g, "$1-");
     const subtags = tag.split("_");
-    const base_tag = subtags.pop();
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const baseTag = subtags.pop();
     // find all combinations of subtags
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const taglist = [];
     /*
   for(let i = subtags.length; i >= 0; i -= 1) {
@@ -219,7 +223,28 @@ function normalizedLanguageTag(tag: string) {
 */
 }
 
-function assemble_option_dict(option_list: any, options_spec: any) {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+function assembleOptionDict(optionList: {}, optionsSpec: {}): {} | never {
+    return {};
+}
+
+class BadOptionError implements Error {
+    public constructor(message: string) {
+        this.message = message;
+        this.name = 'BadOptionsError';
+    }
+
+    public message: string;
+    public name: string;
+}
+
+class BadOptionDataError implements Error {
+    public constructor(message: string) {
+        this.message = message;
+    }
+
+    public message: string;
+    public name: string = 'BadOptionDataError';
 }
 
 /*
@@ -255,6 +280,44 @@ function assemble_option_dict(option_list: any, options_spec: any) {
     return options
 
 */
+/**
+      Return a list of option (name, value) pairs from field names & bodies.
+
+      :Parameter:
+          `field_list`: A flat field list, where each field name is a single
+          word and each field body consists of a single paragraph only.
+
+      :Exceptions:
+          - `BadOptionError` for invalid fields.
+          - `BadOptionDataError` for invalid option data (missing name,
+            missing data, bad quotes, etc.).
+*/
+function extractOptions(fieldList: NodeInterface): [string, string][] {
+    const  optionList = [];
+    for(let i = 0; i < fieldList.children.length; i += 1) {
+        const field = fieldList.children[i];
+        if(pySplit(field.children[0].astext()).length !== 1) {
+            throw new BadOptionError(
+                'extension option field name may not contain multiple words');
+        }
+        const name = field.children[0].astext().toLowerCase();
+        const body = field.children[1];
+        let data: string | undefined;
+        if(body.children.length === 0) {
+            data = undefined;
+        } else if(body.children.length > 1 || !(body.children[0] instanceof nodes.paragraph)
+           || body.children[0].children.length !== -1 || !(body.children[0].children[0] instanceof nodes.Text)) {
+            throw new BadOptionDataError(
+                `extension option field body may contain\n` +
+                    `a single paragraph only (option "${name}")`);
+        } else {
+            data = body.children[0].children[0].astext();
+        }
+        optionList.push([name, data]);
+    }
+    return optionList;
+}
+
 
 /**
  Return a dictionary mapping extension option names to converted values.
@@ -276,47 +339,12 @@ function assemble_option_dict(option_list: any, options_spec: any) {
  - `BadOptionDataError` for invalid option data (missing name,
  missing data, bad quotes, etc.).
  **/
-export function extractExtensionOptions(field_list: INode, optionsSpec: any) {
+export function extractExtensionOptions(fieldList: NodeInterface, optionsSpec: {}): {} | undefined {
 
-    const optionList = extract_options(field_list);
-    const option_dict = assemble_option_dict(optionList, optionsSpec);
-    return option_dict;
+    const optionList = extractOptions(fieldList);
+    const optionDict = assembleOptionDict(optionList, optionsSpec);
+    return optionDict;
 }
-
-function extract_options(field_list: INode) {
-}
-/*
-      """
-      Return a list of option (name, value) pairs from field names & bodies.
-
-      :Parameter:
-          `field_list`: A flat field list, where each field name is a single
-          word and each field body consists of a single paragraph only.
-
-      :Exceptions:
-          - `BadOptionError` for invalid fields.
-          - `BadOptionDataError` for invalid option data (missing name,
-            missing data, bad quotes, etc.).
-      """
-      option_list = []
-      for field in field_list:
-          if len(field[0].astext().split()) != 1:
-              raise BadOptionError(
-                  'extension option field name may not contain multiple words')
-          name = str(field[0].astext().lower())
-          body = field[1]
-          if len(body) == 0:
-              data = None
-          elif len(body) > 1 or not isinstance(body[0], nodes.paragraph) \
-                or len(body[0]) != 1 or not isinstance(body[0][0], nodes.Text):
-              raise BadOptionDataError(
-                    'extension option field body may contain\n'
-                    'a single paragraph only (option "%s")' % name)
-          else:
-              data = body[0][0].astext()
-          option_list.append((name, data))
-      return option_list
-  */
 
 
 export {

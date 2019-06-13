@@ -5,19 +5,20 @@
 import { ApplicationError } from './Exceptions';
 
 class ViewList extends Array {
-    public items: any[];
+    public items: [string | undefined, number | undefined][];
 
     protected parentOffset: number;
 
     public parent?: ViewList;
 
     public constructor(
-        initlist: any[],
+        initlist: {}[] = [],
         source?: string,
-        items?: any[],
-        parent?: any,
+        items?: [string, number][],
+        parent?: ViewList,
         parentOffset?: number
     ) {
+        // @ts-ignore
         super(...initlist);
         this.items = [];
         this.parent = parent;
@@ -39,19 +40,19 @@ class ViewList extends Array {
         }
     }
 
-    public source(i: number) {
+    public source(i: number): string | undefined {
         return this.info(i)[0];
     }
 
-    public offset(i: number) {
+    public offset(i: number): number | undefined {
         return this.info(i)[1];
     }
 
-    public disconnect() {
+    public disconnect(): void {
         this.parent = undefined;
     }
 
-    public splice(index: number, num: number, ...elems: any[]) {
+    public splice(index: number, num: number, ...elems: {}[]): ViewList {
         //        console.log(`enter slice ${index} ${num} [${elems.length}]`);
         //        console.log(`input: ${JSON.stringify(this)}`);
         const returnAry = [];
@@ -70,7 +71,7 @@ class ViewList extends Array {
         return new this.constructor(returnAry);
     }
 
-    public slice(start = 0, end = this.length) {
+    public slice(start = 0, end = this.length): ViewList {
         const initList = [];
 
         const myEnd = Math.min(end, this.length);
@@ -81,9 +82,9 @@ class ViewList extends Array {
         return new this.constructor(initList);
     }
 
-    public info(i: number) {
+    public info(i: number): [string | undefined, number | undefined] {
         if (i === this.items.length && this.items.length > 0) {
-            return [this.items[i - 1][0], null];
+            return [this.items[i - 1][0], undefined];
         }
         /* istanbul ignore if */
         if (i < 0 || i >= this.items.length) {
@@ -92,7 +93,7 @@ class ViewList extends Array {
         return this.items[i];
     }
 
-    public trimStart(n = 1) {
+    public trimStart(n = 1): void {
         /* istanbul ignore if */
         if (n > this.length) {
             // fixme
@@ -109,7 +110,7 @@ class ViewList extends Array {
         }
     }
 
-    public trimEnd(n = 1) {
+    public trimEnd(n = 1): void {
         /* Remove items from the end of the list, without touching the parent. */
         /*        if n > len(self.data):
             raise IndexError("Size of trim too large; can't trim %s items "

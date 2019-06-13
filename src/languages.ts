@@ -1,14 +1,8 @@
-import { IRSTLanguage } from "./parsers/rst/types";
-import * as en from './languages/en'
-import { IReporter } from "./types";
+import * as en from "./languages/en";
+import { CoreLanguage, ReporterInterface } from "./types";
 
-interface IBaseLanguage {
-    labels: any;
-    bibliographicFields: any;
-    authorSeparators: string[];
-}
-
-export function getLanguage(languageCode: string, reporter: IReporter): IBaseLanguage | undefined {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export function getLanguage(languageCode: string, reporter: ReporterInterface): CoreLanguage | undefined {
     if(languageCode === "en") {
         return en;
     }

@@ -15,66 +15,77 @@
  * .. _DTD: http://docutils.sourceforge.net/docs/ref/docutils.dtd
  *
  */
-import xmlescape from 'xml-escape';
-import Transformer from './Transformer';
-/* eslint-disable-next-line no-unused-vars */
-import {InvalidArgumentsError, UnimplementedError} from './Exceptions';
-import unescape from './utils/unescape';
-import {checkDocumentArg, isIterable} from './utils';
-import {Document, HasIndent, IAttributes, IElement, INode, IReporter, ITextElement, TraverseArgs,} from './types';
-import {Settings} from '../gen/Settings';
+import xmlescape from "xml-escape";
+import Transformer from "./Transformer";
+/* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */
+import { InvalidArgumentsError, InvalidStateError, UnimplementedError } from "./Exceptions";
+import unescape from "./utils/unescape";
+import { checkDocumentArg, isIterable } from "./utils";
+import {
+    Attributes,
+    Document,
+    ElementInterface, FastTraverseArg,
+    HasIndent,
+    NameIds,
+    NodeInterface, QuoteattrCallback,
+    ReporterInterface,
+    SystemMessage,
+    TextElementInterface,
+    TraverseArgs, Visitor
+} from "./types";
+import { Settings } from "../gen/Settings";
 
-/* eslint-disable-next-line no-unused-vars */
-const __docformat__ = 'reStructuredText';
+/* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */
+const __docformat__ = "reStructuredText";
 
 
-/* eslint-disable-next-line no-unused-vars */
+/* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */
 const _nonIdChars = /[^a-z0-9]+/ig;
-/* eslint-disable-next-line no-unused-vars */
+/* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */
 const _nonIdAtEnds = /^[-0-9]+|-+$/;
-/* eslint-disable-next-line no-unused-vars */
+/* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */
 const _nonIdTranslate = {
-    0x00f8: 'o', // o with stroke
-    0x0111: 'd', // d with stroke
-    0x0127: 'h', // h with stroke
-    0x0131: 'i', // dotless i
-    0x0142: 'l', // l with stroke
-    0x0167: 't', // t with stroke
-    0x0180: 'b', // b with stroke
-    0x0183: 'b', // b with topbar
-    0x0188: 'c', // c with hook
-    0x018c: 'd', // d with topbar
-    0x0192: 'f', // f with hook
-    0x0199: 'k', // k with hook
-    0x019a: 'l', // l with bar
-    0x019e: 'n', // n with long right leg
-    0x01a5: 'p', // p with hook
-    0x01ab: 't', // t with palatal hook
-    0x01ad: 't', // t with hook
-    0x01b4: 'y', // y with hook
-    0x01b6: 'z', // z with stroke
-    0x01e5: 'g', // g with stroke
-    0x0225: 'z', // z with hook
-    0x0234: 'l', // l with curl
-    0x0235: 'n', // n with curl
-    0x0236: 't', // t with curl
-    0x0237: 'j', // dotless j
-    0x023c: 'c', // c with stroke
-    0x023f: 's', // s with swash tail
-    0x0240: 'z', // z with swash tail
-    0x0247: 'e', // e with stroke
-    0x0249: 'j', // j with stroke
-    0x024b: 'q', // q with hook tail
-    0x024d: 'r', // r with stroke
-    0x024f: 'y', // y with stroke
+    0x00f8: "o", // o with stroke
+    0x0111: "d", // d with stroke
+    0x0127: "h", // h with stroke
+    0x0131: "i", // dotless i
+    0x0142: "l", // l with stroke
+    0x0167: "t", // t with stroke
+    0x0180: "b", // b with stroke
+    0x0183: "b", // b with topbar
+    0x0188: "c", // c with hook
+    0x018c: "d", // d with topbar
+    0x0192: "f", // f with hook
+    0x0199: "k", // k with hook
+    0x019a: "l", // l with bar
+    0x019e: "n", // n with long right leg
+    0x01a5: "p", // p with hook
+    0x01ab: "t", // t with palatal hook
+    0x01ad: "t", // t with hook
+    0x01b4: "y", // y with hook
+    0x01b6: "z", // z with stroke
+    0x01e5: "g", // g with stroke
+    0x0225: "z", // z with hook
+    0x0234: "l", // l with curl
+    0x0235: "n", // n with curl
+    0x0236: "t", // t with curl
+    0x0237: "j", // dotless j
+    0x023c: "c", // c with stroke
+    0x023f: "s", // s with swash tail
+    0x0240: "z", // z with swash tail
+    0x0247: "e", // e with stroke
+    0x0249: "j", // j with stroke
+    0x024b: "q", // q with hook tail
+    0x024d: "r", // r with stroke
+    0x024f: "y" // y with stroke
 };
-/* eslint-disable-next-line no-unused-vars */
+/* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */
 const _nonIdTranslateDigraphs = {
-    0x00df: 'sz', // ligature sz
-    0x00e6: 'ae', // ae
-    0x0153: 'oe', // ligature oe
-    0x0238: 'db', // db digraph
-    0x0239: 'qp', // qp digraph
+    0x00df: "sz", // ligature sz
+    0x00e6: "ae", // ae
+    0x0153: "oe", // ligature oe
+    0x0238: "db", // db digraph
+    0x0239: "qp" // qp digraph
 };
 
 /**
@@ -85,7 +96,7 @@ const _nonIdTranslateDigraphs = {
  * |test         |
  * +-------------+
  */
-function dupname(node: INode, name: string) {
+function dupname(node: NodeInterface, name: string): void {
     /* What is the intention of this function? */
     node.attributes.dupnames.push(name);
     node.attributes.names.splice(node.attributes.names.indexOf(name), 1);
@@ -98,107 +109,118 @@ function dupname(node: INode, name: string) {
  * Escape string values that are elements of a list, for serialization.
  * @param {String} value - Value to escape.
  */
-function serialEscape(value: string) {
-    return value.replace(/\\/g, '\\\\').replace(/ /g, '\\ ');
+function serialEscape(value: string): string {
+    return value.replace(/\\/g, "\\\\").replace(/ /g, "\\ ");
 }
 
 /* We don't do 'psuedo-xml' but perhaps we should */
-function pseudoQuoteattr(value: any) {
+function pseudoQuoteattr(value: string): string {
     return `"${xmlescape(value)}"`;
 }
 
 /**
  * Return a whitespace-normalized name.
  */
-function whitespaceNormalizeName(name: string) {
-    return name.replace(/\s+/, ' ');
+function whitespaceNormalizeName(name: string): string {
+    return name.replace(/\s+/, " ");
 }
 
-export function fullyNormalizeName(name: string) {
-    return name.toLowerCase().replace(/\s+/, ' ');
+export function fullyNormalizeName(name: string): string {
+    return name.toLowerCase().replace(/\s+/, " ");
 }
 
-function setupBacklinkable(o: any) {
-    o.addBackref = (refid: string) => o.attributes.backrefs.push(refid);
+function setupBacklinkable(o: NodeInterface): void {
+    o.addBackref = (refid: string): void => { o.attributes.backrefs.push(refid) };
 }
 
 /* This needs to be implemented - fixme */
-function makeId(strVal: string) {
+function makeId(strVal: string): string {
     return strVal;
     /*
-    let id = string.lower();
-    // This is for unicode, I believe?
-    //if not isinstance(id, str):
-    //id = id.decode()
-    id = id.translate(_non_id_translate_digraphs)
-    id = id.translate(_non_id_translate)
-    // get rid of non-ascii characters.
-    // 'ascii' lowercase to prevent problems with turkish locale.
-    id = unicodedata.normalize('NFKD', id).\
-         encode('ascii', 'ignore').decode('ascii')
-    # shrink runs of whitespace and replace by hyphen
-    id = _non_id_chars.sub('-', ' '.join(id.split()))
-    id = _non_id_at_ends.sub('', id)
-    return str(id)
+  let id = string.lower();
+  // This is for unicode, I believe?
+  //if not isinstance(id, str):
+  //id = id.decode()
+  id = id.translate(_non_id_translate_digraphs)
+  id = id.translate(_non_id_translate)
+  // get rid of non-ascii characters.
+  // 'ascii' lowercase to prevent problems with turkish locale.
+  id = unicodedata.normalize('NFKD', id).\
+       encode('ascii', 'ignore').decode('ascii')
+  # shrink runs of whitespace and replace by hyphen
+  id = _non_id_chars.sub('-', ' '.join(id.split()))
+  id = _non_id_at_ends.sub('', id)
+  return str(id)
 */
 }
 
-function _callDefaultVisit(node: INode) {
+function _callDefaultVisit(node: NodeInterface): void | undefined | {} {
     // @ts-ignore
     return this.default_visit(node);
 }
 
-function _callDefaultDeparture(node: INode) {
+function _callDefaultDeparture(node: NodeInterface): void | {} | undefined {
     // @ts-ignore
     return this.default_departure(node);
 }
+
 /* This is designed to be called later, a-nd not with an object. hmm */
-function _addNodeClassNames(names: string[], o: any) {
-    names.forEach((_name) => {
+function _addNodeClassNames(names: string[], o: {}): void {
+    names.forEach((_name): void => {
         const v = `visit_${_name}`;
+        // @ts-ignore
         if (!o[v]) {
+            // @ts-ignore
             o[v] = _callDefaultVisit.bind(o);
         }
         const d = `depart_${_name}`;
+        // @ts-ignore
         if (!o[d]) {
+            // @ts-ignore
             o[d] = _callDefaultDeparture.bind(o);
         }
     });
 }
 
-const nodeClassNames = ['Text', 'abbreviation', 'acronym', 'address',
-    'admonition', 'attention', 'attribution', 'author',
-    'authors', 'block_quote', 'bullet_list', 'caption',
-    'caution', 'citation', 'citation_reference',
-    'classifier', 'colspec', 'comment', 'compound',
-    'contact', 'container', 'copyright', 'danger',
-    'date', 'decoration', 'definition', 'definition_list',
-    'definition_list_item', 'description', 'docinfo',
-    'doctest_block', 'document', 'emphasis', 'entry',
-    'enumerated_list', 'error', 'field', 'field_body',
-    'field_list', 'field_name', 'figure', 'footer',
-    'footnote', 'footnote_reference', 'generated',
-    'header', 'hint', 'image', 'important', 'inline',
-    'label', 'legend', 'line', 'line_block', 'list_item',
-    'literal', 'literal_block', 'math',
-    'math_block', 'note', 'option', 'option_argument',
-    'option_group', 'option_list', 'option_list_item',
-    'option_string', 'organization', 'paragraph',
-    'pending', 'problematic', 'raw', 'reference',
-    'revision', 'row', 'rubric', 'section', 'sidebar',
-    'status', 'strong', 'subscript',
-    'substitution_definition', 'substitution_reference',
-    'subtitle', 'superscript', 'system_message', 'table',
-    'target', 'tbody', 'term', 'tgroup', 'thead', 'tip',
-    'title', 'title_reference', 'topic', 'transition',
-    'version', 'warning'];
+const nodeClassNames = ["Text", "abbreviation", "acronym", "address",
+    "admonition", "attention", "attribution", "author",
+    "authors", "block_quote", "bullet_list", "caption",
+    "caution", "citation", "citation_reference",
+    "classifier", "colspec", "comment", "compound",
+    "contact", "container", "copyright", "danger",
+    "date", "decoration", "definition", "definition_list",
+    "definition_list_item", "description", "docinfo",
+    "doctest_block", "document", "emphasis", "entry",
+    "enumerated_list", "error", "field", "field_body",
+    "field_list", "field_name", "figure", "footer",
+    "footnote", "footnote_reference", "generated",
+    "header", "hint", "image", "important", "inline",
+    "label", "legend", "line", "line_block", "list_item",
+    "literal", "literal_block", "math",
+    "math_block", "note", "option", "option_argument",
+    "option_group", "option_list", "option_list_item",
+    "option_string", "organization", "paragraph",
+    "pending", "problematic", "raw", "reference",
+    "revision", "row", "rubric", "section", "sidebar",
+    "status", "strong", "subscript",
+    "substitution_definition", "substitution_reference",
+    "subtitle", "superscript", "system_message", "table",
+    "target", "tbody", "term", "tgroup", "thead", "tip",
+    "title", "title_reference", "topic", "transition",
+    "version", "warning"];
 
-const SkipChildren = class {};
-const StopTraversal = class {};
+const SkipChildren = class {
+};
+const StopTraversal = class {
+};
+
 class SkipNode extends Error {
 }
-const SkipDeparture = class {};
-const SkipSiblings = class {};
+
+const SkipDeparture = class {
+};
+const SkipSiblings = class {
+};
 
 /**
  *  "Visitor" pattern [GoF95]_ abstract superclass implementation for
@@ -227,31 +249,35 @@ const SkipSiblings = class {};
  *     1995.
  */
 class NodeVisitor {
-    document: Document;
+    public document: Document;
 
-    optional: any[];
+    public optional: string[];
+    private strictVisitor: boolean | undefined;
 
     /**
-      * Create a NodeVisitor.
-      * @param {nodes.document} document - document to visit
-      */
+   * Create a NodeVisitor.
+   * @param {nodes.document} document - document to visit
+   */
     public constructor(document: Document) {
         if (!checkDocumentArg(document)) {
             throw new Error(`Invalid document arg: ${document}`);
         }
         this.document = document;
+        const core = document.settings.docutilsCoreOptionParser;
+        this.strictVisitor = core.strictVisitor;
         this.optional = [];
     }
 
     /**
-     * Call this."``visit_`` + node class name" with `node` as
-     * parameter.  If the ``visit_...`` method does not exist, call
-     * this.unknown_visit.
-     */
-    public dispatchVisit(node: INode) {
+   * Call this."``visit_`` + node class name" with `node` as
+   * parameter.  If the ``visit_...`` method does not exist, call
+   * this.unknown_visit.
+   */
+    public dispatchVisit(node: NodeInterface): {} | undefined | void {
         const nodeName = node.tagname;
         const methodName = `visit_${nodeName}`;
-        let method = (<any> this)[methodName];
+        // @ts-ignore
+        let method = (this)[methodName];
         if (!method) {
             method = this.unknownVisit;
         }
@@ -260,41 +286,43 @@ class NodeVisitor {
     }
 
     /*
-     * Call this."``depart_`` + node class name" with `node` as
-     * parameter.  If the ``depart_...`` method does not exist, call
-     * this.unknown_departure.
-     */
-    public dispatchDeparture(node: INode) {
+   * Call this."``depart_`` + node class name" with `node` as
+   * parameter.  If the ``depart_...`` method does not exist, call
+   * this.unknown_departure.
+   */
+    public dispatchDeparture(node: NodeInterface): {} | undefined | void {
         const nodeName = node.tagname;
-        const method = (<any> this)[`depart_${nodeName}`] || this.unknownDeparture;
+        // @ts-ignore
+        const method = (this)[`depart_${nodeName}`] || this.unknownDeparture;
         this.document.reporter.debug(
-            `docutils.nodes.NodeVisitor.dispatch_departure calling for ${node}`,
+            `docutils.nodes.NodeVisitor.dispatch_departure calling for ${node}`
         );
         return method.bind(this)(node);
     }
 
     /**
-     * Called when entering unknown `Node` types.
-     *
-     * Raise an exception unless overridden.
-     */
-    public unknownVisit(node: INode) {
-        if (this.document!.settings.docutilsCoreOptionParser!.strictVisitor || !(this.optional.includes(node.tagname))) {
+   * Called when entering unknown `Node` types.
+   *
+   * Raise an exception unless overridden.
+   */
+    public unknownVisit(node: NodeInterface): never | void {
+        if (this.strictVisitor || !(this.optional.includes(node.tagname))) {
             throw new Error(`visiting unknown node type:${node.tagname}`);
         }
     }
 
     /**
-     * Called before exiting unknown `Node` types.
-     *
-     * Raise exception unless overridden.
-     */
-    public unknownDeparture(node: INode) {
-        if (this.document.settings.docutilsCoreOptionParser!.strictVisitor || !(this.optional.includes(node.tagname))) {
+   * Called before exiting unknown `Node` types.
+   *
+   * Raise exception unless overridden.
+   */
+    public unknownDeparture(node: NodeInterface): never | void {
+        if (this.strictVisitor || !(this.optional.includes(node.tagname))) {
             throw new Error(`departing unknown node type: ${node.tagname}`);
         }
     }
 }
+
 /**
  * Base class for sparse traversals, where only certain node types are of
  * interest.  When ``visit_...`` & ``depart_...`` methods should be
@@ -320,7 +348,7 @@ class SparseNodeVisitor extends NodeVisitor {
  *  be overridden for default behavior.
  */
 class GenericNodeVisitor extends NodeVisitor {
-    static nodeClassNames = [];
+    public static nodeClassNames = [];
 
     public constructor(document: Document) {
         super(document);
@@ -329,15 +357,16 @@ class GenericNodeVisitor extends NodeVisitor {
     }
 
     /* eslint-disable-next-line */
-    public default_visit(node: INode) {
-        throw new Error('not implemented');
+  public default_visit(node: NodeInterface) {
+        throw new Error("not implemented");
     }
 
     /* eslint-disable-next-line */
-    public default_departure(node: INode) {
-        throw new Error('not implemented');
+  public default_departure(node: NodeInterface) {
+        throw new Error("not implemented");
     }
 }
+
 // fixme
 // GenericNodeVisitor.nodeClassNames = nodeClassNames;
 
@@ -350,9 +379,9 @@ class Resolvable {
 }
 
 class BackLinkable {
-    backrefs: string[] = [];
+    public backrefs: string[] = [];
 
-    public addBackref(refid: string) {
+    public addBackref(refid: string): void {
         this.backrefs.push(refid);
     }
 }
@@ -361,57 +390,77 @@ class BackLinkable {
 //  Element Categories
 // ====================
 
-class Root { }
+class Root {
+}
 
-class Titular { }
+class Titular {
+}
 
 /**
  * Category of Node which may occur before Bibliographic Nodes.
  */
-class PreBibliographic { }
+class PreBibliographic {
+}
 
-class Bibliographic { }
+class Bibliographic {
+}
 
-class Decorative extends PreBibliographic { }
+class Decorative extends PreBibliographic {
+}
 
-class Structural { }
+class Structural {
+}
 
-class Body { }
+class Body {
+}
 
-class General extends Body { }
+class General extends Body {
+}
 
 /** List-like elements. */
 class Sequential extends Body {
 }
 
-class Admonition extends Body { }
+class Admonition extends Body {
+}
 
 /** Special internal body elements.  */
-class Special extends Body { }
+class Special extends Body {
+}
 
 /** Internal elements that don't appear in output. */
-class Invisible extends PreBibliographic { }
+class Invisible extends PreBibliographic {
+}
 
-class Part { }
+class Part {
+}
 
-class Inline { }
+class Inline {
+}
 
-class Referential extends Resolvable { }
+class Referential extends Resolvable {
+}
 
 class Targetable extends Resolvable {
     // referenced = 0
     // indirect_reference_name = null
     /* Holds the whitespace_normalized_name (contains mixed case) of a target.
-    Required for MoinMoin/reST compatibility.
-    */
+  Required for MoinMoin/reST compatibility.
+  */
 }
 
 /** Contains a `label` as its first element. */
-class Labeled { }
+class Labeled {
+}
 
 // ==============================
-//  Functional Node: INode Base Classes
+//  Functional Node: NodeInterface Base Classes
 // ==============================
+
+
+interface NodeClass {
+    new (): NodeInterface;
+}
 
 /**
  * Node class.
@@ -420,79 +469,78 @@ class Labeled { }
  */
 
 
-abstract class Node implements INode {
+abstract class Node implements NodeInterface {
     /**
    * List attributes which are defined for every Element-derived class
    * instance and can be safely transferred to a different node.
    */
-    basicAttributes: string[] = ['ids', 'classes', 'names', 'dupnames'];
+    public basicAttributes: string[] = ["ids", "classes", "names", "dupnames"];
 
     /**
    * List attributes, automatically initialized to empty lists for
    * all nodes.
    */
-    listAttributes: string[] = [];
+    public listAttributes: string[] = [];
 
     /** List attributes that are known to the Element base class. */
-    knownAttributes: string[] = [];
+    public knownAttributes: string[] = [];
 
-    childTextSeparator: string = '';
+    public childTextSeparator: string = "";
 
-    public emptytag(): string {
-        throw new Error('Method not implemented.');
-    }
+    public abstract emptytag(): string;
 
-    referenced: boolean = false;
+    public referenced: boolean = false;
 
-    names: any[] = [];
+    public names: string[] = [];
 
-    refname?: string;
+    public refname?: string;
 
-    refid?: string;
+    public refid?: string;
 
-    currentSource: string = '';
+    public currentSource: string = "";
 
-    currentLine: number = 0;
+    public currentLine: number = 0;
 
-    rawsource: any = '';
+    public rawsource: string = "";
 
-    tagname: string;
+    public tagname: string;
 
-    parent?: INode;
+    public parent?: NodeInterface;
 
-    document?: Document;
+    public document?: Document;
 
-    source: string = '';
+    public source: string = "";
 
-    line: number = 0;
+    public line: number = 0;
 
-    classTypes: any[] = [];
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    public classTypes: any[] = [];
 
-    children: INode[] = [];
+    public children: NodeInterface[] = [];
 
-    attributes: IAttributes = { };
+    public attributes: Attributes = {};
 
     /**
-      * Create a node
-      */
+   * Create a node
+   */
     public constructor() {
         this.tagname = this.constructor.name;
         this.classTypes = [];
         this._init();
     }
 
-    public _init() {
+    public _init(): void {
     }
 
 
     /**
-    Return the first node in the iterable returned by traverse(),
-    or None if the iterable is empty.
+   Return the first node in the iterable returned by traverse(),
+   or None if the iterable is empty.
 
-    Parameter list is the same as of traverse.  Note that
-    include_self defaults to 0, though.
-    */
-    public nextNode(args: TraverseArgs) {
+   Parameter list is the same as of traverse.  Note that
+   include_self defaults to 0, though.
+   */
+    public nextNode(args: TraverseArgs): NodeInterface | undefined {
         const iterable = this.traverse(args);
         if (iterable.length) {
             return iterable[0];
@@ -500,35 +548,39 @@ abstract class Node implements INode {
         return undefined;
     }
 
-    public hasClassType(classType: any) {
-        return this.classTypes.findIndex(c => c.prototype instanceof classType
-                                         || c === classType) !== -1;
+    public hasClassType(classType: {}): boolean {
+        // @ts-ignore
+        return this.classTypes.findIndex((c): boolean => c.prototype instanceof classType
+      || c === classType) !== -1;
     }
 
-    public isInline() {
-        return this.classTypes.findIndex(c => c.prototype instanceof Inline || c === Inline) !== -1;
+    public isInline(): boolean {
+        // @ts-ignore
+        return this.classTypes.findIndex((c: {}): boolean => c.prototype instanceof Inline || c === Inline) !== -1;
     }
 
-    public isAdmonition() {
+    public isAdmonition(): boolean {
         return this.classTypes.findIndex(
-            c => c.prototype instanceof Admonition || c === Admonition,
+            (c): boolean => c.prototype instanceof Admonition || c === Admonition
         ) !== -1;
     }
 
-    public asDOM(dom: any): any {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any,@typescript-eslint/no-unused-vars
+    public asDOM(dom: {}): {} {
+        return {};
     }
 
     abstract pformat(indent: string, level: number): string;
 
     abstract astext(): string;
 
-    abstract copy(): INode;
+    abstract copy(): NodeInterface;
 
-    abstract deepcopy(): INode;
+    abstract deepcopy(): NodeInterface;
 
-    abstract _domNode(domroot: any): any;
+    abstract _domNode(domroot: {}): {};
 
-    public setupChild(child: INode) {
+    public setupChild(child: NodeInterface): void {
         child.parent = this;
         if (this.document) {
             child.document = this.document;
@@ -542,44 +594,45 @@ abstract class Node implements INode {
     }
 
     /**
- * Traverse a tree of `Node` objects, calling the
- * `dispatch_visit()` method of `visitor` when entering each
- * node.  (The `walkabout()` method is similar, except it also
- * calls the `dispatch_departure()` method before exiting each
- * node.)
- *
- * This tree traversal supports limited in-place tree
- * modifications.  Replacing one node with one or more nodes is
- * OK, as is removing an element.  However, if the node removed
- * or replaced occurs after the current node, the old node will
- * still be traversed, and any new nodes will not.
- *
- * Within ``visit`` methods (and ``depart`` methods for
- * `walkabout()`), `TreePruningException` subclasses may be raised
- * (`SkipChildren`, `SkipSiblings`, `SkipNode`, `SkipDeparture`).
- *
- * Parameter `visitor`: A `NodeVisitor` object, containing a
- * ``visit`` implementation for each `Node` subclass encountered.
- *
- * Return true if we should stop the traversal.
- */
-    public walk(visitor: any): boolean {
+   * Traverse a tree of `Node` objects, calling the
+   * `dispatch_visit()` method of `visitor` when entering each
+   * node.  (The `walkabout()` method is similar, except it also
+   * calls the `dispatch_departure()` method before exiting each
+   * node.)
+   *
+   * This tree traversal supports limited in-place tree
+   * modifications.  Replacing one node with one or more nodes is
+   * OK, as is removing an element.  However, if the node removed
+   * or replaced occurs after the current node, the old node will
+   * still be traversed, and any new nodes will not.
+   *
+   * Within ``visit`` methods (and ``depart`` methods for
+   * `walkabout()`), `TreePruningException` subclasses may be raised
+   * (`SkipChildren`, `SkipSiblings`, `SkipNode`, `SkipDeparture`).
+   *
+   * Parameter `visitor`: A `NodeVisitor` object, containing a
+   * ``visit`` implementation for each `Node` subclass encountered.
+   *
+   * Return true if we should stop the traversal.
+   */
+    public walk(visitor: Visitor): boolean {
         let stop = false;
-        visitor.document.reporter.debug('docutils.nodes.Node.walk calling dispatch_visit for fixme');
+        visitor.document.reporter.debug("docutils.nodes.Node.walk calling dispatch_visit for fixme");
         try {
             try {
-                visitor.dispatch_visit(this);
+                visitor.dispatchVisit(this);
             } catch (error) {
                 if (error instanceof SkipChildren || error instanceof SkipNode) {
                     return stop;
-                } if (error instanceof SkipDeparture) {
+                }
+                if (error instanceof SkipDeparture) {
                     // do nothing
                 }
                 throw error;
             }
             const children = [...this.children];
             let skipSiblings = false;
-            children.forEach((child) => {
+            children.forEach((child): void => {
                 try {
                     if (!stop && !skipSiblings) {
                         if (child.walk(visitor)) {
@@ -603,17 +656,18 @@ abstract class Node implements INode {
         return stop;
     }
 
-    public walkabout(visitor: any): boolean {
+    public walkabout(visitor: Visitor): boolean {
         let callDepart = true;
         let stop = false;
-        visitor.document.reporter.debug('docutils.nodes.Node.walkabout calling dispatch_visit');
+        visitor.document.reporter.debug("docutils.nodes.Node.walkabout calling dispatch_visit");
         try {
             try {
                 visitor.dispatchVisit(this);
             } catch (error) {
                 if (error instanceof SkipNode || error instanceof SkipChildren) {
                     return stop;
-                } if (error instanceof SkipDeparture) {
+                }
+                if (error instanceof SkipDeparture) {
                     callDepart = false;
                 } else {
                     throw error;
@@ -645,27 +699,27 @@ abstract class Node implements INode {
         }
         if (callDepart) {
             visitor.document.reporter.debug(
-                `docutils.nodes.Node.walkabout calling dispatch_departure for ${this}`,
+                `docutils.nodes.Node.walkabout calling dispatch_departure for ${this}`
             );
             visitor.dispatchDeparture(this);
         }
         return stop;
     }
 
-    public _fastTraverse(cls: any) {
-        // Specialized traverse() that only supports instance checks.
+    public _fastTraverse(cls: FastTraverseArg): NodeInterface[] {
+    // Specialized traverse() that only supports instance checks.
         const result = [];
         if (this instanceof cls) {
             result.push(this);
         }
         const myNode = this;
-        myNode.children.forEach((child) => {
-            if (typeof child === 'undefined') {
-                throw new Error('child is undefined');
+        myNode.children.forEach((child): void => {
+            if (typeof child === "undefined") {
+                throw new Error("child is undefined");
             }
             // @ts-ignore
             // eslint-disable-next-line no-underscore-dangle
-            if (typeof child._fastTraverse === 'undefined') {
+            if (typeof child._fastTraverse === "undefined") {
                 throw new Error(`${child} does not have _fastTraverse`);
             }
             // @ts-ignore
@@ -674,21 +728,21 @@ abstract class Node implements INode {
         return result;
     }
 
-    public _allTraverse() {
-        // Specialized traverse() that doesn't check for a condition.
-        const result = [];
+    public _allTraverse(): NodeInterface[] {
+    // Specialized traverse() that doesn't check for a condition.
+        const result: NodeInterface[] = [];
         result.push(this);
-        this.children.forEach((child) => {
-        // @ts-ignore
-        // eslint-disable-next-line no-underscore-dangle
+        this.children.forEach((child): void => {
+            // @ts-ignore
+            // eslint-disable-next-line no-underscore-dangle
             result.push(...child._allTraverse());
         });
         return result;
     }
 
-    public traverse(args: TraverseArgs): any[] {
+    public traverse(args: TraverseArgs): NodeInterface[] {
         const {
-            condition, includeSelf = true, descend = true, siblings = false, ascend = false,
+            condition, includeSelf = true, descend = true, siblings = false, ascend = false
         } = args;
         const mySiblings = ascend ? true : siblings;
         if (includeSelf && descend && !mySiblings) {
@@ -696,50 +750,54 @@ abstract class Node implements INode {
                 // eslint-disable-next-line no-underscore-dangle
                 return this._allTraverse();
                 // eslint-disable-next-line no-underscore-dangle
-            } if (condition.prototype instanceof Node || condition === Node) {
+            }
+            // @ts-ignore
+            if ((condition.prototype instanceof Node) || condition === Node) {
+                // @ts-ignore
                 return this._fastTraverse(condition);
             }
         }
-        if (typeof condition !== 'undefined' && (condition.prototype instanceof Node || condition === Node)) {
+        if (typeof condition !== "undefined" && (condition.prototype instanceof Node || condition === Node)) {
             const nodeClass = condition;
-            /* eslint-disable-next-line no-unused-vars */
-            const myCondition = (node: INode, nodeClassArg: any) => (
+            /* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */
+            const myCondition = (node: Node, nodeClassArg: NodeClass): boolean => (
                 (node instanceof nodeClassArg) || (node instanceof nodeClass)
             );
-            throw new Error('unimplemented');
+            throw new Error("unimplemented");
         }
         /*
-        if isinstance(condition, (types.ClassType, type)):
-            node_class = condition
-            def condition(node, node_class=node_class):
-                return isinstance(node, node_class)
+    if isinstance(condition, (types.ClassType, type)):
+        node_class = condition
+        def condition(node, node_class=node_class):
+            return isinstance(node, node_class)
 */
-        const r = [];
+        const r: NodeInterface[] = [];
+        // @ts-ignore
         if (includeSelf && (condition == null || condition(this))) {
             r.push(this);
         }
         if (descend && this.children.length) {
-            this.children.forEach((child) => {
+            this.children.forEach((child): void => {
                 r.push(...child.traverse({
                     includeSelf: true,
                     descend: true,
                     siblings: false,
                     ascend: false,
-                    condition,
+                    condition
                 }));
             });
         }
         if (siblings || ascend) {
-            let node: INode | undefined = (this as INode);
+            let node: NodeInterface | undefined = (this as NodeInterface);
             while (node != null && node.parent != null) {
                 const index = node.parent.children.indexOf(node);
-                node.parent.children.slice(index + 1).forEach((sibling) => {
+                node.parent.children.slice(index + 1).forEach((sibling): void => {
                     r.push(...sibling.traverse({
                         includeSelf: true,
                         descend,
                         siblings: false,
                         ascend: false,
-                        condition,
+                        condition
                     }));
                 });
                 if (!ascend) {
@@ -752,58 +810,62 @@ abstract class Node implements INode {
         return r;
     }
 
-    public add(iNodes: INode[] | INode): void {
-        throw new UnimplementedError('');
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    public add(iNodes: NodeInterface[] | NodeInterface): void {
+        throw new UnimplementedError("");
     }
 
 
     public endtag(): string {
-        return '';
+        return "";
     }
 
-    public starttag(quoteattr?: any): string {
-        return '';
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    public starttag(quoteattr?: QuoteattrCallback): string {
+        return "";
     }
 
-    public addBackref(prbid: any): void {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    public addBackref(prbid: {}): void {
     }
 
-    public updateBasicAtts(dict_: any) {
+    public updateBasicAtts(dict_: Attributes): void {
         const dict2 = dict_ instanceof Node ? dict_.attributes : dict_;
-        this.basicAttributes.forEach((att) => {
+        this.basicAttributes.forEach((att): void => {
+            // @ts-ignore
             const v = att in dict2 ? dict2[att] : [];
             this.appendAttrList(att, v);
         });
     }
 
-    public appendAttrList(attr: string, values: any[]) {
+    public appendAttrList(attr: string, values: (string|{})[]): void {
     // List Concatenation
-        values.forEach((value) => {
-            if ((this.attributes[attr].filter((v: any) => v === value)).length === 0) {
+        values.forEach((value): void => {
+            if ((this.attributes[attr].filter((v: {}): boolean => v === value)).length === 0) {
                 this.attributes[attr].push(value);
             }
         });
     }
 
-    public replaceAttr(attr: string, value: any[] | any, force = true) {
+    public replaceAttr(attr: string, value: (string|{})[] | string | {}, force = true): void {
     // One or the other
         if (force || this.attributes[attr] == null) {
             this.attributes[attr] = value;
         }
     }
 
-    public copyAttrConsistent(attr: string, value: any, replace?: boolean) {
+    public copyAttrConsistent(attr: string, value: (string|{}), replace?: boolean): void {
         if (this.attributes[attr] !== value) {
             this.replaceAttr(attr, value, replace);
         }
     }
 
     public updateAllAtts(
-        dict_: any,
+        dict_: Attributes,
         updateFun = this.copyAttrConsistent,
         replace = true,
         andSource = false
-    ) {
+    ): void {
         const dict2 = dict_ instanceof Node ? dict_.attributes : dict_;
         // Include the source attribute when copying?
         let filterFun;
@@ -819,7 +881,7 @@ abstract class Node implements INode {
         // Grab other attributes in dict_ not in self except the
         // (All basic attributes should be copied already)
         const atts = Object.keys(dict2).filter(filterFun);
-        atts.forEach((att) => {
+        atts.forEach((att): void => {
             updateFun.bind(this)(att, dict2[att], replace);
         });
     }
@@ -843,7 +905,7 @@ abstract class Node implements INode {
    attribute, though it may still be merged into a list depending
    on the value of update_fun.
    */
-    public updateAllAttsConcatenating(dict_: any, replace: boolean = true, andSource: boolean = false) {
+    public updateAllAttsConcatenating(dict_: Attributes, replace: boolean = true, andSource: boolean = false): void {
         this.updateAllAtts(dict_, this.copyAttrConcatenate, replace,
             andSource);
     }
@@ -852,7 +914,7 @@ abstract class Node implements INode {
    Returns True if and only if the given attribute is NOT one of the
    basic list attributes defined for all Elements.
    */
-    public isNotListAttribute(attr: string) {
+    public isNotListAttribute(attr: string): boolean {
         return !(attr in this.listAttributes);
     }
 
@@ -860,11 +922,11 @@ abstract class Node implements INode {
    Returns True if and only if the given attribute is NOT recognized by
    this class.
    */
-    public isNotKnownAttribute(attr: string) {
+    public isNotKnownAttribute(attr: string): boolean {
         return !(attr in this.knownAttributes);
     }
 
-    public copyAttrConcatenate(attr: string, value: any | any[], replace?: boolean) {
+    public copyAttrConcatenate(attr: string, value: string | string[], replace?: boolean): void {
     /*
       """
       If attr is an attribute of self and both self[attr] and value are
@@ -882,7 +944,9 @@ abstract class Node implements INode {
         }
     }
 
-    public getCustomAttr(attrName: string): any[] | any | undefined | null {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    public getCustomAttr(attrName: string): undefined {
         return undefined;
     }
 }
@@ -911,7 +975,7 @@ abstract class Node implements INode {
  *
  *      element += node
  *
- *  This is equivalent to ``element.append(node: INode)``.
+ *  This is equivalent to ``element.append(node: NodeInterface)``.
  *
  *  To add a list of multiple child nodes at once, use the same ``+=``
  *  operator::
@@ -922,44 +986,45 @@ abstract class Node implements INode {
  *
  * @extends module:nodes~Node
  */
-class Element extends Node implements IElement {
-    nodeName: any;
+class Element extends Node implements ElementInterface {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    public nodeName: any;
 
 
     /**
-     * A list of class-specific attributes that should not be copied with the
-     * standard attributes when replacing a node.
-     *
-     * NOTE: Derived classes should override this value to prevent any of its
-     * attributes being copied by adding to the value in its parent class.
-     */
-    localAttributes: string[] = ['backrefs'];
+   * A list of class-specific attributes that should not be copied with the
+   * standard attributes when replacing a node.
+   *
+   * NOTE: Derived classes should override this value to prevent any of its
+   * attributes being copied by adding to the value in its parent class.
+   */
+    public localAttributes: string[] = ["backrefs"];
 
 
     /**
-     * The element generic identifier. If None, it is set as an instance
-     * attribute to the name of the class.
-     */
-    tagname: string = '';
+   * The element generic identifier. If None, it is set as an instance
+   * attribute to the name of the class.
+   */
+    public tagname: string = "";
 
-    attributes: IAttributes;
+    public attributes: Attributes;
 
 
     /**
-     * Create element.
-     * @classdesc Abstracts a docutils Element.
-     * @extends module:nodes~Node
-     */
-    public constructor(rawsource?: string, children: INode[] = [], attributes: IAttributes = { }) {
+   * Create element.
+   * @classdesc Abstracts a docutils Element.
+   * @extends module:nodes~Node
+   */
+    public constructor(rawsource?: string, children: NodeInterface[] = [], attributes: Attributes = {}) {
         super();
-        this.nodeName = Symbol.for('Element');
+        this.nodeName = Symbol.for("Element");
         this.children = children; // we want to do this, imo
-        this.attributes = { };
-        this.listAttributes.forEach((x) => {
+        this.attributes = {};
+        this.listAttributes.forEach((x): void => {
             this.attributes[x] = [];
         });
-        Object.keys(attributes).forEach((att) => {
-            const value: any | any[] = attributes[att];
+        Object.keys(attributes).forEach((att): void => {
+            const value: string| string[] = attributes[att];
             const attKey = att.toLowerCase();
 
             /* This if path never taken... why? FIXME */
@@ -969,7 +1034,7 @@ class Element extends Node implements IElement {
                     throw new Error();
                 }
                 // @ts-ignore
-                const a: any[] = value;
+                const a: string[] = value;
                 this.attributes[attKey] = [...a];
             } else {
                 this.attributes[attKey] = value;
@@ -978,51 +1043,52 @@ class Element extends Node implements IElement {
         this.tagname = this.constructor.name;
     }
 
-    public _init() {
+    public _init(): void {
         super._init();
         /* List attributes which are defined for every Element-derived class
-           instance and can be safely transferred to a different node. */
-        this.basicAttributes = ['ids', 'classes', 'names', 'dupnames'];
+       instance and can be safely transferred to a different node. */
+        this.basicAttributes = ["ids", "classes", "names", "dupnames"];
         /*
-          "A list of class-specific attributes that should not be copied with the
-          standard attributes when replacing a node.
+      "A list of class-specific attributes that should not be copied with the
+      standard attributes when replacing a node.
 
-          NOTE: Derived classes should override this value to prevent any of its
-          attributes being copied by adding to the value in its parent class.
-        */
-        this.localAttributes = ['backrefs'];
+      NOTE: Derived classes should override this value to prevent any of its
+      attributes being copied by adding to the value in its parent class.
+    */
+        this.localAttributes = ["backrefs"];
 
         /* List attributes, automatically initialized to empty lists
-           for all nodes. */
+       for all nodes. */
         this.listAttributes = [...this.basicAttributes, ...this.localAttributes];
 
         /* List attributes that are known to the Element base class. */
-        this.knownAttributes = [...this.listAttributes, 'source', 'rawsource'];
+        this.knownAttributes = [...this.listAttributes, "source", "rawsource"];
 
         /* The element generic identifier. If None, it is set as an
-           instance attribute to the name of the class. */
+       instance attribute to the name of the class. */
         // this.tagname = undefined; (already set in Node.constructor)
 
         /* Separator for child nodes, used by `astext()` method. */
-        this.childTextSeparator = '\n\n';
+        this.childTextSeparator = "\n\n";
     }
 
 
-    public _domNode(domroot: any): any {
+    public _domNode(domroot: {}): {}{
+        // @ts-ignore
         const element = domroot.createElement(this.tagname);
         const l = this.attlist();
-        Object.keys(l).forEach((attribute) => {
+        Object.keys(l).forEach((attribute): void => {
             // @ts-ignore
-            const value: any | any[] = l[attribute];
+            const value: string | string[] = l[attribute];
             let myVal: string;
-            if (isIterable(value)) {
-                myVal = value.map((v: any) => serialEscape(v.toString())).join(' ');
+            if (Array.isArray(value)) {
+                myVal = value.map((v): string => serialEscape(v.toString())).join(" ");
             } else {
                 myVal = value.toString();
             }
             element.setAttribute(attribute, myVal);
         });
-        this.children.forEach((child) => {
+        this.children.forEach((child): void => {
             // @ts-ignore
             // eslint-disable-next-line no-underscore-dangle
             element.appendChild(child._domNode(domroot));
@@ -1030,26 +1096,27 @@ class Element extends Node implements IElement {
         return element;
     }
 
-    public emptytag() {
+    public emptytag(): string {
         return `<${[this.tagname, ...Object.entries(this.attlist())
-            .map(([n, v]) => `${n}="${v}"`)].join(' ')}/>`;
+            .map(([n, v]): string => `${n}="${v}"`)].join(" ")}/>`;
     }
 
 
     public astext(): string {
-        return this.children.map(x => x.astext()).join(this.childTextSeparator);
+        return this.children.map((x): string => x.astext()).join(this.childTextSeparator);
     }
 
-    public extend(...items: any[]) {
+    public extend(...items: {}[]): void {
+        // @ts-ignore
         items.forEach(this.append.bind(this));
     }
 
-    public append(item: any) {
+    public append(item: NodeInterface): void {
         this.setupChild(item);
         this.children.push(item);
     }
 
-    public add(item: INode[] | INode) {
+    public add(item: NodeInterface[] | NodeInterface): void {
         if (Array.isArray(item)) {
             this.extend(...item);
         } else {
@@ -1057,7 +1124,7 @@ class Element extends Node implements IElement {
         }
     }
 
-    public setupChild(child: INode) {
+    public setupChild(child: NodeInterface): void {
     /* istanbul ignore if */
         if (!(child instanceof Node)) {
             throw new InvalidArgumentsError(`Expecting node instance ${child}`);
@@ -1065,28 +1132,28 @@ class Element extends Node implements IElement {
 
         /* istanbul ignore if */
         if (!child) {
-            throw new InvalidArgumentsError('need child');
+            throw new InvalidArgumentsError("need child");
         }
 
         child.parent = this;
         if (this.document) {
             child.document = this.document;
-            if (typeof child.source === 'undefined') {
+            if (typeof child.source === "undefined") {
                 child.source = this.document.currentSource;
             }
-            if (typeof child.line === 'undefined') {
+            if (typeof child.line === "undefined") {
                 child.line = this.document.currentLine;
             }
         }
     }
 
-    public starttag(quoteAttr?: any) {
+    public starttag(quoteAttr?: QuoteattrCallback): string {
         const q = quoteAttr || pseudoQuoteattr;
 
         const parts = [this.tagname];
         const attlist = this.attlist();
-        Object.keys(attlist).forEach((name) => {
-            const value: any | any[] = attlist[name];
+        Object.keys(attlist).forEach((name): void => {
+            const value: string | string[] = attlist[name];
 
             let myVal = value;
             let gotPart = false;
@@ -1094,8 +1161,8 @@ class Element extends Node implements IElement {
                 parts.push(`${name}="True"`);
                 gotPart = true;
             } else if (Array.isArray(myVal)) {
-                const values = myVal.map(v => serialEscape(v.toString()));
-                myVal = values.join(' ');
+                const values = myVal.map((v: string): string => serialEscape(v.toString()));
+                myVal = values.join(" ");
             } else {
                 myVal = value.toString();
             }
@@ -1104,21 +1171,21 @@ class Element extends Node implements IElement {
                 parts.push(`${name}=${myVal}`);
             }
         });
-        return `<${parts.join(' ')}>`;
+        return `<${parts.join(" ")}>`;
     }
 
     public endtag(): string {
         return `</${this.tagname}>`;
     }
 
-    public attlist(): any {
+    public attlist(): Attributes {
         const attlist = this.nonDefaultAttributes();
         return attlist;
     }
 
-    public nonDefaultAttributes(): any {
-        const atts: any = { };
-        Object.entries(this.attributes).forEach(([key, value]) => {
+    public nonDefaultAttributes(): Attributes {
+        const atts: Attributes = {};
+        Object.entries(this.attributes).forEach(([key, value]): void => {
             if (this.isNotDefault(key)) {
                 atts[key] = value;
             }
@@ -1126,39 +1193,41 @@ class Element extends Node implements IElement {
         return atts;
     }
 
-    public isNotDefault(key: string) {
+    public isNotDefault(key: string): boolean {
         if (Array.isArray(this.attributes[key])
-            && this.attributes[key].length === 0
-            && this.listAttributes.includes(key)) {
+      && this.attributes[key].length === 0
+      && this.listAttributes.includes(key)) {
             return false;
         }
         return true;
     }
 
     /*
-       Return the index of the first child whose class does *not* match.
+     Return the index of the first child whose class does *not* match.
 
-       Parameters:
+     Parameters:
 
-       - `childclass`: A `Node` subclass to skip, or a tuple of `Node`
-       classes. If a tuple, none of the classes may match.
-       - `start`: Initial index to check.
-       - `end`: Initial index to *not* check.
-    */
+     - `childclass`: A `Node` subclass to skip, or a tuple of `Node`
+     classes. If a tuple, none of the classes may match.
+     - `start`: Initial index to check.
+     - `end`: Initial index to *not* check.
+  */
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     public firstChildNotMatchingClass(childClass: any | any[], start = 0, end = this.children.length): number | undefined {
         const myChildClass = Array.isArray(childClass) ? childClass : [childClass];
         const r = this.children.slice(start,
             Math.min(this.children.length, end))
-            .findIndex((child, index) => {
-                if (myChildClass.findIndex((c) => {
+            .findIndex((child, index): boolean => {
+                if (myChildClass.findIndex((c): boolean => {
                     // if (typeof child === 'undefined') {
                     //     throw new Error(`child should not be undefined, index ${index}`);
                     // }
                     if (child instanceof c
-                    || (this.children[index].classTypes.filter(
-                        (c2 => c2.prototype instanceof c || c2 === c),
-                    ))
-                        .length) {
+            || (this.children[index].classTypes.filter(
+                // @ts-ignore
+                ((c2): boolean => c2.prototype instanceof c || c2 === c)
+            ))
+                .length) {
                         return true;
                     }
                     return false;
@@ -1176,63 +1245,63 @@ class Element extends Node implements IElement {
     }
 
     public pformat(indent: string, level: number): string {
-        return `${indent.repeat(level)}${this.starttag()}\n${this.children.map(c => c.pformat(indent, level + 1)).join('')}`;
+        return `${indent.repeat(level)}${this.starttag()}\n${this.children.map((c): string => c.pformat(indent, level + 1)).join("")}`;
     }
 
-    public copy(): INode {
+    public copy(): NodeInterface {
     // @ts-ignore
         return new this.constructor(this.rawsouce, this.children, this.attributes);
     }
 
-    public deepcopy(): INode {
+    public deepcopy(): NodeInterface {
         return this.copy();
     }
 
     /*
-      Update basic attributes ('ids', 'names', 'classes',
-      'dupnames', but not 'source') from node or dictionary `dict_`.
-    */
-
-    /*
-    For each element in values, if it does not exist in self[attr], append
-    it.
-
-    NOTE: Requires self[attr] and values to be sequence type and the
-    former should specifically be a list.
+    Update basic attributes ('ids', 'names', 'classes',
+    'dupnames', but not 'source') from node or dictionary `dict_`.
   */
 
     /*
-    If self[attr] does not exist or force is True or omitted, set
-    self[attr] to value, otherwise do nothing.
-  */
+  For each element in values, if it does not exist in self[attr], append
+  it.
+
+  NOTE: Requires self[attr] and values to be sequence type and the
+  former should specifically be a list.
+*/
 
     /*
-    If replace is true or this.attributes[attr] is null, replace
-    this.attributes[attr] with value.  Otherwise, do nothing.
-  */
+  If self[attr] does not exist or force is True or omitted, set
+  self[attr] to value, otherwise do nothing.
+*/
 
     /*
-    Updates all attributes from node or dictionary `dict_`.
+  If replace is true or this.attributes[attr] is null, replace
+  this.attributes[attr] with value.  Otherwise, do nothing.
+*/
 
-      Appends the basic attributes ('ids', 'names', 'classes',
-      'dupnames', but not 'source') and then, for all other attributes in
-      dict_, updates the same attribute in self.  When attributes with the
-      same identifier appear in both self and dict_, the two values are
-      merged based on the value of update_fun.  Generally, when replace is
-      True, the values in self are replaced or merged with the values in
-      dict_; otherwise, the values in self may be preserved or merged.  When
-      and_source is True, the 'source' attribute is included in the copy.
+    /*
+  Updates all attributes from node or dictionary `dict_`.
 
-      NOTE: When replace is False, and self contains a 'source' attribute,
-            'source' is not replaced even when dict_ has a 'source'
-            attribute, though it may still be merged into a list depending
-            on the value of update_fun.
-      NOTE: It is easier to call the update-specific methods then to pass
-            the update_fun method to this function.
-  */
+    Appends the basic attributes ('ids', 'names', 'classes',
+    'dupnames', but not 'source') and then, for all other attributes in
+    dict_, updates the same attribute in self.  When attributes with the
+    same identifier appear in both self and dict_, the two values are
+    merged based on the value of update_fun.  Generally, when replace is
+    True, the values in self are replaced or merged with the values in
+    dict_; otherwise, the values in self may be preserved or merged.  When
+    and_source is True, the 'source' attribute is included in the copy.
+
+    NOTE: When replace is False, and self contains a 'source' attribute,
+          'source' is not replaced even when dict_ has a 'source'
+          attribute, though it may still be merged into a list depending
+          on the value of update_fun.
+    NOTE: It is easier to call the update-specific methods then to pass
+          the update_fun method to this function.
+*/
     /** Note that this Element has been referenced by its name
    `name` or id `id`. */
-    public noteReferencedBy(name: string, id: string) {
+    public noteReferencedBy(name: string, id: string): void {
         this.referenced = true;
         const byName = this.attributes.expect_referenced_by_name[name];
         const byId = this.attributes.expect_referenced_by_name[id];
@@ -1248,38 +1317,40 @@ class Element extends Node implements IElement {
 // =====================
 //  Decorative Elements
 // =====================
+// eslint-disable-next-line @typescript-eslint/class-name-casing
 class header extends Element {
-    public constructor(rawsource?: string, children?: INode[], attributes?: IAttributes) {
+    public constructor(rawsource?: string, children?: NodeInterface[], attributes?: Attributes) {
         super(rawsource, children, attributes);
         this.classTypes = [Decorative];
     }
 }
-
+// eslint-disable-next-line @typescript-eslint/class-name-casing
 class footer extends Element {
     // @ts-ignore
     public constructor(...args) {
-        // @ts-ignore
+    // @ts-ignore
         super(...args);
         this.classTypes = [Decorative];
     }
 }
 
+// eslint-disable-next-line @typescript-eslint/class-name-casing
 class decoration extends Element {
     // @ts-ignore
     public constructor(...args) {
-        // @ts-ignore
+    // @ts-ignore
         super(...args);
         this.classTypes = [Decorative];
     }
 
-    public getHeader() {
+    public getHeader(): NodeInterface {
         if (!this.children.length || !(this.children[0] instanceof header)) {
             this.children.splice(0, 0, new header());
         }
         return this.children[0];
     }
 
-    public getFooter() {
+    public getFooter(): NodeInterface {
         if (!this.children.length || !(this.children[this.children.length - 1] instanceof footer)) {
             this.add(new footer());
         }
@@ -1288,28 +1359,30 @@ class decoration extends Element {
 }
 
 class Text extends Node {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     public pformat(indent: string, level: number): string {
-        throw new Error('Method not implemented.');
+        throw new Error("Method not implemented.");
     }
 
-    public copy(): INode {
+    public copy(): NodeInterface {
         return this.constructor(this.data, this.rawsource);
     }
 
-    public deepcopy(): INode {
+    public deepcopy(): NodeInterface {
         return this.copy();
     }
 
-    public walk(any: any): boolean {
-        throw new Error('Method not implemented.');
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    public walk(visitor: Visitor): boolean {
+        throw new Error("Method not implemented.");
     }
 
     private data: string;
 
-    public constructor(data: string, rawsource = '') {
+    public constructor(data: string, rawsource = "") {
         super();
-        if (typeof data === 'undefined') {
-            throw new Error('data should not be undefined');
+        if (typeof data === "undefined") {
+            throw new Error("data should not be undefined");
         }
 
         this.rawsource = rawsource;
@@ -1317,46 +1390,81 @@ class Text extends Node {
         this.children = [];
     }
 
-    public _domNode(domroot: any) {
+    public _domNode(domroot: {}): {} {
+        // @ts-ignore
         return domroot.createTextNode(this.data);
     }
 
-    public astext() {
+    public astext(): string {
         return unescape(this.data);
     }
 
-    public toString() {
+    public toString(): string {
         return this.astext();
     }
 
-    public toSource() {
+    public toSource(): string {
         return this.toString();
     }
 
-    // eslint-disable-next-line no-unused-vars
-    public add(iNodes: INode[] | INode): void {
-        throw new UnimplementedError('');
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars
+    public add(iNodes: NodeInterface[] | NodeInterface): void {
+        throw new UnimplementedError("");
+    }
+
+    public document?: Document;
+    public parent?: NodeInterface;
+    public refid?: string;
+    public refname?: string;
+
+    public emptytag(): string {
+        return "";
     }
 }
 
-class TextElement extends Element implements ITextElement {
+class TextElement extends Element implements TextElementInterface {
     public constructor(
-        rawsource?: any,
+        rawsource?: string,
         text?: string,
-        children?: INode[],
-        attributes?: IAttributes
+        children?: NodeInterface[],
+        attributes?: Attributes
     ) {
         const cAry = children || [];
         /* istanbul ignore if */
         if (Array.isArray(text)) {
-            throw new InvalidArgumentsError('text should not be an array');
+            throw new InvalidArgumentsError("text should not be an array");
         }
-        super(rawsource, (typeof text !== 'undefined' && text !== '') ? [new Text(text), ...cAry] : cAry, attributes);
+        super(rawsource, (typeof text !== "undefined" && text !== "") ? [new Text(text), ...cAry] : cAry, attributes);
     }
 }
 
-interface ITransformer {
-    addPending(pending: any, priority: any): void;
+export interface TransformerInterface {
+    addPending(pending: NodeInterface, priority: number): void;
+}
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+interface NameTypes {
+}
+
+interface Ids {
+    [id: string]: NodeInterface ;
+}
+
+interface RefNames {
+    [refName: string]: NodeInterface[];
+}
+
+interface RefIds {
+    [refId: string]: NodeInterface[];
+}
+
+interface SubstitutionNames {
+    [name: string]: string;
+}
+
+interface SubstitutionDefs {
+    // eslint-disable-next-line @typescript-eslint/camelcase
+    [name: string]: substitution_definition;
 }
 
 /**
@@ -1365,68 +1473,71 @@ interface ITransformer {
  * To create a document, call {@link newDocument}.
  * @extends Element
  */
+// eslint-disable-next-line @typescript-eslint/class-name-casing
 class document extends Element implements Document {
-    settings: Settings;
+    public settings: Settings;
 
-    reporter: IReporter;
+    public reporter: ReporterInterface;
 
-    decoration?: decoration;
+    public decoration?: decoration;
 
-    transformMessages: string[];
+    public transformMessages: SystemMessage[];
 
-    private parseMessages: string[];
+    public parseMessages: SystemMessage[];
 
-    transformer: Transformer;
+    public transformer: Transformer;
 
-    private substitutionDefs: any;
+    private substitutionDefs: SubstitutionDefs;
 
-    private substitutionNames: any;
+    private substitutionNames: SubstitutionNames;
 
-    private citationRefs: any;
+    private citationRefs: RefNames;
 
-    private citations: any[];
+    private citations: NodeInterface[];
 
-    private footnoteRefs: any;
+    private footnoteRefs: RefNames;
 
-    private autofootnoteRefs: INode[];
+    private autofootnoteRefs: NodeInterface[];
 
-    private symbolFootnotes: any[];
+    private symbolFootnotes: NodeInterface[];
 
-    private footnotes: any[];
+    private footnotes: NodeInterface[];
 
-    private symbolFootnoteRefs: any[];
+    private symbolFootnoteRefs: NodeInterface[];
 
-    private indirectTargets: any[];
+    private indirectTargets: NodeInterface[];
 
-    private autofootnotes: any[];
+    private autofootnotes: NodeInterface[];
 
-    private refIds: any;
+    private refIds: RefIds;
 
-    private refNames: any;
+    private refNames: RefNames;
 
-    nameIds: any;
+    public nameIds: NameIds;
 
-    private ids: any;
+    private ids: Ids;
 
-    private nameTypes: any;
+    private nameTypes: NameTypes;
 
     private idStart: number;
 
     private autofootnoteStart: number;
 
     private symbolFootnoteStart: number;
+    private idPrefix: string = "";
+    private autoIdPrefix: string = "";
 
     /** Private constructor */
     public constructor(
         settings: Settings,
-        reporter: IReporter,
-        rawsource?: any,
-        children?: INode[],
-        attributes?: IAttributes
+        reporter: ReporterInterface,
+        rawsource?: string,
+        children?: NodeInterface[],
+        attributes?: Attributes
     ) {
         super(rawsource, children, attributes);
         this.classTypes = [Root, Structural];
-        this.tagname = 'document';
+        this.tagname = "document";
         this.settings = settings;
         this.reporter = reporter;
         this.indirectTargets = [];
@@ -1455,13 +1566,13 @@ class document extends Element implements Document {
         this.document = this;
     }
 
-    public setId(node: INode, msgnode?: INode) {
+    public setId(node: NodeInterface, msgnode?: NodeInterface): void {
         let msg;
-        let id;
-        node.attributes.ids.forEach((myId: string) => {
+        let id: string;
+        node.attributes.ids.forEach((myId: string): void => {
             if (myId in this.ids && this.ids[myId] !== node) {
                 msg = this.reporter.severe(`Duplicate ID: "${myId}".`);
-                if (msgnode) {
+                if (msgnode !== undefined) {
                     msgnode.add(msg);
                 }
             }
@@ -1471,17 +1582,17 @@ class document extends Element implements Document {
             let myBreak = false;
             /* eslint-disable-next-line no-restricted-syntax */
             for (name of node.attributes.names) {
-                id = this.settings.docutilsCoreOptionParser!.idPrefix + makeId(name);
-                if (id && !(id in this.attributes.ids)) {
+                id = this.idPrefix + makeId(name);
+                if (id && this.attributes.ids.indexOf(id) === -1) {
                     myBreak = true;
                     break;
                 }
             }
             if (!myBreak) {
-                id = '';
+                id = "";
                 while (!id || (id in this.attributes.ids)) {
-                    id = (this.settings.docutilsCoreOptionParser!.idPrefix + this.settings.docutilsCoreOptionParser!.autoIdPrefix
-                          + this.idStart);
+                    id = (this.idPrefix + this.autoIdPrefix
+            + this.idStart);
                     this.idStart += 1;
                 }
             }
@@ -1491,8 +1602,8 @@ class document extends Element implements Document {
         return id;
     }
 
-    public setNameIdMap(node: INode, id: string, msgnode: INode, explicit?: boolean) {
-        node.attributes.names.forEach((name: string) => {
+    public setNameIdMap(node: NodeInterface, id: string, msgnode: NodeInterface, explicit?: boolean): void {
+        node.attributes.names.forEach((name: string): void => {
             if (name in this.nameIds) {
                 this.setDuplicateNameId(node, id, name, msgnode, explicit);
             } else {
@@ -1502,7 +1613,7 @@ class document extends Element implements Document {
         });
     }
 
-    public setDuplicateNameId(node: INode, id: string, name: string, msgnode: INode, explicit?: boolean) {
+    public setDuplicateNameId(node: NodeInterface, id: string, name: string, msgnode: NodeInterface, explicit?: boolean): void {
         const oldId = this.nameIds[name];
         const oldExplicit = this.nameTypes[name];
         this.nameTypes[name] = oldExplicit || explicit;
@@ -1512,11 +1623,11 @@ class document extends Element implements Document {
                 let level = 2;
                 if (oldId != null) {
                     oldNode = this.ids[oldId];
-                    if ('refuri' in node.attributes) {
+                    if ("refuri" in node.attributes) {
                         const { refuri } = node.attributes;
                         if (oldNode.attributes.names.length
-                           && 'refuri' in oldNode.attributes
-                           && oldNode.attributes.refuri === refuri) {
+              && "refuri" in oldNode.attributes
+              && oldNode.attributes.refuri === refuri) {
                             level = 1; // just inform if refuri's identical
                         }
                     }
@@ -1527,7 +1638,8 @@ class document extends Element implements Document {
                 }
                 const msg = this.reporter.systemMessage(
                     level, `Duplicate explicit target name: "${name}".`,
-                    [], { backrefs: [id], base_node: node },
+                    // eslint-disable-next-line @typescript-eslint/camelcase
+                    [], { backrefs: [id], base_node: node }
                 );
                 if (msgnode != null) {
                     msgnode.add(msg);
@@ -1551,7 +1663,8 @@ class document extends Element implements Document {
         if (!explicit || (!oldExplicit && oldId != null)) {
             const msg = this.reporter.info(
                 `Duplicate implicit target name: "${name}".`, [],
-                { backrefs: [id], base_node: node },
+                // eslint-disable-next-line @typescript-eslint/camelcase
+                { backrefs: [id], base_node: node }
             );
             if (msgnode != null) {
                 msgnode.add(msg);
@@ -1559,39 +1672,45 @@ class document extends Element implements Document {
         }
     }
 
-    public hasName(name: string) {
+    public hasName(name: string): boolean {
         return Object.keys(this.nameIds).includes(name);
     }
 
-    public noteImplicitTarget(target: INode, msgnode: INode) {
+    public noteImplicitTarget(target: NodeInterface, msgnode: NodeInterface): void {
         const id = this.setId(target, msgnode);
         this.setNameIdMap(target, id, msgnode);
     }
 
-    public noteExplicitTarget(target: INode, msgnode: INode) {
+    public noteExplicitTarget(target: NodeInterface, msgnode: NodeInterface): void {
         const id = this.setId(target, msgnode);
         this.setNameIdMap(target, id, msgnode, true);
     }
 
-    public noteRefname(node: INode) {
+    public noteRefname(node: NodeInterface): void {
+        if(node === undefined || node.refname === undefined) {
+            throw new InvalidStateError();
+        }
         const a = [node];
-        if (this.refNames[node.refname!]) {
-            this.refNames[node.refname!].push(node);
+        if (this.refNames[node.refname]) {
+            this.refNames[node.refname].push(node);
         } else {
-            this.refNames[node.refname!] = a;
+            this.refNames[node.refname] = a;
         }
     }
 
-    public noteRefId(node: INode) {
+    public noteRefId(node: NodeInterface): void | never {
+        if(node === undefined || node.refid === undefined) {
+            throw new InvalidStateError();
+        }
         const a = [node];
-        if (this.refIds[node.refid!]) {
-            this.refIds[node.refid!].push(node);
+        if (this.refIds[node.refid]) {
+            this.refIds[node.refid].push(node);
         } else {
-            this.refIds[node.refid!] = a;
+            this.refIds[node.refid] = a;
         }
     }
 
-    public noteIndirectTarget(target: INode) {
+    public noteIndirectTarget(target: NodeInterface): void {
         this.indirectTargets.push(target);
         // check this fixme
         if (target.names) {
@@ -1599,61 +1718,68 @@ class document extends Element implements Document {
         }
     }
 
-    public noteAnonymousTarget(target: INode) {
+    public noteAnonymousTarget(target: NodeInterface): void {
         this.setId(target);
     }
 
-    public noteAutofootnote(footnote: INode) {
+    public noteAutofootnote(footnote: NodeInterface): void {
         this.setId(footnote);
         this.autofootnotes.push(footnote);
     }
 
-    public noteAutofootnoteRef(ref: INode) {
+    public noteAutofootnoteRef(ref: NodeInterface): void {
         this.setId(ref);
         this.autofootnoteRefs.push(ref);
     }
 
-    public noteSymbolFootnote(footnote: INode) {
+    public noteSymbolFootnote(footnote: NodeInterface): void {
         this.setId(footnote);
         this.symbolFootnotes.push(footnote);
     }
 
-    public noteSymbolFootnoteRef(ref: INode) {
+    public noteSymbolFootnoteRef(ref: NodeInterface): void {
         this.setId(ref);
         this.symbolFootnoteRefs.push(ref);
     }
 
-    public noteFootnote(footnote: INode) {
+    public noteFootnote(footnote: NodeInterface): void {
         this.setId(footnote);
         this.footnotes.push(footnote);
     }
 
-    public noteFootnoteRef(ref: INode) {
+    public noteFootnoteRef(ref: NodeInterface): void {
+        if(ref === undefined || ref.refname === undefined) {
+            throw new InvalidStateError();
+        }
         this.setId(ref);
         const a = [ref];
-        if (this.footnoteRefs[ref.refname!]) {
-            this.footnoteRefs[ref.refname!].push(ref);
+        if (this.footnoteRefs[ref.refname]) {
+            this.footnoteRefs[ref.refname].push(ref);
         } else {
-            this.footnoteRefs[ref.refname!] = a;
+            this.footnoteRefs[ref.refname] = a;
         }
         this.noteRefname(ref);
     }
 
-    public noteCitation(citation: INode) {
+    public noteCitation(citation: NodeInterface): void {
         this.citations.push(citation);
     }
 
-    public noteCitationRef(ref: INode) {
+    public noteCitationRef(ref: NodeInterface): void | never {
+        if(ref === undefined || ref.refname === undefined) {
+            throw new InvalidStateError();
+        }
         this.setId(ref);
-        if (this.citationRefs[ref.refname!]) {
-            this.citationRefs[ref.refname!].push(ref);
+        if (this.citationRefs[ref.refname]) {
+            this.citationRefs[ref.refname].push(ref);
         } else {
-            this.citationRefs[ref.refname!] = [ref];
+            this.citationRefs[ref.refname] = [ref];
         }
         this.noteRefname(ref);
     }
 
-    public noteSubstitutionDef(subdef: INode, defName: string, msgnode: INode) {
+    // eslint-disable-next-line @typescript-eslint/camelcase
+    public noteSubstitutionDef(subdef: substitution_definition, defName: string, msgnode: NodeInterface): void {
         const name = whitespaceNormalizeName(defName);
         if (Object.keys(this.substitutionDefs).includes(name)) {
             const msg = this.reporter.error(`Duplicate substitution definition name: "${name}".`, { baseNode: subdef });
@@ -1667,23 +1793,23 @@ class document extends Element implements Document {
         this.substitutionNames[fullyNormalizeName(name)] = name;
     }
 
-    public noteSubstitutionRef(subref: INode, refname: string) {
+    public noteSubstitutionRef(subref: NodeInterface, refname: string): void {
         subref.refname = whitespaceNormalizeName(refname);
     }
 
-    public notePending(pending: INode, priority: number) {
+    public notePending(pending: NodeInterface, priority: number): void {
         this.transformer.addPending(pending, priority);
     }
 
-    public noteParseMessage(message: any) {
+    public noteParseMessage(message: SystemMessage): void {
         this.parseMessages.push(message);
     }
 
-    public noteTransformMessage(message: any) {
+    public noteTransformMessage(message: SystemMessage): void {
         this.transformMessages.push(message);
     }
 
-    public noteSource(source: string, offset: number) {
+    public noteSource(source: string, offset: number): void {
         this.currentSource = source;
         if (offset === undefined) {
             this.currentLine = offset;
@@ -1692,14 +1818,14 @@ class document extends Element implements Document {
         }
     }
 
-    public getDecoration() {
+    public getDecoration(): decoration {
         if (!this.decoration) {
             this.decoration = new decoration();
             const index = this.firstChildNotMatchingClass(Titular);
             if (index === undefined) {
                 this.children.push(this.decoration);
             } else {
-                this.children.splice(index, 0, this.decoration as INode);
+                this.children.splice(index, 0, this.decoration as NodeInterface);
             }
         }
         return this.decoration;
@@ -1707,40 +1833,46 @@ class document extends Element implements Document {
 }
 
 class FixedTextElement extends TextElement {
-/*    def __init__(self, rawsource='', text='', *children, **attributes):
-        TextElement.__init__(self, rawsource, text, *children, **attributes)
-        self.attributes['xml:space'] = 'preserve'
-*/
+    /*    def __init__(self, rawsource='', text='', *children, **attributes):
+          TextElement.__init__(self, rawsource, text, *children, **attributes)
+          self.attributes['xml:space'] = 'preserve'
+  */
 }
 
 // ================
 //  Title Elements
 // ================
+// eslint-disable-next-line @typescript-eslint/class-name-casing
 class title extends TextElement {
-/* eslint-disable-next-line no-useless-constructor */
+    /* eslint-disable-next-line no-useless-constructor */
+
     // @ts-ignore
     public constructor(...args) {
-        // @ts-ignore
+    // @ts-ignore
         super(...args);
         this.classTypes = [Titular, PreBibliographic];
     }
 }
 
+// eslint-disable-next-line @typescript-eslint/class-name-casing
 class subtitle extends TextElement {
-/* eslint-disable-next-line no-useless-constructor */
+    /* eslint-disable-next-line no-useless-constructor */
+
     // @ts-ignore
     public constructor(...args) {
-        // @ts-ignore
+    // @ts-ignore
         super(...args);
         this.classTypes = [Titular, PreBibliographic];
     }
 }
 
+// eslint-disable-next-line @typescript-eslint/class-name-casing
 class rubric extends TextElement {
-/* eslint-disable-next-line no-useless-constructor */
+    /* eslint-disable-next-line no-useless-constructor */
+
     // @ts-ignore
     public constructor(...args) {
-        // @ts-ignore
+    // @ts-ignore
         super(...args);
         this.classTypes = [Titular];
     }
@@ -1750,111 +1882,124 @@ class rubric extends TextElement {
 //  Bibliographic Elements
 // ========================
 
+// eslint-disable-next-line @typescript-eslint/class-name-casing
 class docinfo extends Element {
     // @ts-ignore
     public constructor(...args) {
-        // @ts-ignore
+    // @ts-ignore
         super(...args);
         this.classTypes = [Bibliographic];
     }
 }
 
+// eslint-disable-next-line @typescript-eslint/class-name-casing
 class author extends TextElement {
     // @ts-ignore
     public constructor(...args) {
-        // @ts-ignore
+    // @ts-ignore
         super(...args);
         this.classTypes = [Bibliographic];
     }
 }
 
+// eslint-disable-next-line @typescript-eslint/class-name-casing
 class authors extends Element {
     // @ts-ignore
     public constructor(...args) {
-        // @ts-ignore
+    // @ts-ignore
         super(...args);
         this.classTypes = [Bibliographic];
     }
 }
 
+// eslint-disable-next-line @typescript-eslint/class-name-casing
 class organization extends TextElement {
     // @ts-ignore
     public constructor(...args) {
-        // @ts-ignore
+    // @ts-ignore
         super(...args);
         this.classTypes = [Bibliographic];
     }
 }
 
+// eslint-disable-next-line @typescript-eslint/class-name-casing
 class address extends FixedTextElement {
     // @ts-ignore
     public constructor(...args) {
-        // @ts-ignore
+    // @ts-ignore
         super(...args);
         this.classTypes = [Bibliographic];
     }
 }
 
+// eslint-disable-next-line @typescript-eslint/class-name-casing
 class contact extends TextElement {
     // @ts-ignore
     public constructor(...args) {
-        // @ts-ignore
+    // @ts-ignore
         super(...args);
         this.classTypes = [Bibliographic];
     }
 }
 
+// eslint-disable-next-line @typescript-eslint/class-name-casing
 class version extends TextElement {
     // @ts-ignore
     public constructor(...args) {
-        // @ts-ignore
+    // @ts-ignore
         super(...args);
         this.classTypes = [Bibliographic];
     }
 }
 
+// eslint-disable-next-line @typescript-eslint/class-name-casing
 class revision extends TextElement {
     // @ts-ignore
     public constructor(...args) {
-        // @ts-ignore
+    // @ts-ignore
         super(...args);
         this.classTypes = [Bibliographic];
     }
 }
 
+// eslint-disable-next-line @typescript-eslint/class-name-casing
 class status extends TextElement {
     // @ts-ignore
     public constructor(...args) {
-        // @ts-ignore
+    // @ts-ignore
         super(...args);
         this.classTypes = [Bibliographic];
     }
 }
 
+// eslint-disable-next-line @typescript-eslint/class-name-casing
 class date extends TextElement {
     // @ts-ignore
     public constructor(...args) {
-        // @ts-ignore
+    // @ts-ignore
         super(...args);
         this.classTypes = [Bibliographic];
     }
 }
 
+// eslint-disable-next-line @typescript-eslint/class-name-casing
 class copyright extends TextElement {
     // @ts-ignore
     public constructor(...args) {
-        // @ts-ignore
+    // @ts-ignore
         super(...args);
         this.classTypes = [Bibliographic];
     }
 }
 
 
+// eslint-disable-next-line @typescript-eslint/class-name-casing
 class section extends Element {
     /* eslint-disable-next-line no-useless-constructor */
+
     // @ts-ignore
     public constructor(...args) {
-        // @ts-ignore
+    // @ts-ignore
         super(...args);
         this.classTypes = [Structural];
     }
@@ -1870,10 +2015,11 @@ class section extends Element {
  *  inside topics, sidebars, or body elements; you can't have a topic inside a
  *  table, list, block quote, etc.
  */
+// eslint-disable-next-line @typescript-eslint/class-name-casing
 class topic extends Element {
     // @ts-ignore
     public constructor(...args) {
-        // @ts-ignore
+    // @ts-ignore
         super(...args);
         this.classTypes = [Structural];
     }
@@ -1893,20 +2039,23 @@ class topic extends Element {
  *  sidebar inside a table, list, block quote, etc.
  */
 
+// eslint-disable-next-line @typescript-eslint/class-name-casing
 class sidebar extends Element {
     // @ts-ignore
     public constructor(...args) {
-        // @ts-ignore
+    // @ts-ignore
         super(...args);
         this.classTypes = [Structural];
     }
 }
 
+// eslint-disable-next-line @typescript-eslint/class-name-casing
 class transition extends Element {
-/* eslint-disable-next-line no-useless-constructor */
+    /* eslint-disable-next-line no-useless-constructor */
+
     // @ts-ignore
     public constructor(...args) {
-        // @ts-ignore
+    // @ts-ignore
         super(...args);
         this.classTypes = [Structural];
     }
@@ -1916,571 +2065,689 @@ class transition extends Element {
 //  Body Elements
 // ===============
 
+// eslint-disable-next-line @typescript-eslint/class-name-casing
 class paragraph extends TextElement {
-/* eslint-disable-next-line no-useless-constructor */
+    /* eslint-disable-next-line no-useless-constructor */
+
     // @ts-ignore
     public constructor(...args) {
-        // @ts-ignore
+    // @ts-ignore
         super(...args);
         this.classTypes = [General];
     }
 } // General
 
+// eslint-disable-next-line @typescript-eslint/class-name-casing
 class compound extends Element {
     // @ts-ignore
     public constructor(...args) {
-        // @ts-ignore
+    // @ts-ignore
         super(...args);
         this.classTypes = [General];
     }
 }
 
 
+// eslint-disable-next-line @typescript-eslint/class-name-casing
 class container extends Element {
     // @ts-ignore
     public constructor(...args) {
-        // @ts-ignore
+    // @ts-ignore
         super(...args);
         this.classTypes = [General];
     }
 }
-/* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
+
+/* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,@typescript-eslint/class-name-casing */
 class bullet_list extends Element {
-/* eslint-disable-next-line no-useless-constructor */
+    /* eslint-disable-next-line no-useless-constructor */
+
     // @ts-ignore
     public constructor(...args) {
-        // @ts-ignore
+    // @ts-ignore
         super(...args);
         this.classTypes = [Sequential];
     }
 }
 
-/* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
+/* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,@typescript-eslint/class-name-casing */
 class enumerated_list extends Element {
-    start?: number;
+    public start?: number;
 
-    suffix?: string;
+    public suffix?: string;
 
-    prefix?: string;
+    public prefix?: string;
 
-    enumtype: any;
+    public enumtype: string;
 
     /* eslint-disable-next-line no-useless-constructor */
+
     // @ts-ignore
     public constructor(...args) {
-        // @ts-ignore
+    // @ts-ignore
         super(...args);
         this.classTypes = [Sequential];
     }
 }
 
-/* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
+/* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,@typescript-eslint/class-name-casing */
 class list_item extends Element {
-/* eslint-disable-next-line no-useless-constructor */
+    /* eslint-disable-next-line no-useless-constructor */
+
     // @ts-ignore
     public constructor(...args) {
-        // @ts-ignore
+    // @ts-ignore
         super(...args);
         this.classTypes = [Part];
     }
 }
 
-/* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
+/* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,@typescript-eslint/class-name-casing */
 class definition_list extends Element {
-/* eslint-disable-next-line no-useless-constructor */
+    /* eslint-disable-next-line no-useless-constructor */
+
     // @ts-ignore
     public constructor(...args) {
-        // @ts-ignore
+    // @ts-ignore
         super(...args);
         this.classTypes = [Sequential];
     }
 }
 
-/* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
+/* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,@typescript-eslint/class-name-casing */
 class definition_list_item extends Element {
-/* eslint-disable-next-line no-useless-constructor */
+    /* eslint-disable-next-line no-useless-constructor */
+
     // @ts-ignore
     public constructor(...args) {
-        // @ts-ignore
+    // @ts-ignore
         super(...args);
         this.classTypes = [Part];
     }
 }
 
+// eslint-disable-next-line @typescript-eslint/class-name-casing
 class term extends TextElement {
-/* eslint-disable-next-line no-useless-constructor */
+    /* eslint-disable-next-line no-useless-constructor */
+
     // @ts-ignore
     public constructor(...args) {
-        // @ts-ignore
+    // @ts-ignore
         super(...args);
         this.classTypes = [Part];
     }
 }
 
+// eslint-disable-next-line @typescript-eslint/class-name-casing
 class classifier extends TextElement {
-/* eslint-disable-next-line no-useless-constructor */
+    /* eslint-disable-next-line no-useless-constructor */
+
     // @ts-ignore
     public constructor(...args) {
-        // @ts-ignore
+    // @ts-ignore
         super(...args);
         this.classTypes = [Part];
     }
 }
+
+// eslint-disable-next-line @typescript-eslint/class-name-casing
 class definition extends Element {
-/* eslint-disable-next-line no-useless-constructor */
+    /* eslint-disable-next-line no-useless-constructor */
+
     // @ts-ignore
     public constructor(...args) {
-        // @ts-ignore
+    // @ts-ignore
         super(...args);
         this.classTypes = [Part];
     }
 }
+
 /*
 class classifier(Part, TextElement): pass
 */
-/* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
+
+/* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,@typescript-eslint/class-name-casing */
 class field_list extends Element {
-/* eslint-disable-next-line no-useless-constructor */
+    /* eslint-disable-next-line no-useless-constructor */
+
     // @ts-ignore
     public constructor(...args) {
-        // @ts-ignore
+    // @ts-ignore
         super(...args);
         this.classTypes = [Sequential];
     }
 } // (Sequential, Element
+
+// eslint-disable-next-line @typescript-eslint/class-name-casing
 class field extends Element {
-/* eslint-disable-next-line no-useless-constructor */
+    /* eslint-disable-next-line no-useless-constructor */
+
     // @ts-ignore
     public constructor(...args) {
-        // @ts-ignore
+    // @ts-ignore
         super(...args);
         this.classTypes = [Part];
     }
 } // (Part
-/* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
+/* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,@typescript-eslint/class-name-casing */
 class field_name extends TextElement {
-/* eslint-disable-next-line no-useless-constructor */
+    /* eslint-disable-next-line no-useless-constructor */
+
     // @ts-ignore
     public constructor(...args) {
-        // @ts-ignore
+    // @ts-ignore
         super(...args);
         this.classTypes = [Part];
     }
 } // (Part
-/* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
+/* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,@typescript-eslint/class-name-casing */
 class field_body extends Element {
-/* eslint-disable-next-line no-useless-constructor */
+    /* eslint-disable-next-line no-useless-constructor */
+
     // @ts-ignore
     public constructor(...args) {
-        // @ts-ignore
+    // @ts-ignore
         super(...args);
         this.classTypes = [Part];
     }
 } // (Part
 
+// eslint-disable-next-line @typescript-eslint/class-name-casing
 class option extends Element {
     // @ts-ignore
     public constructor(...args) {
-        // @ts-ignore
+    // @ts-ignore
         super(...args);
         this.classTypes = [Part];
-        this.childTextSeparator = ''; // fixme test this
+        this.childTextSeparator = ""; // fixme test this
     }
 }
 
-/* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
+/* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,@typescript-eslint/class-name-casing */
 class option_argument extends TextElement {
     // @ts-ignore
     public constructor(...args) {
-        // @ts-ignore
+    // @ts-ignore
         super(...args);
         this.classTypes = [Part];
     }
 
     // fixme test this
-    public astext() {
+    public astext(): string {
         const r = super.astext();
-        return (this.attributes.delimiter || ' ') + r;
+        return (this.attributes.delimiter || " ") + r;
     }
 }
 
-/* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
+/* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,@typescript-eslint/class-name-casing */
 class option_group extends Element {
     // @ts-ignore
     public constructor(...args) {
-        // @ts-ignore
+    // @ts-ignore
         super(...args);
         this.classTypes = [Part];
-        this.childTextSeparator = ', ';
+        this.childTextSeparator = ", ";
     }
 }
 
-/* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
+/* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,@typescript-eslint/class-name-casing */
 class option_list extends Element {
-/* eslint-disable-next-line no-useless-constructor */
+    /* eslint-disable-next-line no-useless-constructor */
+
     // @ts-ignore
     public constructor(...args) {
-        // @ts-ignore
+    // @ts-ignore
         super(...args);
         this.classTypes = [Sequential];
     }
 } // Sequential
-/* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
+/* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,@typescript-eslint/class-name-casing */
 class option_list_item extends Element {
-/* eslint-disable-next-line no-useless-constructor */
+    /* eslint-disable-next-line no-useless-constructor */
+
     // @ts-ignore
     public constructor(...args) {
-        // @ts-ignore
+    // @ts-ignore
         super(...args);
         this.classTypes = [Part];
-        this.childTextSeparator = '  ';
+        this.childTextSeparator = "  ";
     }
 }
 
-/* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
+/* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,@typescript-eslint/class-name-casing */
 class option_string extends TextElement {
-/* eslint-disable-next-line no-useless-constructor */
+    /* eslint-disable-next-line no-useless-constructor */
+
     // @ts-ignore
     public constructor(...args) {
-        // @ts-ignore
+    // @ts-ignore
         super(...args);
         this.classTypes = [Part];
     }
 } // (Part
+
+// eslint-disable-next-line @typescript-eslint/class-name-casing
 class description extends Element {
-/* eslint-disable-next-line no-useless-constructor */
+    /* eslint-disable-next-line no-useless-constructor */
+
     // @ts-ignore
     public constructor(...args) {
-        // @ts-ignore
+    // @ts-ignore
         super(...args);
         this.classTypes = [Part];
     }
 } // (Part
 
-/* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
+/* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,@typescript-eslint/class-name-casing */
 class literal_block extends FixedTextElement {
-/* eslint-disable-next-line no-useless-constructor */
+    /* eslint-disable-next-line no-useless-constructor */
+
     // @ts-ignore
     public constructor(...args) {
-        // @ts-ignore
+    // @ts-ignore
         super(...args);
         this.classTypes = [General];
     }
 }
 
-/* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
+/* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,@typescript-eslint/class-name-casing */
 class doctest_block extends FixedTextElement {
-/* eslint-disable-next-line no-useless-constructor */
+    /* eslint-disable-next-line no-useless-constructor */
+
     // @ts-ignore
     public constructor(...args) {
-        // @ts-ignore
+    // @ts-ignore
         super(...args);
         this.classTypes = [General];
     }
 }
 
-/* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
+/* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,@typescript-eslint/class-name-casing */
 class math_block extends FixedTextElement {
-/* eslint-disable-next-line no-useless-constructor */
+    /* eslint-disable-next-line no-useless-constructor */
+
     // @ts-ignore
     public constructor(...args) {
-        // @ts-ignore
+    // @ts-ignore
         super(...args);
         this.classTypes = [General];
     }
 }
-/* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
+
+/* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,@typescript-eslint/class-name-casing */
 class line_block extends Element {
-/* eslint-disable-next-line no-useless-constructor */
+    /* eslint-disable-next-line no-useless-constructor */
+
     // @ts-ignore
     public constructor(...args) {
-        // @ts-ignore
+    // @ts-ignore
         super(...args);
         this.classTypes = [General];
     }
 }
 
+// eslint-disable-next-line @typescript-eslint/class-name-casing
 class line extends TextElement implements HasIndent {
-    indent: any;
+    public indent: number = 0;
 
-    public _init() {
+    public _init(): void {
         super._init();
-        this.indent = undefined;
+
         this.classTypes = [Part];
     }
 } // Part
 
-/* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
+/* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,@typescript-eslint/class-name-casing */
 class block_quote extends Element {
-/* eslint-disable-next-line no-useless-constructor */
+    /* eslint-disable-next-line no-useless-constructor */
+
     // @ts-ignore
     public constructor(...args) {
-        // @ts-ignore
+    // @ts-ignore
         super(...args);
         this.classTypes = [General];
     }
 }
+
+// eslint-disable-next-line @typescript-eslint/class-name-casing
 class attribution extends TextElement {
-/* eslint-disable-next-line no-useless-constructor */
+    /* eslint-disable-next-line no-useless-constructor */
+
     // @ts-ignore
     public constructor(...args) {
-        // @ts-ignore
+    // @ts-ignore
         super(...args);
         this.classTypes = [Part];
     }
 }
+
+// eslint-disable-next-line @typescript-eslint/class-name-casing
 class attention extends Element {
-/* eslint-disable-next-line no-useless-constructor */
+    /* eslint-disable-next-line no-useless-constructor */
+
     // @ts-ignore
     public constructor(...args) {
-        // @ts-ignore
-        super(...args);
-        this.classTypes = [Admonition];
-    }
-}
-class caution extends Element {
-/* eslint-disable-next-line no-useless-constructor */
     // @ts-ignore
-    public constructor(...args) {
-        // @ts-ignore
-        super(...args);
-        this.classTypes = [Admonition];
-    }
-}
-class danger extends Element {
-/* eslint-disable-next-line no-useless-constructor */
-    // @ts-ignore
-    public constructor(...args) {
-        // @ts-ignore
-        super(...args);
-        this.classTypes = [Admonition];
-    }
-}
-class error extends Element {
-/* eslint-disable-next-line no-useless-constructor */
-    // @ts-ignore
-    public constructor(...args) {
-        // @ts-ignore
-        super(...args);
-        this.classTypes = [Admonition];
-    }
-}
-class important extends Element {
-/* eslint-disable-next-line no-useless-constructor */
-    // @ts-ignore
-    public constructor(...args) {
-        // @ts-ignore
-        super(...args);
-        this.classTypes = [Admonition];
-    }
-}
-class note extends Element {
-/* eslint-disable-next-line no-useless-constructor */
-    // @ts-ignore
-    public constructor(...args) {
-        // @ts-ignore
         super(...args);
         this.classTypes = [Admonition];
     }
 }
 
+// eslint-disable-next-line @typescript-eslint/class-name-casing
+class caution extends Element {
+    /* eslint-disable-next-line no-useless-constructor */
+
+    // @ts-ignore
+    public constructor(...args) {
+    // @ts-ignore
+        super(...args);
+        this.classTypes = [Admonition];
+    }
+}
+
+// eslint-disable-next-line @typescript-eslint/class-name-casing
+class danger extends Element {
+    /* eslint-disable-next-line no-useless-constructor */
+
+    // @ts-ignore
+    public constructor(...args) {
+    // @ts-ignore
+        super(...args);
+        this.classTypes = [Admonition];
+    }
+}
+
+// eslint-disable-next-line @typescript-eslint/class-name-casing
+class error extends Element {
+    /* eslint-disable-next-line no-useless-constructor */
+
+    // @ts-ignore
+    public constructor(...args) {
+    // @ts-ignore
+        super(...args);
+        this.classTypes = [Admonition];
+    }
+}
+
+// eslint-disable-next-line @typescript-eslint/class-name-casing
+class important extends Element {
+    /* eslint-disable-next-line no-useless-constructor */
+
+    // @ts-ignore
+    public constructor(...args) {
+    // @ts-ignore
+        super(...args);
+        this.classTypes = [Admonition];
+    }
+}
+
+// eslint-disable-next-line @typescript-eslint/class-name-casing
+class note extends Element {
+    /* eslint-disable-next-line no-useless-constructor */
+
+    // @ts-ignore
+    public constructor(...args) {
+    // @ts-ignore
+        super(...args);
+        this.classTypes = [Admonition];
+    }
+}
+
+// eslint-disable-next-line @typescript-eslint/class-name-casing
 class tip extends Element {
-/* eslint-disable-next-line no-useless-constructor */
+    /* eslint-disable-next-line no-useless-constructor */
+
     // @ts-ignore
     public constructor(...args) {
-        // @ts-ignore
+    // @ts-ignore
         super(...args);
         this.classTypes = [Admonition];
     }
 }
+
+// eslint-disable-next-line @typescript-eslint/class-name-casing
 class hint extends Element {
-/* eslint-disable-next-line no-useless-constructor */
+    /* eslint-disable-next-line no-useless-constructor */
+
     // @ts-ignore
     public constructor(...args) {
-        // @ts-ignore
+    // @ts-ignore
         super(...args);
         this.classTypes = [Admonition];
     }
 }
+
+// eslint-disable-next-line @typescript-eslint/class-name-casing
 class warning extends Element {
-/* eslint-disable-next-line no-useless-constructor */
+    /* eslint-disable-next-line no-useless-constructor */
+
     // @ts-ignore
     public constructor(...args) {
-        // @ts-ignore
+    // @ts-ignore
         super(...args);
         this.classTypes = [Admonition];
     }
 }
+
+// eslint-disable-next-line @typescript-eslint/class-name-casing
 class admonition extends Element {
-/* eslint-disable-next-line no-useless-constructor */
+    /* eslint-disable-next-line no-useless-constructor */
+
     // @ts-ignore
     public constructor(...args) {
-        // @ts-ignore
+    // @ts-ignore
         super(...args);
         this.classTypes = [Admonition];
     }
 }
+
+// eslint-disable-next-line @typescript-eslint/class-name-casing
 class comment extends FixedTextElement {
-/* eslint-disable-next-line no-useless-constructor */
+    /* eslint-disable-next-line no-useless-constructor */
+
     // @ts-ignore
     public constructor(...args) {
-        // @ts-ignore
+    // @ts-ignore
         super(...args);
         this.classTypes = [Special, Invisible, Inline, Targetable];
     }
 }
-/* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
+
+/* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,@typescript-eslint/class-name-casing */
 class substitution_definition extends TextElement {
-/* eslint-disable-next-line no-useless-constructor */
+    /* eslint-disable-next-line no-useless-constructor */
+
     // @ts-ignore
     public constructor(...args) {
-        // @ts-ignore
+    // @ts-ignore
         super(...args);
         this.classTypes = [Special, Invisible];
     }
 }
+
+// eslint-disable-next-line @typescript-eslint/class-name-casing
 class target extends TextElement {
-    indirectReferenceName: string = '';
+    public indirectReferenceName: string = "";
 
     /* eslint-disable-next-line no-useless-constructor */
+
     // @ts-ignore
     public constructor(...args) {
-        // @ts-ignore
+    // @ts-ignore
         super(...args);
         this.classTypes = [Special, Invisible, Inline, Targetable];
     }
 }
+
+// eslint-disable-next-line @typescript-eslint/class-name-casing
 class footnote extends Element {
-/* eslint-disable-next-line no-useless-constructor */
+    /* eslint-disable-next-line no-useless-constructor */
+
     // @ts-ignore
     public constructor(...args) {
-        // @ts-ignore
+    // @ts-ignore
         super(...args);
         this.classTypes = [General, BackLinkable, Labeled, Targetable];
     }
 }
+
+// eslint-disable-next-line @typescript-eslint/class-name-casing
 class citation extends Element {
-/* eslint-disable-next-line no-useless-constructor */
+    /* eslint-disable-next-line no-useless-constructor */
+
     // @ts-ignore
     public constructor(...args) {
-        // @ts-ignore
+    // @ts-ignore
         super(...args);
         this.classTypes = [General, BackLinkable, Labeled, Targetable];
     }
 }
+
+// eslint-disable-next-line @typescript-eslint/class-name-casing
 class label extends TextElement {
-/* eslint-disable-next-line no-useless-constructor */
+    /* eslint-disable-next-line no-useless-constructor */
+
     // @ts-ignore
     public constructor(...args) {
-        // @ts-ignore
+    // @ts-ignore
         super(...args);
         this.classTypes = [Part];
     }
 }
+
+// eslint-disable-next-line @typescript-eslint/class-name-casing
 class figure extends Element {
-/* eslint-disable-next-line no-useless-constructor */
+    /* eslint-disable-next-line no-useless-constructor */
+
     // @ts-ignore
     public constructor(...args) {
-        // @ts-ignore
+    // @ts-ignore
         super(...args);
         this.classTypes = [General];
     }
 }
+
+// eslint-disable-next-line @typescript-eslint/class-name-casing
 class caption extends TextElement {
-/* eslint-disable-next-line no-useless-constructor */
+    /* eslint-disable-next-line no-useless-constructor */
+
     // @ts-ignore
     public constructor(...args) {
-        // @ts-ignore
-        super(...args);
-        this.classTypes = [Part];
-    }
-}
-class legend extends Element {
-/* eslint-disable-next-line no-useless-constructor */
     // @ts-ignore
-    public constructor(...args) {
-        // @ts-ignore
         super(...args);
         this.classTypes = [Part];
     }
 }
 
-class table extends Element {
-/* eslint-disable-next-line no-useless-constructor */
+// eslint-disable-next-line @typescript-eslint/class-name-casing
+class legend extends Element {
+    /* eslint-disable-next-line no-useless-constructor */
+
     // @ts-ignore
     public constructor(...args) {
-        // @ts-ignore
+    // @ts-ignore
+        super(...args);
+        this.classTypes = [Part];
+    }
+}
+
+// eslint-disable-next-line @typescript-eslint/class-name-casing
+class table extends Element {
+    /* eslint-disable-next-line no-useless-constructor */
+
+    // @ts-ignore
+    public constructor(...args) {
+    // @ts-ignore
         super(...args);
         this.classTypes = [General];
     }
 }
+
+// eslint-disable-next-line @typescript-eslint/class-name-casing
 class tgroup extends Element {
-    stubs?: any[];
+    public stubs?: {}[];
     /* eslint-disable-next-line no-useless-constructor */
+
     // @ts-ignore
     public constructor(...args) {
-        // @ts-ignore
-        super(...args);
-        this.classTypes = [Part];
-    }
-}
-class colspec extends Element {
-/* eslint-disable-next-line no-useless-constructor */
     // @ts-ignore
-    public constructor(...args) {
-        // @ts-ignore
-        super(...args);
-        this.classTypes = [Part];
-    }
-}
-class thead extends Element {
-/* eslint-disable-next-line no-useless-constructor */
-    // @ts-ignore
-    public constructor(...args) {
-        // @ts-ignore
-        super(...args);
-        this.classTypes = [Part];
-    }
-}
-class tbody extends Element {
-/* eslint-disable-next-line no-useless-constructor */
-    // @ts-ignore
-    public constructor(...args) {
-        // @ts-ignore
-        super(...args);
-        this.classTypes = [Part];
-    }
-}
-class row extends Element {
-    column?: number;
-    /* eslint-disable-next-line no-useless-constructor */
-    // @ts-ignore
-    public constructor(...args) {
-        // @ts-ignore
-        super(...args);
-        this.classTypes = [Part];
-    }
-}
-class entry extends Element {
-/* eslint-disable-next-line no-useless-constructor */
-    // @ts-ignore
-    public constructor(...args) {
-        // @ts-ignore
         super(...args);
         this.classTypes = [Part];
     }
 }
 
-/* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
-class system_message extends Element {
-    public constructor(message: any, children: INode[], attributes: IAttributes) {
-        super((attributes.rawsource || ''),
-            (message ? [new paragraph('', message), ...children] : children),
+// eslint-disable-next-line @typescript-eslint/class-name-casing
+class colspec extends Element {
+    /* eslint-disable-next-line no-useless-constructor */
+
+    // @ts-ignore
+    public constructor(...args) {
+    // @ts-ignore
+        super(...args);
+        this.classTypes = [Part];
+    }
+}
+
+// eslint-disable-next-line @typescript-eslint/class-name-casing
+class thead extends Element {
+    /* eslint-disable-next-line no-useless-constructor */
+
+    // @ts-ignore
+    public constructor(...args) {
+    // @ts-ignore
+        super(...args);
+        this.classTypes = [Part];
+    }
+}
+
+// eslint-disable-next-line @typescript-eslint/class-name-casing
+class tbody extends Element {
+    /* eslint-disable-next-line no-useless-constructor */
+
+    // @ts-ignore
+    public constructor(...args) {
+    // @ts-ignore
+        super(...args);
+        this.classTypes = [Part];
+    }
+}
+
+// eslint-disable-next-line @typescript-eslint/class-name-casing
+class row extends Element {
+    public column?: number;
+    /* eslint-disable-next-line no-useless-constructor */
+
+    // @ts-ignore
+    public constructor(...args) {
+    // @ts-ignore
+        super(...args);
+        this.classTypes = [Part];
+    }
+}
+
+// eslint-disable-next-line @typescript-eslint/class-name-casing
+class entry extends Element {
+    /* eslint-disable-next-line no-useless-constructor */
+
+    // @ts-ignore
+    public constructor(...args) {
+    // @ts-ignore
+        super(...args);
+        this.classTypes = [Part];
+    }
+}
+
+/* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,@typescript-eslint/class-name-casing */
+class system_message extends Element implements SystemMessage {
+    public constructor(message: string, children: NodeInterface[], attributes: Attributes) {
+        super((attributes.rawsource || ""),
+            (message ? [new paragraph("", message), ...children] : children),
             attributes);
         setupBacklinkable(this);
         this.classTypes = [Special, BackLinkable, PreBibliographic];
     }
 }
+
 /**
  *  The "pending" element is used to encapsulate a pending operation: the
  *  operation (transform), the point at which to apply it, and any data it
@@ -2506,17 +2773,18 @@ class system_message extends Element {
  *  `docutils.transforms.Transformer` stage of processing can run all pending
  *  transforms.
  */
+// eslint-disable-next-line @typescript-eslint/class-name-casing
 class pending extends Element {
-    details: any;
+    public details: {};
 
-    transform: any;
+    public transform: {};
 
     public constructor(
-        transform: any,
-        details: any,
-        rawsource = '',
-        children: INode[],
-        attributes: IAttributes
+        transform: {},
+        details: {},
+        rawsource = "",
+        children: NodeInterface[],
+        attributes: Attributes
     ) {
         super(rawsource, children, attributes);
         /** The `docutils.transforms.Transform` class implementing the pending
@@ -2529,47 +2797,48 @@ class pending extends Element {
 
     // fixme implement this
     /*
-    def pformat(self, indent='    ', level=0):
-        internals = [
-              '.. internal attributes:',
-              '     .transform: %s.%s' % (this.transform.__module__,
-                                          this.transform.__name__),
-              '     .details:']
-        details = this.details.items()
-        details.sort()
-        for key, value in details:
-            if isinstance(value, Node):
-                internals.append('%7s%s:' % ('', key))
-                internals.extend(['%9s%s' % ('', line)
-                                  for line in value.pformat().splitlines()])
-            elif value and isinstance(value, list) \
-                  and isinstance(value[0], Node):
-                internals.append('%7s%s:' % ('', key))
-                for v in value:
-                    internals.extend(['%9s%s' % ('', line)
-                                      for line in v.pformat().splitlines()])
-            else:
-                internals.append('%7s%s: %r' % ('', key, value))
-        return (Element.pformat(self, indent, level)
-                + ''.join([('    %s%s\n' % (indent * level, line))
-                           for line in internals]))
+  def pformat(self, indent='    ', level=0):
+      internals = [
+            '.. internal attributes:',
+            '     .transform: %s.%s' % (this.transform.__module__,
+                                        this.transform.__name__),
+            '     .details:']
+      details = this.details.items()
+      details.sort()
+      for key, value in details:
+          if isinstance(value, Node):
+              internals.append('%7s%s:' % ('', key))
+              internals.extend(['%9s%s' % ('', line)
+                                for line in value.pformat().splitlines()])
+          elif value and isinstance(value, list) \
+                and isinstance(value[0], Node):
+              internals.append('%7s%s:' % ('', key))
+              for v in value:
+                  internals.extend(['%9s%s' % ('', line)
+                                    for line in v.pformat().splitlines()])
+          else:
+              internals.append('%7s%s: %r' % ('', key, value))
+      return (Element.pformat(self, indent, level)
+              + ''.join([('    %s%s\n' % (indent * level, line))
+                         for line in internals]))
 
-    def copy(self):
-        obj = this.__class__(this.transform, this.details, this.rawsource,
-                              **this.attributes)
-        obj.document = this.document
-        obj.source = this.source
-        obj.line = this.line
-        return obj
+  def copy(self):
+      obj = this.__class__(this.transform, this.details, this.rawsource,
+                            **this.attributes)
+      obj.document = this.document
+      obj.source = this.source
+      obj.line = this.line
+      return obj
 
 */
 }
 
 
+// eslint-disable-next-line @typescript-eslint/class-name-casing
 class raw extends FixedTextElement {
     // @ts-ignore
     public constructor(...args) {
-        // @ts-ignore
+    // @ts-ignore
         super(...args);
         this.classTypes = [Special, Inline, PreBibliographic];
     }
@@ -2578,173 +2847,206 @@ class raw extends FixedTextElement {
 // =================
 //  Inline Elements
 // =================
+// eslint-disable-next-line @typescript-eslint/class-name-casing
 class emphasis extends TextElement {
-/* eslint-disable-next-line no-useless-constructor */
-    // @ts-ignore
-    public constructor(...args) {
-        // @ts-ignore
-        super(...args);
-        this.classTypes = [Inline];
-    }
-}
-class strong extends TextElement {
-/* eslint-disable-next-line no-useless-constructor */
-    // @ts-ignore
-    public constructor(...args) {
-        // @ts-ignore
-        super(...args);
-        this.classTypes = [Inline];
-    }
-} // Inline
-class literal extends TextElement {
-/* eslint-disable-next-line no-useless-constructor */
-    // @ts-ignore
-    public constructor(...args) {
-        // @ts-ignore
-        super(...args);
-        this.classTypes = [Inline];
-    }
-} // Inline
-class reference extends TextElement {
-    indirectReferenceName: string | undefined;
     /* eslint-disable-next-line no-useless-constructor */
+
     // @ts-ignore
     public constructor(...args) {
-        // @ts-ignore
+    // @ts-ignore
+        super(...args);
+        this.classTypes = [Inline];
+    }
+}
+
+// eslint-disable-next-line @typescript-eslint/class-name-casing
+class strong extends TextElement {
+    /* eslint-disable-next-line no-useless-constructor */
+
+    // @ts-ignore
+    public constructor(...args) {
+    // @ts-ignore
+        super(...args);
+        this.classTypes = [Inline];
+    }
+} // Inline
+
+// eslint-disable-next-line @typescript-eslint/class-name-casing
+class literal extends TextElement {
+    /* eslint-disable-next-line no-useless-constructor */
+
+    // @ts-ignore
+    public constructor(...args) {
+    // @ts-ignore
+        super(...args);
+        this.classTypes = [Inline];
+    }
+} // Inline
+// eslint-disable-next-line @typescript-eslint/class-name-casing
+class reference extends TextElement {
+    public indirectReferenceName: string | undefined;
+    /* eslint-disable-next-line no-useless-constructor */
+
+    // @ts-ignore
+    public constructor(...args) {
+    // @ts-ignore
         super(...args);
         this.classTypes = [General, Inline, Referential];
     }
 } // General, Inline, Referential
-/* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
+/* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,@typescript-eslint/class-name-casing */
 class footnote_reference extends TextElement {
-/* eslint-disable-next-line no-useless-constructor */
+    /* eslint-disable-next-line no-useless-constructor */
+
     // @ts-ignore
     public constructor(...args) {
-        // @ts-ignore
+    // @ts-ignore
         super(...args);
         this.classTypes = [General, Inline, Referential];
     }
 } // General, Inline, Referential
-/* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
+/* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,@typescript-eslint/class-name-casing */
 class citation_reference extends TextElement {
-/* eslint-disable-next-line no-useless-constructor */
+    /* eslint-disable-next-line no-useless-constructor */
+
     // @ts-ignore
     public constructor(...args) {
-        // @ts-ignore
+    // @ts-ignore
         super(...args);
         this.classTypes = [General, Inline, Referential];
     }
 } // General, Inline, Referential
-/* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
+/* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,@typescript-eslint/class-name-casing */
 class substitution_reference extends TextElement {
-/* eslint-disable-next-line no-useless-constructor */
+    /* eslint-disable-next-line no-useless-constructor */
+
     // @ts-ignore
     public constructor(...args) {
-        // @ts-ignore
+    // @ts-ignore
         super(...args);
         this.classTypes = [Inline];
     }
 } // General, Inline, Referential
-/* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
+/* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,@typescript-eslint/class-name-casing */
 class title_reference extends TextElement {
-/* eslint-disable-next-line no-useless-constructor */
+    /* eslint-disable-next-line no-useless-constructor */
+
     // @ts-ignore
     public constructor(...args) {
-        // @ts-ignore
+    // @ts-ignore
         super(...args);
         this.classTypes = [Inline];
     }
 } // General, Inline, Referential
 
-/* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
+/* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,@typescript-eslint/class-name-casing */
 class abbreviation extends TextElement {
-/* eslint-disable-next-line no-useless-constructor */
+    /* eslint-disable-next-line no-useless-constructor */
+
     // @ts-ignore
     public constructor(...args) {
-        // @ts-ignore
+    // @ts-ignore
         super(...args);
         this.classTypes = [Inline];
     }
 }
 
+// eslint-disable-next-line @typescript-eslint/class-name-casing
 class acronym extends TextElement {
-/* eslint-disable-next-line no-useless-constructor */
+    /* eslint-disable-next-line no-useless-constructor */
+
     // @ts-ignore
     public constructor(...args) {
-        // @ts-ignore
+    // @ts-ignore
         super(...args);
         this.classTypes = [Inline];
     }
 }
 
+// eslint-disable-next-line @typescript-eslint/class-name-casing
 class superscript extends TextElement {
-/* eslint-disable-next-line no-useless-constructor */
+    /* eslint-disable-next-line no-useless-constructor */
+
     // @ts-ignore
     public constructor(...args) {
-        // @ts-ignore
+    // @ts-ignore
         super(...args);
         this.classTypes = [Inline];
     }
 }
 
+// eslint-disable-next-line @typescript-eslint/class-name-casing
 class subscript extends TextElement {
-/* eslint-disable-next-line no-useless-constructor */
+    /* eslint-disable-next-line no-useless-constructor */
+
     // @ts-ignore
     public constructor(...args) {
-        // @ts-ignore
+    // @ts-ignore
         super(...args);
         this.classTypes = [Inline];
     }
 }
+
+// eslint-disable-next-line @typescript-eslint/class-name-casing
 class math extends TextElement {
-/* eslint-disable-next-line no-useless-constructor */
+    /* eslint-disable-next-line no-useless-constructor */
+
     // @ts-ignore
     public constructor(...args) {
-        // @ts-ignore
+    // @ts-ignore
         super(...args);
         this.classTypes = [Inline];
     }
 }
+
+// eslint-disable-next-line @typescript-eslint/class-name-casing
 class image extends Element {
-/* eslint-disable-next-line no-useless-constructor */
+    /* eslint-disable-next-line no-useless-constructor */
+
     // @ts-ignore
     public constructor(...args) {
-        // @ts-ignore
+    // @ts-ignore
         super(...args);
         this.classTypes = [General, Inline];
     }
 
-    public astext() {
-        return this.attributes.alt || '';
+    public astext(): string {
+        return Array.isArray(this.attributes.alt) ? this.attributes.alt.join(' ') : this.attributes.alt || "";
     }
 }
 
 
+// eslint-disable-next-line @typescript-eslint/class-name-casing
 class inline extends TextElement {
-/* eslint-disable-next-line no-useless-constructor */
+    /* eslint-disable-next-line no-useless-constructor */
+
     // @ts-ignore
     public constructor(...args) {
-        // @ts-ignore
+    // @ts-ignore
         super(...args);
         this.classTypes = [Inline];
     }
 }
 
+// eslint-disable-next-line @typescript-eslint/class-name-casing
 class problematic extends TextElement {
-/* eslint-disable-next-line no-useless-constructor */
+    /* eslint-disable-next-line no-useless-constructor */
+
     // @ts-ignore
     public constructor(...args) {
-        // @ts-ignore
+    // @ts-ignore
         super(...args);
         this.classTypes = [Inline];
     }
 }
 
+// eslint-disable-next-line @typescript-eslint/class-name-casing
 class generated extends TextElement {
-/* eslint-disable-next-line no-useless-constructor */
+    /* eslint-disable-next-line no-useless-constructor */
+
     // @ts-ignore
     public constructor(...args) {
-        // @ts-ignore
+    // @ts-ignore
         super(...args);
         this.classTypes = [Inline];
     }
@@ -2756,13 +3058,13 @@ class generated extends TextElement {
 /**
  * convert a node to XML
  */
-function nodeToXml(node: INode): string {
+function nodeToXml(node: NodeInterface): string {
     if (node instanceof Text) {
         const text = xmlescape(node.astext());
         return text;
     }
     if (node.children.length) {
-        return [node.starttag(), ...node.children.map(c => nodeToXml(c)), node.endtag()].join('');
+        return [node.starttag(), ...node.children.map((c: NodeInterface): string => nodeToXml(c)), node.endtag()].join("");
     }
     return node.emptytag();
 }
@@ -2810,5 +3112,5 @@ export {
     StopTraversal,
     SkipNode,
     SkipDeparture,
-    SkipSiblings,
+    SkipSiblings
 };

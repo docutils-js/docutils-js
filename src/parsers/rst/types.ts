@@ -1,11 +1,12 @@
 import Inliner from "./Inliner";
-import { Document, INode, IReporter, LogLevel, StateMachineCommonArgs } from "../../types";
+import { Document, ElementInterface, NodeInterface, ReporterInterface, LogLevel, StateMachineCommonArgs } from "../../types";
 import StringList from "../../StringList";
+import { Settings } from "../../../gen/Settings";
 
 export interface CommonParseArgs {
     inputLines?: StringList;
     inputOffset?: number;
-    node?: INode;
+    node?: NodeInterface;
     matchTitles?: boolean;
 }
 
@@ -15,8 +16,8 @@ export interface RSTStateArgs {
 }
 
 export interface RSTParseArgs extends CommonParseArgs {
-    inliner: Inliner,
-    document: Document,
+    inliner: Inliner;
+    document: Document;
 }
 
 export interface NestedParseArgs extends CommonParseArgs, StateMachineClassArgs {
@@ -39,7 +40,7 @@ interface StateMachineClassArgs {
 
 export interface RstMemo {
     document: Document;
-    reporter: IReporter,
+    reporter: ReporterInterface,
     language: IRSTLanguage,
     titleStyles: (string[] | string)[]
     sectionLevel: number,
@@ -68,4 +69,9 @@ export interface IDirectives {
 
 export interface IRSTLanguage {
     directives: IDirectives;
+}
+export interface InlinerInterface {
+  initCustomizations(settings: Settings): void;
+
+  parse(text: string, args: { lineno: number, memo: any, parent: ElementInterface }): any[][];
 }

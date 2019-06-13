@@ -2,7 +2,7 @@ import StateWS from '../../../states/StateWS';
 import NestedStateMachine from '../NestedStateMachine';
 import * as nodes from '../../../nodes';
 import {EOFError, InvalidArgumentsError} from '../../../Exceptions';
-import {Document, IElement, INode} from "../../../types";
+import {Document, ElementInterface, NodeInterface} from "../../../types";
 import StringList from "../../../StringList";
 import Inliner from "../Inliner";
 import RSTStateMachine from "../RSTStateMachine";
@@ -17,23 +17,23 @@ abstract class RSTState extends StateWS {
     public explicit: any
     public memo?: RstMemo;
     public inliner?: Inliner;
-    protected parent?: IElement;
+    protected parent?: ElementInterface;
 
     protected rstStateMachine: RSTStateMachine;
     public document?: Document;
     protected stateClasses?: string[];
-    public messages: INode[] = [];
+    public messages: NodeInterface[] = [];
 
     public blankFinish?: boolean;
 
     public doubleWidthPadChar: string = '';
 
-    constructor(stateMachine: RSTStateMachine, args: any) {
+    public constructor(stateMachine: RSTStateMachine, args: any) {
         super(stateMachine, args);
         this.rstStateMachine = stateMachine;
     }
 
-// fixme this whole thing needs rework
+    // fixme this whole thing needs rework
     _init(stateMachine: RSTStateMachine, args: RSTStateArgs) {
         super._init(stateMachine, args);
         this.rstStateMachine = stateMachine;
@@ -42,7 +42,7 @@ abstract class RSTState extends StateWS {
         this.stateClasses = args.stateClasses || [];
 
         this.nestedSmKwargs = {
-           stateFactory: this.rstStateMachine.stateFactory.withStateClasses(this.stateClasses),
+            stateFactory: this.rstStateMachine.stateFactory.withStateClasses(this.stateClasses),
             initialState: 'Body',
             debug: args && stateMachine ? stateMachine.debug : false,
             /* eslint-disable-next-line no-console */
@@ -66,7 +66,7 @@ abstract class RSTState extends StateWS {
         }
     }
 
-    gotoLine(absLineOffset: number) {
+    public gotoLine(absLineOffset: number): void {
         try {
             this.rstStateMachine.gotoLine(absLineOffset);
         } catch (ex) {
@@ -75,17 +75,17 @@ abstract class RSTState extends StateWS {
     }
 
     /* istanbul ignore next */
-    noMatch(context: any[], transitions: any[]) {
+    public noMatch(context: any[], transitions: any[]) {
         this.reporter!.severe(`Internal error: no transition pattern match.  State: "${this.constructor.name}"; transitions: ${transitions}; context: ${context}; current line: ${this.rstStateMachine.line}.`);
         return [context, null, []];
     }
 
-    bof() {
+    public bof() {
         return [[], []];
     }
 
-    // eslint-disable-next-line no-unused-vars
-    nestedParse(args: NestedParseArgs) {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars
+    public nestedParse(args: NestedParseArgs) {
         /* istanbul ignore if */
         if (!this.memo || !this.memo.document) {
             throw new Error('need memo');
@@ -114,14 +114,7 @@ abstract class RSTState extends StateWS {
         }
 
         if (!stateMachine) {
-            // check things ?
-            /* istanbul ignore if */
-//            if (!stateMachineKwargs.stateClasses) {
-//                throw new InvalidArgumentsError('stateClasses');
-//            }
-//          if(!stateMachineKwargs.document) {
-//              throw new Error("expectinf document")
-            //          }
+
             if (!mCopy.stateMachineKwargs!.stateFactory) {
                 throw new Error('need statefactory');
             }
@@ -150,7 +143,7 @@ abstract class RSTState extends StateWS {
         return newOffset;
     }
 
-    nestedListParse(block: StringList, args: NestedParseArgs) {
+    public nestedListParse(block: StringList, args: NestedParseArgs): [ number, boolean ] {
         const myargs: NestedParseArgs = {...args};
         /* istanbul ignore next */
         if (myargs.extraSettings == null) {
@@ -192,20 +185,20 @@ abstract class RSTState extends StateWS {
         return [stateMachine.absLineOffset(), blankFinish];
     }
 
-    section(args: {
-                title: string, source: string, style : any | any[], lineno: number, messages: any | any[],
-            }) {
+    public section(args: {
+        title: string; source: string; style: any | any[]; lineno: number; messages: any | any[];
+    }): void {
         const { source, style, title, lineno, messages } = args;
         if (this.checkSubsection({source, style, lineno})) {
             this.newSubsection({title, lineno, messages});
         }
     }
 
-    checkSubsection(args: { source: string, style: any | any[], lineno: number}) {
+    public checkSubsection(args: { source: string; style: any | any[]; lineno: number}): boolean {
         const { source, style, lineno } = args;
         const memo = this.memo!;
         const titleStyles: any[] = memo.titleStyles;
-//        console.log(titleStyles);
+        //        console.log(titleStyles);
         const mylevel = memo.sectionLevel;
         let level = 0;
         level = titleStyles.findIndex(tStyle => (style.length === 1 ? tStyle.length === 1
@@ -248,10 +241,10 @@ abstract class RSTState extends StateWS {
     }
 
 
-    newSubsection(args: {title: string, lineno: number, messages: any | any[]}) {
+    public newSubsection(args: {title: string; lineno: number; messages: {}| {}[]}) {
         const { title, lineno, messages} = args;
         const memo = this.memo!;
-        const mylevel = memo.sectionLevel;
+        const myLevel = memo.sectionLevel;
         memo.sectionLevel += 1;
         const sectionNode = new nodes.section();
         this.parent!.add(sectionNode);
@@ -269,19 +262,19 @@ abstract class RSTState extends StateWS {
             {
                 inputLines: this.rstStateMachine.inputLines.slice(offset),
                 inputOffset: absoffset,
-                node: sectionNode as INode,
+                node: sectionNode as NodeInterface,
                 matchTitles: true,
             }
         );
         this.gotoLine(newabsoffset);
-        if (memo.sectionLevel <= mylevel) {
+        if (memo.sectionLevel <= myLevel) {
             throw new EOFError();
         }
 
-        memo.sectionLevel = mylevel;
+        memo.sectionLevel = myLevel;
     }
 
-    unindentWarning(nodeName: string): INode {
+    unindentWarning(nodeName: string): NodeInterface {
         const lineno = this.rstStateMachine.absLineNumber() + 1;
         return this.reporter!.warning(`${nodeName} ends without a blank line; unexpected unindent.`, {line: lineno});
     }

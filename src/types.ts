@@ -3,23 +3,23 @@
  *
  * TransformSpec subclass objects used by `docutils.transforms.Transformer`.
  */
-import {citation, Element, footnote, reference} from "./nodes";
-import {Settings} from "../gen/Settings";
-import State from "./states/State";
-import StringList from "./StringList";
-import Inliner from "./parsers/rst/Inliner";
+// eslint-disable-next-line @typescript-eslint/camelcase
+import { citation, decoration, Element, footnote, reference, substitution_definition } from "./nodes";
+import { Settings } from "../gen/Settings";
 import Transformer from "./Transformer";
+import StringList from "./StringList";
+import { InlinerInterface } from "./parsers/rst/types";
 
 export interface ParserArgs
 {
-    inliner?: Inliner;
+    inliner?: {};
     rfc2822?: boolean;
     debug?: boolean;
-    debugFn?: any;
+    debugFn?: DebugFunction;
 }
 
-export interface ISettings {
-    getSettings(name: string): any;
+export interface SettingsInterface {
+    getSettings(name: string): {};
 }
 
 export interface SourceLocation {
@@ -28,17 +28,21 @@ export interface SourceLocation {
 }
 
 export interface HasIndent {
-    indent: any;
+    indent: number;
 }
 
-export interface INode extends SourceLocation {
+export interface QuoteattrCallback {
+    (arg: string): string;
+}
+
+export interface NodeInterface extends SourceLocation {
     referenced: boolean;
-    names: any[];
+    names: string[];
     refname?: string;
     refid?: string;
     rawsource: string;
     /** Back-reference to the Node immediately containing this Node. */
-    parent?: INode;
+    parent?: NodeInterface;
     /** The `document` node at the root of the tree containing this Node. */
     document?: Document;
     /** Path or description of the input source which generated this Node. */
@@ -46,9 +50,9 @@ export interface INode extends SourceLocation {
     /** The line number (1-based) of the beginning of this Node in `source`. */
     line: number;
 
-    attributes: IAttributes;
+    attributes: Attributes;
 
-    asDOM(dom: any): any;
+    asDOM(dom: {}): {};
 
     /**
      * Return an indented pseudo-XML representation, for test purposes.
@@ -58,10 +62,10 @@ export interface INode extends SourceLocation {
     pformat(indent: string, level: number): string;
 
     /** Return a copy of self. */
-    copy(): INode;
+    copy(): NodeInterface;
 
     /** Return a deep copy of self (also copying children). */
-    deepcopy(): INode;
+    deepcopy(): NodeInterface;
 
     /**
      * Traverse a tree of `Node` objects, calling the
@@ -84,30 +88,30 @@ export interface INode extends SourceLocation {
      * ``visit`` implementation for each `Node` subclass encountered.
      * Return true if we should stop the traversal.
      */
-    walk(visitor: any): boolean;
+    walk(visitor: {}): boolean;
 
-    walkabout(visitor: any): boolean;
+    walkabout(visitor: {}): boolean;
 
     tagname: string;
-    classTypes: any[];
-    children: INode[];
+    classTypes: {}[];
+    children: NodeInterface[];
 
     // eslint-disable-next-line max-len
-    traverse(args: { condition?: any; includeSelf?: boolean; descend?: boolean; siblings?: boolean; ascend?: boolean }): any[];
+    traverse(args: TraverseArgs): NodeInterface[];
 
     astext(): string;
 
-    add(iNodes: INode[] | INode): void;
+    add(iNodes: NodeInterface[] | NodeInterface): void;
 
     isInline(): boolean;
 
-    starttag(quoteattr?: any): string;
+    starttag(quoteattr?: QuoteattrCallback): string;
 
     endtag(): string;
 
     emptytag(): string;
 
-    addBackref(prbid: any): void;
+    addBackref(prbid: {}): void;
 
     /**
      Updates all attributes from node or dictionary `dict_`.
@@ -128,65 +132,69 @@ export interface INode extends SourceLocation {
      attribute, though it may still be merged into a list depending
      on the value of update_fun.
      */
-    updateAllAttsConcatenating(dict_: any, replace:  boolean,
+    updateAllAttsConcatenating(dict_: {}, replace:  boolean,
         andSource: boolean): void;
 
-    nextNode(args: TraverseArgs): INode | undefined | null;
+    nextNode(args: TraverseArgs): NodeInterface | undefined | null;
 
-    getCustomAttr(attrName: string): any[] | any | undefined| null;
+    getCustomAttr(attrName: string): undefined;
 
-    isAdmonition(): any;
+    isAdmonition(): boolean;
 }
 
-export interface IAttributes {
+export interface Attributes {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     [propName: string]: any;
 }
 
-export interface IElement extends INode {
-    nodeName: any;
+export interface ElementInterface extends NodeInterface {
+    nodeName: string;
     listAttributes: string[];
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     firstChildNotMatchingClass(childClass: any | any[], start?: number, end?: number): number | undefined;
-    attlist(): IAttributes;
+    attlist(): Attributes;
 }
 
-export interface ITextElement extends IElement {
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface TextElementInterface extends ElementInterface {
 }
 
-export interface Document extends IElement {
-    transformMessages: any[];
-    nameIds: any;
-    noteSource: any;
-    reporter: IReporter;
+export interface Document extends ElementInterface {
+    transformMessages: {}[];
+    nameIds: NameIds;
+    noteSource: {};
+    reporter: ReporterInterface;
     settings: Settings;
 
     // eslint-disable-next-line @typescript-eslint/camelcase,camelcase
     transformer: Transformer;
 
-    noteTransformMessage(message: any): void;
+    noteTransformMessage(message: SystemMessage): void;
 
-    noteImplicitTarget(target: any, msgnode: any): void;
+    noteImplicitTarget(target: NodeInterface, msgnode: NodeInterface): void;
 
-    noteRefname(ref: reference): any;
+    noteRefname(ref: reference): void;
 
-    noteExplicitTarget(target: any, parent: any): any;
+    noteExplicitTarget(target: NodeInterface, parent: NodeInterface): void;
 
-    noteIndirectTarget(target: any): any;
+    noteIndirectTarget(target: NodeInterface): void;
 
-    setId(p: INode, msgnode?: IElement): any;
+    setId(p: NodeInterface, msgnode?: ElementInterface): void;
 
-    noteFootnoteRef(refnode: any): any;
+    noteFootnoteRef(refnode: NodeInterface): void;
 
-    noteSymbolFootnoteRef(refnode: any): any;
+    noteSymbolFootnoteRef(refnode: NodeInterface): void;
 
-    noteCitationRef(refnode: any): void;
+    noteCitationRef(refnode: NodeInterface): void;
 
-    noteAutofootnoteRef(refnode: any): void;
+    noteAutofootnoteRef(refnode: NodeInterface): void;
 
-    noteSubstitutionRef(subrefNode: any, subrefText: any): void;
+    noteSubstitutionRef(subrefNode: NodeInterface, subrefText: string): void;
 
-    noteSubstitutionDef(substitutionNode: any, subname: any, parent: IElement): void;
+    // eslint-disable-next-line @typescript-eslint/camelcase
+    noteSubstitutionDef(substitutionNode: substitution_definition, subname: string, parent: ElementInterface): void;
 
-    noteAnonymousTarget(target: any): void;
+    noteAnonymousTarget(target: NodeInterface): void;
 
     noteCitation(c: citation): void;
 
@@ -196,10 +204,10 @@ export interface Document extends IElement {
 
     noteAutofootnote(f: footnote): void;
 
-    getDecoration(): any;
+    getDecoration(): decoration;
 }
 
-export interface ITransformSpec {
+export interface TransformSpecInterface {
     /**
      * List of functions to try to resolve unknown references.  Unknown
      * references have a 'refname' attribute which doesn't correspond to any
@@ -224,13 +232,13 @@ export interface ITransformSpec {
      *
      * Override in subclasses.
      */
-    unknownReferenceResolvers: any[];
+    unknownReferenceResolvers: {}[];
 
-    getTransforms(): ITransformSpec[];
+    getTransforms(): TransformSpecInterface[];
 }
 
 /** Base interface for Docutils components. */
-export interface IComponent extends ITransformSpec {
+export interface ComponentInterface extends TransformSpecInterface {
     componentType: string;
     supported: string[];
 
@@ -250,45 +258,49 @@ export enum LogLevel {
     ErrorLevel,
 };
 
-export interface IReporter {
+export interface ReporterInterface {
     reportLevel: number;
-    getSourceAndLine?: (lineno?: number) => any[];
+    getSourceAndLine?: (lineno?: number) => [string, number] | undefined;
 
     debugFlag?: boolean;
 
-    setConditions(): void;
 
-    systemMessage(level: number, message: string | Error, children: Element[], attributes: IAttributes): INode;
+    systemMessage(level: number, message: string | Error, children: Element[], attributes: Attributes): NodeInterface;
 
     notifyObservers(message: string): void;
 
-    attachObserver(observer: any): void;
+    attachObserver(observer: {}): void;
 
-    debug(...args: any[]): INode;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    debug(...args: any[]): NodeInterface;
 
-    info(...args: any[]): INode;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    info(...args: any[]): NodeInterface;
 
-    warning(...args: any[]): INode;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    warning(...args: any[]): NodeInterface;
 
-    error(...args: any[]): INode;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    error(...args: any[]): NodeInterface;
 
-    severe(...args: any[]): INode;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    severe(...args: any[]): NodeInterface;
 }
 
-export interface IStateFactory {
+export interface Statefactory {
 
-    withStateClasses(strings: string[]): IStateFactory;
+    withStateClasses(strings: string[]): Statefactory;
 
-    createState(stateName: any, param2: any): State;
+    createState(stateName: string, stateMachine: Statemachine): StateInterface;
 
     getStateClasses(): string[];
 }
 
-export interface IStateMachine {
+export interface Statemachine {
 
     unlink(): void;
 
-    run(args: StateMachineRunArgs): any[];
+    run(args: StateMachineRunArgs): (string|{})[];
 
     /**
      *         Return current state object; set it first if
@@ -296,9 +308,9 @@ export interface IStateMachine {
      *         the name of the next state.  Exception:
      *         `UnknownStateError` raised if `next_state` unknown.
      */
-    getState(nextState: any): any;
+    getState(nextState: string): StateInterface;
 
-    nextLine(n: number): any;
+    nextLine(n: number): string;
 
     isNextLineBlank(): boolean;
 
@@ -306,75 +318,77 @@ export interface IStateMachine {
 
     atBof(): boolean;
 
-    previousLine(n: number): any;
+    previousLine(n: number): string;
 
     gotoLine(lineOffset: number): string | undefined;
 
-    getSource(lineOffset: number): any;
+    getSource(lineOffset: number): string;
 
     absLineOffset(): number;
 
     absLineNumber(): number;
 
-    getSourceAndLine(lineno: number): any[];
+    getSourceAndLine(lineno: number): [string | undefined, number | undefined];
 
-    insertInput(inputLines: any, source: any): void;
+    insertInput(inputLines: StringList, source?: string): void;
 
-    getTextBlock(flushLeft: boolean): any;
+    getTextBlock(flushLeft: boolean): StringList;
 
-    checkLine(context: any[], state: any, transitions: any): any[] | any;
+    checkLine(context: {}[], state: StateInterface, transitions: Transitions): {}[] | {};
 
-    addState(stateClass: any): void;
+    addState(stateClass: StateInterface): void;
 
-    addStates(stateClasses: any[]): void;
+    addStates(stateClasses: StateInterface[]): void;
 
     runtimeInit(): void;
 
     error(): void;
 
-    attachObserver(observer: any): void;
+    attachObserver(observer: {}): void;
 
-    detachObserver(observer: any): void;
+    detachObserver(observer: {}): void;
 
     notifyObservers(): void;
 }
 
-export interface IState {
+export interface StateInterface {
 
 
     runtimeInit(): void;
 
     addInitialTransitions(): void;
 
-    addTransitions(names: any[], transitions: any[]): void;
+    addTransitions(names: string[], transitions: Transitions): void;
 
-    addTransition(name: any[], transition: any): void;
+    addTransition(name: string, transition: StateInterface): void;
 
-    removeTransition(name: any): void;
+    removeTransition(name: string): void;
 
-    makeTransition(name: string, nextState?: any): any[];
+    makeTransition(name: string, nextState?: {}): {}[];
 
-    makeTransitions(nameList: any[]): (any[] | {})[];
+    makeTransitions(nameList: string[]): ({}[] | {})[];
+
+    transitionOrder: string[];
 }
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface StateMachineCommonArgs {
 }
 
 export interface StateMachineRunArgs extends StateMachineCommonArgs {
     inputLines: StringList | string | string[];
     inputOffset?: number;
-    context?: any[];
+    context?: {}[];
     inputSource?: string;
     initialState?: string;
-    memo?: any;
-    node?: INode;
+    node?: NodeInterface;
     matchTitles?: boolean;
     document?: Document;
-    inliner?: any;
+    inliner?: InlinerInterface;
 }
 
 export interface GetIndentedArgs {
-    start?: any;
+    start?: number;
     untilBlank?: boolean;
     stripIndent?: boolean;
     blockIndent?: number;
@@ -383,7 +397,21 @@ export interface GetIndentedArgs {
     stripTop?: boolean;
 }
 
+export interface Visitor {
+    document: Document;
+
+    // eslint-disable-next-line @typescript-eslint/camelcase
+    dispatchVisit(node: NodeInterface): void;
+
+    dispatchDeparture(node: NodeInterface): void;
+}
+
+export interface FastTraverseArg {
+    new (): NodeInterface;
+}
+
 export interface TraverseArgs {
+    // @ts-ignore
     condition?: any;
     includeSelf?: boolean;
     descend?: boolean;
@@ -392,15 +420,15 @@ export interface TraverseArgs {
 }
 
 
-export interface IStateMachineWS extends IStateMachine {
-    getIndented(labeled: GetIndentedArgs): any[];
+export interface WhitespaceStatemachine extends Statemachine {
+    getIndented(labeled: GetIndentedArgs): [StringList, number, number, boolean];
 
-    getKnownIndented(labeled: GetIndentedArgs): any[];
+    getKnownIndented(labeled: GetIndentedArgs): [StringList, number, number, boolean];
 
-    getFirstKnownIndented(args: GetIndentedArgs): any[];
+    getFirstKnownIndented(args: GetIndentedArgs): [StringList, number, number, boolean];
 }
 
-export interface ITransformer {
+export interface TransformerInterface {
     document: Document;
 
     /**
@@ -412,7 +440,7 @@ export interface ITransformer {
      * Store multiple transforms, with default priorities.
      * @param {Array} transformList - Array of transform classes (not instances).
      */
-    addTransforms(transformList: any[]): void;
+    addTransforms(transformList: ApplyFunction[]): void;
 
     /**
      *
@@ -420,7 +448,59 @@ export interface ITransformer {
      *
      * This ensures FIFO order on transforms with identical priority.
      */
-    getPriorityString(class_: any, priority: number): string;
+    getPriorityString(class_: {}, priority: number): string;
 
-    addPending(pending: any, priority: any): void;
+    addPending(pending: NodeInterface, priority: number): void;
+}
+export interface DebugFunction {
+    (line: string): void;
+}
+
+export interface SourceArgs {
+    source: {};
+    sourcePath: string;
+    encoding: string;
+}
+
+export interface CoreLanguage {
+    labels: {};
+    bibliographicFields: {};
+    authorSeparators: string[];
+}
+
+export interface ApplyFunction {
+    (): void;
+}
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface SystemMessage extends NodeInterface {
+}
+
+export interface NameIds {
+    [name: string]: string;
+}
+
+export interface ObserverCallback {
+    (message: {}): void;
+}
+
+export interface Transitions {
+    [name: string]: StateInterface;
+}
+
+export interface ReadCallback {
+    (error: Error | undefined | {}, output: {} | undefined): void;
+}
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface TransformType {
+    defaultPriority: number;
+}
+
+export interface Components {
+    [componentName: string]: ComponentInterface;
+}
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface TransformInterface {
+    apply(): void;
 }

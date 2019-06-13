@@ -23,7 +23,7 @@ class QuotedLiteralBlock extends RSTState {
         this.initial_lineno = undefined;
     }
 
-    /* eslint-disable-next-line no-unused-vars */
+    /* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */
     // @ts-ignore
     blank(match, context, nextState) {
         if (context.length) {
@@ -56,7 +56,7 @@ class QuotedLiteralBlock extends RSTState {
         return [];
     }
 
-    /* eslint-disable-next-line no-unused-vars */
+    /* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */
     indent(match: any, context: any[], nextState: any): any[] {
 //        assert context, ('QuotedLiteralBlock.indent: context should not '
 //                         'be empty!')
@@ -90,7 +90,7 @@ class QuotedLiteralBlock extends RSTState {
         return [context, nextState, []];
     }
 
-    /* eslint-disable-next-line no-unused-vars */
+    /* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */
     // @ts-ignore
     text(match, context, nextState) {
         if (context.length) {

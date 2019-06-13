@@ -6,7 +6,7 @@ class StateWS extends State {
     private wsPatterns: any;
     private wsInitialTransitions: any[] = [];
     private wsStateMachine: StateMachineWS;
-    constructor(stateMachine: StateMachineWS, args: any) {
+    public constructor(stateMachine: StateMachineWS, args: any) {
         super(stateMachine, args);
         this.wsStateMachine = stateMachine;
         /* istanbul ignore else */
@@ -27,7 +27,7 @@ class StateWS extends State {
         }
     }
 
-    _init(stateMachine: any, args: any) {
+    public _init(stateMachine: any, args: any) {
         super._init(stateMachine, args);
         this.indentSm = undefined;
         this.indentSmKwargs = null;
@@ -40,19 +40,19 @@ class StateWS extends State {
         this.wsInitialTransitions = ['blank', 'indent'];
     }
 
-    addInitialTransitions() {
+    public addInitialTransitions() {
         super.addInitialTransitions();
         this.patterns = {...this.patterns, ...this.wsPatterns};
         const [names, transitions] = this.makeTransitions(this.wsInitialTransitions);
         this.addTransitions(names, transitions);
     }
 
-    blank(match: any, context: any[], nextState: any) {
+    public blank(match: any, context: any[], nextState: any) {
         return this.nop(match, context, nextState);
     }
 
-    indent(match: any, context: any[], nextState: any) {
-        /* eslint-disable-next-line no-unused-vars */
+    public indent(match: any, context: any[], nextState: any) {
+        /* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */
         const [indented, indent, lineOffset, blankFinish] = this.wsStateMachine.getIndented({});
         const IndentSm = this.indentSm;
         // console.log('instantiating indentsm');
@@ -68,9 +68,9 @@ class StateWS extends State {
         return [context, nextState, results];
     }
 
-    /* eslint-disable-next-line no-unused-vars */
-    knownIndent(match: any, context: any[], nextState: any) {
-        /* eslint-disable-next-line no-unused-vars */
+    /* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */
+    public knownIndent(match: any, context: any[], nextState: any) {
+        /* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */
         const [indented, lineOffset, blankFinish] = this.wsStateMachine.getKnownIndented(
             match.end(),
         );
@@ -83,9 +83,9 @@ class StateWS extends State {
         return [context, nextState, results];
     }
 
-    /* eslint-disable-next-line no-unused-vars */
-    firstKnownIndent(match: any, context: any[], nextState: any) {
-        /* eslint-disable-next-line no-unused-vars */
+    /* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */
+    public firstKnownIndent(match: any, context: any[], nextState: any) {
+        /* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */
         const [indented, lineOffset, blankFinish] = this.wsStateMachine.getFirstKnownIndented(
             {
                 indent: match.result.index + match.result[0].length,

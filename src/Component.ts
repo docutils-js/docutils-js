@@ -1,6 +1,6 @@
 import TransformSpec from './TransformSpec';
 
-/* eslint-disable-next-line no-unused-vars */
+/* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */
 const __docformat__ = 'reStructuredText';
 
 /**
@@ -8,9 +8,9 @@ const __docformat__ = 'reStructuredText';
  * @extends TransformSpec
  */
 class Component extends TransformSpec {
-    supported: string[] = [];
-    componentType: string = 'random';
-    public toString() {
+    public supported: string[] = [];
+    public componentType: string = 'random';
+    public toString(): string {
         return `Component<${this.constructor.name}>`;
     }
 }

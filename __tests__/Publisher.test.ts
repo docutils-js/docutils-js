@@ -21,7 +21,7 @@ beforeEach(() => {
 
     // @ts-ignore
     Input.mockClear();
-    /* eslint-disable-next-line no-unused-vars */
+    /* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */
     // @ts-ignore
     Input.mockImplementation(({ source }) => ({
         getTransforms: () => [],
@@ -33,17 +33,17 @@ beforeEach(() => {
 
     // @ts-ignore
     Reader.mockClear();
-    /* eslint-disable-next-line no-unused-vars */
+    /* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */
     // @ts-ignore
     Reader.mockImplementation((parser, parserName, args) => ({
         getTransforms: () => [],
-        /* eslint-disable-next-line no-unused-vars */
+        /* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */
         setParser: (parserName2: any) => {},
         parse: () => {
             parser.parse(/* input,document */);
         },
         newDocument: () => newDocument({sourcePath:''}, publishingSettings),
-        /* eslint-disable-next-line no-unused-vars */
+        /* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */
         read: (source: any, parser2: any, settings: any, cb: any) => {
             // call this.source.rad ??
             //        console.log(`in read ${cb}`);
@@ -55,11 +55,11 @@ beforeEach(() => {
     }));
     // @ts-ignore
     Writer.mockClear();
-    /* eslint-disable-next-line no-unused-vars */
+    /* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */
     // @ts-ignore
     Writer.mockImplementation(args => ({
         getTransforms: () => [],
-    /* eslint-disable-next-line no-unused-vars */
+    /* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */
         write: (document: any, destination: any) => document,
         assembleParts: () => {},
     }));

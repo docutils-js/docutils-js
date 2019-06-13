@@ -7,14 +7,14 @@ class StringList extends ViewList {
     public constructor(
         initlist: string[],
         source?: string,
-        items?: any[],
-        parent?: any,
+        items?: [string, number][],
+        parent?: StringList,
         parentOffset?: number
     ) {
         super(initlist, source, items, parent, parentOffset);
     }
 
-    public trimLeft(trimLength: number, start = 0, end: number) {
+    public trimLeft(trimLength: number, start = 0, end?: number): void {
         let localEnd = end;
         if (localEnd === undefined) {
             localEnd = this.length;
@@ -28,7 +28,7 @@ class StringList extends ViewList {
         }
     }
 
-    public getTextBlock(start: number, flushLeft: boolean = false) {
+    public getTextBlock(start: number, flushLeft: boolean = false): StringList {
         let end = start;
         const last = this.length;
         while (end < last) {
@@ -37,17 +37,18 @@ class StringList extends ViewList {
                 break;
             }
             if (flushLeft && (line.substring(0, 1) === ' ')) {
+                // eslint-disable-next-line @typescript-eslint/no-unused-vars
                 const [source, offset] = this.info(end);
                 throw new UnexpectedIndentationError('fixme',/*this.slice(start, end),
                                                      source, offset + 1*/);
             }
             end += 1;
         }
-        return this.slice(start, end);
+        return this.slice(start, end) as StringList;
     }
 
-    public getIndented(args: GetIndentedArgs) {
-        const {  start, untilBlank, stripIndent, blockIndent, firstIndent } = args;
+    public getIndented(args: GetIndentedArgs): [StringList, number, boolean] {
+        const { untilBlank, stripIndent, blockIndent, firstIndent } = args;
         const cArgs = { ... args };
         if(stripIndent == null) {
             cArgs.stripIndent = true;
@@ -64,17 +65,17 @@ class StringList extends ViewList {
             end += 1;
         }
         const last = this.length;
-        let blankFinish;
+        let blankFinish: boolean | undefined;
         while (end < last) {
             const line = this[end];
             if (line && (line[0] !== ' ' || (blockIndent != null && line.substring(0, blockIndent).trim()))) {
-                blankFinish = ((end > start) && !this[end - 1].trim());
+                blankFinish = ((end > cArgs.start) && !this[end - 1].trim());
                 break;
             }
             const stripped = line.replace(/^\s*/, '');
             if (!stripped) {
                 if (untilBlank) {
-                    blankFinish = 1;
+                    blankFinish = true;
                     break;
                 }
             } else if (blockIndent == null) {
@@ -88,10 +89,10 @@ class StringList extends ViewList {
             end += 1;
         }
         if (end === last) {
-            blankFinish = 1;
+            blankFinish = true;
         }
 
-        const block = this.slice(start, end);
+        const block = this.slice(cArgs.start, end) as StringList;
         if (firstIndent != null && block) {
             block[0] = block[0].substring(firstIndent);
         }
@@ -109,7 +110,7 @@ class StringList extends ViewList {
         bottom: number,
         right: number,
         stripIndent: boolean = true
-    ) {
+    ): StringList {
 
         const block = this.slice(top, bottom);
         let indent = right;
@@ -137,21 +138,22 @@ class StringList extends ViewList {
                 block[i] = block[i].substring(indent);
             }
         }
-        return block;
+        return block as StringList;
     }
 
-    public padDoubleWidth() {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    public padDoubleWidth(arg: string): void {
         //        throw new Unimp('padDoublewidth');
 
     }
 
-    public replace(old: any, newStr: string) {
+    public replace(old: RegExp | string, newStr: string): void {
         for (let i = 0; i < this.length; i += 1) {
             this[i] = this[i].replace(old, newStr); // fix me !!
         }
     }
 
-    public trimTop(n = 1) {
+    public trimTop(n = 1): void {
         /* Remove items from the start of the list, without touching the parent. */
         /* istanbul ignore if */
         if (n > this.length) {

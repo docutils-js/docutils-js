@@ -2,16 +2,17 @@ import { createReadStream } from 'fs';
 import Input from './io/Input';
 import Output from './io/Output';
 import { ApplicationError } from './Exceptions';
+import { ReadCallback } from "./types";
 
 /** Direct string input. */
 export class StringInput extends Input {
 
-    public constructor(source: any, sourcePath?: any, encoding?: any, errorHandler?: any) {
+    public constructor(source: string, sourcePath?: string, encoding?: string, errorHandler?: string) {
         super({source, sourcePath, encoding, errorHandler});
         this.sourcePath = '<string>';
     }
 
-    public read(cb: any) {
+    public read(cb: ReadCallback): void {
         cb(undefined, this.source);
     }
 }
@@ -20,15 +21,15 @@ export class StringOutput extends Output<string> {
     public constructor(
         destination?: string,
         destinationPath?: string,
-        encoding?: any,
-        errorHandler?: any
+        encoding?: string,
+        errorHandler?: string
     ) {
         super(destination, destinationPath, encoding, errorHandler);
         this.defaultDestinationPath = '<string>';
 
     }
 
-    public write(data: string) {
+    public write(data: string): string {
         // self.destination = self.encode(data) // fixme encoding
         if (Array.isArray(data)) {
             data = JSON.stringify(data);
@@ -39,18 +40,25 @@ export class StringOutput extends Output<string> {
 }
 
 export class FileInput extends Input {
-    private _stderr: any;
-    private autoClose: any;
+
+    private autoClose: boolean;
     /* ew, too much logic for a constructor, with side effects etc! */
-    public constructor(args: any) {
+    public constructor(args: {
+        mode?: {};
+        autoClose?: boolean;
+        source?: {};
+        sourcePath?: string;
+        encoding?: string;
+        errorHandler?: string;
+    }) {
         super(args);
         const {
-        /* eslint-disable-next-line no-unused-vars */
+        /* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */
             source, sourcePath, encoding, errorHandler, autoClose,
             mode,
         } = args;
         let myAutoClose = autoClose;
-        /* eslint-disable-next-line no-unused-vars */
+        /* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */
         let myMode = mode;
         if (typeof source === 'undefined' && typeof sourcePath === 'undefined') {
             throw new ApplicationError('FileInput: Undefined source and sourcePath');
@@ -85,8 +93,8 @@ export class FileInput extends Input {
 
     /* Read and decode a single file and return the data (Unicode string).
      */
-    public read(cb?: any) {
-        setTimeout(() => {
+    public read(cb: ReadCallback): void {
+        setTimeout((): void => {
             let data;
             try {
             /* reading ? */
@@ -110,7 +118,7 @@ export class FileInput extends Input {
     //     return this.read().splitlines(true);
     // }
 
-    public close() {
+    public close(): void {
         if (this.source !== process.stdin) {
             this.source.close();
         }

@@ -6,7 +6,7 @@ import StringList from '../src/StringList';
 // @takes N arrays -- arguments *must* be arrays
 // @returns an array of X arrays of N elements, X being the product of the input arrays' lengths.
 
-/* eslint-disable-next-line no-unused-vars */
+/* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */
 function cartesianProduct(...arrays: any[]) {
         function _inner(...args: any[]): any {
                 if (arguments.length > 1) {

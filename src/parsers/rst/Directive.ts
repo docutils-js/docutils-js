@@ -1,5 +1,5 @@
 import { DirectiveError, IDirective } from "./types";
-import { IStateMachine, LogLevel } from "../../types";
+import { Statemachine, LogLevel } from "../../types";
 import State from "../../states/State";
 import StringList from "../../StringList";
 import Body from "./states/Body";
@@ -102,7 +102,7 @@ class Directive implements IDirective {
   contentOffset: number;
   blockText: StringList;
   state: Body;
-  stateMachine: IStateMachine;
+  stateMachine: Statemachine;
   constructor(args: { name: string, args: any, options: any, content: any, lineno: number, contentOffset: number, blockText: StringList, state: Body, stateMachine: any } ) {
   this.name = args.name;
   this.arguments = args.args;

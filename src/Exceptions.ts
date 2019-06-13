@@ -1,9 +1,9 @@
-import {INode} from "./types";
+import {NodeInterface} from "./types";
 
 export class UnimplementedError extends Error {
     // @ts-ignore
-    public constructor(message?: string, ...params) {
-        super(...params);
+    public constructor(message?: string) {
+        super(message);
         /* instanbul ignore else */
         if (Error.captureStackTrace) {
             Error.captureStackTrace(this, UnimplementedError);
@@ -13,9 +13,21 @@ export class UnimplementedError extends Error {
 }
 
 
+export class InvalidStateError extends Error {
+    // @ts-ignore
+    public constructor(message?: string) {
+        super(message);
+        /* instanbul ignore else */
+        if (Error.captureStackTrace) {
+            Error.captureStackTrace(this, InvalidStateError);
+        }
+        this.message = message || '';
+    }
+}
+
 export class EOFError extends Error {
-    public constructor(...params: any[]) {
-        super(...params);
+    public constructor() {
+        super();
         /* instanbul ignore else */
         if (Error.captureStackTrace) {
             Error.captureStackTrace(this, EOFError);
@@ -25,8 +37,8 @@ export class EOFError extends Error {
 
 
 export class InvalidArgumentsError extends Error {
-    public constructor(message: any, ...params: any[]) {
-        super(...params);
+    public constructor(message: string) {
+        super();
         this.message = message;
         /* instanbul ignore else */
         if (Error.captureStackTrace) {
@@ -39,9 +51,9 @@ export const InvalidArgumentError = InvalidArgumentsError;
 
 
 export class SystemMessage extends Error {
-    msg: INode;
-    level: number;
-    public constructor(msg: INode, level: number, ...params: any[]) {
+    public msg: NodeInterface;
+    public level: number;
+    public constructor(msg: NodeInterface, level: number, ...params: []) {
         super(...params);
         this.message = msg.astext();
         this.msg = msg;
@@ -54,23 +66,24 @@ export class SystemMessage extends Error {
 }
 
 export class ApplicationError extends Error {
-    error: Error;
-    args: any[];
-    public constructor(...params: any[]) {
-        super(...params);
-        this.args = params;
-        const [message, kwargs] = params; // eslint-disable-line no-unused-vars
-        this.error = kwargs ? kwargs.error : undefined;
+    public error: Error | undefined;
+    public args: {} | undefined;
+    public constructor(message: string, args?: { error?: Error}) {
+        super(message);
+        this.args = args;
+        if(args !== undefined) {
+            this.error = args.error;
+        }
         /* instanbul ignore else */
         if (Error.captureStackTrace) {
-            Error.captureStackTrace(this, Error);
+            Error.captureStackTrace(this, ApplicationError);
         }
     }
 }
 
 export class DataError extends ApplicationError {
-    public constructor(...params: any[]) {
-        super(...params);
+    public constructor(message: string, args?: {}) {
+        super(message, args);
         /* instanbul ignore else */
         if (Error.captureStackTrace) {
             Error.captureStackTrace(this, DataError);
@@ -79,8 +92,8 @@ export class DataError extends ApplicationError {
 }
 
 export class AssertError extends Error {
-    public constructor(message: string, ...params: any[]) {
-        super(...params);
+    public constructor(message: string) {
+        super(message);
         /* instanbul ignore else */
         if (Error.captureStackTrace) {
             Error.captureStackTrace(this, AssertError);

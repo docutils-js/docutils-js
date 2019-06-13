@@ -1,7 +1,7 @@
 import BaseWriter from '../Writer';
 import * as docutils from '../index';
 import * as nodes from '../nodes';
-import {Document, INode} from "../types";
+import {Document, NodeInterface} from "../types";
 import {Settings} from "../../gen/Settings";
 import { InvalidArgumentsError } from "../Exceptions";
 
@@ -9,7 +9,7 @@ export function escapeXml(unsafe: string): string {
     if (typeof unsafe === 'undefined') {
         throw new Error('need unsafE');
     }
-    return unsafe.replace(/[<>&'"]/g, (c) => {
+    return unsafe.replace(/[<>&'"]/g, (c): string => {
         switch (c) {
             case '<': return '&lt;';
             case '>': return '&gt;';
@@ -23,8 +23,10 @@ export function escapeXml(unsafe: string): string {
 class XMLTranslator extends nodes.GenericNodeVisitor {
     public output: string[];
     private indent: string;
-    private warn: (...args: any[]) => INode;
-    private error: (...args: any[]) => INode;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    private warn: (...args: any[]) => NodeInterface;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    private error: (...args: any[]) => NodeInterface;
     private settings: Settings;
     private generator: string;
     private newline: string;
@@ -71,7 +73,7 @@ class XMLTranslator extends nodes.GenericNodeVisitor {
     }
 
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
-    default_visit(node: INode) {
+    public default_visit(node: NodeInterface) {
         this.simple_nodes = [nodes.TextElement];// nodes.image, nodes.colspec, nodes.transition]
         if (!this.inSimple) {
             this.output.push(Array(this.level + 1).join(this.indent));
@@ -97,7 +99,7 @@ class XMLTranslator extends nodes.GenericNodeVisitor {
     }
 
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
-    default_departure(node: INode) {
+    public default_departure(node: NodeInterface) {
         this.level -= 1;
         if (!this.inSimple) {
             this.output.push(Array(this.level + 1).join(this.indent));
@@ -110,16 +112,16 @@ class XMLTranslator extends nodes.GenericNodeVisitor {
     }
 
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
-    visit_Text(node: INode) {
+    public visit_Text(node: NodeInterface) {
         const text = escapeXml(node.astext());
         this.output.push(text);
     }
 
-    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,no-unused-vars */
-    public depart_Text(node: INode) {
+    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,@typescript-eslint/no-unused-vars,no-unused-vars */
+    public depart_Text(node: NodeInterface): void {
     }
 
-    private xmlDeclaration(outputEncoding: string): string {
+    public xmlDeclaration(outputEncoding: string): string {
         return '';
 
     }

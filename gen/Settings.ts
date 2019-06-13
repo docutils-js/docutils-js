@@ -493,7 +493,7 @@ export interface DocutilsReadersStandaloneReader {
 export interface Settings {
     _source?: string;
     _destination?: string;
-docutilsCoreOptionParser?: DocutilsCoreOptionParser;
+docutilsCoreOptionParser: DocutilsCoreOptionParser;
 docutilsFrontendOptionParser?: DocutilsFrontendOptionParser;
 docutilsParsersRstParser?: DocutilsParsersRstParser;
 docutilsWritersDocutilsXmlWriter?: DocutilsWritersDocutilsXmlWriter;

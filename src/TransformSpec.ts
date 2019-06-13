@@ -1,6 +1,8 @@
-/* eslint-disable-next-line no-unused-vars */
+/* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */
 import SettingsSpec from "./SettingsSpec";
+import { TransformType } from "./types";
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const __docformat__ = 'reStructuredText';
 
 /**
@@ -11,18 +13,18 @@ const __docformat__ = 'reStructuredText';
  */
 
 class TransformSpec extends SettingsSpec {
-    public unknownReferenceResolvers: any[] = [];
+    public unknownReferenceResolvers: {}[] = [];
 
     /**
      * Get the transforms associated with the instance.
      * @returns {Array} array of Transform classes (not instances)
      */
     // eslint-disable-next-line class-methods-use-this
-    public getTransforms(): any[] {
+    public getTransforms(): TransformType[] {
         return [];
     }
 
-    public toString() {
+    public toString(): string {
         return `TransformSpec<${this.constructor.name}>`;
     }
 }

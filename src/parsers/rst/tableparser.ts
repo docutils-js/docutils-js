@@ -45,7 +45,7 @@ abstract class TableParser {
         this._init();
     }
 
-    /* eslint-disable-next-line no-unused-vars */
+    /* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */
     _init() {
         /** Padding character for East Asian double-width text. */
     }
@@ -369,7 +369,7 @@ if (typeof right === 'undefined') {
         /**
                 Noting row boundaries, see if we can return to the starting point.
          */
-    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,no-unused-vars */
+    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,@typescript-eslint/no-unused-vars,no-unused-vars */
     scan_up(top: number, left: number, bottom: number, right: number) {
         const rowseps: any = {};
         for (let i = bottom - 1; i > top; i -= 1) {
@@ -606,7 +606,7 @@ class SimpleTableParser extends TableParser {
     init_row(colspec: number[][], offset: number) {
         let i = 0;
         const cells = [];
-        /* eslint-disable-next-line no-unused-vars,no-restricted-syntax */
+        /* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars,no-restricted-syntax */
         for (const [start, end] of colspec) {
             let morecols = 0;
             try {
@@ -647,7 +647,7 @@ class SimpleTableParser extends TableParser {
             return;
         }
         let columns;
-        /* eslint-disable-next-line no-unused-vars */
+        /* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */
         let spanOffset;
         if (spanline) {
             columns = this.parse_columns(spanline[0], spanline[1]);

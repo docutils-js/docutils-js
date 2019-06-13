@@ -1,7 +1,6 @@
 import BaseWriter from '../Writer';
-import {Document} from "../types";
 
-/* eslint-disable-next-line no-unused-vars */
+/* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */
 const __docformat__ = 'reStructuredText';
 
 /**
@@ -11,7 +10,7 @@ class NoOpWriter extends BaseWriter {
     /**
      * Translate the document to plain old javascript object
      */
-    translate() {
+    public translate() {
         this.output = this.document;
     }
 }

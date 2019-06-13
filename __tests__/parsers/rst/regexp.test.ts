@@ -9,7 +9,7 @@ function setupInliner() {
     const document = newDocument({sourcePath:''}, { ...baseSettings });
     const reporter = newReporter({sourcePath:''}, { ...baseSettings });
     let language;
-    /* eslint-disable-next-line no-unused-vars */
+    /* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */
     const memo = {
  document,
                    reporter,

@@ -1,13 +1,13 @@
 import * as nodes from '../nodes';
 import * as utils from '../utils';
 import Transform from '../Transform';
-/* eslint-disable-next-line no-unused-vars */
+/* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */
 import TransformError from '../error/TransformError';
-import {INode} from "../types";
+import { NodeInterface } from "../types";
 
 /* eslint-disable-next-line import/prefer-default-export */
 class Decorations extends Transform {
-    apply() {
+    public apply(): void {
         const headerNodes = this.generateHeader();
         if (headerNodes && headerNodes.length) {
             const decoration = this.document.getDecoration();
@@ -25,11 +25,11 @@ class Decorations extends Transform {
         }
     }
 
-    generateHeader(): INode[] | undefined {
+    public generateHeader(): NodeInterface[] | undefined {
         return undefined;
     }
 
-    generateFooter(): INode[] | undefined {
+    public generateFooter(): NodeInterface[] | undefined {
         // @@@ Text is hard-coded for now.
         // Should be made dynamic (language-dependent).
         // @@@ Use timestamp from the `SOURCE_DATE_EPOCH`_ environment variable
@@ -72,7 +72,7 @@ Decorations.defaultPriority = 820;
  * of the document.
  */
 class Messages extends Transform {
-    apply() {
+    public apply(): void {
         const unfiltered = this.document.transformMessages;
         if (unfiltered == null) {
             throw new Error('need transformmessages');
@@ -95,7 +95,7 @@ Messages.defaultPriority = 860;
 
 /** Remove system messages below verbosity threshold. */
 class FilterMessages extends Transform {
-    apply() {
+    public apply() {
         this.document.traverse({ condition: nodes.system_message}).forEach((node, i) => {
             if (node.attributes.level < this.document.reporter.reportLevel) {
                 node.parent.children.pop(i);

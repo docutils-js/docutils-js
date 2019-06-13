@@ -1,21 +1,25 @@
-import { getLanguage } from './languages';
-import {Document, INode} from "./types";
+import { getLanguage } from "./languages";
+import { CoreLanguage, Document, NodeInterface, TransformInterface } from "./types";
 
 
-export default class Transform {
-    document: Document;
-    startNode?: INode;
-    language: any;
-    static defaultPriority: number;
-    public constructor(document: Document, startNode?: INode) {
+export default abstract class Transform implements TransformInterface {
+    public document: Document;
+    public startNode?: NodeInterface;
+    public language?: CoreLanguage;
+    public static defaultPriority: number;
+    public constructor(document: Document, startNode?: NodeInterface) {
         this.document = document;
         this.startNode = startNode;
-        this.language = getLanguage(document.settings.docutilsCoreOptionParser!.languageCode,
+        let languageCode = document.settings.docutilsCoreOptionParser.languageCode;
+        this.language = getLanguage(languageCode,
             document.reporter);
         this._init(document, startNode);
     }
 
-    public _init(document: Document, startNode: INode | undefined) {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    public _init(document: Document, startNode: NodeInterface | undefined): void {
 
     }
+
+    public abstract apply(): void;
 }

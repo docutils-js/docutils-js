@@ -1,4 +1,4 @@
-/* eslint-disable-next-line no-unused-vars */
+/* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */
 export default function unescape(text: string, restoreBackslashes = false, respectWhitespace = false) {
     /*
     Return a string with nulls removed or restored to backslashes.

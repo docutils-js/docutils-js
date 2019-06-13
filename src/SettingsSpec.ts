@@ -7,18 +7,11 @@
  * SettingsSpec subclass objects used by `docutils.frontend.OptionParser`.
  */
 class SettingsSpec {
-    private settingsSpec: any[] = [];
-    private settingsDefaults: any;
-    private settingsDefaultOverrides: any;
-    private relativePathSettings: any[] = [];
+    private settingsSpec: {}[] = [];
+    private settingsDefaults?: {};
+    private settingsDefaultOverrides?: {};
+    private relativePathSettings: {}[] = [];
     public configSection: string = '';
     public configSectionDependencies: string[] = [];
-    /* eslint-disable-next-line no-unused-vars */
-    public _init(...args: any[]) {
-        this.settingsSpec = [];
-        this.settingsDefaults = null;
-        this.settingsDefaultOverrides = null;
-        this.relativePathSettings = [];
-    }
 }
 export default SettingsSpec;

@@ -14,7 +14,7 @@ export { htmlTranslate } from './fn/htmlTranslate';
 export { RSTParser } from './parsers/restructuredtext';
 export { XMLWriter } from './writers/xml'
 
-/* eslint-disable-next-line no-unused-vars */
+/* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */
 const __docformat__ = 'reStructuredText';
 
 export const __version__ = '0.14js';

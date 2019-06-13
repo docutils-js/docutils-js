@@ -8,7 +8,7 @@ class EnumeratedList extends SpecializedBody {
     /** Enumerated list item. */
     // @ts-ignore
     enumerator(match, context, nextState) {
-        /* eslint-disable-next-line no-unused-vars */
+        /* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */
         const [format, sequence, text, ordinal] = this.parse_enumerator(
             match, this.parent!.attributes.enumtype,
 );

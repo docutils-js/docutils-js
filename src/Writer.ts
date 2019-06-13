@@ -1,18 +1,27 @@
 import Component from './Component';
 import { getLanguage }from './languages';
 import {Document} from "./types";
+import Output from "./io/Output";
 
 const __version__ = '';
 
 /**
  * Base class for all writers.
  */
-export default class Writer extends Component {
-    public parts: any;
+export default abstract class Writer extends Component {
+    public parts: {};
     public document?: Document;
-    private language: any;
-    private destination: any;
-    protected output: any | any[];
+    private language?: {};
+    /**
+     * Final translated form of `document` (Unicode string for text, binary
+     * string for other forms); set by `translate`.
+     */
+    protected output?: {};
+    /**
+     * `docutils.io` Output object; where to write the document.
+     * Set by `write`.
+     */
+    private destination: {};
     /*
      * @constructor
      *
@@ -22,10 +31,12 @@ export default class Writer extends Component {
         this.parts = {};
     }
 
-    public write(document: Document, destination: any) {
+    public write(document: Document, destination: Output): void {
         this.document = document;
-        this.language = getLanguage(document.settings.docutilsCoreOptionParser!.languageCode,
-            document.reporter);
+        if(document !== undefined) {
+            this.language = getLanguage(document.settings.docutilsCoreOptionParser.languageCode,
+                document.reporter);
+        }
         this.destination = destination;
         this.translate();
         //        console.log(this.output);
@@ -40,13 +51,11 @@ export default class Writer extends Component {
         return fn(this.output);
     }
 
-    public translate() {
-        throw new Error('subclass must override this method');
-    }
+    public abstract translate();
 
-    public assembleParts() {
+    public assembleParts(): void {
         this.parts.whole = this.output;
-        this.parts.encoding = this.document!.settings.docutilsCoreOptionParser!.outputEncoding;
+        this.parts.encoding = this.document.settings.docutilsCoreOptionParser.outputEncoding;
         this.parts.version = __version__;
     }
 }

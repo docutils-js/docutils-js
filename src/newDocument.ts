@@ -1,8 +1,9 @@
 import { document } from './nodes';
 import newReporter from './newReporter';
 import {Settings} from "../gen/Settings";
+import { Document } from "./types";
 
-/* eslint-disable-next-line no-unused-vars */
+/* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */
 const __docformat__ = 'reStructuredText';
 
 /**
@@ -25,10 +26,10 @@ const __docformat__ = 'reStructuredText';
  * @returns {module:nodes~document} New document
  * @see module:newDocument~newDocument
  */
-function newDocument(args: { sourcePath: string }, settings: Settings) {
+function newDocument(args: { sourcePath: string }, settings: Settings): Document{
     const {sourcePath} = args;
     const reporter = newReporter({ sourcePath }, settings);
-    const attrs: any = {};
+    const attrs: { source?: string }= {};
     if (typeof sourcePath !== 'undefined') {
         attrs.source = sourcePath;
     }

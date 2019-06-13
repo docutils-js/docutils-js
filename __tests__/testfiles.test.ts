@@ -2,7 +2,7 @@ import { Publisher } from '../src/Core';
 import { StringInput, StringOutput } from '../src/io';
 import * as nodes from '../src/nodes';
 import defaults from "../gen/defaults";
-import {INode} from "../src/types";
+import {NodeInterface} from "../src/types";
 
 const path = require('path');
 const fs = require('fs');
@@ -58,13 +58,13 @@ test.each(table)('%s', (file, input) => {
             const document = pub.document;
 
             const Visitor = class extends nodes.GenericNodeVisitor {
-                /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,no-unused-vars */
-                default_departure(node: INode) {
+                /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,@typescript-eslint/no-unused-vars,no-unused-vars */
+                default_departure(node: NodeInterface) {
                     /**/
                 }
 
                 /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
-                default_visit(node: INode) {
+                default_visit(node: NodeInterface) {
                     if (node.attributes && node.attributes.refuri) {
                         //                                console.log(node.attributes.refuri);
                         if (!/^https?:\/\//.test(node.attributes.refuri)) {

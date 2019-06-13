@@ -1,7 +1,7 @@
 import StateMachineWS from '../../StateMachineWS';
 import Inliner from './Inliner';
 import * as languages from '../../languages';
-import {IElement, StateMachineRunArgs} from "../../types";
+import {ElementInterface, StateMachineRunArgs} from "../../types";
 import {RstMemo} from "./types";
 import { getLanguage } from "./languages";
 
@@ -12,7 +12,7 @@ import { getLanguage } from "./languages";
  */
 class RSTStateMachine extends StateMachineWS {
     matchTitles?: boolean;
-    node?: IElement;
+    node?: ElementInterface;
     public memo?: RstMemo;
     run(args: StateMachineRunArgs) {
         const cArgs = { ... args };

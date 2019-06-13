@@ -14,7 +14,7 @@ import * as frontmatter from '../transforms/frontmatter';
 
 export const __docformat__ = 'reStructuredText';
 export default class Reader extends BaseReader {
-    constructor(args: any) {
+    public constructor(args: any) {
         super(args);
 
         /** Contexts this reader supports. */
@@ -27,7 +27,7 @@ export default class Reader extends BaseReader {
         this.configSectionDependencies = ['readers'];
     }
 
-    getTransforms() {
+    public getTransforms() {
         const s = super.getTransforms();
         const r = [...s, references.PropagateTargets,
             frontmatter.DocTitle,

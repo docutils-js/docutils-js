@@ -2,7 +2,7 @@ import { Publisher } from '../src/Core';
 import { StringInput, StringOutput } from '../src/io';
 import * as nodes from '../src/nodes';
 import defaults from "../gen/defaults";
-import {INode} from "../src/types";
+import {NodeInterface} from "../src/types";
 
 const currentLogLines = [];
 
@@ -28,7 +28,7 @@ test('full rst2xml pipeline with specific input', () => {
     const settings = { ...defaultSettings };
     const args = { ...defaultArgs };
 
-    /* eslint-disable-next-line no-unused-vars */
+    /* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */
     const debugFn = (msg: string) => {
 
 //        console.log(msg);
@@ -296,7 +296,7 @@ footnote 2.
     ['escaping 2', '\\*escape* \\``with`` "\\\\"'],
 
 ])('%s', (...inputAry) => {
-    /* eslint-disable-next-line no-unused-vars */
+    /* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */
              const [a, raw, opts] = inputAry;
              const myOpts: any = opts || {};
 
@@ -329,13 +329,13 @@ settingsOverrides, configSection, enableExitStatus } */
                       const document = pub.document!;
 
                       const Visitor = class extends nodes.GenericNodeVisitor {
-                          /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,no-unused-vars */
-                          default_departure(node: INode) {
+                          /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,@typescript-eslint/no-unused-vars,no-unused-vars */
+                          default_departure(node: NodeInterface) {
                               /**/
                           }
 
                           /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
-                          default_visit(node: INode) {
+                          default_visit(node: NodeInterface) {
                               if (node.attributes && node.attributes.refuri) {
 //                                console.log(node.attributes.refuri);
                                   if (!/^https?:\/\//.test(node.attributes.refuri)) {

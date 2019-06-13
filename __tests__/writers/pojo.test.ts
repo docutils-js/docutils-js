@@ -26,7 +26,7 @@ test('rst2pojo pipeline', () => {
     const settings = { ...defaultSettings };
     const args = { ...defaultArgs };
 
-/* eslint-disable-next-line no-unused-vars */
+/* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */
     const debugFn = (msg: string) => {
 //      console.log(msg);
 //      currentLogLines.push(msg);

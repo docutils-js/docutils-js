@@ -1,9 +1,8 @@
-import Component from './Component';
-import { UnimplementedError } from './Exceptions';
-import {Document, ParserArgs} from "./types";
+import Component from "./Component";
+import { DebugFunction, Document, ParserArgs } from "./types";
 
 abstract class Parser extends Component {
-    protected debugFn: any;
+    public debugFn: DebugFunction;
     protected debug: boolean;
 
     public constructor(args: ParserArgs = {}) {
@@ -15,9 +14,9 @@ abstract class Parser extends Component {
     }
 
     /* istanbul ignore function */
-    /* eslint-disable-next-line no-unused-vars */
-    abstract parse(inputstring: string, document: Document): any | any[] | void;
-    /* eslint-disable-next-line no-unused-vars */
+    /* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */
+    abstract parse(inputstring: string, document: Document): void;
+    /* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */
     public setupParse(inputstring: string, document: Document): void {
     } ;
     abstract finishParse(): void;

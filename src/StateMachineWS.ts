@@ -1,5 +1,6 @@
 import {StateMachine} from './StateMachine';
-import {GetIndentedArgs, IStateMachineWS} from "./types";
+import { Document, GetIndentedArgs, WhitespaceStatemachine } from "./types";
+import StringList from "./StringList";
 
 interface GetFirstKnownIndentedArgs {
     indent: number;
@@ -8,12 +9,12 @@ interface GetFirstKnownIndentedArgs {
     stripTop?: boolean;
 }
 
-class StateMachineWS extends StateMachine implements IStateMachineWS {
-    public document: any;
+class StateMachineWS extends StateMachine implements WhitespaceStatemachine {
+    public document?: Document;
 
     public matchTitles?: boolean;
 
-    public getIndented(labeled: GetIndentedArgs) {
+    public getIndented(labeled: GetIndentedArgs): [StringList, number, number, boolean] {
         /* istanbul ignore if */
         const cArgs = {...labeled};
         if (typeof labeled.stripIndent === 'undefined') {
@@ -36,13 +37,14 @@ class StateMachineWS extends StateMachine implements IStateMachineWS {
         return [indented, indent, offset, blankFinish];
     }
 
-    public getKnownIndented(labeled: GetIndentedArgs): any[] {
+    public getKnownIndented(labeled: GetIndentedArgs): [StringList, number, number, boolean] {
         const cArgs: GetIndentedArgs = {...labeled};
         /* istanbul ignore if */
         if (typeof cArgs.stripIndent === 'undefined') {
             cArgs.stripIndent = true;
         }
         let offset = this.absLineOffset();
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const [indented, indent, blankFinish] = this.inputLines.getIndented({
             start: this.lineOffset,
             untilBlank: cArgs.untilBlank, stripIndent: cArgs.stripIndent, blockIndent:
@@ -56,7 +58,7 @@ class StateMachineWS extends StateMachine implements IStateMachineWS {
         return [indented, offset, blankFinish];
     }
 
-    public getFirstKnownIndented(args: GetIndentedArgs): any[] {
+    public getFirstKnownIndented(args: GetIndentedArgs):  [StringList, number, number, boolean] {
         const cArgs: GetIndentedArgs = {...args};
         /* istanbul ignore if */
         if (cArgs.stripIndent === undefined) {

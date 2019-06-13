@@ -1,7 +1,7 @@
 /**
  */
 
-function applyTransforms() {
+function applyTransforms(): void {
 }
 
 export default applyTransforms;

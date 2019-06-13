@@ -1,15 +1,14 @@
-import * as nodes from '../../nodes';
-import {
- isIterable, getTrimFootnoteRefSpace, splitEscapedWhitespace, escape2null,
-} from '../../utils';
-import { matchChars } from '../../utils/punctuationChars';
-import roleInterface from './Roles';
-import { ApplicationError } from '../../Exceptions';
-import unescape from '../../utils/unescape';
-import {Document, IElement, INode, IReporter} from "../../types";
-import {Settings} from "../../../gen/Settings";
+import * as nodes from "../../nodes";
+import { escape2null, getTrimFootnoteRefSpace, isIterable, splitEscapedWhitespace } from "../../utils";
+import { matchChars } from "../../utils/punctuationChars";
+import roleInterface from "./Roles";
+import { ApplicationError } from "../../Exceptions";
+import unescape from "../../utils/unescape";
+import { Document, ElementInterface, NodeInterface, ReporterInterface } from "../../types";
+import { Settings } from "../../../gen/Settings";
+import { InlinerInterface } from "./types";
 
-/* eslint-disable-next-line no-unused-vars */
+/* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */
 const __docformat__ = 'reStructuredText';
 
 const uric = '[-_.!~*\'()[\\];/:@&=+$,%a-zA-Z0-9\\x00]';
@@ -97,7 +96,7 @@ function buildRegexp(definition: any[], compile = true) {
  *    Parse inline markup; call the `parse()` method.
  *
  */
-class Inliner {
+class Inliner implements InlinerInterface {
     private language: any;
     private dispatch: any;
     private implicitDispatch: any[];
@@ -106,8 +105,8 @@ class Inliner {
     private nonWhitespaceEscapeBefore: string;
     private nonUnescapedWhitespaceEscapeBefore: string;
     public patterns: any;
-    private reporter?: IReporter;
-    private parent?: IElement;
+    private reporter?: ReporterInterface;
+    private parent?: ElementInterface;
     private document?: Document;
     private simplename: string = '';
     private parts: any[] = [];
@@ -142,7 +141,7 @@ class Inliner {
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
     inline_internal_target(match: any, lineno: number) {
         const [before, inlines, remaining,
-               /* eslint-disable-next-line no-unused-vars */
+               /* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */
                sysmessages, endstring] = this.inline_obj(match,
                                                          lineno,
                                                          this.patterns.target,
@@ -186,7 +185,7 @@ class Inliner {
         return [before, inlines, remaining, sysmessages];
     }
 
-    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,no-unused-vars */
+    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,@typescript-eslint/no-unused-vars,no-unused-vars */
     footnote_reference(match: any, lineno: number) {
         const label = match.groups.footnotelabel;
         let refname = nodes.fullyNormalizeName(label);
@@ -251,7 +250,7 @@ class Inliner {
         return this.reference(match, lineno, true);
     }
 
-    problematic(text: any, rawsource: any, message: INode) {
+    problematic(text: any, rawsource: any, message: NodeInterface) {
         const msgid = this.document!.setId(message, this.parent);
         const problematic = new nodes.problematic(rawsource, text, [], { refid: msgid });
         const prbid = this.document!.setId(problematic);
@@ -261,7 +260,7 @@ class Inliner {
 
     emphasis(match: any, lineno: number) {
         const [before, inlines, remaining,
-               /* eslint-disable-next-line no-unused-vars */
+               /* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */
                sysmessages, endstring] = this.inline_obj(
                    match, lineno, this.patterns.emphasis, nodes.emphasis,
                );
@@ -270,7 +269,7 @@ class Inliner {
 
     strong(match: any, lineno: number) {
         const [before, inlines, remaining,
-               /* eslint-disable-next-line no-unused-vars */
+               /* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */
                sysmessages, endstring] = this.inline_obj(match,
                                                          lineno,
                                                          this.patterns.strong,
@@ -508,24 +507,26 @@ class Inliner {
     }
 
     initCustomizations(settings: Settings) {
-        let startStringPrefix; let
-        endStringSuffix;
-        /* eslint-disable-next-line no-unused-vars */
-        let ssn; let
-        /* eslint-disable-next-line no-unused-vars */
-        esn;
+        let startStringPrefix;
+        let
+          endStringSuffix;
+        /* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */
+        let ssn;
+        let
+          /* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */
+          esn;
         if (settings.docutilsParsersRstParser!.characterLevelInlineMarkup) {
-            startStringPrefix = '(^|(?<!\\x00))';
+            startStringPrefix = "(^|(?<!\\x00))";
             ssn = [null, null];
-            endStringSuffix = '';
+            endStringSuffix = "";
             esn = [];
         } else {
-            startStringPrefix = '';/* '(^|(?<=\\s|[' +
+            startStringPrefix = "";/* '(^|(?<=\\s|[' +
                                       punctuation_chars.openers +
                                       punctuation_chars.delimiters +
                                       ']))' */
             ssn = [];
-            endStringSuffix = '';/* '($|(?=\\s|[\\x00' + [
+            endStringSuffix = "";/* '($|(?=\\s|[\\x00' + [
                                     punctuation_chars.closing_delimiters,
                                     punctuation_chars.delimiters,
                                     punctuation_chars.closers].join('') +
@@ -533,7 +534,7 @@ class Inliner {
             esn = [];
         }
         //      this.simplename = '(?:(?!_)\\w)+(?:[-._+:](?:(?!_)\\w)+)*' // fixme
-        this.simplename = '\\w+';
+        this.simplename = "\\w+";
 
         //        const prefix = startStringPrefix;
         //        const suffix = endStringSuffix;
@@ -550,32 +551,32 @@ class Inliner {
                 suffix,
                 parts:
         */
-        const parts = [1, 'initial_inline', startStringPrefix, '',
-                       [0, [1, 'start', '', this.nonWhitespaceAfter, // simple start-strings
-                            [0, '\\*\\*', // strong
-                             '\\*(?!\\*)', // emphasis but not strong
-                             '``', // literal
-                             '_`', // inline internal target
-                             [2, '\\|(?!\\|)', null]], // substitution reference
-                           ],
-                        [1, 'whole', '', endStringSuffix, // whole constructs
-                         [0, // reference name & end-string
-                          [2, `(${this.simplename})(__?)`, 'refname', 'refend'],
-                          [1, 'footnotelabel', '\\[', [2, '(\\]_)', 'fnend'],
-                           [0, '[0-9]+', // manually numbered
-                            [2, `\\#(${this.simplename})?`, null], // auto-numbered (w/ label?)
-                            '\\*', // auto-symbol
-                            [2, `(${this.simplename})`, 'citationlabel']], // citation reference
-                          ],
-                         ],
-                        ],
-                        [1, 'backquote', // interpreted text or phrase reference
-                         [2, `((:${this.simplename}:)?)`, 'role', null], // optional role
-                         this.nonWhitespaceAfter,
-                         [0, [2, '`(?!`)', null]], // but not literal
-                        ],
-                       ],
-                      ];
+        const parts = [1, "initial_inline", startStringPrefix, "",
+            [0, [1, "start", "", this.nonWhitespaceAfter, // simple start-strings
+                [0, "\\*\\*", // strong
+                    "\\*(?!\\*)", // emphasis but not strong
+                    "``", // literal
+                    "_`", // inline internal target
+                    [2, "\\|(?!\\|)", null]] // substitution reference
+            ],
+                [1, "whole", "", endStringSuffix, // whole constructs
+                    [0, // reference name & end-string
+                        [2, `(${this.simplename})(__?)`, "refname", "refend"],
+                        [1, "footnotelabel", "\\[", [2, "(\\]_)", "fnend"],
+                            [0, "[0-9]+", // manually numbered
+                                [2, `\\#(${this.simplename})?`, null], // auto-numbered (w/ label?)
+                                "\\*", // auto-symbol
+                                [2, `(${this.simplename})`, "citationlabel"]] // citation reference
+                        ]
+                    ]
+                ],
+                [1, "backquote", // interpreted text or phrase reference
+                    [2, `((:${this.simplename}:)?)`, "role", null], // optional role
+                    this.nonWhitespaceAfter,
+                    [0, [2, "`(?!`)", null]] // but not literal
+                ]
+            ]
+        ];
         this.startStringPrefix = startStringPrefix;
         this.endStringSuffix = endStringSuffix;
         this.parts = parts;
@@ -590,15 +591,15 @@ class Inliner {
             literal: new RegExp(`${this.nonWhitespaceBefore}(\`\`)${endStringSuffix}`),
             target: new RegExp(`${this.nonWhitespaceEscapeBefore}(\`)${endStringSuffix}`),
             substitution_ref: new RegExp(`${this.nonWhitespaceEscapeBefore
-                                          }(\\|_{0,2})${
-                                          endStringSuffix}`),
+              }(\\|_{0,2})${
+              endStringSuffix}`),
             email: new RegExp(emailPattern), // fixme % args + '$',
             // re.VERBOSE | re.UNICODE),
-            uri: new RegExp(`${startStringPrefix}((([a-zA-Z][a-zA-Z0-9.+-]*):(((//?)?${uric}*${uriEnd})(\\?${uric}*${uriEnd})?(\\#${uriEnd})?))|(${emailPattern}))${endStringSuffix}`),
-            };
+            uri: new RegExp(`${startStringPrefix}((([a-zA-Z][a-zA-Z0-9.+-]*):(((//?)?${uric}*${uriEnd})(\\?${uric}*${uriEnd})?(\\#${uriEnd})?))|(${emailPattern}))${endStringSuffix}`)
+        };
     }
 
-    parse(text: string, args: { lineno: number, memo: any, parent: IElement }) {
+    parse(text: string, args: { lineno: number, memo: any, parent: ElementInterface }) {
         const { lineno, memo, parent } = args;
         this.reporter = memo.reporter;
         this.document = memo.document;
@@ -622,15 +623,17 @@ class Inliner {
                 const mname = rr.start || rr.backquote || rr.refend || rr.fnend;
                 const method = this.dispatch[mname];
                 /* istanbul ignore if */
-                if (typeof method !== 'function') {
+                if (typeof method !== "function") {
                     throw new Error(`Invalid dispatch ${mname}`);
                 }
-                let before; let inlines; let
-                sysmessages;
+                let before;
+                let inlines;
+                let
+                  sysmessages;
                 //              console.log(`name is ${mname}`);
 
                 [before, inlines, remaining, sysmessages] = method(
-                    { result: match, match, groups: rr }, lineno,
+                  { result: match, match, groups: rr }, lineno
                 );
                 unprocessed.push(before);
                 /* istanbul ignore if */
@@ -639,8 +642,8 @@ class Inliner {
                 }
                 messages.push(...sysmessages);
                 if (inlines) {
-                    processed.push(...this.implicit_inline(unprocessed.join(''),
-                                                           lineno));
+                    processed.push(...this.implicit_inline(unprocessed.join(""),
+                      lineno));
                     processed.push(...inlines);
                     unprocessed = [];
                 }
@@ -655,7 +658,7 @@ class Inliner {
         return [processed, messages];
     }
 
-    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,no-unused-vars */
+    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,@typescript-eslint/no-unused-vars,no-unused-vars */
     implicit_inline(text: string, lineno: number) {
         /*
           Check each of the patterns in `self.implicit_dispatch` for a match,
@@ -718,7 +721,7 @@ class Inliner {
     }
 
     literal(match: any, lineno: number) {
-        /* eslint-disable-next-line no-unused-vars */
+        /* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */
         const [before, inlines, remaining, sysmessages, endstring] = this.inline_obj(
             match, lineno, this.patterns.literal, nodes.literal, true,
         );

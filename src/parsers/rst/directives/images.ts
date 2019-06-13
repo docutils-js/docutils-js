@@ -1,6 +1,6 @@
 import * as nodes from '../../../nodes';
 import Directive from '../Directive';
-import {INode} from "../../../types";
+import {NodeInterface} from "../../../types";
 import { lengthOrPercentageOrUnitless, lengthOrUnitless, unchanged } from "../directiveConversions";
 import SubstitutionDef from "../states/SubstitutionDef";
 import { escape2null } from "../../../utils";
@@ -10,7 +10,7 @@ import { fullyNormalizeName, whitespaceNormalizeName } from "../../../nodes";
 import { setClasses } from "../Roles";
 import { uri } from "../directives";
 
-/* eslint-disable-next-line no-unused-vars */
+/* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */
 const __docformat__ = 'reStructuredText';
 
 const directives = {};
@@ -33,7 +33,7 @@ class Image extends Directive {
     return directives.choice(argument);
   }
 
-  private addName(imageNode: INode) {
+  private addName(imageNode: NodeInterface) {
 
   }
 

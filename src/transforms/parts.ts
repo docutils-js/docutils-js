@@ -16,7 +16,7 @@ export class SectNum extends Transform {
     private maxDepth?: number;
     private startValue?: number;
     private prefix?: number;
-    apply() {
+    public apply() {
         const s = this.startNode;
         // @ts-ignore
         this.maxDepth = s.details.attributes.depth || null;
@@ -50,9 +50,9 @@ SectNum.defaultPriority = 710;
  */
 
 class AnonymousHyperlinks extends Transform {
-    apply() {
+    public apply() {
         const anonymousRefs = [];
-        /* eslint-disable-next-line no-unused-vars */
+        /* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */
         const anonymousTargets = [];
         this.document.traverse({ condition: nodes.reference }).forEach((node) => {
             if (node.attributes.anonymous) {

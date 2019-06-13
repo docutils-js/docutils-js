@@ -1,17 +1,28 @@
 import UnknownStateError from './error/UnknownStateError';
 import { isIterable } from './utils';
 import {
-    ApplicationError, EOFError, InvalidArgumentsError, UnimplementedError as Unimp,
-} from './Exceptions';
+    ApplicationError, EOFError, InvalidArgumentsError, InvalidStateError, UnimplementedError as Unimp
+} from "./Exceptions";
 import UnexpectedIndentationError from './error/UnexpectedIndentationError';
 import StateCorrection from './StateCorrection';
 import TransitionCorrection from './TransitionCorrection';
 import DuplicateStateError from './error/DuplicateStateError';
 import StringList from './StringList';
 import {
-    INode, IStateFactory, IStateMachine, StateMachineRunArgs,
-} from './types';
+    NodeInterface,
+    Statefactory,
+    Statemachine,
+    StateMachineRunArgs,
+    StateInterface,
+    DebugFunction,
+    CoreLanguage,
+    ReporterInterface
+} from "./types";
 import State from './states/State';
+
+interface States {
+    [stateName: string]: StateInterface;
+}
 
 /**
  * A finite state machine for text filters using regular expressions.
@@ -24,12 +35,12 @@ import State from './states/State';
  * The state machine is started with the `run()` method, which returns the
  * results of processing in a list.
  */
-class StateMachine implements IStateMachine {
-    protected states: any;
+class StateMachine implements Statemachine {
+    protected states: States = {};
 
     public inputLines: StringList = new StringList([]);
 
-    public debugFn: any;
+    public debugFn: DebugFunction;
 
     public debug: boolean;
     /*
@@ -42,34 +53,33 @@ class StateMachine implements IStateMachine {
         - `debug`: a boolean; produce verbose output if true (nonzero).
         */
 
-    stateFactory: IStateFactory;
+    protected stateFactory: Statefactory;
 
-    lineOffset: number;
+    public lineOffset: number;
 
-    line: string = '';
+    public line?: string = '';
 
-    inputOffset: number = 0;
+    public inputOffset: number = 0;
 
-    // eslint-disable-next-line no-unused-vars
-    public node?: INode;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars
+    public node?: NodeInterface;
 
-    public language: any;
+    public language?: CoreLanguage;
 
-    public reporter: any;
+    public reporter?: ReporterInterface;
 
-    private observers: any[];
+    private observers: {}[];
 
     private currentState?: string;
 
     private initialState?: string;
-    private _stderr: any;
 
     public constructor(
         args: {
-            stateFactory: IStateFactory;
+            stateFactory: Statefactory;
             initialState: string;
             debug?: boolean;
-            debugFn?: any;
+            debugFn?: DebugFunction;
         }
     ) {
         const cArgs = { ... args };
@@ -111,18 +121,18 @@ class StateMachine implements IStateMachine {
         // eslint-disable-next-line no-underscore-dangle
     }
 
-    public _init() {
+    public _init(): void {
         // do-nothing
     }
 
-    public forEachState(cb: (state: State) => void) {
+    public forEachState(cb: (state: State) => void): void {
         // @ts-ignore
         Object.values(this.states).forEach(cb);
     }
 
-    public unlink() {
-        this.forEachState(s =>s.unlink());
-        this.states = undefined;
+    public unlink(): void {
+        this.forEachState((s): void =>s.unlink());
+        this.states = {};
     }
 
     /**
@@ -146,7 +156,7 @@ class StateMachine implements IStateMachine {
     - `input_source`: name or path of source of `input_lines`.
     - `initial_state`: name of initial state.
     */
-    public run(args: StateMachineRunArgs) {
+    public run(args: StateMachineRunArgs): (string|{})[] {
         const cArgs: StateMachineRunArgs = { ...args };
         this.runtimeInit();
         if (cArgs.inputLines instanceof StringList) {
@@ -159,16 +169,16 @@ class StateMachine implements IStateMachine {
             }
             this.inputLines = new StringList(cArgs.inputLines, cArgs.inputSource || '');
         }
-        this.inputOffset = cArgs.inputOffset!;
+        this.inputOffset = cArgs.inputOffset;
         this.lineOffset = -1;
         this.currentState = cArgs.initialState || this.initialState;
         if (this.debug) {
             this.debugFn(`\nStateMachine.run: input_lines (line_offset=${this.lineOffset}):\n| ${this.inputLines.join('\n| ')}`);
         }
         let transitions;
-        const results = [];
+        const results: (string|{})[] = [];
         let state = this.getState();
-        let nextState;
+        let nextState: string;
         let result;
         let context;
         try {
@@ -282,21 +292,24 @@ class StateMachine implements IStateMachine {
      *         the name of the next state.  Exception:
      *         `UnknownStateError` raised if `next_state` unknown.
      */
-    public getState(nextState?: string) {
+    public getState(nextState?: string): StateInterface {
         if (nextState) {
             if (this.debug && nextState !== this.currentState) {
                 this.debugFn(`StateMachine.getState: changing state from "${this.currentState}" to "${nextState}" (input line ${this.absLineNumber()})`);
             }
             this.currentState = nextState;
         }
-        if (typeof this.states[this.currentState!] === 'undefined') {
+        if(this.currentState === undefined) {
+            throw new InvalidStateError();
+        }
+        if (this.states[this.currentState] === undefined) {
             throw new UnknownStateError(this.currentState, JSON.stringify(this.states));
         }
-        return this.states[this.currentState!];
+        return this.states[this.currentState];
     }
 
     /* Load `self.line` with the `n`'th next line and return it. */
-    public nextLine(n = 1) {
+    public nextLine(n = 1): string {
         // /     console.log('*** advancing to next line');
         this.lineOffset += n;
         if (this.lineOffset >= this.inputLines.length) {
@@ -311,19 +324,19 @@ class StateMachine implements IStateMachine {
         return this.line;
     }
 
-    public isNextLineBlank() {
+    public isNextLineBlank(): boolean {
         return !(this.inputLines[this.lineOffset + 1].trim());
     }
 
-    public atEof() {
+    public atEof(): boolean {
         return this.lineOffset >= this.inputLines.length - 1;
     }
 
-    public atBof() {
+    public atBof(): boolean {
         return this.lineOffset <= 0;
     }
 
-    public previousLine(n = 1) {
+    public previousLine(n = 1): string {
         this.lineOffset -= n;
         if (this.lineOffset < 0) {
             this.line = '';
@@ -331,7 +344,8 @@ class StateMachine implements IStateMachine {
             this.line = this.inputLines[this.lineOffset];
         }
         this.notifyObservers();
-        return this.line;
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        return this.line!;
     }
 
     public gotoLine(lineOffset: number): string  | undefined {
@@ -353,7 +367,7 @@ class StateMachine implements IStateMachine {
         return this.lineOffset + this.inputOffset + 1;
     }
 
-    public getSourceAndLine(lineno?: number) {
+    public getSourceAndLine(lineno?: number): [string | undefined, number] {
         let offset;
         let srcoffset;
         let srcline;
@@ -374,8 +388,8 @@ class StateMachine implements IStateMachine {
     }
 
 
-    /* eslint-disable-next-line no-unused-vars */
-    public insertInput(inputLines: any, source: any) {
+    /* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */
+    public insertInput(inputLines: StringList, source: string): void {
         // self.input_lines.insert(self.line_offset + 1, '',
         //     source='internal padding after '+source,
         //     offset=len(input_lines))
@@ -388,7 +402,7 @@ class StateMachine implements IStateMachine {
         throw new Unimp();
     }
 
-    public getTextBlock(flushLeft = false) {
+    public getTextBlock(flushLeft = false): StringList {
         let block;
         try {
             block = this.inputLines.getTextBlock(this.lineOffset,
@@ -422,7 +436,7 @@ class StateMachine implements IStateMachine {
  * When there is no match, ``state.no_match()`` is called and its return
  * value is returned.
  */
-    public checkLine(context: any[], state: any, transitions: any[] | undefined | null) {
+    public checkLine(context: {}[], state: StateInterface, transitions: ({}|string)[] | undefined | null): (string|{})[] {
         /* istanbul ignore if */
         if (!Array.isArray(context)) {
             throw new Error('context should be array');
@@ -433,11 +447,12 @@ class StateMachine implements IStateMachine {
         if (transitions === undefined) {
             transitions = state.transitionOrder;
         }
-        /* eslint-disable-next-line no-unused-vars */
+        /* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */
         const stateCorrection = true;
 
         /* eslint-disable-next-line no-restricted-syntax */
-        for (const name of transitions!) {
+        // @ts-ignore
+        for (const name of transitions) {
         // how is this initialized?
             const [pattern, method, nextState] = state.transitions[name];
             const result = pattern.exec(this.line);
@@ -461,7 +476,7 @@ class StateMachine implements IStateMachine {
         return state.noMatch(context, transitions);
     }
 
-    public addState(stateClass: any) {
+    public addState(stateClass: {}): void {
         if (typeof stateClass === 'undefined') {
         // throw new InvalidArgumentsError('stateClass should be a class');
             return;
@@ -485,31 +500,32 @@ class StateMachine implements IStateMachine {
         this.states[stateName] = r;
     }
 
-    public addStates(stateClasses: any[]) {
+    public addStates(stateClasses: StateInterface[]): void {
         if (!stateClasses) {
             throw new Error('');
         }
         stateClasses.forEach(this.addState.bind(this));
     }
 
-    public runtimeInit() {
+    public runtimeInit(): void{
         // @ts-ignore
-        Object.values(this.states).forEach(s => s.runtimeInit());
+        Object.values(this.states).forEach((s): void => s.runtimeInit());
     }
 
 
-    public error() {
+    public error(): void {
+        //fixme
     }
 
-    public attachObserver(observer: any) {
+    public attachObserver(observer: {}): void {
         this.observers.push(observer);
     }
 
-    public detachObserver(observer: any) {
+    public detachObserver(observer: {}): void {
         this.observers.splice(this.observers.indexOf(observer), 1);
     }
 
-    public notifyObservers() {
+    public notifyObservers(): void {
         /* eslint-disable-next-line no-restricted-syntax */
         for (const observer of this.observers) {
         /* istanbul ignore if */
@@ -517,7 +533,7 @@ class StateMachine implements IStateMachine {
                 throw new ApplicationError('undefined observer');
             }
             try {
-                let info = [];
+                let info: [string | undefined, number | undefined] | undefined;
                 try {
                     info = this.inputLines.info(this.lineOffset);
                 } catch (err) {
@@ -542,7 +558,7 @@ class StateMachine implements IStateMachine {
 }
 
 
-function expandtabs(strVal: string) {
+function expandtabs(strVal: string): string {
     let tabIndex;
     /* eslint-disable-next-line no-cond-assign */
     while ((tabIndex = strVal.indexOf('\t')) !== -1) {
@@ -550,7 +566,7 @@ function expandtabs(strVal: string) {
     }
     return strVal;
 }
-export function string2lines(astring?: string, args?: any) {
+export function string2lines(astring?: string, args?: { tabWidth?: number; convertWhitespace?: boolean; Whitespace?: RegExp | string }): string[] {
     if (!astring) {
         astring = '';
     }
@@ -558,7 +574,7 @@ export function string2lines(astring?: string, args?: any) {
         args = {};
     }
 
-    /* eslint-disable-next-line no-unused-vars,prefer-const */
+    /* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars,prefer-const */
     let { tabWidth, convertWhitespace, whitespace } = args;
     /* eslint-disable-next-line no-empty */
     if (whitespace === undefined) {

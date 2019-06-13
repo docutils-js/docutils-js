@@ -10,11 +10,11 @@ beforeAll(() => {
     RSTStateMachine.mockClear();
     // @ts-ignore
     StateFactory.mockClear();
-        /* eslint-disable-next-line no-unused-vars */
+        /* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */
     // @ts-ignore
     // @ts-ignore
     RSTStateMachine.mockImplementation((...cargs) => ({
-        /* eslint-disable-next-line no-unused-vars */
+        /* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */
             stateFactory: { withStateClasses: (classes: any) => new StateFactory() },
         }));
 });

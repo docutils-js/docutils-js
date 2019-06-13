@@ -3,14 +3,16 @@ import TransformSpec from '../TransformSpec';
 class Output<T> extends TransformSpec {
     public componentType: string = 'output';
     public supported: string[] = [];
-    protected defaultDestinationPath: any;
-    private destinationPath: any;
-    private encoding: any;
+    protected defaultDestinationPath?: string;
+    private destinationPath?: string;
+    private encoding?: string;
     public destination?: T;
     private errorHandler: string;
-    constructor(destination?: T, destinationPath?: any, encoding?: any, errorHandler?: any) {
+    public constructor(destination?: T, destinationPath?: string, encoding?: string, errorHandler?: string) {
         super();
-        this.encoding = encoding;
+        if(encoding !== undefined) {
+            this.encoding = encoding;
+        }
         this.errorHandler = errorHandler || 'strict';
         this.destination = destination;
         this.destinationPath = destinationPath;
@@ -20,17 +22,17 @@ class Output<T> extends TransformSpec {
     }
 
     /* istanbul ignore method */
-    /* eslint-disable-next-line no-unused-vars */
-    write(data: string): void {
+    /* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */
+    public write(data: string): void {
     }
 
     /* istanbul ignore method */
-    encode(data: string): string {
+    public encode(data: string): string {
         return data; // fixme?
     }
 
     /* istanbul ignore method */
-    toString() {
+    public toString() {
         return `Output<${this.constructor.name}>`;
     }
 }

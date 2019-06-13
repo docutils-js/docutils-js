@@ -9,7 +9,8 @@ export const defaultDescription = ('Reads from <source> (default is stdin) and w
 /* We need a non command-line parsing based function */
 
 /* We should document all the arguments to this function */
-export function publish(args: any) {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function publish(args: any): void {
     const _defaults = {
         readerName: defaults.defaultReaderName,
         parserName: defaults.defaultParserName,
@@ -33,7 +34,8 @@ export function publish(args: any) {
 }
 
 
-export function publishCmdLine(args: any, cb: any) {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function publishCmdLine(args: any, cb: any): void {
     const _defaults = {
         readerName: 'standalone',
         parserName: 'restructuredtext',

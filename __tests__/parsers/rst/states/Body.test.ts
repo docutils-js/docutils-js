@@ -11,13 +11,13 @@ beforeEach(() => {
     RSTStateMachine.mockClear();
     // @ts-ignore
     StateFactory.mockClear();
-    /* eslint-disable-next-line no-unused-vars */
+    /* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */
     // @ts-ignore
     RSTStateMachine.mockImplementation(({ indent, untilBlank, stripIndent }) => ({
         absLineNumber: () => 1,
-        /* eslint-disable-next-line no-unused-vars */
+        /* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */
             getFirstKnownIndented: (...args: any[]) => [new StringList(['hello']), indent, 0, true],
-        /* eslint-disable-next-line no-unused-vars */
+        /* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */
             stateFactory: { withStateClasses: (classes: any[]) => new StateFactory() },
         }));
 });

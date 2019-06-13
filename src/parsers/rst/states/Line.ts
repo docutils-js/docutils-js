@@ -35,7 +35,7 @@ class Line extends SpecializedText {
     }
 
     /** Transition marker. */
-    /* eslint-disable-next-line no-unused-vars */
+    /* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */
     // @ts-ignore
     blank(match, context, nextState) {
         const [src, srcline] = this.rstStateMachine.getSourceAndLine();
@@ -51,7 +51,7 @@ class Line extends SpecializedText {
     }
 
     /** Potential over- & underlined title. */
-    /* eslint-disable-next-line no-unused-vars */
+    /* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */
     // @ts-ignore
     text(match, context, nextState) {
         const lineno = this.rstStateMachine.absLineNumber() - 1;
@@ -132,7 +132,7 @@ class Line extends SpecializedText {
         return [[], 'Body', []];
     }
 
-    /* eslint-disable-next-line no-unused-vars */
+    /* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */
     // @ts-ignore
     underline(match, context, nextState) {
         const overline = context[0];

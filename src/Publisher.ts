@@ -1,11 +1,11 @@
-import {FileInput, StringOutput} from './io';
-import { ApplicationError } from './Exceptions';
+import {StringOutput} from './io';
+import { ApplicationError, InvalidStateError } from "./Exceptions";
 import OptionParser from './OptParse';
 import * as readers from './Readers';
 import * as writers from './Writers';
 import SettingsSpec from './SettingsSpec';
-import Source from './Sources';
-/* eslint-disable-next-line no-unused-vars */
+import Source, { SourceConstructor } from "./Sources";
+/* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */
 import pojoTranslate from './fn/pojoTranslate';
 import {Settings} from "../gen/Settings";
 import Parser from "./Parser";
@@ -13,19 +13,24 @@ import Writer from "./Writer";
 import Reader from "./Reader";
 import Output from "./io/Output";
 import Input from "./io/Input";
-import {Document} from "./types";
+import { DebugFunction, Document } from "./types";
 
 interface PublisherArgs {
     reader?: Reader;
     parser?: Parser;
     writer?: Writer;
     source?: Input;
-    sourceClass?: any;
+    sourceClass?: Input;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     destination?: Output<any>;
-    destinationClass?: any;
+    destinationClass?: {};
     settings: Settings;
-    debugFn?: any;
+    debugFn?: DebugFunction;
     debug?: boolean;
+}
+
+interface OutputConstructor<T> {
+    new (): Output<T>;
 }
 
 /**
@@ -33,19 +38,20 @@ interface PublisherArgs {
  */
 
 class Publisher {
-    public get document(): Document | null | undefined {
+    public get document(): Document | undefined {
         return this._document;
     }
     private settings: Settings;
-    private debugFn: any;
+    private debugFn: DebugFunction;
     private reader?: Reader;
-    private _document: Document | null | undefined;
+    private _document: Document | undefined;
     private parser?: Parser;
     private writer?: Writer;
     private source?: Input;
-    private sourceClass?: any;
+    private sourceClass?: SourceConstructor;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     private destination?: Output<any>;
-    private destinationClass?: any;
+    private destinationClass?: OutputConstructor<{}>;
     private debug: boolean = false;
 
     /**
@@ -71,8 +77,10 @@ class Publisher {
         const sourceClass2 = sourceClass;
         const destinationClass2 = destinationClass;
 
-        this.debugFn = debugFn;
-        this._document = null;
+        if(debugFn !== undefined) {
+            this.debugFn = debugFn;
+        }
+        this._document = undefined;
         this.reader = reader;
         this.parser = parser;
         this.writer = writer;
@@ -92,30 +100,32 @@ class Publisher {
         this.settings = settings;
     }
 
-    public setReader(readerName: string, parser?: Parser, parserName?: string) {
+    public setReader(readerName: string, parser?: Parser, parserName?: string): void {
         const ReaderClass = readers.getReaderClass(readerName);
         this.reader = new ReaderClass({
             parser, parserName, debug: this.debug, debugFn: this.debugFn,
         });
-        this.parser = this.reader!.parser;
+        if(this.reader !== undefined) {
+            this.parser = this.reader.parser;
+        }
     }
 
-    public setWriter(writerName: string) {
+    public setWriter(writerName: string): void {
         const writerClass = writers.getWriterClass(writerName);
         /* not setting document here, the write method takes it, which
          * is confusing */
         this.writer = new writerClass();
     }
 
-    public setComponents(readerName: string, parserName: string, writerName: string) {
+    public setComponents(readerName: string, parserName: string, writerName: string): void {
         if (!this.reader) {
             this.setReader(readerName, this.parser, parserName);
         }
-        if (!this.parser) {
-            if (!this.reader!.parser) {
-                this.reader!.setParser(parserName);
+        if (!this.parser && this.reader !== undefined) {
+            if(!this.reader.parser) {
+                this.reader.setParser(parserName);
             }
-            this.parser = this.reader!.parser;
+            this.parser = this.reader.parser;
         }
         if (!this.writer) {
             this.setWriter(writerName);
@@ -124,9 +134,10 @@ class Publisher {
 
     public setupOptionParser(
         args: {
-            usage: string; description: string; settingsSpec: any; configSection: string; defaults: any;
+            usage: string; description: string; settingsSpec: SettingsSpec;
+            configSection: string; defaults: {};
         }
-    ) {
+    ): OptionParser {
         const { usage, description, settingsSpec, configSection, defaults } = args;
         let settingsSpec2 = settingsSpec;
         if (configSection) {
@@ -136,7 +147,7 @@ class Publisher {
             settingsSpec2.configSection = configSection;
             const parts = configSection.split(' ');//fixme check split
             if (parts.length > 1 && parts[parts.length - 1] === 'application') {
-                settingsSpec2.configSectionDepenendencies = ['applications'];
+                settingsSpec2.configSectionDependencies = ['applications'];
             }
         }
         const optionParser = new OptionParser({
@@ -153,10 +164,10 @@ class Publisher {
     public processCommandLine(
         args: {
             argv: string[]; usage: string; description: string; settingsSpec: SettingsSpec; configSection: string;
-            settingsOverrides: any;
+            settingsOverrides: {};
         }
-    ) {
-        const optionParser = this.setupOptionParser({
+    ): void {
+        const optionParser: OptionParser= this.setupOptionParser({
             usage: args.usage,
             description: args.description,
             settingsSpec: args.settingsSpec,
@@ -168,10 +179,10 @@ class Publisher {
             argv = process.argv.slice(2);
         }
         const settings = optionParser.parseArgs(argv);
-        this.settings = optionParser.parseArgs(argv);
+        this.settings = settings;
     }
 
-    public setIO(sourcePath?: string, destinationPath?: string) {
+    public setIO(sourcePath?: string, destinationPath?: string): void {
         if (typeof this.source === 'undefined') {
             this.setSource({ sourcePath });
         }
@@ -180,7 +191,7 @@ class Publisher {
         }
     }
 
-    public setSource(args: { source?: any; sourcePath?: string }) {
+    public setSource(args: { source?: {}; sourcePath?: string }): void {
         let sourcePath = args.sourcePath;
         let source = args.source;
         if (typeof sourcePath === 'undefined') {
@@ -189,19 +200,23 @@ class Publisher {
             this.settings._source = sourcePath;
         }
         try {
-            const sourceClass = this.sourceClass;
-            this.source = new sourceClass({
-                source,
-                sourcePath,
-                encoding:
-                                                this.settings.docutilsCoreOptionParser!.inputEncoding,
-            });
+            const SourceClass = this.sourceClass;
+            let inputEncoding: string | undefined = this.settings.docutilsCoreOptionParser.inputEncoding;
+
+            if(SourceClass !== undefined) {
+                this.source = new SourceClass({
+                    source,
+                    sourcePath,
+                    encoding:
+                    inputEncoding,
+                });
+            }
         } catch (error) {
             throw new ApplicationError(`Unable to instantiate Source class ${this.sourceClass.constructor.name}: ${error.message}`, { error });
         }
     }
 
-    public setDestination(args: { destination?: any; destinationPath?: string }) {
+    public setDestination(args: { destination?: Output<{}>; destinationPath?: string }): void {
         let destinationPath = args.destinationPath;
         let destination = args.destination;
         if (destinationPath === undefined) {
@@ -209,43 +224,46 @@ class Publisher {
         } else {
             this.settings._destination = destinationPath;
         }
-        const destinationClass = this.destinationClass;
-        this.destination = new destinationClass(
+        const DestinationClass = this.destinationClass;
+        const outputEncoding = this.settings.docutilsCoreOptionParser.outputEncoding;
+        let outputEncodingErrorHandler = this.settings.docutilsCoreOptionParser.outputEncodingErrorHandler;
+        this.destination = new DestinationClass(
             {
                 destination,
                 destinationPath,
-                encoding: this.settings.docutilsCoreOptionParser!.outputEncoding,
-                errorHandler: this.settings.docutilsCoreOptionParser!.outputEncodingErrorHandler,
+                encoding: outputEncoding,
+                errorHandler: outputEncodingErrorHandler,
             },
         );
     }
 
-    public applyTransforms() {
-        this._document!.transformer.populateFromComponents(
-            this.source!, this.reader!, this.reader!.parser,
-            this.writer!, this.destination!,
+    public applyTransforms(): void {
+        const document1 = this.document;
+        if(document1 === undefined) {
+            throw new InvalidStateError('Document undefined');
+        }
+        if(this.source === undefined ||
+        this.reader === undefined ||
+        this.reader.parser === undefined
+        || this.writer === undefined|| this.destination === undefined) {
+            throw new InvalidStateError('Component undefined');
+        }
+        document1.transformer.populateFromComponents(
+            this.source, this.reader, this.reader.parser,
+            this.writer, this.destination,
         );
-        this._document!.transformer.applyTransforms();
-    }
-
-    public publish2(args: any) {
-        /* eslint-disable-next-line no-unused-vars */
-        const {
-        /* eslint-disable-next-line no-unused-vars */
-            argv, usage, description, settingsSpec, settingsOverrides,
-            /* eslint-disable-next-line no-unused-vars */
-            configSection, enableExitStatus,
-        } = args;
+        document1.transformer.applyTransforms();
     }
 
     /* This doesnt seem to return anything ? */
-    public publish(args: any, cb: any) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    public publish(args: any, cb: (error: undefined | {}, output: undefined | {}) => void): void {
 
         const {
-            /* eslint-disable-next-line no-unused-vars */
+            /* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */
             argv, usage, description, settingsSpec, settingsOverrides, configSection, enableExitStatus,
         } = args;
-        /* eslint-disable-next-line no-unused-vars */
+        /* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */
         let exit;
         try {
             if (this.settings === undefined) {
@@ -263,9 +281,13 @@ class Publisher {
             if (typeof this.reader === 'undefined') {
                 throw new ApplicationError('Need defined reader with "read" method');
             }
+            if(this.writer === undefined) {
+                throw new InvalidStateError('need Writer');
+            }
+            const writer = this.writer;
             this.reader.read(
                 this.source, this.parser, this.settings,
-                ((error: any, document: Document) => {
+                ((error: {}, document: Document): void => {
                     if (error) {
                         cb(error, undefined);
                         return;
@@ -276,8 +298,8 @@ class Publisher {
                     }
                     this.applyTransforms();
 
-                    const output = this.writer!.write(this.document!, this.destination);
-                    this.writer!.assembleParts();
+                    const output = writer.write(document, this.destination);
+                    writer.assembleParts();
                     cb(undefined, output);
                 }),
             );

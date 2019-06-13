@@ -1,17 +1,17 @@
 import * as nodes from '../nodes';
-/* eslint-disable-next-line no-unused-vars */
+/* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */
 import * as utils from '../utils';
 import Transform from '../Transform';
-/* eslint-disable-next-line no-unused-vars */
+/* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */
 import TransformError from '../error/TransformError';
-import {Document, IElement, INode} from "../types";
+import {Document, ElementInterface, NodeInterface} from "../types";
 
 /**
  * TitlePromoter transform.
  * Base class for other transforms which promote section names to title and subtitle
  */
-class TitlePromoter extends Transform {
-    promoteTitle(node: INode) {
+abstract class TitlePromoter extends Transform {
+    public promoteTitle(node: NodeInterface) {
         if (!(node instanceof nodes.Element)) {
             throw new TypeError('node must be of Element-derived type.');
         }
@@ -33,16 +33,16 @@ class TitlePromoter extends Transform {
         return 1;
     }
 
-    promoteSubtitle(node: IElement) {
+    public promoteSubtitle(node: ElementInterface) {
         // console.log('promoteSubtitle');
         // Type check
         const x = this.candidateIndex(node);
-        const subsection: IElement = x[0];
+        const subsection: ElementInterface = x[0];
         const index: number = x[1];
         if (index == null) {
             return undefined;
         }
-        const subtitle: IElement = new nodes.subtitle();
+        const subtitle: ElementInterface = new nodes.subtitle();
 
         // Transfer the subsection's attributes to the new subtitle
         // NOTE: Change second parameter to False to NOT replace
@@ -64,7 +64,7 @@ class TitlePromoter extends Transform {
         return 1;
     }
 
-    candidateIndex(node: IElement): any[] {
+    public candidateIndex(node: ElementInterface): any[] {
         const index = node.firstChildNotMatchingClass(nodes.PreBibliographic);
         if (index == null || node.children.length > (index + 1)
             || !(node.children[index] instanceof nodes.section)) {
@@ -76,7 +76,7 @@ class TitlePromoter extends Transform {
 
 export class DocTitle extends TitlePromoter {
 
-    setMetadata() {
+    public setMetadata() {
         if (!('title' in this.document.attributes)) {
             let title = this.document.settings.docutilsCoreOptionParser!.title;
             if (title != null) {
@@ -87,7 +87,7 @@ export class DocTitle extends TitlePromoter {
         }
     }
 
-    apply() {
+    public apply() {
         if (this.document.settings.docutilsReadersStandaloneReader!.doctitleXform || typeof this.document.settings.docutilsReadersStandaloneReader!.doctitleXform === 'undefined') {
             if (this.promoteTitle(this.document)) {
                 this.promoteSubtitle(this.document);
@@ -100,7 +100,7 @@ DocTitle.defaultPriority = 320;
 
 export class SectionSubTitle extends TitlePromoter {
 
-    apply() {
+    public apply() {
         let reader = this.document.settings.docutilsWritersOdfOdtReader;
         if (!reader || (reader.sectsubtitleXform || typeof reader.sectsubtitleXform === 'undefined')) {
             this.document.traverse({ condition: nodes.section }).forEach((section) => {
@@ -119,7 +119,7 @@ SectionSubTitle.defaultPriority = 350;
 export class DocInfo extends Transform {
     private biblioNodes: any;
 
-    protected _init(document: Document, startNode: INode | undefined) {
+    public _init(document: Document, startNode: NodeInterface | undefined) {
         super._init(document, startNode);
 
         this.biblioNodes = {
@@ -138,22 +138,22 @@ export class DocInfo extends Transform {
         };
     }
 
-    apply() {
+    public apply() {
     }
 
-    /* eslint-disable-next-line no-unused-vars */
+    /* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */
     // @ts-ignore
-    extractBibliographic(fieldList) {
+    public extractBibliographic(fieldList) {
     }
 
-    /* eslint-disable-next-line no-unused-vars */
+    /* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */
     // @ts-ignore
-    checkEmptyBiblioField(field, name) {
+    public checkEmptyBiblioField(field, name) {
     }
 
-    /* eslint-disable-next-line no-unused-vars */
+    /* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */
     // @ts-ignore
-    checkCompoundBiblioField(field, name) {
+    public checkCompoundBiblioField(field, name) {
     }
 
     // rcsKeywordSubstitutions = [] // todo fixme
@@ -163,24 +163,25 @@ export class DocInfo extends Transform {
           (re.compile(r'\$' r'RCSfile: (.+),v \$', re.IGNORECASE), r'\1'),
           (re.compile(r'\$[a-zA-Z]+: (.+) \$'), r'\1'),]
     */
-    /* eslint-disable-next-line no-unused-vars */
+    /* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */
     // @ts-ignore
-    extractAuthors(field, name, docinfo) {
+    public extractAuthors(field, name, docinfo) {
     }
 
-    /* eslint-disable-next-line no-unused-vars */
+    /* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */
     // @ts-ignore
-    authorsFromOneParagraph(field) {
+    public authorsFromOneParagraph(field) {
     }
 
-    /* eslint-disable-next-line no-unused-vars */
+    /* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */
     // @ts-ignore
-    authorsFromBulletList(field) {
+    public authorsFromBulletList(field) {
     }
 
-    /* eslint-disable-next-line no-unused-vars */
+    /* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */
     // @ts-ignore
-    authorsFromParagraphs(field) {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    public authorsFromParagraphs(field): void {
     }
 }
 DocInfo.defaultPriority = 340;
