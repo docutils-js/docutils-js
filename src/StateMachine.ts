@@ -174,9 +174,9 @@ class StateMachine implements Statemachine {
         let transitions;
         const results: (string|{})[] = [];
         let state = this.getState();
-        let nextState: StateInterface | undefined;
-        let result: string[] = [];
-        let context: string[] = [];
+        let nextState: StateInterface | string | undefined;
+        let result: (string|{})[] = [];
+        let context: (string|{})[] = [];
         try {
             if (this.debug) {
                 this.debugFn('\nStateMachine.run: bof transition');
@@ -208,7 +208,7 @@ class StateMachine implements Statemachine {
                             throw new Error('context should be array');
                         }
 
-                        const r = this.checkLine(context, state, transitions);
+                        const r: [{}[], string|StateInterface, {}[]] = this.checkLine(context, state, transitions);
                         /* istanbul ignore if */
                         if (!isIterable(r)) {
                             throw new Error(`Expect iterable result, got: ${r}`);
@@ -254,12 +254,10 @@ class StateMachine implements Statemachine {
                         } else {
                             transitions = [error.args[1]];
                         }
-                        /*                    if self.debug:
-                            print >>self._stderr, (
-                                  '\nStateMachine.run: StateCorrection to state '
-                                  '"%s", transition %s.'
-                                  % (next_state, transitions[0]))
-                        */
+                        if(this.debug) {
+                          this.debugFn(`\nStateMachine.run: StateCorrection to state `+
+                                  `"${nextState}", transition ${transitions[0]}.`);
+                        }
                     } else {
                         throw error;
                     }
@@ -294,6 +292,7 @@ class StateMachine implements Statemachine {
         if (this.states[this.currentState] === undefined) {
             throw new UnknownStateError(this.currentState, JSON.stringify(this.states));
         }
+        console.log(this.currentState);
         return this.states[this.currentState];
     }
 
@@ -407,31 +406,33 @@ class StateMachine implements Statemachine {
         }
     }
     /*
- * Examine one line of input for a transition match & execute its method.
- *
- * Parameters:
- *
- * - `context`: application-dependent storage.
- * - `state`: a `State` object, the current state.
- * - `transitions`: an optional ordered list of transition names to try,
- *   instead of ``state.transition_order``.
- *
- * Return the values returned by the transition method:
- *
- * - context: possibly modified from the parameter `context`;
- * - next state name (`State` subclass name);
- * - the result output of the transition, a list.
- *
- * When there is no match, ``state.no_match()`` is called and its return
- * value is returned.
- */
-    public checkLine(context: {}[], state: string, transitions: ({}|string)[] | undefined | null): string[][] {
+     * Examine one line of input for a transition match & execute its method.
+     *
+     * Parameters:
+     *
+     * - `context`: application-dependent storage.
+     * - `state`: a `State` object, the current state.
+     * - `transitions`: an optional ordered list of transition names to try,
+     *   instead of ``state.transition_order``.
+     *
+     * Return the values returned by the transition method:
+     *
+     * - context: possibly modified from the parameter `context`;
+     * - next state name (`State` subclass name);
+     * - the result output of the transition, a list.
+     *
+     * When there is no match, ``state.no_match()`` is called and its return
+     * value is returned.
+     */
+    public checkLine(context: {}[], state: string|StateInterface,
+      transitions: ({}|string)[] | undefined | null): [{}[], string|StateInterface, {}[]] {
         /* istanbul ignore if */
         if (!Array.isArray(context)) {
             throw new Error('context should be array');
         }
         if (this.debug) {
-            this.debugFn(`\nStateMachine.check_line: state="${state.constructor.name}", transitions=${transitions}.`);
+            this.debugFn(`\nStateMachine.check_line: ` +
+              `state="${state.constructor.name}", transitions=${transitions}.`);
         }
         if (transitions === undefined) {
             transitions = state.transitionOrder;
@@ -447,18 +448,19 @@ class StateMachine implements Statemachine {
             const result = pattern.exec(this.line);
             if (result) {
                 if (this.debug) {
-                    this.debugFn(`\nStateMachine.checkLine: Matched transition '"${name}"`
+                    this.debugFn(`\nStateMachine.checkLine: `
+                      + `Matched transition '"${name}"`
                         + `in state "${state.constructor.name}`);
                 }
-                //              console.log(`pattern match for ${name}`);
+                // console.log(`pattern match for ${name}`);
                 const r = method.bind(state)({ pattern, result, input: this.line },
                     context, nextState);
                 /* istanbul ignore if */
                 if (r === undefined) {
                     throw new Error();
                 }
-                //              console.log(`return is >>> `);
-                //              console.log(r);
+                // console.log(`return is >>> `);
+                // console.log(r);
                 return r;
             }
         }
