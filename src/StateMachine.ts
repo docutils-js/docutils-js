@@ -16,7 +16,7 @@ import {
     StateInterface,
     DebugFunction,
     CoreLanguage,
-    ReporterInterface
+    ReporterInterface, StateType
 } from "./types";
 import State from './states/State';
 
@@ -40,26 +40,26 @@ class StateMachine implements Statemachine {
 
     public inputLines: StringList = new StringList([]);
 
-    public debugFn: DebugFunction;
+    public debugFn: DebugFunction = (line) => {};
 
     public debug: boolean;
+
     /*
-        Initialize a `StateMachine` object; add state objects.
-
-       Parameters:
-
-        - `stateClasses`: a list of `State` (sub)classes.
-        - `initialState`: a string, the class name of the initial state.
-        - `debug`: a boolean; produce verbose output if true (nonzero).
-        */
-
+     * Initialize a `StateMachine` object; add state objects.
+     * 
+     * Parameters:
+     * 
+     *  - `stateClasses`: a list of `State` (sub)classes.
+     *  - `initialState`: a string, the class name of the initial state.
+     *  - `debug`: a boolean; produce verbose output if true (nonzero).
+     **/
     protected stateFactory: Statefactory;
 
     public lineOffset: number;
 
     public line?: string = '';
 
-    public inputOffset: number = 0;
+    public inputOffset?: number = 0;
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars
     public node?: NodeInterface;
@@ -70,14 +70,14 @@ class StateMachine implements Statemachine {
 
     private observers: {}[];
 
-    private currentState?: string;
+    private currentState?: StateInterface;
 
-    private initialState?: string;
+    private initialState?: StateInterface;
 
     public constructor(
         args: {
             stateFactory: Statefactory;
-            initialState: string;
+            initialState: StateInterface;
             debug?: boolean;
             debugFn?: DebugFunction;
         }
@@ -100,7 +100,9 @@ class StateMachine implements Statemachine {
             cArgs.debugFn = console.log;
         }
         this.stateFactory = cArgs.stateFactory;
-        this.debugFn = cArgs.debugFn;
+        if(cArgs.debugFn !== undefined) {
+            this.debugFn = cArgs.debugFn;
+        }
         this.lineOffset = -1;
         this.debug = cArgs.debug;
         this.initialState = cArgs.initialState;
@@ -111,14 +113,11 @@ class StateMachine implements Statemachine {
         }
 
         const stateClasses = cArgs.stateFactory.getStateClasses();
-        //      console.log(typeof stateClasses);
         if (!isIterable(stateClasses)) {
             throw new Error(`expecting iterable, got ${stateClasses}`);
         }
-        //      console.log(stateClasses);
         this.addStates(stateClasses);
         this.observers = [];
-        // eslint-disable-next-line no-underscore-dangle
     }
 
     public _init(): void {
@@ -172,15 +171,15 @@ class StateMachine implements Statemachine {
         this.inputOffset = cArgs.inputOffset;
         this.lineOffset = -1;
         this.currentState = cArgs.initialState || this.initialState;
-        if (this.debug) {
+        if (this.debug && this.debugFn !== undefined) {
             this.debugFn(`\nStateMachine.run: input_lines (line_offset=${this.lineOffset}):\n| ${this.inputLines.join('\n| ')}`);
         }
         let transitions;
         const results: (string|{})[] = [];
         let state = this.getState();
-        let nextState: string;
-        let result;
-        let context;
+        let nextState: StateInterface | undefined;
+        let result: string[] = [];
+        let context: string[] = [];
         try {
             if (this.debug) {
                 this.debugFn('\nStateMachine.run: bof transition');
@@ -189,7 +188,6 @@ class StateMachine implements Statemachine {
             if (!Array.isArray(context)) {
                 throw new Error('expecting array');
             }
-            //          console.log(context);
             results.push(...result);
             /* eslint-disable-next-line no-constant-condition */
             while (true) {
@@ -202,17 +200,12 @@ class StateMachine implements Statemachine {
                                 throw new Error();
                             }
 
-                            const rinfo = this.inputLines.info(
+                            const [source, offset] = this.inputLines.info(
                                 this.lineOffset,
                             );
-                            if (!isIterable(rinfo)) {
-                                /* istanbul ignore if */
-                                throw new Error();
-                            }
-                            const [source, offset] = rinfo;
+
                             this.debugFn(`\nStateMachine.run: line (source=${source}, offset=${offset}):\n| ${this.line}`);
                         }
-                        //                      console.log(context);
                         /* istanbul ignore if */
                         if (!Array.isArray(context)) {
                             throw new Error('context should be array');
@@ -292,7 +285,7 @@ class StateMachine implements Statemachine {
      *         the name of the next state.  Exception:
      *         `UnknownStateError` raised if `next_state` unknown.
      */
-    public getState(nextState?: string): StateInterface {
+    public getState(nextState?: StateInterface): StateInterface {
         if (nextState) {
             if (this.debug && nextState !== this.currentState) {
                 this.debugFn(`StateMachine.getState: changing state from "${this.currentState}" to "${nextState}" (input line ${this.absLineNumber()})`);
@@ -436,7 +429,7 @@ class StateMachine implements Statemachine {
  * When there is no match, ``state.no_match()`` is called and its return
  * value is returned.
  */
-    public checkLine(context: {}[], state: StateInterface, transitions: ({}|string)[] | undefined | null): (string|{})[] {
+    public checkLine(context: {}[], state: string, transitions: ({}|string)[] | undefined | null): string[][] {
         /* istanbul ignore if */
         if (!Array.isArray(context)) {
             throw new Error('context should be array');
@@ -476,7 +469,7 @@ class StateMachine implements Statemachine {
         return state.noMatch(context, transitions);
     }
 
-    public addState(stateClass: {}): void {
+    public addState(stateClass: StateType): void {
         if (typeof stateClass === 'undefined') {
         // throw new InvalidArgumentsError('stateClass should be a class');
             return;
@@ -500,7 +493,7 @@ class StateMachine implements Statemachine {
         this.states[stateName] = r;
     }
 
-    public addStates(stateClasses: StateInterface[]): void {
+    public addStates(stateClasses: StateType[]): void {
         if (!stateClasses) {
             throw new Error('');
         }
