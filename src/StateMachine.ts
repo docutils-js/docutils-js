@@ -83,11 +83,6 @@ class StateMachine implements Statemachine {
         }
     ) {
         const cArgs = { ... args };
-        /* Perform some sanity checking on arguments */
-        //        /* istanbul ignore if */
-        //        if (stateClasses == null || stateClasses.length === 0) {
-        //            throw new InvalidArgumentsError('stateClasses');
-        //        }
         /* Initialize instance junk that we can't do except through
            this method. */
         this._init();
@@ -95,8 +90,9 @@ class StateMachine implements Statemachine {
             cArgs.debug = false;
         }
         if (cArgs.debug && !cArgs.debugFn) {
-        // throw new Error("unexpected lack of debug function");
-        /* eslint-disable-next-line no-console */
+          // make this unexpected error?
+          // throw new Error("unexpected lack of debug function");
+            /* eslint-disable-next-line no-console */
             cArgs.debugFn = console.log;
         }
         this.stateFactory = cArgs.stateFactory;
@@ -135,27 +131,27 @@ class StateMachine implements Statemachine {
     }
 
     /**
-    Run the state machine on `input_lines`. Return results (a list).
-
-    Reset `self.line_offset` and `self.current_state`. Run the
-    beginning-of-file transition. Input one line at a time and check for a
-    matching transition. If a match is found, call the transition method
-    and possibly change the state. Store the context returned by the
-    transition method to be passed on to the next transition matched.
-    Accumulate the results returned by the transition methods in a list.
-    Run the end-of-file transition. Finally, return the accumulated
-    results.
-
-    Parameters:
-
-    - `input_lines`: a list of strings without newlines, or `StringList`.
-    - `input_offset`: the line offset of `input_lines` from the beginning
-      of the file.
-    - `context`: application-specific storage.
-    - `input_source`: name or path of source of `input_lines`.
-    - `initial_state`: name of initial state.
-    */
-    public run(args: StateMachineRunArgs): (string|{})[] {
+     * Run the state machine on `input_lines`. Return results (a list).
+     * 
+     * Reset `self.line_offset` and `self.current_state`. Run the
+     * beginning-of-file transition. Input one line at a time and check for a
+     * matching transition. If a match is found, call the transition method
+     * and possibly change the state. Store the context returned by the
+     * transition method to be passed on to the next transition matched.
+     * Accumulate the results returned by the transition methods in a list.
+     * Run the end-of-file transition. Finally, return the accumulated
+     * results.
+     * 
+     * Parameters:
+     * 
+     * - `input_lines`: a list of strings without newlines, or `StringList`.
+     * - `input_offset`: the line offset of `input_lines` from the beginning
+     *   of the file.
+     * - `context`: application-specific storage.
+     * - `input_source`: name or path of source of `input_lines`.
+     * - `initial_state`: name of initial state.
+     */
+     public run(args: StateMachineRunArgs): (string|{})[] {
         const cArgs: StateMachineRunArgs = { ...args };
         this.runtimeInit();
         if (cArgs.inputLines instanceof StringList) {
