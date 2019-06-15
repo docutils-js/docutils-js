@@ -4,22 +4,23 @@ import * as nodes from '../../../nodes';
 import * as RegExps from '../RegExps';
 import RSTStateMachine from "../RSTStateMachine";
 import {RSTStateArgs} from "../types";
+import { StateInterface } from "../../../types";
 
 /** Parser for the contents of a substitution_definition element. */
 class SubstitutionDef extends Body {
-    _init(stateMachine: RSTStateMachine, args: RSTStateArgs) {
+    public _init(stateMachine: RSTStateMachine, args: RSTStateArgs) {
         super._init(stateMachine, args);
         this.patterns = {
+            // eslint-disable-next-line @typescript-eslint/camelcase
             embedded_directive: new RegExp(`(${RegExps.simplename})::( +|$)`),
             text: '',
-};
+        };
         this.initialTransitions = ['embedded_directive', 'text'];
     }
 
-/** Return a list of nodes. */
-    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,@typescript-eslint/no-unused-vars,no-unused-vars */
-    // @ts-ignore
-    literal_block(match, context, nextState) {
+    /** Return a list of nodes. */
+    // eslint-disable-next-line @typescript-eslint/explicit-function-return-type,@typescript-eslint/no-unused-vars,@typescript-eslint/camelcase
+    public literal_block(match: {}, context: string[], nextState: StateInterface) {
         /* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */
         const [indented, indent, offset, blankFinish] = this.rstStateMachine.getIndented({});
         while (indented && indented.length && !indented[indented.length - 1].trim()) {
@@ -30,8 +31,10 @@ class SubstitutionDef extends Body {
         }
         const data = indented.join('\n');
         const literalBlock = new nodes.literal_block(data, data);
-            const [source, line] = this.rstStateMachine.getSourceAndLine(offset + 1);
-        literalBlock.source = source;
+        const [source, line] = this.rstStateMachine.getSourceAndLine(offset + 1);
+        if(source !== undefined) {
+            literalBlock.source = source;
+        }
         literalBlock.line = line;
         const nodelist: any[] = [literalBlock];
         if (!blankFinish) {
@@ -41,7 +44,7 @@ class SubstitutionDef extends Body {
     }
 
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,@typescript-eslint/no-unused-vars,no-unused-vars */
-    quoted_literal_block() {
+    public quoted_literal_block() {
         const absLineOffset = this.rstStateMachine.absLineOffset();
         const offset = this.rstStateMachine.lineOffset;
         const parentNode = new nodes.Element();
@@ -49,26 +52,26 @@ class SubstitutionDef extends Body {
 
             {
                 inputLines: this.rstStateMachine.inputLines.slice(offset),
- inputOffset: absLineOffset,
-              node: parentNode,
-              matchTitles: false,
+                inputOffset: absLineOffset,
+                node: parentNode,
+                matchTitles: false,
                 stateMachineKwargs: {
                     stateFactory: this.rstStateMachine.stateFactory.withStateClasses(['QuotedLiteralBlock']),
                     initialState: 'QuotedLiteralBlock',
-},
-},
-);
+                },
+            },
+        );
         this.gotoLine(newAbsOffset);
         return parentNode.children;
     }
 
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,@typescript-eslint/no-unused-vars,no-unused-vars */
     // @ts-ignore
-    embedded_directive(match, context, nextState) {
+    public embedded_directive(match, context, nextState) {
         const [nodelist, blankFinish] = this.directive(
             match.result,
             { alt: this.parent!.attributes.names[0] },
-);
+        );
         this.parent!.add(nodelist);
         if (!this.rstStateMachine.atEof()) {
             this.blankFinish = blankFinish;
@@ -77,7 +80,7 @@ class SubstitutionDef extends Body {
     }
 
     /* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */
-    text(match: any, context: string[], nextState: any): any[] {
+    public text(match: {}, context: string[], nextState: string): any[] {
         if (!this.rstStateMachine.atEof()) {
             this.blankFinish = this.rstStateMachine.isNextLineBlank();
         }

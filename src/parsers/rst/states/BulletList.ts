@@ -3,7 +3,7 @@ import SpecializedBody from './SpecializedBody';
 
 class BulletList extends SpecializedBody {
     // @ts-ignore
-    bullet(match, context, nextState) {
+    public bullet(match, context, nextState) {
         if (match.result.input[0] !== this.parent!.attributes.bullet) {
             // @ts-ignore
             this.invalid_input();

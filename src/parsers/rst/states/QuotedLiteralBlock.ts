@@ -7,25 +7,26 @@ import RSTStateMachine from "../RSTStateMachine";
 import {RSTStateArgs} from "../types";
 
 /**
-    Nested parse handler for quoted (unindented) literal blocks.
-
-    Special-purpose.  Not for inclusion in `state_classes`.
-*/
+ *  Nested parse handler for quoted (unindented) literal blocks.
+ *
+ * Special-purpose.  Not for inclusion in `state_classes`.
+ */
 class QuotedLiteralBlock extends RSTState {
     private initial_lineno?: number;
-    _init(stateMachine: RSTStateMachine, args: RSTStateArgs) {
+    public _init(stateMachine: RSTStateMachine, args: RSTStateArgs) {
         super._init(stateMachine, args);
         this.patterns = {
- initial_quoted: `(${RegExps.nonalphanum7bit})`,
-                text: '',
-};
+            // eslint-disable-next-line @typescript-eslint/camelcase
+            initial_quoted: `(${RegExps.nonalphanum7bit})`,
+            text: '',
+        };
         this.initialTransitions = ['initial_quoted', 'text'];
         this.initial_lineno = undefined;
     }
 
     /* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */
     // @ts-ignore
-    blank(match, context, nextState) {
+    public blank(match, context, nextState) {
         if (context.length) {
             throw new EOFError();
         } else {
@@ -34,11 +35,11 @@ class QuotedLiteralBlock extends RSTState {
     }
 
     // @ts-ignore
-    eof(context) {
+    public eof(context) {
         if (context.length) {
             const [src, srcline] = this.rstStateMachine.getSourceAndLine(
                 this.initial_lineno,
-);
+            );
             const text = context.join('\n');
             const literalBlock = new nodes.literal_block(text, text);
             literalBlock.source = src;
@@ -48,7 +49,7 @@ class QuotedLiteralBlock extends RSTState {
             this.parent!.add(this.reporter!.warning(
                 'Literal block expected; none found.', [],
                 { line: this.rstStateMachine.absLineNumber() },
-));
+            ));
             // # src not available, because statemachine.input_lines is empty
             this.rstStateMachine.previousLine();
         }
@@ -57,47 +58,48 @@ class QuotedLiteralBlock extends RSTState {
     }
 
     /* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */
-    indent(match: any, context: any[], nextState: any): any[] {
-//        assert context, ('QuotedLiteralBlock.indent: context should not '
-//                         'be empty!')
+    public indent(match: any, context: any[], nextState: any): any[] {
+        //        assert context, ('QuotedLiteralBlock.indent: context should not '
+        //                         'be empty!')
         this.messages.push(
             this.reporter!.error('Unexpected indentation.', [],
-                                { line: this.rstStateMachine.absLineNumber() }),
-);
+                { line: this.rstStateMachine.absLineNumber() }),
+        );
         this.rstStateMachine.previousLine();
         throw new EOFError();
     }
 
     /** Match arbitrary quote character on the first line only. */
-    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
     // @ts-ignore
-    initial_quoted(match, context, nextState) {
+    // eslint-disable-next-line @typescript-eslint/camelcase
+    public initial_quoted(match, context, nextState) {
         this.removeTransition('initial_quoted');
         const quote = match.result.input[0];
         const pattern = new RegExp(escapeRegExp(quote));
         // # New transition matches consistent quotes only:
         this.addTransition('quoted',
-                           [pattern, this.quoted.bind(this),
-                            this.constructor.name]);
+            [pattern, this.quoted.bind(this),
+                this.constructor.name]);
+        // eslint-disable-next-line @typescript-eslint/camelcase
         this.initial_lineno = this.rstStateMachine.absLineNumber();
         return [[match.result.input], nextState, []];
     }
 
     /** Match consistent quotes on subsequent lines. */
     // @ts-ignore
-    quoted(match, context, nextState) {
+    public quoted(match, context, nextState) {
         context.push(match.result.input);
         return [context, nextState, []];
     }
 
     /* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */
     // @ts-ignore
-    text(match, context, nextState) {
+    public text(match, context, nextState) {
         if (context.length) {
             this.messages.push(
                 this.reporter!.error('Inconsistent literal block quoting.',
-                                    [], { line: this.rstStateMachine.absLineNumber() }),
-);
+                    [], { line: this.rstStateMachine.absLineNumber() }),
+            );
             this.rstStateMachine.previousLine();
         }
         throw new EOFError();

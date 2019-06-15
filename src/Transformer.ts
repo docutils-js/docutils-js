@@ -1,5 +1,5 @@
 import { document } from "./nodes";
-import { ComponentInterface, Components, Document, NodeInterface, TransformerInterface } from "./types";
+import { ComponentInterface, Components, Document, NodeInterface, TransformerInterface, TransformType } from "./types";
 import { ApplicationError } from "./Exceptions";
 
 function leftPad(num: number, len: number, pad: string): string {
@@ -20,7 +20,7 @@ class Transformer implements TransformerInterface {
     public document: Document;
     // this.applied.push([priority, TransformClass, pending, kwargs]);
 
-    public applied: [number, {}, NodeInterface, {}];
+    public applied: [number, {}, NodeInterface, {}][];
     public sorted: number;
     public components: Components;
     public serialno: number;
@@ -72,6 +72,7 @@ class Transformer implements TransformerInterface {
             if (typeof i !== 'undefined') {
                 //              console.log(`collecting unknownReferenceResolver from component ${i}`);
                 if (i.unknownReferenceResolvers) {
+                    // @ts-ignore
                     urr.push(...i.unknownReferenceResolvers);
                 }
             } else {
@@ -100,9 +101,11 @@ class Transformer implements TransformerInterface {
         while (this.transforms.length) {
             if (!this.sorted) {
                 this.transforms.sort((el1, el2): number => {
+                    // @ts-ignore
                     if (el1[0] < el2[0]) {
                         return -1;
                     }
+                    // @ts-ignore
                     if (el1[0] > el2[0]) {
                         return 1;
                     }
@@ -113,6 +116,7 @@ class Transformer implements TransformerInterface {
             }
             const t = this.transforms.pop();
             //          console.log(t);
+            // @ts-ignore
             const [priority, TransformClass, pending, kwargs] = t;
             try {
                 const transform = new TransformClass(this.document, {startnode: pending});
@@ -128,7 +132,7 @@ class Transformer implements TransformerInterface {
      * Store multiple transforms, with default priorities.
      * @param {Array} transformList - Array of transform classes (not instances).
      */
-    public addTransforms(transformList: {}[]): void {
+    public addTransforms(transformList: TransformType[]): void {
         transformList.forEach((transformClass): void => {
             if (!transformClass) {
                 throw new Error('invalid argument');

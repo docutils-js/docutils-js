@@ -1,10 +1,13 @@
-export default class UnexpectedIndentationError extends Error {
-    public args: ({}|{}[])[];
+import StringList from "../StringList";
 
-    public constructor(...params: {}[]) {
+export default class UnexpectedIndentationError extends Error {
+    public block: StringList;
+
+    public constructor(block: StringList) {
         // @ts-ignore
-        super(...params);
-        this.args = params;
+        super();
+        this.block = block;
+
         if (Error.captureStackTrace) {
             Error.captureStackTrace(this, UnexpectedIndentationError);
         }

@@ -3,6 +3,9 @@ import { Document, ElementInterface, NodeInterface, ReporterInterface, LogLevel,
 import StringList from "../../StringList";
 import { Settings } from "../../../gen/Settings";
 
+export interface Explicit {
+  [patternName: string]: {},
+}
 export interface CommonParseArgs {
     inputLines?: StringList;
     inputOffset?: number;

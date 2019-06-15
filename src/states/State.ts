@@ -173,7 +173,7 @@ class State implements StateInterface {
     }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    public bof(context: any[]): any[] {
+    public bof(context: {}[]): {}[][] {
         return [context, []];
     }
 

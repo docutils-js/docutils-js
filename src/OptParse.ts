@@ -1,4 +1,4 @@
-export default class OptionParser {
+class OptionParser {
     private rargs?: string[];
     private largs?: string[];
     private values?: {};
@@ -66,3 +66,5 @@ export default class OptionParser {
 
     }
 }
+
+export { OptionParser };

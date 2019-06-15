@@ -1,107 +1,106 @@
 import * as RSTStates from './RSTStates';
-import {Statefactory, Statemachine} from "../../types";
+import { Statefactory, StateInterface, Statemachine, StateType } from "../../types";
 
 class StateFactory implements Statefactory {
-    private stateClasses: any[];
+    private stateClasses?: StateType[];
     private args: any | undefined;
-    constructor(args?: any) {
+    public constructor(args?: { stateClasses?: StateType[] }) {
         this.args = args;
         if (args && args.stateClasses && args.stateClasses.length) {
             this.stateClasses = args.stateClasses;
         } else {
             this.stateClasses = [RSTStates.Body,
-                                 RSTStates.BulletList,
- RSTStates.DefinitionList,
- RSTStates.EnumeratedList,
- RSTStates.FieldList,
- RSTStates.OptionList,
- RSTStates.LineBlock,
- RSTStates.ExtensionOptions,
- RSTStates.Explicit,
- RSTStates.Text,
- RSTStates.Definition,
-                                 RSTStates.Line,
-                                RSTStates.SubstitutionDef];
+                RSTStates.BulletList,
+                RSTStates.DefinitionList,
+                RSTStates.EnumeratedList,
+                RSTStates.FieldList,
+                RSTStates.OptionList,
+                RSTStates.LineBlock,
+                RSTStates.ExtensionOptions,
+                RSTStates.Explicit,
+                RSTStates.Text,
+                RSTStates.Definition,
+                RSTStates.Line,
+                RSTStates.SubstitutionDef];
         }
     }
 
     /* istanbul ignore next */
-    createBody() {
+    public createBody() {
         return this.createState('Body');
     }
 
     /* istanbul ignore next */
-    createBulletList() {
+    public createBulletList() {
         return this.createState('BulletList');
     }
 
     /* istanbul ignore next */
-    createDefinition() {
+    public createDefinition() {
         return this.createState('Definition');
     }
 
     /* istanbul ignore next */
-    createDefinitionList() {
+    public createDefinitionList() {
         return this.createState('DefinitionList');
     }
 
     /* istanbul ignore next */
-    createEnumeratedList() {
+    public createEnumeratedList() {
         return this.createState('EnumeratedList');
     }
 
     /* istanbul ignore next */
-    createExplicit() {
+    public createExplicit() {
         return this.createState('Explicit');
     }
 
     /* istanbul ignore next */
-    createExtensionOptions() {
+    public createExtensionOptions() {
         return this.createState('ExtensionOptions');
     }
 
     /* istanbul ignore next */
-    createFieldList() {
+    public createFieldList() {
         return this.createState('FieldList');
     }
 
     /* istanbul ignore next */
-    createLineBlock() {
+    public createLineBlock() {
         return this.createState('LineBlock');
     }
 
     /* istanbul ignore next */
-    createLine() {
+    public createLine() {
         return this.createState('Line');
     }
 
     /* istanbul ignore next */
-    createOptionList() {
+    public createOptionList() {
         return this.createState('OptionList');
     }
 
     /* istanbul ignore next */
-    createQuotedLiteralBlock() {
+    public createQuotedLiteralBlock() {
         return this.createState('QuotedLiteralBlock');
     }
 
     /* istanbul ignore next */
-    createSpecializedBody() {
+    public createSpecializedBody() {
         return this.createState('SpecializedBody');
     }
 
     /* istanbul ignore next */
-    createSpecializedText() {
+    public createSpecializedText() {
         return this.createState('SpecializedText');
     }
 
     /* istanbul ignore next */
-    createText() {
+    public createText() {
         return this.createState('Text');
     }
 
-    createState(stateName: string,
- stateMachine?: Statemachine) {
+    public createState(stateName: string, stateMachine?: Statemachine) {
         if (typeof stateName === 'undefined') {
             throw new Error('Need argument stateName');
         }
@@ -118,11 +117,11 @@ class StateFactory implements Statefactory {
         return new StateClass(stateMachine, { });
     }
 
-    getStateClasses() {
+    public getStateClasses() {
         return this.stateClasses;
     }
 
-    withStateClasses(stateClasses: any[]) {
+    public withStateClasses(stateClasses: StateType[]): Statefactory {
         return new StateFactory({ stateClasses });
     }
 }

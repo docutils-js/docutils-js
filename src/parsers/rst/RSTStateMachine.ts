@@ -11,10 +11,10 @@ import { getLanguage } from "./languages";
  * The entry point to reStructuredText parsing is the `run()` method.
  */
 class RSTStateMachine extends StateMachineWS {
-    matchTitles?: boolean;
-    node?: ElementInterface;
+    public matchTitles?: boolean;
+    public node?: ElementInterface;
     public memo?: RstMemo;
-    run(args: StateMachineRunArgs) {
+    public run(args: StateMachineRunArgs): (string|{})[] {
         const cArgs = { ... args };
         /* istanbul ignore if */
         if (cArgs.inputOffset === undefined) {

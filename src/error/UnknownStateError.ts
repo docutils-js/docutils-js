@@ -1,9 +1,9 @@
 import { StateInterface } from "../types";
 
 class UnknownStateError extends Error {
-    private state: StateInterface;
+    private state: string;
     // @ts-ignore
-    public constructor(state: StateInterface, info: string) {
+    public constructor(state: string, info: string) {
         super();
         if (Error.captureStackTrace) {
             Error.captureStackTrace(this, UnknownStateError);

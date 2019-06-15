@@ -1,7 +1,7 @@
 import * as nodes from "./nodes";
 import { isIterable } from "./utils";
 import { SystemMessage, UnimplementedError as Unimp } from "./Exceptions";
-import { NodeInterface, ObserverCallback, ReporterInterface } from "./types";
+import { Attributes, NodeInterface, ObserverCallback, ReporterInterface, WritableStream } from "./types";
 
 /**
     Return the "source" and "line" attributes from the `node` given or from
@@ -32,13 +32,13 @@ class Reporter implements ReporterInterface {
     public reportLevel: number;
     private haltLevel: number;
     private errorHandler: string;
-    private stream: {};
+    private stream?: WritableStream;
     private encoding?: string;
     public constructor(
         source: string,
         reportLevel: number,
         haltLevel?: number,
-        stream?: {},
+        stream?: WritableStream,
         debug?: boolean,
         encoding?: string,
         errorHandler: string = 'backslashreplace'
@@ -68,7 +68,7 @@ class Reporter implements ReporterInterface {
     }
 
     /* need better system for arguments!! */
-    public systemMessage(level: number, message: string | Error, children?: NodeInterface[], kwargs?: {}): NodeInterface {
+    public systemMessage(level: number, message: string | Error, children?: NodeInterface[], kwargs?: Attributes): NodeInterface {
         if (typeof children === 'undefined') {
             children = [];
         }
@@ -81,9 +81,11 @@ class Reporter implements ReporterInterface {
             kwargs = {};
         }
 
-        let myMessage = message;
+        let myMessage: string;
         if (message instanceof Error) {
             myMessage = message.message;
+        } else {
+            myMessage = message;
         }
 
         const attributes = { ...kwargs };
@@ -128,27 +130,27 @@ class Reporter implements ReporterInterface {
         this.observers.push(observer);
     }
 
-    public debug(...args: {}[]): undefined | {} {
+    public debug(message: string | Error, children?: NodeInterface[], kwargs?: Attributes): NodeInterface | undefined {
         if (this.debugFlag) {
-            return this.systemMessage(this.debugLevel, ...args);
+            return this.systemMessage(this.debugLevel, message, children, kwargs);
         }
         return undefined;
     }
 
-    public info(...args: {}[]): {} {
-        return this.systemMessage(this.INFO_LEVEL, ...args);
+    public info(message: string | Error, children?: NodeInterface[], kwargs?: Attributes): NodeInterface | undefined {
+        return this.systemMessage(this.INFO_LEVEL, message, children, kwargs);
     }
 
-    public warning(...args: {}[]): {} {
-        return this.systemMessage(this.WARNING_LEVEL, ...args);
+    public warning(message: string | Error, children?: NodeInterface[], kwargs?: Attributes): NodeInterface | undefined {
+        return this.systemMessage(this.WARNING_LEVEL, message, children, kwargs);
     }
 
-    public error(...args: {}[]): {}[] {
-        return this.systemMessage(this.ERROR_LEVEL, ...args);
+    public error(message: string | Error, children?: NodeInterface[], kwargs?: Attributes): NodeInterface | undefined {
+        return this.systemMessage(this.ERROR_LEVEL, message, children, kwargs);
     }
 
-    public severe(...args: {}[]): {} {
-        return this.systemMessage(this.SEVERE_LEVEL, ...args);
+    public severe(message: string | Error, children?: NodeInterface[], kwargs?: Attributes): NodeInterface | undefined {
+        return this.systemMessage(this.SEVERE_LEVEL, message, children, kwargs);
     }
 
     public getSourceAndLine?: (lineno?: number) => [string, number] | undefined;

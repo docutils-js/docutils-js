@@ -22,6 +22,10 @@ export interface SettingsInterface {
     getSettings(name: string): {};
 }
 
+export interface WritableStream {
+    write: (data: string) => void;
+}
+
 export interface SourceLocation {
     currentSource: string;
     currentLine: number;
@@ -46,7 +50,7 @@ export interface NodeInterface extends SourceLocation {
     /** The `document` node at the root of the tree containing this Node. */
     document?: Document;
     /** Path or description of the input source which generated this Node. */
-    source: string;
+    source?: string;
     /** The line number (1-based) of the beginning of this Node in `source`. */
     line: number;
 
@@ -234,7 +238,7 @@ export interface TransformSpecInterface {
      */
     unknownReferenceResolvers: {}[];
 
-    getTransforms(): TransformSpecInterface[];
+    getTransforms(): TransformType[];
 }
 
 /** Base interface for Docutils components. */
@@ -272,28 +276,29 @@ export interface ReporterInterface {
     attachObserver(observer: {}): void;
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    debug(...args: any[]): NodeInterface;
+    debug(message: string | Error, children?: NodeInterface[], kwargs?: Attributes): NodeInterface | undefined;
+
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    info(...args: any[]): NodeInterface;
+    info(message: string | Error, children?: NodeInterface[], kwargs?: Attributes): NodeInterface | undefined;
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    warning(...args: any[]): NodeInterface;
+    warning(message: string | Error, children?: NodeInterface[], kwargs?: Attributes): NodeInterface | undefined;
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    error(...args: any[]): NodeInterface;
+    error(message: string | Error, children?: NodeInterface[], kwargs?: Attributes): NodeInterface | undefined;
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    severe(...args: any[]): NodeInterface;
+    severe(message: string | Error, children?: NodeInterface[], kwargs?: Attributes): NodeInterface | undefined;
 }
 
 export interface Statefactory {
 
-    withStateClasses(strings: string[]): Statefactory;
+    withStateClasses(strings: StateType[]): Statefactory;
 
     createState(stateName: string, stateMachine: Statemachine): StateInterface;
 
-    getStateClasses(): string[];
+    getStateClasses(): StateType[];
 }
 
 export interface Statemachine {
@@ -308,9 +313,9 @@ export interface Statemachine {
      *         the name of the next state.  Exception:
      *         `UnknownStateError` raised if `next_state` unknown.
      */
-    getState(nextState: string): StateInterface;
+    getState(nextState?: string): StateInterface;
 
-    nextLine(n: number): string;
+    nextLine(n: number): string| undefined;
 
     isNextLineBlank(): boolean;
 
@@ -322,9 +327,9 @@ export interface Statemachine {
 
     gotoLine(lineOffset: number): string | undefined;
 
-    getSource(lineOffset: number): string;
+    getSource(lineOffset: number): string | undefined;
 
-    absLineOffset(): number;
+    absLineOffset(): number|undefined;
 
     absLineNumber(): number;
 
@@ -333,9 +338,7 @@ export interface Statemachine {
     insertInput(inputLines: StringList, source?: string): void;
 
     getTextBlock(flushLeft: boolean): StringList;
-
-    checkLine(context: {}[], state: StateInterface, transitions: Transitions): {}[] | {};
-
+    checkLine(context: {}[], state: string|StateInterface, transitions: ({}|string)[] | undefined | null): [{}[], string|StateInterface, {}[]];
     addState(stateClass: StateInterface): void;
 
     addStates(stateClasses: StateInterface[]): void;
@@ -351,8 +354,12 @@ export interface Statemachine {
     notifyObservers(): void;
 }
 
-export interface StateInterface {
+export interface StateType {
 
+}
+export interface StateInterface {
+    stateName: string;
+    transitions: Transitions;
 
     runtimeInit(): void;
 
@@ -369,6 +376,9 @@ export interface StateInterface {
     makeTransitions(nameList: string[]): ({}[] | {})[];
 
     transitionOrder: string[];
+
+    bof(context: (string|{})[]): string[][];
+    eof(context: (string|{})[]): string[];
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -377,7 +387,7 @@ export interface StateMachineCommonArgs {
 
 export interface StateMachineRunArgs extends StateMachineCommonArgs {
     inputLines: StringList | string | string[];
-    inputOffset?: number;
+    inputOffset: number;
     context?: {}[];
     inputSource?: string;
     initialState?: string;
@@ -440,7 +450,7 @@ export interface TransformerInterface {
      * Store multiple transforms, with default priorities.
      * @param {Array} transformList - Array of transform classes (not instances).
      */
-    addTransforms(transformList: ApplyFunction[]): void;
+    addTransforms(transformList: TransformType[]): void;
 
     /**
      *
@@ -476,7 +486,7 @@ export interface SystemMessage extends NodeInterface {
 }
 
 export interface NameIds {
-    [name: string]: string;
+    [name: string]: string | undefined;
 }
 
 export interface ObserverCallback {

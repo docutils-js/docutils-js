@@ -11,15 +11,15 @@ class Line extends SpecializedText {
     private eofcheck: boolean = true;
 
     // @ts-ignore
-    indent(...args) {
+    public indent(...args) {
         // @ts-ignore
         return this.text(...args);
     }
 
     // @ts-ignore
-    eof(context) {
+    public eof(context) {
         const marker = context[0].trim();
-        if (this.memo!.sectionBubbleUpKludge) {
+        if (this.memo.sectionBubbleUpKludge) {
             this.memo!.sectionBubbleUpKludge = false;
         } else if (marker.length < 4) {
             this.stateCorrection(context);
@@ -37,7 +37,7 @@ class Line extends SpecializedText {
     /** Transition marker. */
     /* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */
     // @ts-ignore
-    blank(match, context, nextState) {
+    public blank(match, context, nextState) {
         const [src, srcline] = this.rstStateMachine.getSourceAndLine();
         const marker = context[0].trim();
         if (marker.length < 4) {
@@ -160,12 +160,11 @@ class Line extends SpecializedText {
         this.stateCorrection(context, lines);
     }
 
-    stateCorrection(context: any[], lines = 1) {
+    public stateCorrection(context: any[], lines = 1) {
         this.rstStateMachine.previousLine(lines);
         context.length = 0;
         throw new StateCorrection('Body', 'text');
     }
 }
 Line.stateName = 'Line';
-//Line.constructor.stateName = 'Line';
 export default Line;

@@ -60,7 +60,7 @@ class StateMachine implements Statemachine {
 
     public line?: string = '';
 
-    public inputOffset?: number = 0;
+    public inputOffset: number = 0;
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars
     public node?: NodeInterface;
@@ -71,14 +71,14 @@ class StateMachine implements Statemachine {
 
     private observers: {}[];
 
-    private currentState?: StateInterface;
+    private currentState?: string;
 
-    private initialState?: StateInterface;
+    private initialState?: string;
 
     public constructor(
         args: {
             stateFactory: Statefactory;
-            initialState: StateInterface;
+            initialState: string;
             debug?: boolean;
             debugFn?: DebugFunction;
         }
@@ -174,7 +174,10 @@ class StateMachine implements Statemachine {
         let transitions;
         const results: (string|{})[] = [];
         let state = this.getState();
-        let nextState: StateInterface | string | undefined;
+        let nextStateName: string;
+        let nextStateReturn: string | StateInterface | undefined;
+        let nextStateVar: string | undefined;
+        let nextState: StateInterface | undefined;
         let result: (string|{})[] = [];
         let context: (string|{})[] = [];
         try {
@@ -213,7 +216,8 @@ class StateMachine implements Statemachine {
                         if (!isIterable(r)) {
                             throw new Error(`Expect iterable result, got: ${r}`);
                         }
-                        [context, nextState, result] = r;
+                        [context, nextStateReturn, result] = r;
+                        nextStateVar = (nextStateReturn as StateInterface).stateName || (nextStateReturn as string);;
                         /* istanbul ignore if */
                         if (!Array.isArray(context)) {
                             throw new Error('context should be array');
@@ -241,22 +245,26 @@ class StateMachine implements Statemachine {
                         transitions = [error.args[0]];
                         if(this.debug) {
                             this.debugFn(`\nStateMachine.run: TransitionCorrection to `
-                            `state "${state.stateName}", transition ${transitions[0]}.`);
+                            + `state "${state.stateName}", transition ${transitions[0]}.`);
                         }
                         /* Cant continue, makes no sense? ??  */
                         /* eslint-disable-next-line no-continue */
                         continue;
                     } else if (error instanceof StateCorrection) {
                         this.previousLine();
-                        nextState = error.args[0];
+                        nextStateName = error.args[0];
+                        nextStateVar = nextStateName;
+                        let tstr;
                         if (error.args.length === 1) {
                             transitions = null;
+                            tstr = '';
                         } else {
                             transitions = [error.args[1]];
+                            tstr = error.args[1].toString();
                         }
                         if(this.debug) {
-                          this.debugFn(`\nStateMachine.run: StateCorrection to state `+
-                                  `"${nextState}", transition ${transitions[0]}.`);
+                            this.debugFn(`\nStateMachine.run: StateCorrection to state `+
+                                  `"${nextState}", transition ${tstr}.`);
                         }
                     } else {
                         throw error;
@@ -264,7 +272,8 @@ class StateMachine implements Statemachine {
                 }
                 /* we need this somehow, its part of a try, except, else */
                 // transitions = undefined
-                state = this.getState(nextState);
+
+                state = this.getState(nextStateVar);
             }
         } catch (error) {
             throw error;
@@ -279,7 +288,7 @@ class StateMachine implements Statemachine {
      * the name of the next state.  Exception:
      * `UnknownStateError` raised if `next_state` unknown.
      */
-    public getState(nextState?: StateInterface): StateInterface {
+    public getState(nextState?:  string): StateInterface {
         if (nextState) {
             if (this.debug && nextState !== this.currentState) {
                 this.debugFn(`StateMachine.getState: ` +
@@ -293,14 +302,14 @@ class StateMachine implements Statemachine {
         }
         if (this.states[this.currentState] === undefined) {
             throw new UnknownStateError(this.currentState,
-              JSON.stringify(this.states));
+                JSON.stringify(this.states));
         }
         console.log(this.currentState);
         return this.states[this.currentState];
     }
 
     /** Load `self.line` with the `n`'th next line and return it. */
-    public nextLine(n = 1): string {
+    public nextLine(n = 1): string | undefined{
         // console.log('*** advancing to next line');
         this.lineOffset += n;
         if (this.lineOffset >= this.inputLines.length) {
@@ -346,11 +355,14 @@ class StateMachine implements Statemachine {
         return this.line;
     }
 
-    public getSource(lineOffset: number): string {
+    public getSource(lineOffset: number): string | undefined  {
         return this.inputLines.source(lineOffset - this.inputOffset);
     }
 
-    public absLineOffset(): number {
+    public absLineOffset(): number|undefined {
+        if(this.inputOffset === undefined) {
+            return undefined;
+        }
         return this.lineOffset + this.inputOffset;
     }
 
@@ -358,7 +370,7 @@ class StateMachine implements Statemachine {
         return this.lineOffset + this.inputOffset + 1;
     }
 
-    public getSourceAndLine(lineno?: number): [string | undefined, number] {
+    public getSourceAndLine(lineno?: number): [string | undefined, number|undefined] {
         let offset;
         let srcoffset;
         let srcline;
@@ -371,9 +383,11 @@ class StateMachine implements Statemachine {
         }
         try {
             [src, srcoffset] = this.inputLines.info(offset);
-            srcline = srcoffset + 1;
+            if(srcoffset !== undefined) {
+                srcline = srcoffset + 1;
+            }
         } catch (error) {
-        // ??
+        // fixme code smell
         }
         return [src, srcline];
     }
@@ -394,7 +408,7 @@ class StateMachine implements Statemachine {
     }
 
     public getTextBlock(flushLeft = false): StringList {
-        let block;
+        let block: StringList|undefined;
         try {
             block = this.inputLines.getTextBlock(this.lineOffset,
                 flushLeft);
@@ -402,7 +416,7 @@ class StateMachine implements Statemachine {
             return block;
         } catch (error) {
             if (error instanceof UnexpectedIndentationError) {
-                block = error.args[0];
+                block = error.block;
                 this.nextLine(block.length - 1); // advance to last line of block
             }
             throw error;
@@ -427,8 +441,8 @@ class StateMachine implements Statemachine {
      * When there is no match, ``state.no_match()`` is called and its return
      * value is returned.
      */
-    public checkLine(context: {}[], state: string|StateInterface,
-      transitions: ({}|string)[] | undefined | null): [{}[], string|StateInterface, {}[]] {
+    public checkLine(context: {}[], state: StateInterface,
+        transitions: ({}|string)[] | undefined | null): [{}[], string|StateInterface, {}[]] {
         /* istanbul ignore if */
         if (!Array.isArray(context)) {
             throw new Error('context should be array');

@@ -21,6 +21,4 @@ export function getReaderClass(readerName: string): {} {
     throw new Error('');
 }
 
-export default {
-    getReaderClass,
-};
+export default getReaderClass;

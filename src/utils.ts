@@ -11,12 +11,15 @@ import { nodes } from "./index";
 
  */
 function findCombiningChars(text: string): number[] {
+    return [];
+    /*
     return text.split("").map((c, i): number[][] => {
     // @ts-ignore
         const r = combining[text.codePointAt(i)];
         return [r, i];
-    /* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars
     }).filter(([r, i]): number => r).map(([r, i]): number => i);
+*/
 }
 
 
@@ -46,12 +49,17 @@ function columnWidth(text: string): number { // fixme
     return text.length;
 }
 
+/**
+ * @deprecated
+ * @param obj
+ */
 export function isIterable(obj?: {}): boolean {
     // checks for null and undefined
     /* instanbul ignore if */
     if (obj === undefined) {
         return false;
     }
+    // @ts-ignore
     return typeof obj[Symbol.iterator] === "function";
 }
 
@@ -201,7 +209,7 @@ export function relativePath(source: string, target: string): string {
  >>> normalize_language_tag('de-CH-x_altquot')
  ['de-ch-x-altquot', 'de-ch', 'de-x-altquot', 'de']
  */
-function normalizedLanguageTag(tag: string): string {
+function normalizedLanguageTag(tag: string): string[] {
     // normalize:
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     let myTag = tag.toLowerCase().replace(/-/g, "_");
@@ -212,7 +220,7 @@ function normalizedLanguageTag(tag: string): string {
     const baseTag = subtags.pop();
     // find all combinations of subtags
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const taglist = [];
+    const taglist: string[] = [];
     /*
   for(let i = subtags.length; i >= 0; i -= 1) {
     // for tags in unique_combinations(subtags, n):
@@ -221,6 +229,7 @@ function normalizedLanguageTag(tag: string): string {
   taglist += base_tag
   return taglist
 */
+    return taglist;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -292,8 +301,8 @@ class BadOptionDataError implements Error {
           - `BadOptionDataError` for invalid option data (missing name,
             missing data, bad quotes, etc.).
 */
-function extractOptions(fieldList: NodeInterface): [string, string][] {
-    const  optionList = [];
+function extractOptions(fieldList: NodeInterface): [string, string | undefined][] {
+    const  optionList: [string, string | undefined][] = [];
     for(let i = 0; i < fieldList.children.length; i += 1) {
         const field = fieldList.children[i];
         if(pySplit(field.children[0].astext()).length !== 1) {

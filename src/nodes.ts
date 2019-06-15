@@ -20,7 +20,7 @@ import Transformer from "./Transformer";
 /* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */
 import { InvalidArgumentsError, InvalidStateError, UnimplementedError } from "./Exceptions";
 import unescape from "./utils/unescape";
-import { checkDocumentArg, isIterable } from "./utils";
+import { checkDocumentArg, isIterable, pySplit } from "./utils";
 import {
     Attributes,
     Document,
@@ -133,25 +133,55 @@ function setupBacklinkable(o: NodeInterface): void {
     o.addBackref = (refid: string): void => { o.attributes.backrefs.push(refid) };
 }
 
-/* This needs to be implemented - fixme */
+/**
+ * Convert `string` into an identifier and return it.
+ *
+ * Docutils identifiers will conform to the regular expression
+ * ``[a-z](-?[a-z0-9]+)*``.  For CSS compatibility, identifiers (the "class"
+ * and "id" attributes) should have no underscores, colons, or periods.
+ * Hyphens may be used.
+ *
+ * - The `HTML 4.01 spec`_ defines identifiers based on SGML tokens:
+ *
+ *       ID and NAME tokens must begin with a letter ([A-Za-z]) and may be
+ *       followed by any number of letters, digits ([0-9]), hyphens ("-"),
+ *       underscores ("_"), colons (":"), and periods (".").
+ *
+ * - However the `CSS1 spec`_ defines identifiers based on the "name" token,
+ *   a tighter interpretation ("flex" tokenizer notation; "latin1" and
+ *   "escape" 8-bit characters have been replaced with entities)::
+ *
+ *       unicode     \\[0-9a-f]{1,4}
+ *       latin1      [&iexcl;-&yuml;]
+ *       escape      {unicode}|\\[ -~&iexcl;-&yuml;]
+ *       nmchar      [-a-z0-9]|{latin1}|{escape}
+ *       name        {nmchar}+
+ *
+ * The CSS1 "nmchar" rule does not include underscores ("_"), colons (":"),
+ * or periods ("."), therefore "class" and "id" attributes should not contain
+ * these characters. They should be replaced with hyphens ("-"). Combined
+ * with HTML's requirements (the first character must be a letter; no
+ * "unicode", "latin1", or "escape" characters), this results in the
+ * ``[a-z](-?[a-z0-9]+)*`` pattern.
+ *
+ * .. _HTML 4.01 spec: http://www.w3.org/TR/html401
+ * .. _CSS1 spec: http://www.w3.org/TR/REC-CSS1
+ */
 function makeId(strVal: string): string {
-    return strVal;
-    /*
-  let id = string.lower();
-  // This is for unicode, I believe?
-  //if not isinstance(id, str):
-  //id = id.decode()
-  id = id.translate(_non_id_translate_digraphs)
-  id = id.translate(_non_id_translate)
-  // get rid of non-ascii characters.
-  // 'ascii' lowercase to prevent problems with turkish locale.
-  id = unicodedata.normalize('NFKD', id).\
-       encode('ascii', 'ignore').decode('ascii')
-  # shrink runs of whitespace and replace by hyphen
-  id = _non_id_chars.sub('-', ' '.join(id.split()))
-  id = _non_id_at_ends.sub('', id)
-  return str(id)
-*/
+    let id = strVal.toLowerCase();
+    // This is for unicode, I believe?
+    //if not isinstance(id, str):
+    //id = id.decode()
+    // id = translate(_nonIdTranslateDigraphs);
+    //id = id.translate(_nonIdTranslate);
+    // get rid of non-ascii characters.
+    // 'ascii' lowercase to prevent problems with turkish locale.
+    //id = unicodedata.normalize('NFKD', id).
+    //    encode('ascii', 'ignore').decode('ascii');
+    // shrink runs of whitespace and replace by hyphen
+    id = pySplit(id).join(' ').replace(_nonIdChars, '-');
+    id = id.replace(_nonIdAtEnds, '');
+    return id;
 }
 
 function _callDefaultVisit(node: NodeInterface): void | undefined | {} {
@@ -509,7 +539,7 @@ abstract class Node implements NodeInterface {
 
     public document?: Document;
 
-    public source: string = "";
+    public source: string|undefined;
 
     public line: number = 0;
 
@@ -1444,6 +1474,7 @@ export interface TransformerInterface {
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 interface NameTypes {
+    [name: string]: any;
 }
 
 interface Ids {
@@ -1566,13 +1597,13 @@ class document extends Element implements Document {
         this.document = this;
     }
 
-    public setId(node: NodeInterface, msgnode?: NodeInterface): void {
+    public setId(node: NodeInterface, msgnode?: NodeInterface): string {
         let msg;
-        let id: string;
+        let id = '';
         node.attributes.ids.forEach((myId: string): void => {
             if (myId in this.ids && this.ids[myId] !== node) {
                 msg = this.reporter.severe(`Duplicate ID: "${myId}".`);
-                if (msgnode !== undefined) {
+                if (msgnode !== undefined && msg !== undefined) {
                     msgnode.add(msg);
                 }
             }
@@ -1633,7 +1664,9 @@ class document extends Element implements Document {
                     }
                     if (level > 1) {
                         dupname(oldNode, name);
-                        this.nameIds[name] = null;
+                        // worth seeing if the same behavior can be obtained
+                        // via deletion
+                        this.nameIds[name] = undefined;
                     }
                 }
                 const msg = this.reporter.systemMessage(
@@ -1654,7 +1687,7 @@ class document extends Element implements Document {
             }
         } else {
             if (oldId != null && !oldExplicit) {
-                this.nameIds[name] = null;
+                this.nameIds[name] = undefined;
                 oldNode = this.ids[oldId];
                 dupname(oldNode, name);
             }
@@ -1666,7 +1699,7 @@ class document extends Element implements Document {
                 // eslint-disable-next-line @typescript-eslint/camelcase
                 { backrefs: [id], base_node: node }
             );
-            if (msgnode != null) {
+            if (msgnode != null && msg !== undefined) {
                 msgnode.add(msg);
             }
         }
@@ -1782,8 +1815,9 @@ class document extends Element implements Document {
     public noteSubstitutionDef(subdef: substitution_definition, defName: string, msgnode: NodeInterface): void {
         const name = whitespaceNormalizeName(defName);
         if (Object.keys(this.substitutionDefs).includes(name)) {
-            const msg = this.reporter.error(`Duplicate substitution definition name: "${name}".`, { baseNode: subdef });
-            if (msgnode != null) {
+            const msg = this.reporter.error(`Duplicate substitution definition name: "${name}".`, [],
+              { baseNode: subdef });
+            if (msgnode != null && msg !== undefined) {
                 msgnode.add(msg);
             }
             const oldnode = this.substitutionDefs[name];
@@ -2118,7 +2152,7 @@ class enumerated_list extends Element {
 
     public prefix?: string;
 
-    public enumtype: string;
+    public enumtype: string = '';
 
     /* eslint-disable-next-line no-useless-constructor */
 

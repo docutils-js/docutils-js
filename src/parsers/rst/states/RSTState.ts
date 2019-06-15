@@ -1,20 +1,20 @@
-import StateWS from '../../../states/StateWS';
-import NestedStateMachine from '../NestedStateMachine';
-import * as nodes from '../../../nodes';
-import {EOFError, InvalidArgumentsError} from '../../../Exceptions';
-import {Document, ElementInterface, NodeInterface} from "../../../types";
+import StateWS from "../../../states/StateWS";
+import NestedStateMachine from "../NestedStateMachine";
+import * as nodes from "../../../nodes";
+import { EOFError, InvalidArgumentsError } from "../../../Exceptions";
+import { Document, ElementInterface, NodeInterface } from "../../../types";
 import StringList from "../../../StringList";
 import Inliner from "../Inliner";
 import RSTStateMachine from "../RSTStateMachine";
-import { NestedParseArgs, RstMemo, RSTStateArgs } from "../types";
+import { Explicit, NestedParseArgs, RstMemo, RSTStateArgs } from "../types";
 
 abstract class RSTState extends StateWS {
-    static stateName: string;
+    public static stateName: string;
 
     private nestedSmCache: any[] = [];
 
 
-    public explicit: any
+    public explicit: Explicit;
     public memo?: RstMemo;
     public inliner?: Inliner;
     protected parent?: ElementInterface;
@@ -80,7 +80,7 @@ abstract class RSTState extends StateWS {
         return [context, null, []];
     }
 
-    public bof() {
+    public bof(): {}[][] {
         return [[], []];
     }
 
