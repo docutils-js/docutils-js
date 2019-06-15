@@ -40,15 +40,16 @@ class StateMachine implements Statemachine {
 
     public inputLines: StringList = new StringList([]);
 
-    public debugFn: DebugFunction = (line) => {};
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    public debugFn: DebugFunction = (line): void => {};
 
     public debug: boolean;
 
     /*
      * Initialize a `StateMachine` object; add state objects.
-     * 
+     *
      * Parameters:
-     * 
+     *
      *  - `stateClasses`: a list of `State` (sub)classes.
      *  - `initialState`: a string, the class name of the initial state.
      *  - `debug`: a boolean; produce verbose output if true (nonzero).
@@ -90,8 +91,8 @@ class StateMachine implements Statemachine {
             cArgs.debug = false;
         }
         if (cArgs.debug && !cArgs.debugFn) {
-          // make this unexpected error?
-          // throw new Error("unexpected lack of debug function");
+            // make this unexpected error?
+            // throw new Error("unexpected lack of debug function");
             /* eslint-disable-next-line no-console */
             cArgs.debugFn = console.log;
         }
@@ -132,7 +133,7 @@ class StateMachine implements Statemachine {
 
     /**
      * Run the state machine on `input_lines`. Return results (a list).
-     * 
+     *
      * Reset `self.line_offset` and `self.current_state`. Run the
      * beginning-of-file transition. Input one line at a time and check for a
      * matching transition. If a match is found, call the transition method
@@ -141,9 +142,9 @@ class StateMachine implements Statemachine {
      * Accumulate the results returned by the transition methods in a list.
      * Run the end-of-file transition. Finally, return the accumulated
      * results.
-     * 
+     *
      * Parameters:
-     * 
+     *
      * - `input_lines`: a list of strings without newlines, or `StringList`.
      * - `input_offset`: the line offset of `input_lines` from the beginning
      *   of the file.
@@ -151,7 +152,7 @@ class StateMachine implements Statemachine {
      * - `input_source`: name or path of source of `input_lines`.
      * - `initial_state`: name of initial state.
      */
-     public run(args: StateMachineRunArgs): (string|{})[] {
+    public run(args: StateMachineRunArgs): (string|{})[] {
         const cArgs: StateMachineRunArgs = { ...args };
         this.runtimeInit();
         if (cArgs.inputLines instanceof StringList) {
@@ -238,11 +239,10 @@ class StateMachine implements Statemachine {
                     if (error instanceof TransitionCorrection) {
                         this.previousLine();
                         transitions = [error.args[0]];
-                        /* if self.debug:
-                        print >>self._stderr, (
-                              '\nStateMachine.run: TransitionCorrection to '
-                              'state "%s", transition %s.'
-                              % (state.__class__.__name__, transitions[0])) */
+                        if(this.debug) {
+                            this.debugFn(`\nStateMachine.run: TransitionCorrection to `
+                            `state "${state.stateName}", transition ${transitions[0]}.`);
+                        }
                         /* Cant continue, makes no sense? ??  */
                         /* eslint-disable-next-line no-continue */
                         continue;
