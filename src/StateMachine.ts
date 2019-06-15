@@ -274,15 +274,17 @@ class StateMachine implements Statemachine {
     }
 
     /**
-     *         Return current state object; set it first if
-     *         `next_state` given.  Parameter `next_state`: a string,
-     *         the name of the next state.  Exception:
-     *         `UnknownStateError` raised if `next_state` unknown.
+     * Return current state object; set it first if
+     * `next_state` given.  Parameter `next_state`: a string,
+     * the name of the next state.  Exception:
+     * `UnknownStateError` raised if `next_state` unknown.
      */
     public getState(nextState?: StateInterface): StateInterface {
         if (nextState) {
             if (this.debug && nextState !== this.currentState) {
-                this.debugFn(`StateMachine.getState: changing state from "${this.currentState}" to "${nextState}" (input line ${this.absLineNumber()})`);
+                this.debugFn(`StateMachine.getState: ` +
+                  `changing state from "${this.currentState}"` +
+                  `to "${nextState}" (input line ${this.absLineNumber()})`);
             }
             this.currentState = nextState;
         }
@@ -290,15 +292,16 @@ class StateMachine implements Statemachine {
             throw new InvalidStateError();
         }
         if (this.states[this.currentState] === undefined) {
-            throw new UnknownStateError(this.currentState, JSON.stringify(this.states));
+            throw new UnknownStateError(this.currentState,
+              JSON.stringify(this.states));
         }
         console.log(this.currentState);
         return this.states[this.currentState];
     }
 
-    /* Load `self.line` with the `n`'th next line and return it. */
+    /** Load `self.line` with the `n`'th next line and return it. */
     public nextLine(n = 1): string {
-        // /     console.log('*** advancing to next line');
+        // console.log('*** advancing to next line');
         this.lineOffset += n;
         if (this.lineOffset >= this.inputLines.length) {
             this.line = '';
@@ -308,7 +311,7 @@ class StateMachine implements Statemachine {
 
         this.line = this.inputLines[this.lineOffset];
         this.notifyObservers();
-        //      console.log(`line is "${this.line}"`);
+        // console.log(`line is "${this.line}"`);
         return this.line;
     }
 
@@ -553,7 +556,9 @@ function expandtabs(strVal: string): string {
     let tabIndex;
     /* eslint-disable-next-line no-cond-assign */
     while ((tabIndex = strVal.indexOf('\t')) !== -1) {
-        strVal = strVal.substring(0, tabIndex) + Array(8 - (tabIndex % 8)).fill(' ').join('') + strVal.substring(tabIndex + 1);
+        strVal = strVal.substring(0, tabIndex) +
+          Array(8 - (tabIndex % 8)).fill(' ').join('')
+          + strVal.substring(tabIndex + 1);
     }
     return strVal;
 }
