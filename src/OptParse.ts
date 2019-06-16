@@ -62,8 +62,9 @@ class OptionParser {
     }
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    public checkValues(values: {}, args: string[]): {} {
-
+    public checkValues(values: {}, args: string[]): {}|undefined
+    {
+return undefined;
     }
 }
 
