@@ -6,7 +6,7 @@ class Explicit extends SpecializedBody {
     /** Footnotes, hyperlink targets, directives, comments. */
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
     // @ts-ignore
-    explicit_markup(match, context, nextState) {
+    public explicit_markup(match, context, nextState) {
         const [nodelist, blankFinish] = this.explicit_construct(match);
         this.parent!.add(nodelist);
         this.blankFinish = blankFinish;
@@ -15,7 +15,7 @@ class Explicit extends SpecializedBody {
 
     /** Determine which explicit construct this is, parse & return it. */
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
-    explicit_construct(match: any) {
+    public explicit_construct(match: any) {
         const errors = [];
         /* eslint-disable-next-line no-restricted-syntax */
         for (const [method, pattern] of this.explicit.constructs) {
@@ -42,7 +42,7 @@ class Explicit extends SpecializedBody {
 
     /** Anonymous hyperlink targets. */
     // @ts-ignore
-    anonymous(match, context, nextState) {
+    public anonymous(match, context, nextState) {
         const [nodelist, blankFinish] = this.anonymous_target(match);
         this.parent!.add(nodelist);
         this.blankFinish = blankFinish;

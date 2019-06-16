@@ -64,11 +64,14 @@ export class SystemMessage extends Error {
         }
     }
 }
+interface ErrorArgs {
+    error?: Error | undefined;
+}
 
 export class ApplicationError extends Error {
     public error: Error | undefined;
-    public args: {} | undefined;
-    public constructor(message: string, args?: { error?: Error}) {
+    public args: ErrorArgs;
+    public constructor(message: string, args: ErrorArgs={}) {
         super(message);
         this.args = args;
         if(args !== undefined) {
@@ -82,7 +85,7 @@ export class ApplicationError extends Error {
 }
 
 export class DataError extends ApplicationError {
-    public constructor(message: string, args?: {}) {
+    public constructor(message: string, args?: ErrorArgs) {
         super(message, args);
         /* instanbul ignore else */
         if (Error.captureStackTrace) {

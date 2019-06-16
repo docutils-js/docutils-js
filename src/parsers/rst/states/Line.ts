@@ -53,7 +53,7 @@ class Line extends SpecializedText {
     /** Potential over- & underlined title. */
     /* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */
     // @ts-ignore
-    text(match, context, nextState) {
+    public text(match, context, nextState) {
         const lineno = this.rstStateMachine.absLineNumber() - 1;
         let overline = context[0];
         let title = match.result.input;
@@ -134,7 +134,7 @@ class Line extends SpecializedText {
 
     /* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */
     // @ts-ignore
-    underline(match, context, nextState) {
+    public underline(match, context, nextState) {
         const overline = context[0];
         const blocktext = `${overline}\n${this.rstStateMachine.line}`;
         const lineno = this.rstStateMachine.absLineNumber() - 1;
@@ -150,7 +150,7 @@ class Line extends SpecializedText {
         return [[], 'Body', []];
     }
 
-    shortOverline(context: any[], blocktext: any | any[], lineno: number, lines = 1) {
+    public shortOverline(context: any[], blocktext: any | any[], lineno: number, lines = 1): void {
         const msg = this.reporter!.info(
             'Possible incomplete section title.\nTreating the overline as '
             + "ordinary text because it's so short.", [],
@@ -160,7 +160,7 @@ class Line extends SpecializedText {
         this.stateCorrection(context, lines);
     }
 
-    public stateCorrection(context: any[], lines = 1) {
+    public stateCorrection(context: any[], lines = 1): never {
         this.rstStateMachine.previousLine(lines);
         context.length = 0;
         throw new StateCorrection('Body', 'text');

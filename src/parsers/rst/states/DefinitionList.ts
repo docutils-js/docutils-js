@@ -3,7 +3,7 @@ import SpecializedBody from './SpecializedBody';
 class DefinitionList extends SpecializedBody {
     /* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */
     // @ts-ignore
-    text(match, context, nextState) {
+    public text(match, context, nextState) {
         return [[match.result.input], 'Definition', []];
     }
 }

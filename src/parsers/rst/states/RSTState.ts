@@ -33,7 +33,7 @@ abstract class RSTState extends StateWS {
         this.rstStateMachine = stateMachine;
     }
 
-    // fixme this whole thing needs rework
+    public // fixme this whole thing needs rework
     _init(stateMachine: RSTStateMachine, args: RSTStateArgs) {
         super._init(stateMachine, args);
         this.rstStateMachine = stateMachine;
@@ -50,7 +50,7 @@ abstract class RSTState extends StateWS {
         };
     }
 
-    runtimeInit() {
+    public runtimeInit() {
         super.runtimeInit();
         const {memo} = this.rstStateMachine;
         this.memo = memo;
@@ -233,7 +233,7 @@ abstract class RSTState extends StateWS {
     }
 
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
-    title_inconsistent(sourcetext: string, lineno: number) {
+    public title_inconsistent(sourcetext: string, lineno: number) {
         const error = this.reporter!.severe(
             'Title level inconsistent:', [new nodes.literal_block('', sourcetext)], {line: lineno},
         );
@@ -274,12 +274,12 @@ abstract class RSTState extends StateWS {
         memo.sectionLevel = myLevel;
     }
 
-    unindentWarning(nodeName: string): NodeInterface {
+    public unindentWarning(nodeName: string): NodeInterface {
         const lineno = this.rstStateMachine.absLineNumber() + 1;
         return this.reporter!.warning(`${nodeName} ends without a blank line; unexpected unindent.`, {line: lineno});
     }
 
-    paragraph(lines: string[], lineno: number): any[] {
+    public paragraph(lines: string[], lineno: number): any[] {
         const data = lines.join('\n').trimRight();
         let text;
         let literalNext;
@@ -305,7 +305,7 @@ abstract class RSTState extends StateWS {
     }
 
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
-    inline_text(text: string, lineno: number) {
+    public inline_text(text: string, lineno: number) {
         const r = this.inliner!.parse(text, {lineno, memo: this.memo, parent: this.parent!});
         return r;
     }

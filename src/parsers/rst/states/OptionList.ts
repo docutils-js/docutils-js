@@ -7,7 +7,7 @@ class OptionList extends SpecializedBody {
     /** Option list item. */
     /* eslint-disable-next-line */
     // @ts-ignore
-    option_marker(match, context, nextState) {
+    public option_marker(match, context, nextState) {
         let optionListItem;
         let blankFinish;
         try {

@@ -612,7 +612,7 @@ if(srcline !== undefined) {
         return [[error], blankFinish];
     }
 
-    public comment(match: any) {
+    public comment(match: any): [NodeInterface[], boolean] {
         const matchEnd = match.result.index + match.result[0].length;
         if (!match.result.input.substring(matchEnd).trim()
       && this.rstStateMachine.isNextLineBlank()) { // # an empty comment?
@@ -665,7 +665,7 @@ if(srcline !== undefined) {
             } catch (error) {
                 if (error instanceof MarkupError) {
                     const lineno = this.rstStateMachine.absLineNumber();
-                    const message = error.args ? error.args.join(" ") : "";
+                    const message = error.message;//args ? error.args.join(" ") : "";
                     errors.push(this.reporter!.warning(message, [], { line: lineno }));
                 } else {
                     throw error;

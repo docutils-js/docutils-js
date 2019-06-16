@@ -4,27 +4,27 @@ import RSTStateMachine from "../RSTStateMachine";
 import {RSTStateArgs} from "../types";
 
 class SpecializedBody extends Body {
-    _init(stateMachine: RSTStateMachine, args: RSTStateArgs) {
+    public _init(stateMachine: RSTStateMachine, args: RSTStateArgs) {
         super._init(stateMachine, args);
     }
 
     /* istanbul ignore next */
     // @ts-ignore
-    indent() {
+    public indent() {
         // @ts-ignore
         this.invalid_input();
     }
 
     /* istanbul ignore next */
     // @ts-ignore
-    bullet() {
+    public bullet() {
         // @ts-ignore
         this.invalid_input();
     }
 
     /* istanbul ignore next */
     // @ts-ignore
-    enumerator() {
+    public enumerator() {
         // @ts-ignore
         this.invalid_input();
     }
@@ -32,7 +32,7 @@ class SpecializedBody extends Body {
     /* istanbul ignore next */
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,@typescript-eslint/no-unused-vars,no-unused-vars */
     // @ts-ignore
-    field_marker() {
+    public field_marker() {
         // @ts-ignore
         this.invalid_input();
     }
@@ -40,14 +40,14 @@ class SpecializedBody extends Body {
     /* istanbul ignore next */
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,@typescript-eslint/no-unused-vars,no-unused-vars */
     // @ts-ignore
-    option_marker() {
+    public option_marker() {
         // @ts-ignore
         this.invalid_input();
     }
 
     /* istanbul ignore next */
     // @ts-ignore
-    doctest() {
+    public doctest() {
         // @ts-ignore
         this.invalid_input();
     }
@@ -55,7 +55,7 @@ class SpecializedBody extends Body {
     /* istanbul ignore next */
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,@typescript-eslint/no-unused-vars,no-unused-vars */
     // @ts-ignore
-    line_block() {
+    public line_block() {
         // @ts-ignore
         this.invalid_input();
     }
@@ -63,7 +63,7 @@ class SpecializedBody extends Body {
     /* istanbul ignore next */
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,@typescript-eslint/no-unused-vars,no-unused-vars */
     // @ts-ignore
-    grid_table_top() {
+    public grid_table_top() {
         // @ts-ignore
         this.invalid_input();
     }
@@ -71,7 +71,7 @@ class SpecializedBody extends Body {
     /* istanbul ignore next */
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,@typescript-eslint/no-unused-vars,no-unused-vars */
     // @ts-ignore
-    simple_table_top() {
+    public simple_table_top() {
         // @ts-ignore
         this.invalid_input();
     }
@@ -79,35 +79,35 @@ class SpecializedBody extends Body {
     /* istanbul ignore next */
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,@typescript-eslint/no-unused-vars,no-unused-vars */
     // @ts-ignore
-    explicit_markup() {
+    public explicit_markup() {
         // @ts-ignore
         this.invalid_input();
     }
 
     /* istanbul ignore next */
     // @ts-ignore
-    anonymous() {
+    oublic anonymous() {
         // @ts-ignore
         this.invalid_input();
     }
 
     /* istanbul ignore next */
     // @ts-ignore
-    line() {
+    public line() {
         // @ts-ignore
         this.invalid_input();
     }
 
     /* istanbul ignore next */
     // @ts-ignore
-    text() {
+    public text() {
         // @ts-ignore
         this.invalid_input();
     }
 
     /* istanbul ignore next */
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,@typescript-eslint/no-unused-vars,no-unused-vars */
-    invalid_input(match: any, context: any[], nextState: any): any[] {
+    public invalid_input(match: any, context: any[], nextState: any): any[] {
         this.rstStateMachine.previousLine();
         throw new EOFError();
     }

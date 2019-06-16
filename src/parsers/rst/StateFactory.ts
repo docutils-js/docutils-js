@@ -2,7 +2,7 @@ import * as RSTStates from './RSTStates';
 import { Statefactory, StateInterface, Statemachine, StateType } from "../../types";
 
 class StateFactory implements Statefactory {
-    private stateClasses?: StateType[];
+    private stateClasses: StateType[]= [];
     private args: any | undefined;
     public constructor(args?: { stateClasses?: StateType[] }) {
         this.args = args;
@@ -117,7 +117,7 @@ class StateFactory implements Statefactory {
         return new StateClass(stateMachine, { });
     }
 
-    public getStateClasses() {
+    public getStateClasses(): StateType[] {
         return this.stateClasses;
     }
 
