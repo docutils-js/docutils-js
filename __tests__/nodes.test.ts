@@ -41,7 +41,7 @@ test('NodeVisitor.constructor', () => {
 
 test('_domNode', () => {
     const p = new nodes.paragraph('test', 'test', [], {});
-    });
+});
 
 test('firstChildNotMatchingClass', () => {
     const node = newDocument({ sourcePath: ''}, defaults)

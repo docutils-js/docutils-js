@@ -6,7 +6,7 @@ const currentLogLines = [];
 
 afterEach(() => {
     if (currentLogLines.length) {
-//      console.log(currentLogLines.join('\n') + '\n');
+        //      console.log(currentLogLines.join('\n') + '\n');
         currentLogLines.length = 0;
     }
 });
@@ -26,10 +26,10 @@ test('rst2pojo pipeline', () => {
     const settings = { ...defaultSettings };
     const args = { ...defaultArgs };
 
-/* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */
+    /* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */
     const debugFn = (msg: string) => {
-//      console.log(msg);
-//      currentLogLines.push(msg);
+        //      console.log(msg);
+        //      currentLogLines.push(msg);
     };
 
     const { readerName, parserName, writerName } = args;
@@ -38,7 +38,7 @@ test('rst2pojo pipeline', () => {
 I like food.
 
 `,
-);
+    );
 
     const destination = new StringOutput();
     const pub = new Publisher({

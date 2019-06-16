@@ -43,7 +43,7 @@ test('full rst2xml pipeline with specific input', () => {
     );
     const destination = new StringOutput();
     if(defaults === undefined) {
-      throw new Error('no defaults');
+        throw new Error('no defaults');
     }
     const pub = new Publisher({
         source, destination, settings: defaults, debug: true, debugFn,

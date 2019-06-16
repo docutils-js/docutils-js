@@ -8,17 +8,17 @@ import StringList from '../src/StringList';
 
 /* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */
 function cartesianProduct(...arrays: any[]) {
-        function _inner(...args: any[]): any {
-                if (arguments.length > 1) {
-                        const arr2 = args.pop(); // arr of arrs of elems
-                        const arr1 = args.pop(); // arr of elems
-                        return _inner(...args,
-                                arr1.map((e1: any) => arr2.map((e2: any[]) => [e1, ...e2]))
-                                    .reduce((arr: any, e: any) => arr.concat(e), []));
-                }
-                        return args[0];
+    function _inner(...args: any[]): any {
+        if (arguments.length > 1) {
+            const arr2 = args.pop(); // arr of arrs of elems
+            const arr1 = args.pop(); // arr of elems
+            return _inner(...args,
+                arr1.map((e1: any) => arr2.map((e2: any[]) => [e1, ...e2]))
+                    .reduce((arr: any, e: any) => arr.concat(e), []));
         }
-        return _inner(...arrays, [[]]);
+        return args[0];
+    }
+    return _inner(...arrays, [[]]);
 }
 /* trimLeft
 getTextBlock
@@ -34,7 +34,7 @@ viewlist: splice, slice, info, trimStart, trimEnd
 
 const testLines = [['test\n123\nlalala\n']];
 const lineArray = testLines.map((lines, index) => [index.toString(),
-                                               new StringList(string2lines(lines[0]))]);
+    new StringList(string2lines(lines[0]))]);
 
 test.each(lineArray)('%s', (index, lines) => {
     const s = lines.slice(0, lines.length);
@@ -42,10 +42,10 @@ test.each(lineArray)('%s', (index, lines) => {
     s.trimLeft(3);
     expect(s).toMatchSnapshot();
     // @ts-ignore
-  s.trimTop();
+    s.trimTop();
     expect(s).toMatchSnapshot();
     // @ts-ignore
-  s.trimTop(2);
+    s.trimTop(2);
     expect(s).toHaveLength(0);
 });
 
@@ -53,7 +53,7 @@ test.each(lineArray)('%s splice', (index, lines) => {
     const s = lines.slice(0, lines.length);
     expect(s).toMatchSnapshot('original');
     // @ts-ignore
-  expect(s.splice(0, 1)).toMatchSnapshot('splice return');
+    expect(s.splice(0, 1)).toMatchSnapshot('splice return');
     expect(s).toMatchSnapshot('final');
 });
 

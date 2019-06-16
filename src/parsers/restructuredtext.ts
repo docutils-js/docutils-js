@@ -42,7 +42,7 @@ class Parser extends BaseParser {
             debug: document.reporter.debugFlag,
         });
         if(document.settings.docutilsParsersRstParser === undefined) {
-            throw new InvalidStateError(('need document and config for rstparser'));
+            throw new InvalidStateError(('need config for rstparser'));
         }
         let tabWidth = document.settings.docutilsParsersRstParser.tabWidth;
         const inputLines = statemachine.string2lines(

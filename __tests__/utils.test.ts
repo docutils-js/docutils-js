@@ -9,9 +9,9 @@ import { LogLevel } from "../src/types";
 test('1', () => {
     const r = newReporter({sourcePath:''}, { ...defaults });
 
-//    r.attachObserver(node => {
-//      console.log(node.children[0].children[0].astext());
-//    })
+    //    r.attachObserver(node => {
+    //      console.log(node.children[0].children[0].astext());
+    //    })
     r.debug('hello');
 });
 

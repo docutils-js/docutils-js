@@ -59,7 +59,7 @@ beforeEach(() => {
     // @ts-ignore
     Writer.mockImplementation(args => ({
         getTransforms: () => [],
-    /* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */
+        /* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */
         write: (document: any, destination: any) => document,
         assembleParts: () => {},
     }));
