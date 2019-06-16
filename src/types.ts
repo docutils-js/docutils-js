@@ -10,6 +10,7 @@ import Transformer from "./Transformer";
 import StringList from "./StringList";
 import { InlinerInterface } from "./parsers/rst/types";
 import Parser from "./Parser";
+import Output from "./io/Output";
 
 export interface ParserArgs
 {
@@ -254,7 +255,7 @@ export interface ComponentInterface extends TransformSpecInterface {
      * To be used by transforms to ask the dependent component if it supports
      * a certain input context or output format.
      */
-    supports(format: string): boolean;
+    supports?(format: string): boolean;
 }
 
 export enum LogLevel {
@@ -383,6 +384,7 @@ export interface StateInterface {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     noMatch(context: any[], transitions: TransitionsArray|undefined): [{}[], (string | StateInterface | undefined), {}[]];
 
+    transitions: Transitions;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -541,4 +543,16 @@ export interface ParserConsructor {
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface WriterParts {
     [partName: string]: string | undefined;
+}
+
+export interface NodeClass {
+    new(): NodeInterface;
+}
+
+export interface WriteFunction {
+    (): {};
+}
+
+export interface Destination extends Output<string>, WriteFunction {
+
 }

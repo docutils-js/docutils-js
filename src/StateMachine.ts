@@ -25,6 +25,7 @@ import {
 import State from "./states/State";
 import TransitionCorrection from "./TransitionCorrection";
 import UnexpectedIndentationError from "./error/UnexpectedIndentationError";
+import { name } from "ejs";
 
 interface States {
     [stateName: string]: StateInterface;
@@ -218,7 +219,6 @@ class StateMachine implements Statemachine {
                             throw new Error('context should be array');
                         }
 
-                        this.checkLine(context, state, transitions);
                         const r = this.checkLine(context, state, transitions);
                         /* istanbul ignore if */
                         if (!isIterable(r)) {
@@ -310,7 +310,7 @@ class StateMachine implements Statemachine {
         }
         if (this.states[this.currentState] === undefined) {
             throw new UnknownStateError(this.currentState);
-                }
+        }
         console.log(this.currentState);
         return this.states[this.currentState];
     }
@@ -464,19 +464,23 @@ class StateMachine implements Statemachine {
 
         /* eslint-disable-next-line no-restricted-syntax */
         // @ts-ignore
-        Object.entries(transitions).forEach(([k, v]) => {
-            const [ pattern, method, nextState] = v;
-        });
-        /*
-            const [pattern, method, nextState] = state.transitions[name];
+        for(let i = 0; i < transitions.length; i++) {
+            // @ts-ignore
+            let t = transitions[i];
+            // @ts-ignore
+            const v = state.transitions[t];
+
+            const [pattern, method, nextState] = v;
+            if(!pattern.exec){
+                throw new InvalidStateError(`unexpected pattern ${v}`);
+            }
             const result = pattern.exec(this.line);
             if (result) {
                 if (this.debug) {
                     this.debugFn(`\nStateMachine.checkLine: `
                       + `Matched transition '"${name}"`
-                        + `in state "${state.constructor.name}`);
+                      + `in state "${state.constructor.name}`);
                 }
-                // console.log(`pattern match for ${name}`);
                 const r = method.bind(state)({ pattern, result, input: this.line },
                     context, nextState);
                 // istanbul ignore if
@@ -487,7 +491,8 @@ class StateMachine implements Statemachine {
                 // console.log(r);
                 return r;
             }
-            */
+        }
+
         return state.noMatch(context, transitions);
     }
 

@@ -1,184 +1,184 @@
 export interface DocutilsCoreOptionParser {
     /** DocutilsCoreOptionParser: Specify the document title as metadata. */
-    title?: any;
+    title?: string;
     /** DocutilsCoreOptionParser: Do not include a generator credit. */
-    generator?: any;
+    generator?: string;
     /** DocutilsCoreOptionParser: Do not include a datestamp of any kind. */
-    datestamp?: any;
+    datestamp?: string;
     /** DocutilsCoreOptionParser: Include a "View document source" link. */
     sourceLink?: boolean;
     /** DocutilsCoreOptionParser: Use <URL> for a source link; implies --source-link. */
-    sourceUrl?: any;
+    sourceUrl?: string;
     /** DocutilsCoreOptionParser: Do not include a "View document source" link. */
-    noSourceLink?: any;
+    noSourceLink?: string;
     /** DocutilsCoreOptionParser: Disable backlinks to the table of contents. */
-    tocBacklinks?: any;
+    tocBacklinks?: string;
     /** DocutilsCoreOptionParser: Disable backlinks from footnotes and citations. */
-    footnoteBacklinks?: any;
+    footnoteBacklinks?: number;
     /** DocutilsCoreOptionParser: Disable section numbering by Docutils. */
-    sectnumXform?: any;
+    sectnumXform?: number;
     /** DocutilsCoreOptionParser: Leave comment elements in the document tree. (default) */
-    stripComments?: any;
+    stripComments?: string;
     /** DocutilsCoreOptionParser: Remove all elements with classes="<class>" from the document tree. Warning: potentially dangerous; use with caution. (Multiple-use option.) */
-    stripElementsWithClasses?: any;
+    stripElementsWithClasses?: string;
     /** DocutilsCoreOptionParser: Remove all classes="<class>" attributes from elements in the document tree. Warning: potentially dangerous; use with caution. (Multiple-use option.) */
-    stripClasses?: any;
+    stripClasses?: string;
     /** DocutilsCoreOptionParser: Report no system messages.  (Same as "--report=5".) */
-    reportLevel?: any;
+    reportLevel?: number;
     /** DocutilsCoreOptionParser: Halt at the slightest problem.  Same as "--halt=info". */
-    haltLevel?: any;
+    haltLevel?: number;
     /** DocutilsCoreOptionParser: Enable a non-zero exit status for non-halting system messages at or above <level>.  Default: 5 (disabled). */
-    exitStatusLevel?: any;
+    exitStatusLevel?: number   ;
     /** DocutilsCoreOptionParser: Disable debug output.  (default) */
-    debug?: any;
+    debug?: boolean;
     /** DocutilsCoreOptionParser: Send the output of system messages to <file>. */
-    warningStream?: any;
+    warningStream?: string;
     /** DocutilsCoreOptionParser: Disable Python tracebacks.  (default) */
-    traceback?: any;
+    traceback?: string;
     /** DocutilsCoreOptionParser: Specify the encoding and optionally the error handler of input text.  Default: <locale-dependent>:strict. */
-    inputEncoding?: any;
+    inputEncoding?: string;
     /** DocutilsCoreOptionParser: Specify the error handler for undecodable characters.  Choices: "strict" (default), "ignore", and "replace". */
-    inputEncodingErrorHandler?: any;
+    inputEncodingErrorHandler?: string;
     /** DocutilsCoreOptionParser: Specify the text encoding and optionally the error handler for output.  Default: UTF-8:strict. */
-    outputEncoding?: any;
+    outputEncoding?: string;
     /** DocutilsCoreOptionParser: Specify error handler for unencodable output characters; "strict" (default), "ignore", "replace", "xmlcharrefreplace", "backslashreplace". */
-    outputEncodingErrorHandler?: any;
+    outputEncodingErrorHandler?: string;
     /** DocutilsCoreOptionParser: Specify text encoding and error handler for error output.  Default text encoding: system encoding. Default error handler: backslashreplace. */
-    errorEncoding?: any;
+    errorEncoding?: string;
     /** DocutilsCoreOptionParser: Specify the error handler for unencodable characters in error output.  Default: backslashreplace. */
-    errorEncodingErrorHandler?: any;
+    errorEncodingErrorHandler?: string;
     /** DocutilsCoreOptionParser: Specify the language (as BCP 47 language tag).  Default: en. */
-    languageCode?: any;
+    languageCode?: string;
     /** DocutilsCoreOptionParser: Write output file dependencies to <file>. */
-    recordDependencies?: any;
+    recordDependencies?: string;
     /** DocutilsCoreOptionParser: Read configuration settings from <file>, if it exists. */
-    config?: any;
+    config?: string;
     /** DocutilsCoreOptionParser: Show this program's version number and exit. */
-    version?: any;
+    version?: string;
     /** DocutilsCoreOptionParser: Show this help message and exit. */
-    help?: any;
+    help?: string;
     /** DocutilsCoreOptionParser: SUPPRESSHELP */
-    idPrefix?: any;
+    idPrefix?: string;
     /** DocutilsCoreOptionParser: SUPPRESSHELP */
-    autoIdPrefix?: any;
+    autoIdPrefix?: string;
     /** DocutilsCoreOptionParser: SUPPRESSHELP */
-    dumpSettings?: any;
+    dumpSettings?: string;
     /** DocutilsCoreOptionParser: SUPPRESSHELP */
-    dumpInternals?: any;
+    dumpInternals?: string;
     /** DocutilsCoreOptionParser: SUPPRESSHELP */
-    dumpTransforms?: any;
+    dumpTransforms?: string;
     /** DocutilsCoreOptionParser: SUPPRESSHELP */
-    dumpPseudoXml?: any;
+    dumpPseudoXml?: string;
     /** DocutilsCoreOptionParser: SUPPRESSHELP */
-    exposeInternals?: any;
+    exposeInternals?: string;
     /** DocutilsCoreOptionParser: SUPPRESSHELP */
-    strictVisitor?: any;
+    strictVisitor?: string;
 }
 
 export interface DocutilsFrontendOptionParser {
     /** DocutilsFrontendOptionParser: Specify the document title as metadata. */
-    title?: any;
+    title?: string;
     /** DocutilsFrontendOptionParser: Do not include a generator credit. */
-    generator?: any;
+    generator?: string;
     /** DocutilsFrontendOptionParser: Do not include a datestamp of any kind. */
-    datestamp?: any;
+    datestamp?: string;
     /** DocutilsFrontendOptionParser: Include a "View document source" link. */
     sourceLink?: boolean;
     /** DocutilsFrontendOptionParser: Use <URL> for a source link; implies --source-link. */
-    sourceUrl?: any;
+    sourceUrl?: string;
     /** DocutilsFrontendOptionParser: Do not include a "View document source" link. */
-    noSourceLink?: any;
+    noSourceLink?: string;
     /** DocutilsFrontendOptionParser: Disable backlinks to the table of contents. */
-    tocBacklinks?: any;
+    tocBacklinks?: string;
     /** DocutilsFrontendOptionParser: Disable backlinks from footnotes and citations. */
-    footnoteBacklinks?: any;
+    footnoteBacklinks?: number;
     /** DocutilsFrontendOptionParser: Disable section numbering by Docutils. */
-    sectnumXform?: any;
+    sectnumXform?: number;
     /** DocutilsFrontendOptionParser: Leave comment elements in the document tree. (default) */
-    stripComments?: any;
+    stripComments?: string;
     /** DocutilsFrontendOptionParser: Remove all elements with classes="<class>" from the document tree. Warning: potentially dangerous; use with caution. (Multiple-use option.) */
-    stripElementsWithClasses?: any;
+    stripElementsWithClasses?: string;
     /** DocutilsFrontendOptionParser: Remove all classes="<class>" attributes from elements in the document tree. Warning: potentially dangerous; use with caution. (Multiple-use option.) */
-    stripClasses?: any;
+    stripClasses?: string;
     /** DocutilsFrontendOptionParser: Report no system messages.  (Same as "--report=5".) */
-    reportLevel?: any;
+    reportLevel?: number;
     /** DocutilsFrontendOptionParser: Halt at the slightest problem.  Same as "--halt=info". */
-    haltLevel?: any;
+    haltLevel?: number;
     /** DocutilsFrontendOptionParser: Enable a non-zero exit status for non-halting system messages at or above <level>.  Default: 5 (disabled). */
-    exitStatusLevel?: any;
+    exitStatusLevel?: number;
     /** DocutilsFrontendOptionParser: Disable debug output.  (default) */
-    debug?: any;
+    debug?: string;
     /** DocutilsFrontendOptionParser: Send the output of system messages to <file>. */
-    warningStream?: any;
+    warningStream?: string;
     /** DocutilsFrontendOptionParser: Disable Python tracebacks.  (default) */
-    traceback?: any;
+    traceback?: string;
     /** DocutilsFrontendOptionParser: Specify the encoding and optionally the error handler of input text.  Default: <locale-dependent>:strict. */
-    inputEncoding?: any;
+    inputEncoding?: string;
     /** DocutilsFrontendOptionParser: Specify the error handler for undecodable characters.  Choices: "strict" (default), "ignore", and "replace". */
-    inputEncodingErrorHandler?: any;
+    inputEncodingErrorHandler?: string;
     /** DocutilsFrontendOptionParser: Specify the text encoding and optionally the error handler for output.  Default: UTF-8:strict. */
-    outputEncoding?: any;
+    outputEncoding?: string;
     /** DocutilsFrontendOptionParser: Specify error handler for unencodable output characters; "strict" (default), "ignore", "replace", "xmlcharrefreplace", "backslashreplace". */
-    outputEncodingErrorHandler?: any;
+    outputEncodingErrorHandler?: string;
     /** DocutilsFrontendOptionParser: Specify text encoding and error handler for error output.  Default text encoding: system encoding. Default error handler: backslashreplace. */
-    errorEncoding?: any;
+    errorEncoding?: string;
     /** DocutilsFrontendOptionParser: Specify the error handler for unencodable characters in error output.  Default: backslashreplace. */
-    errorEncodingErrorHandler?: any;
+    errorEncodingErrorHandler?: string;
     /** DocutilsFrontendOptionParser: Specify the language (as BCP 47 language tag).  Default: en. */
-    languageCode?: any;
+    languageCode?: string;
     /** DocutilsFrontendOptionParser: Write output file dependencies to <file>. */
-    recordDependencies?: any;
+    recordDependencies?: string;
     /** DocutilsFrontendOptionParser: Read configuration settings from <file>, if it exists. */
-    config?: any;
+    config?: string;
     /** DocutilsFrontendOptionParser: Show this program's version number and exit. */
-    version?: any;
+    version?: string;
     /** DocutilsFrontendOptionParser: Show this help message and exit. */
-    help?: any;
+    help?: string;
     /** DocutilsFrontendOptionParser: SUPPRESSHELP */
-    idPrefix?: any;
+    idPrefix?: string;
     /** DocutilsFrontendOptionParser: SUPPRESSHELP */
-    autoIdPrefix?: any;
+    autoIdPrefix?: string;
     /** DocutilsFrontendOptionParser: SUPPRESSHELP */
-    dumpSettings?: any;
+    dumpSettings?: string;
     /** DocutilsFrontendOptionParser: SUPPRESSHELP */
-    dumpInternals?: any;
+    dumpInternals?: string;
     /** DocutilsFrontendOptionParser: SUPPRESSHELP */
-    dumpTransforms?: any;
+    dumpTransforms?: string;
     /** DocutilsFrontendOptionParser: SUPPRESSHELP */
-    dumpPseudoXml?: any;
+    dumpPseudoXml?: string;
     /** DocutilsFrontendOptionParser: SUPPRESSHELP */
-    exposeInternals?: any;
+    exposeInternals?: string;
     /** DocutilsFrontendOptionParser: SUPPRESSHELP */
-    strictVisitor?: any;
+    strictVisitor?: string;
 }
 
 export interface DocutilsParsersRstParser {
     /** DocutilsParsersRstParser: Recognize and link to standalone PEP references (like "PEP 258"). */
     pepReferences?: boolean;
     /** DocutilsParsersRstParser: Base URL for PEP references (default "http://www.python.org/dev/peps/"). */
-    pepBaseUrl?: any;
+    pepBaseUrl?: string;
     /** DocutilsParsersRstParser: Template for PEP file part of URL. (default "pep-%04d") */
-    pepFileUrlTemplate?: any;
+    pepFileUrlTemplate?: string;
     /** DocutilsParsersRstParser: Recognize and link to standalone RFC references (like "RFC 822"). */
     rfcReferences?: boolean;
     /** DocutilsParsersRstParser: Base URL for RFC references (default "http://tools.ietf.org/html/"). */
-    rfcBaseUrl?: any;
+    rfcBaseUrl?: string;
     /** DocutilsParsersRstParser: Set number of spaces for tab expansion (default 8). */
-    tabWidth?: any;
+    tabWidth?: number;
     /** DocutilsParsersRstParser: Leave spaces before footnote references. */
-    trimFootnoteReferenceSpace?: any;
+    trimFootnoteReferenceSpace?: string;
     /** DocutilsParsersRstParser: Enable directives that insert the contents of external file ("include" & "raw").  Enabled by default. */
-    fileInsertionEnabled?: any;
+    fileInsertionEnabled?: number;
     /** DocutilsParsersRstParser: Enable the "raw" directive.  Enabled by default. */
-    rawEnabled?: any;
+    rawEnabled?: number;
     /** DocutilsParsersRstParser: Token name set for parsing code with Pygments: one of "long", "short", or "none (no parsing)". Default is "long". */
-    syntaxHighlight?: any;
+    syntaxHighlight?: string;
     /** DocutilsParsersRstParser: Change straight quotation marks to typographic form: one of "yes", "no", "alt[ernative]" (default "no"). */
-    smartQuotes?: any;
+    smartQuotes?: boolean;
     /** DocutilsParsersRstParser: Characters to use as "smart quotes" for <language>.  */
-    smartquotesLocales?: any;
+    smartquotesLocales?: string;
     /** DocutilsParsersRstParser: Inline markup recognized anywhere, regardless of surrounding characters. Backslash-escapes must be used to avoid unwanted markup recognition. Useful for East Asian languages. Experimental. */
-    characterLevelInlineMarkup?: any;
+    characterLevelInlineMarkup?: boolean;
 }
 
 export interface DocutilsWritersDocutilsXmlWriter {
@@ -194,33 +194,33 @@ export interface DocutilsWritersDocutilsXmlWriter {
 
 export interface DocutilsWritersPepHtmlWriter {
     /** DocutilsWritersPepHtmlWriter: Specify the template file (UTF-8 encoded).  Default is "/usr/share/docutils/writers/html4css1/template.txt". */
-    template?: any;
+    template?: string;
     /** DocutilsWritersPepHtmlWriter: Comma separated list of stylesheet URLs. Overrides previous --stylesheet and --stylesheet-path settings. */
-    stylesheet?: any;
+    stylesheet?: string;
     /** DocutilsWritersPepHtmlWriter: Comma separated list of stylesheet paths. Relative paths are expanded if a matching file is found in the --stylesheet-dirs. With --link-stylesheet, the path is rewritten relative to the output HTML file. Default: "html4css1.css" */
-    stylesheetPath?: any;
+    stylesheetPath?: string[];
     /** DocutilsWritersPepHtmlWriter: Link to the stylesheet(s) in the output HTML file. Default: embed stylesheets. */
-    embedStylesheet?: any;
+    embedStylesheet?: number;
     /** DocutilsWritersPepHtmlWriter: Comma-separated list of directories where stylesheets are found. Used by --stylesheet-path when expanding relative path arguments. Default: "['.', '/usr/share/docutils/writers/html4css1', '/usr/share/docutils/writers/html5_polyglot']" */
-    stylesheetDirs?: any;
+    stylesheetDirs?: string[];
     /** DocutilsWritersPepHtmlWriter: Specify the initial header level.  Default is 1 for "<h1>".  Does not affect document title & subtitle (see --no-doc-title). */
-    initialHeaderLevel?: any;
+    initialHeaderLevel?: string;
     /** DocutilsWritersPepHtmlWriter: Specify the maximum width (in characters) for one-column field names.  Longer field names will span an entire row of the table used to render the field list.  Default is 14 characters.  Use 0 for "no limit". */
-    fieldNameLimit?: any;
+    fieldNameLimit?: number;
     /** DocutilsWritersPepHtmlWriter: Specify the maximum width (in characters) for options in option lists.  Longer options will span an entire row of the table used to render the option list.  Default is 14 characters.  Use 0 for "no limit". */
-    optionLimit?: any;
+    optionLimit?: number;
     /** DocutilsWritersPepHtmlWriter: Format for footnote references: one of "superscript" or "brackets".  Default is "brackets". */
-    footnoteReferences?: any;
+    footnoteReferences?: string;
     /** DocutilsWritersPepHtmlWriter: Format for block quote attributions: one of "dash" (em-dash prefix), "parentheses"/"parens", or "none".  Default is "dash". */
-    attribution?: any;
+    attribution?: string;
     /** DocutilsWritersPepHtmlWriter: Disable compact simple bullet and enumerated lists. */
-    compactLists?: any;
+    compactLists?: number;
     /** DocutilsWritersPepHtmlWriter: Disable compact simple field lists. */
-    compactFieldLists?: any;
+    compactFieldLists?: number;
     /** DocutilsWritersPepHtmlWriter: Added to standard table classes. Defined styles: "borderless". Default: "" */
-    tableStyle?: any;
+    tableStyle?: string;
     /** DocutilsWritersPepHtmlWriter: Math output format, one of "MathML", "HTML", "MathJax" or "LaTeX". Default: "HTML math.css" */
-    mathOutput?: any;
+    mathOutput?: string;
     /** DocutilsWritersPepHtmlWriter: Omit the XML declaration.  Use with caution. */
     xmlDeclaration?: boolean;
     /** DocutilsWritersPepHtmlWriter: Obfuscate email addresses to confuse harvesters while still keeping email links usable with standards-compliant browsers. */
@@ -229,29 +229,29 @@ export interface DocutilsWritersPepHtmlWriter {
 
 export interface DocutilsWritersLatex2EWriter {
     /** DocutilsWritersLatex2EWriter: Specify documentclass.  Default is "article". */
-    documentclass?: any;
+    documentclass?: string;
     /** DocutilsWritersLatex2EWriter: Specify document options.  Multiple options can be given, separated by commas.  Default is "a4paper". */
-    documentoptions?: any;
+    documentoptions?: string;
     /** DocutilsWritersLatex2EWriter: Footnotes with numbers/symbols by Docutils. (default) */
     docutilsFootnotes?: boolean;
     /** DocutilsWritersLatex2EWriter: Format for footnote references: one of "superscript" or "brackets".  Default is "superscript". */
-    footnoteReferences?: any;
+    footnoteReferences?: string;
     /** DocutilsWritersLatex2EWriter: Use figure floats for citations (might get mixed with real figures). (default) */
     useLatexCitations?: boolean;
     /** DocutilsWritersLatex2EWriter: Format for block quote attributions: one of "dash" (em-dash prefix), "parentheses"/"parens", or "none".  Default is "dash". */
-    attribution?: any;
+    attribution?: string;
     /** DocutilsWritersLatex2EWriter: Specify LaTeX packages/stylesheets.  A style is referenced with \usepackage if extension is ".sty" or omitted and with \input else.  Overrides previous --stylesheet and --stylesheet-path settings. */
-    stylesheet?: any;
+    stylesheet?: string;
     /** DocutilsWritersLatex2EWriter: Comma separated list of LaTeX packages/stylesheets. Relative paths are expanded if a matching file is found in the --stylesheet-dirs. With --link-stylesheet, the path is rewritten relative to the output *.tex file.  */
-    stylesheetPath?: any;
+    stylesheetPath?: string;
     /** DocutilsWritersLatex2EWriter: Embed the stylesheet(s) in the output file. Stylesheets must be accessible during processing.  */
     embedStylesheet?: boolean;
     /** DocutilsWritersLatex2EWriter: Comma-separated list of directories where stylesheets are found. Used by --stylesheet-path when expanding relative path arguments. Default: "." */
-    stylesheetDirs?: any;
+    stylesheetDirs?: string[];
     /** DocutilsWritersLatex2EWriter: Customization by LaTeX code in the preamble. Default: select PDF standard fonts (Times, Helvetica, Courier). */
-    latexPreamble?: any;
+    latexPreamble?: string;
     /** DocutilsWritersLatex2EWriter: Specify the template file. Default: "default.tex". */
-    template?: any;
+    template?: string;
     /** DocutilsWritersLatex2EWriter: Table of contents by Docutils (without page numbers).  */
     useLatexToc?: boolean;
     /** DocutilsWritersLatex2EWriter: Add parts on top of the section hierarchy. */
@@ -261,40 +261,40 @@ export interface DocutilsWritersLatex2EWriter {
     /** DocutilsWritersLatex2EWriter: Use LaTeX abstract environment for the document's abstract.  */
     useLatexAbstract?: boolean;
     /** DocutilsWritersLatex2EWriter: Color of any hyperlinks embedded in text (default: "blue", "false" to disable). */
-    hyperlinkColor?: any;
+    hyperlinkColor?: string;
     /** DocutilsWritersLatex2EWriter: Additional options to the "hyperref" package (default: ""). */
-    hyperrefOptions?: any;
+    hyperrefOptions?: string;
     /** DocutilsWritersLatex2EWriter: Disable compound enumerators for nested enumerated lists. This is the default. */
-    compoundEnumerators?: any;
+    compoundEnumerators?: string;
     /** DocutilsWritersLatex2EWriter: Disable section prefixes for compound enumerators.  This is the default. */
-    sectionPrefixForEnumerators?: any;
+    sectionPrefixForEnumerators?: string;
     /** DocutilsWritersLatex2EWriter: Set the separator between section number and enumerator for compound enumerated lists.  Default is "-". */
-    sectionEnumeratorSeparator?: any;
+    sectionEnumeratorSeparator?: string;
     /** DocutilsWritersLatex2EWriter: When possible, use the specified environment for literal-blocks. Default is quoting of whitespace and special chars. */
-    literalBlockEnv?: any;
+    literalBlockEnv?: string;
     /** DocutilsWritersLatex2EWriter: When possible, use verbatim for literal-blocks. Compatibility alias for "--literal-block-env=verbatim". */
     useVerbatimWhenPossible?: boolean;
     /** DocutilsWritersLatex2EWriter: Table style. "standard" with horizontal and vertical lines, "booktabs" (LaTeX booktabs style) only horizontal lines above and below the table and below the header or "borderless".  Default: "standard" */
-    tableStyle?: any;
+    tableStyle?: string[];
     /** DocutilsWritersLatex2EWriter: LaTeX graphicx package option. Possible values are "dvips", "pdftex". "auto" includes LaTeX code to use "pdftex" if processing with pdf(la)tex and dvips otherwise. Default is no option. */
-    graphicxOption?: any;
+    graphicxOption?: string;
     /** DocutilsWritersLatex2EWriter: LaTeX font encoding. Possible values are "", "T1" (default), "OT1", "LGR,T1" or any other combination of options to the `fontenc` package.  */
-    fontEncoding?: any;
+    fontEncoding?: string;
     /** DocutilsWritersLatex2EWriter: Per default the latex-writer puts the reference title into hyperreferences. Specify "ref*" or "pageref*" to get the section number or the page number. */
-    referenceLabel?: any;
+    referenceLabel?: string;
     /** DocutilsWritersLatex2EWriter: Specify style and database for bibtex, for example "--use-bibtex=mystyle,mydb1,mydb2". */
-    useBibtex?: any;
+    useBibtex?: string;
 }
 
 export interface DocutilsWritersOdfOdtWriter {
     /** DocutilsWritersOdfOdtWriter: Specify a stylesheet.  Default: "/usr/share/docutils/writers/odf_odt/styles.odt" */
-    stylesheet?: any;
+    stylesheet?: string;
     /** DocutilsWritersOdfOdtWriter: Specify a configuration/mapping file relative to the current working directory for additional ODF options.  In particular, this file may contain a section named "Formats" that maps default style names to names to be used in the resulting output file allowing for adhering to external standards. For more info and the format of the configuration/mapping file, see the odtwriter doc. */
-    odfConfigFile?: any;
+    odfConfigFile?: string;
     /** DocutilsWritersOdfOdtWriter: Do not obfuscate email addresses. */
     cloakEmailAddresses?: boolean;
     /** DocutilsWritersOdfOdtWriter: Specify the thickness of table borders in thousands of a cm.  Default is 35. */
-    tableBorderThickness?: any;
+    tableBorderThickness?: string;
     /** DocutilsWritersOdfOdtWriter: Do not add syntax highlighting in literal code blocks. (default) */
     addSyntaxHighlighting?: boolean;
     /** DocutilsWritersOdfOdtWriter: Do not create sections for headers. */
@@ -306,9 +306,9 @@ export interface DocutilsWritersOdfOdtWriter {
     /** DocutilsWritersOdfOdtWriter: Generate an ODF/oowriter table of contents, not a bullet list. (default) */
     generateOowriterToc?: boolean;
     /** DocutilsWritersOdfOdtWriter: Specify the contents of an custom header line.  See odf_odt writer documentation for details about special field character sequences. */
-    customHeader?: any;
+    customHeader?: string;
     /** DocutilsWritersOdfOdtWriter: Specify the contents of an custom footer line.  See odf_odt writer documentation for details about special field character sequences. */
-    customFooter?: any;
+    customFooter?: string;
 }
 
 export interface DocutilsWritersOdfOdtReader {
@@ -317,38 +317,38 @@ export interface DocutilsWritersOdfOdtReader {
     /** DocutilsWritersOdfOdtReader: Disable the bibliographic field list transform (enabled by default). */
     docinfoXform?: boolean;
     /** DocutilsWritersOdfOdtReader: Deactivate the promotion of lone subsection titles. */
-    sectsubtitleXform?: any;
+    sectsubtitleXform?: string;
 }
 
 export interface DocutilsWritersHtml4Css1Writer {
     /** DocutilsWritersHtml4Css1Writer: Specify the template file (UTF-8 encoded).  Default is "/usr/share/docutils/writers/html4css1/template.txt". */
-    template?: any;
+    template?: string;
     /** DocutilsWritersHtml4Css1Writer: Comma separated list of stylesheet URLs. Overrides previous --stylesheet and --stylesheet-path settings. */
-    stylesheet?: any;
+    stylesheet?: string;
     /** DocutilsWritersHtml4Css1Writer: Comma separated list of stylesheet paths. Relative paths are expanded if a matching file is found in the --stylesheet-dirs. With --link-stylesheet, the path is rewritten relative to the output HTML file. Default: "html4css1.css" */
-    stylesheetPath?: any;
+    stylesheetPath?: string[];
     /** DocutilsWritersHtml4Css1Writer: Link to the stylesheet(s) in the output HTML file. Default: embed stylesheets. */
-    embedStylesheet?: any;
+    embedStylesheet?: number;
     /** DocutilsWritersHtml4Css1Writer: Comma-separated list of directories where stylesheets are found. Used by --stylesheet-path when expanding relative path arguments. Default: "['.', '/usr/share/docutils/writers/html4css1', '/usr/share/docutils/writers/html5_polyglot']" */
-    stylesheetDirs?: any;
+    stylesheetDirs?: string[];
     /** DocutilsWritersHtml4Css1Writer: Specify the initial header level.  Default is 1 for "<h1>".  Does not affect document title & subtitle (see --no-doc-title). */
-    initialHeaderLevel?: any;
+    initialHeaderLevel?: number;
     /** DocutilsWritersHtml4Css1Writer: Specify the maximum width (in characters) for one-column field names.  Longer field names will span an entire row of the table used to render the field list.  Default is 14 characters.  Use 0 for "no limit". */
-    fieldNameLimit?: any;
+    fieldNameLimit?: number;
     /** DocutilsWritersHtml4Css1Writer: Specify the maximum width (in characters) for options in option lists.  Longer options will span an entire row of the table used to render the option list.  Default is 14 characters.  Use 0 for "no limit". */
-    optionLimit?: any;
+    optionLimit?: number;
     /** DocutilsWritersHtml4Css1Writer: Format for footnote references: one of "superscript" or "brackets".  Default is "brackets". */
-    footnoteReferences?: any;
+    footnoteReferences?: string;
     /** DocutilsWritersHtml4Css1Writer: Format for block quote attributions: one of "dash" (em-dash prefix), "parentheses"/"parens", or "none".  Default is "dash". */
-    attribution?: any;
+    attribution?: string;
     /** DocutilsWritersHtml4Css1Writer: Disable compact simple bullet and enumerated lists. */
-    compactLists?: any;
+    compactLists?: number;
     /** DocutilsWritersHtml4Css1Writer: Disable compact simple field lists. */
-    compactFieldLists?: any;
+    compactFieldLists?: number;
     /** DocutilsWritersHtml4Css1Writer: Added to standard table classes. Defined styles: "borderless". Default: "" */
-    tableStyle?: any;
+    tableStyle?: string;
     /** DocutilsWritersHtml4Css1Writer: Math output format, one of "MathML", "HTML", "MathJax" or "LaTeX". Default: "HTML math.css" */
-    mathOutput?: any;
+    mathOutput?: string;
     /** DocutilsWritersHtml4Css1Writer: Omit the XML declaration.  Use with caution. */
     xmlDeclaration?: boolean;
     /** DocutilsWritersHtml4Css1Writer: Obfuscate email addresses to confuse harvesters while still keeping email links usable with standards-compliant browsers. */
@@ -357,29 +357,29 @@ export interface DocutilsWritersHtml4Css1Writer {
 
 export interface DocutilsWritersXetexWriter {
     /** DocutilsWritersXetexWriter: Specify documentclass.  Default is "article". */
-    documentclass?: any;
+    documentclass?: string;
     /** DocutilsWritersXetexWriter: Specify document options.  Multiple options can be given, separated by commas.  Default is "a4paper". */
-    documentoptions?: any;
+    documentoptions?: string;
     /** DocutilsWritersXetexWriter: Footnotes with numbers/symbols by Docutils. (default) */
     docutilsFootnotes?: boolean;
     /** DocutilsWritersXetexWriter: Format for footnote references: one of "superscript" or "brackets".  Default is "superscript". */
-    footnoteReferences?: any;
+    footnoteReferences?: string;
     /** DocutilsWritersXetexWriter: Use figure floats for citations (might get mixed with real figures). (default) */
     useLatexCitations?: boolean;
     /** DocutilsWritersXetexWriter: Format for block quote attributions: one of "dash" (em-dash prefix), "parentheses"/"parens", or "none".  Default is "dash". */
-    attribution?: any;
+    attribution?: string;
     /** DocutilsWritersXetexWriter: Specify LaTeX packages/stylesheets.  A style is referenced with \usepackage if extension is ".sty" or omitted and with \input else.  Overrides previous --stylesheet and --stylesheet-path settings. */
-    stylesheet?: any;
+    stylesheet?: string;
     /** DocutilsWritersXetexWriter: Comma separated list of LaTeX packages/stylesheets. Relative paths are expanded if a matching file is found in the --stylesheet-dirs. With --link-stylesheet, the path is rewritten relative to the output *.tex file.  */
-    stylesheetPath?: any;
+    stylesheetPath?: string;
     /** DocutilsWritersXetexWriter: Embed the stylesheet(s) in the output file. Stylesheets must be accessible during processing.  */
     embedStylesheet?: boolean;
     /** DocutilsWritersXetexWriter: Comma-separated list of directories where stylesheets are found. Used by --stylesheet-path when expanding relative path arguments. Default: "." */
-    stylesheetDirs?: any;
+    stylesheetDirs?: string;
     /** DocutilsWritersXetexWriter: Customization by LaTeX code in the preamble. Default: select "Linux Libertine" fonts. */
-    latexPreamble?: any;
+    latexPreamble?: string;
     /** DocutilsWritersXetexWriter: Template file. Default: "xelatex.tex". */
-    template?: any;
+    template?: string;
     /** DocutilsWritersXetexWriter: Table of contents by Docutils (without page numbers).  */
     useLatexToc?: boolean;
     /** DocutilsWritersXetexWriter: Add parts on top of the section hierarchy. */
@@ -389,95 +389,96 @@ export interface DocutilsWritersXetexWriter {
     /** DocutilsWritersXetexWriter: Use LaTeX abstract environment for the document's abstract.  */
     useLatexAbstract?: boolean;
     /** DocutilsWritersXetexWriter: Color of any hyperlinks embedded in text (default: "blue", "false" to disable). */
-    hyperlinkColor?: any;
+    hyperlinkColor?: string;
     /** DocutilsWritersXetexWriter: Additional options to the "hyperref" package (default: ""). */
-    hyperrefOptions?: any;
+    hyperrefOptions?: string;
     /** DocutilsWritersXetexWriter: Disable compound enumerators for nested enumerated lists. This is the default. */
-    compoundEnumerators?: any;
+    compoundEnumerators?: string;
     /** DocutilsWritersXetexWriter: Disable section prefixes for compound enumerators.  This is the default. */
-    sectionPrefixForEnumerators?: any;
+    sectionPrefixForEnumerators?: string;
     /** DocutilsWritersXetexWriter: Set the separator between section number and enumerator for compound enumerated lists.  Default is "-". */
-    sectionEnumeratorSeparator?: any;
+    sectionEnumeratorSeparator?: string;
     /** DocutilsWritersXetexWriter: When possible, use the specified environment for literal-blocks. Default is quoting of whitespace and special chars. */
-    literalBlockEnv?: any;
+    literalBlockEnv?: string;
     /** DocutilsWritersXetexWriter: When possible, use verbatim for literal-blocks. Compatibility alias for "--literal-block-env=verbatim". */
     useVerbatimWhenPossible?: boolean;
     /** DocutilsWritersXetexWriter: Table style. "standard" with horizontal and vertical lines, "booktabs" (LaTeX booktabs style) only horizontal lines above and below the table and below the header or "borderless".  Default: "standard" */
-    tableStyle?: any;
+    tableStyle?: string;
     /** DocutilsWritersXetexWriter: LaTeX graphicx package option. Possible values are "dvips", "pdftex". "auto" includes LaTeX code to use "pdftex" if processing with pdf(la)tex and dvips otherwise. Default is no option. */
-    graphicxOption?: any;
+    graphicxOption?: string;
     /** DocutilsWritersXetexWriter: Per default the latex-writer puts the reference title into hyperreferences. Specify "ref*" or "pageref*" to get the section number or the page number. */
-    referenceLabel?: any;
+    referenceLabel?: string;
     /** DocutilsWritersXetexWriter: Specify style and database for bibtex, for example "--use-bibtex=mystyle,mydb1,mydb2". */
-    useBibtex?: any;
+    useBibtex?: string;
 }
 
 export interface DocutilsWritersHtml5PolyglotWriter {
     /** DocutilsWritersHtml5PolyglotWriter: Specify the template file (UTF-8 encoded).  Default is "/usr/share/docutils/writers/html5_polyglot/template.txt". */
-    template?: any;
+    template?: string;
     /** DocutilsWritersHtml5PolyglotWriter: Comma separated list of stylesheet URLs. Overrides previous --stylesheet and --stylesheet-path settings. */
-    stylesheet?: any;
+    stylesheet?: string;
     /** DocutilsWritersHtml5PolyglotWriter: Comma separated list of stylesheet paths. Relative paths are expanded if a matching file is found in the --stylesheet-dirs. With --link-stylesheet, the path is rewritten relative to the output HTML file. Default: "minimal.css,plain.css" */
-    stylesheetPath?: any;
+    stylesheetPath?: string;
     /** DocutilsWritersHtml5PolyglotWriter: Link to the stylesheet(s) in the output HTML file. Default: embed stylesheets. */
-    embedStylesheet?: any;
+    embedStylesheet?: string;
     /** DocutilsWritersHtml5PolyglotWriter: Comma-separated list of directories where stylesheets are found. Used by --stylesheet-path when expanding relative path arguments. Default: "['.', '/usr/share/docutils/writers/html5_polyglot']" */
-    stylesheetDirs?: any;
+    stylesheetDirs?: string;
     /** DocutilsWritersHtml5PolyglotWriter: Specify the initial header level.  Default is 1 for "<h1>".  Does not affect document title & subtitle (see --no-doc-title). */
-    initialHeaderLevel?: any;
+    initialHeaderLevel?: string;
     /** DocutilsWritersHtml5PolyglotWriter: Format for footnote references: one of "superscript" or "brackets".  Default is "brackets". */
-    footnoteReferences?: any;
+    footnoteReferences?: string;
     /** DocutilsWritersHtml5PolyglotWriter: Format for block quote attributions: one of "dash" (em-dash prefix), "parentheses"/"parens", or "none".  Default is "dash". */
-    attribution?: any;
+    attribution?: string;
     /** DocutilsWritersHtml5PolyglotWriter: Disable compact simple bullet and enumerated lists. */
-    compactLists?: any;
+    compactLists?: string;
     /** DocutilsWritersHtml5PolyglotWriter: Disable compact simple field lists. */
-    compactFieldLists?: any;
+    compactFieldLists?: string;
     /** DocutilsWritersHtml5PolyglotWriter: Added to standard table classes. Defined styles: borderless, booktabs, align-left, align-center, align-right, colwidths-auto. Default: "" */
-    tableStyle?: any;
+    tableStyle?: string;
     /** DocutilsWritersHtml5PolyglotWriter: Math output format (one of "MathML", "HTML", "MathJax", or "LaTeX") and option(s). Default: "HTML math.css" */
-    mathOutput?: any;
+    mathOutput?: string;
     /** DocutilsWritersHtml5PolyglotWriter: Omit the XML declaration. */
-    xmlDeclaration?: any;
+    xmlDeclaration?: string;
     /** DocutilsWritersHtml5PolyglotWriter: Obfuscate email addresses to confuse harvesters while still keeping email links usable with standards-compliant browsers. */
     cloakEmailAddresses?: boolean;
 }
 
 export interface DocutilsWritersS5HtmlWriter {
     /** DocutilsWritersS5HtmlWriter: Specify the template file (UTF-8 encoded).  Default is "/usr/share/docutils/writers/html4css1/template.txt". */
-    template?: any;
+    template?: string;
     /** DocutilsWritersS5HtmlWriter: Comma separated list of stylesheet URLs. Overrides previous --stylesheet and --stylesheet-path settings. */
-    stylesheet?: any;
+    stylesheet?: string;
     /** DocutilsWritersS5HtmlWriter: Comma separated list of stylesheet paths. Relative paths are expanded if a matching file is found in the --stylesheet-dirs. With --link-stylesheet, the path is rewritten relative to the output HTML file. Default: "html4css1.css" */
-    stylesheetPath?: any;
+    stylesheetPath?: string;
     /** DocutilsWritersS5HtmlWriter: Link to the stylesheet(s) in the output HTML file. Default: embed stylesheets. */
-    embedStylesheet?: any;
+    embedStylesheet?: string;
     /** DocutilsWritersS5HtmlWriter: Comma-separated list of directories where stylesheets are found. Used by --stylesheet-path when expanding relative path arguments. Default: "['.', '/usr/share/docutils/writers/html4css1', '/usr/share/docutils/writers/html5_polyglot']" */
-    stylesheetDirs?: any;
+    stylesheetDirs?: string;
     /** DocutilsWritersS5HtmlWriter: Specify the initial header level.  Default is 1 for "<h1>".  Does not affect document title & subtitle (see --no-doc-title). */
-    initialHeaderLevel?: any;
+    initialHeaderLevel?: string;
     /** DocutilsWritersS5HtmlWriter: Specify the maximum width (in characters) for one-column field names.  Longer field names will span an entire row of the table used to render the field list.  Default is 14 characters.  Use 0 for "no limit". */
-    fieldNameLimit?: any;
+    fieldNameLimit?: string;
     /** DocutilsWritersS5HtmlWriter: Specify the maximum width (in characters) for options in option lists.  Longer options will span an entire row of the table used to render the option list.  Default is 14 characters.  Use 0 for "no limit". */
-    optionLimit?: any;
+    optionLimit?: string;
     /** DocutilsWritersS5HtmlWriter: Format for footnote references: one of "superscript" or "brackets".  Default is "brackets". */
-    footnoteReferences?: any;
+    footnoteReferences?: string;
     /** DocutilsWritersS5HtmlWriter: Format for block quote attributions: one of "dash" (em-dash prefix), "parentheses"/"parens", or "none".  Default is "dash". */
-    attribution?: any;
+    attribution?: string;
     /** DocutilsWritersS5HtmlWriter: Disable compact simple bullet and enumerated lists. */
-    compactLists?: any;
+    compactLists?: string;
     /** DocutilsWritersS5HtmlWriter: Disable compact simple field lists. */
-    compactFieldLists?: any;
+    compactFieldLists?: string;
     /** DocutilsWritersS5HtmlWriter: Added to standard table classes. Defined styles: "borderless". Default: "" */
-    tableStyle?: any;
+    tableStyle?: string;
     /** DocutilsWritersS5HtmlWriter: Math output format, one of "MathML", "HTML", "MathJax" or "LaTeX". Default: "HTML math.css" */
-    mathOutput?: any;
+    mathOutput?: string;
     /** DocutilsWritersS5HtmlWriter: Omit the XML declaration.  Use with caution. */
     xmlDeclaration?: boolean;
     /** DocutilsWritersS5HtmlWriter: Obfuscate email addresses to confuse harvesters while still keeping email links usable with standards-compliant browsers. */
     cloakEmailAddresses?: boolean;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface DocutilsReadersPepReader {
 }
 
@@ -487,25 +488,25 @@ export interface DocutilsReadersStandaloneReader {
     /** DocutilsReadersStandaloneReader: Disable the bibliographic field list transform (enabled by default). */
     docinfoXform?: boolean;
     /** DocutilsReadersStandaloneReader: Deactivate the promotion of lone subsection titles. */
-    sectsubtitleXform?: any;
+    sectsubtitleXform?: boolean;
 }
 
 export interface Settings {
     _source?: string;
     _destination?: string;
-docutilsCoreOptionParser: DocutilsCoreOptionParser;
-docutilsFrontendOptionParser?: DocutilsFrontendOptionParser;
-docutilsParsersRstParser?: DocutilsParsersRstParser;
-docutilsWritersDocutilsXmlWriter?: DocutilsWritersDocutilsXmlWriter;
-docutilsWritersPepHtmlWriter?: DocutilsWritersPepHtmlWriter;
-docutilsWritersLatex2EWriter?: DocutilsWritersLatex2EWriter;
-docutilsWritersOdfOdtWriter?: DocutilsWritersOdfOdtWriter;
-docutilsWritersOdfOdtReader?: DocutilsWritersOdfOdtReader;
-docutilsWritersHtml4Css1Writer?: DocutilsWritersHtml4Css1Writer;
-docutilsWritersXetexWriter?: DocutilsWritersXetexWriter;
-docutilsWritersHtml5PolyglotWriter?: DocutilsWritersHtml5PolyglotWriter;
-docutilsWritersS5HtmlWriter?: DocutilsWritersS5HtmlWriter;
-docutilsReadersPepReader?: DocutilsReadersPepReader;
-docutilsReadersStandaloneReader?: DocutilsReadersStandaloneReader;
+    docutilsCoreOptionParser: DocutilsCoreOptionParser;
+    docutilsFrontendOptionParser?: DocutilsFrontendOptionParser;
+    docutilsParsersRstParser?: DocutilsParsersRstParser;
+    docutilsWritersDocutilsXmlWriter?: DocutilsWritersDocutilsXmlWriter;
+    docutilsWritersPepHtmlWriter?: DocutilsWritersPepHtmlWriter;
+    docutilsWritersLatex2EWriter?: DocutilsWritersLatex2EWriter;
+    docutilsWritersOdfOdtWriter?: DocutilsWritersOdfOdtWriter;
+    docutilsWritersOdfOdtReader?: DocutilsWritersOdfOdtReader;
+    docutilsWritersHtml4Css1Writer?: DocutilsWritersHtml4Css1Writer;
+    docutilsWritersXetexWriter?: DocutilsWritersXetexWriter;
+    docutilsWritersHtml5PolyglotWriter?: DocutilsWritersHtml5PolyglotWriter;
+    docutilsWritersS5HtmlWriter?: DocutilsWritersS5HtmlWriter;
+    docutilsReadersPepReader?: DocutilsReadersPepReader;
+    docutilsReadersStandaloneReader?: DocutilsReadersStandaloneReader;
 
 }

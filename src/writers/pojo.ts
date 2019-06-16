@@ -13,7 +13,8 @@ const __docformat__ = 'reStructuredText';
  */
 class POJOTranslator extends GenericNodeVisitor {
     private level: number;
-    private ancestors: {}[][];
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    private ancestors: any[][];
     private generator: string;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     private warn: OmitThisParameter<(...args: any[]) => NodeInterface>;
@@ -23,7 +24,7 @@ class POJOTranslator extends GenericNodeVisitor {
     private output: {};
     private settings: Settings;
     private fixedText: number;
-    public root?: NodeInterface;
+    public root?: {};
     /**
       * Create a POJOTranslator
       * @param {nodes.document} document - the document to translate

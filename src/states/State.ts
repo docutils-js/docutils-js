@@ -29,7 +29,7 @@ class State implements StateInterface {
     protected indentSmKwargs: any;
 
     public transitionOrder: string[] = [];
-    protected transitions: Transitions = { };
+    public transitions: Transitions = { };
     protected reporter?: ReporterInterface;
     private stateMachine?: StateMachine;
 
@@ -41,7 +41,7 @@ class State implements StateInterface {
         this.addInitialTransitions();
         /* istanbul ignore if */
         if (!stateMachine) {
-            throw new Error('Need statemachine');
+            throw new Error('Need state machine');
         }
 
 
@@ -146,7 +146,7 @@ class State implements StateInterface {
         /* istanbul ignore if */
         if (!Array.isArray(nameList)) {
             // console.log('warning, not an array');
-            throw new Error('not array');
+            throw new Error(`not array ${nameList}`);
         }
 
         /* check what happens with throw inside here */

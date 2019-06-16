@@ -28,7 +28,7 @@ abstract class Input extends TransformSpec {
     }
 
     /* istanbul ignore method */
-    abstract read(cb: ReadInputCallback<string | string[]>): void;
+    abstract read(cb: ReadInputCallback<string | string[] | {}>): void;
 
     /* istanbul ignore method */
     public decode(data: string): string {

@@ -1,7 +1,7 @@
 import BaseWriter from '../Writer';
 import * as docutils from '../index';
 import * as nodes from '../nodes';
-import {Document, NodeInterface} from "../types";
+import { Document, NodeClass, NodeInterface } from "../types";
 import {Settings} from "../../gen/Settings";
 import { InvalidArgumentsError } from "../Exceptions";
 
@@ -33,8 +33,8 @@ class XMLTranslator extends nodes.GenericNodeVisitor {
     private level: number;
     private inSimple: number;
     private fixedText: number;
-    private simple_nodes: (() => any)[] = [];
-    private doctype: any;
+    private simple_nodes: NodeClass[] = [];
+    private doctype: string = '';
 
     public constructor(document: Document) {
         super(document);
@@ -49,6 +49,8 @@ class XMLTranslator extends nodes.GenericNodeVisitor {
         const settings: Settings = this.settings;
         this.newline = '';
         this.indent = '';
+        const core = this.settings.docutilsCoreOptionParser;
+        const outputEncoding = core.outputEncoding;
         let xmlWriter = settings.docutilsWritersDocutilsXmlWriter;
         if(xmlWriter !== undefined) {
             if (xmlWriter.newlines) {
@@ -58,8 +60,8 @@ class XMLTranslator extends nodes.GenericNodeVisitor {
                 this.newline = '\n';
                 this.indent = '    ';
             }
-            if (xmlWriter.xmlDeclaration) {
-                this.output.push(this.xmlDeclaration(settings.docutilsCoreOptionParser!.outputEncoding));
+            if (xmlWriter.xmlDeclaration && outputEncoding !== undefined) {
+                this.output.push(this.xmlDeclaration(outputEncoding));
             }
             if (xmlWriter.doctypeDeclaration) {
                 this.output.push(this.doctype);
@@ -73,7 +75,8 @@ class XMLTranslator extends nodes.GenericNodeVisitor {
     }
 
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
-    public default_visit(node: NodeInterface) {
+    public default_visit(node: NodeInterface): void {
+        // eslint-disable-next-line @typescript-eslint/camelcase
         this.simple_nodes = [nodes.TextElement];// nodes.image, nodes.colspec, nodes.transition]
         if (!this.inSimple) {
             this.output.push(Array(this.level + 1).join(this.indent));
@@ -86,12 +89,10 @@ class XMLTranslator extends nodes.GenericNodeVisitor {
             this.fixedText += 1;
         } else {
             /* eslint-disable-next-line no-restricted-syntax */
-            for (const nt of this.simple_nodes) {
-                if (node instanceof nt) {
-                    this.inSimple += 1;
-                    break;
-                }
+            if(this.simple_nodes.findIndex((nt: NodeClass): boolean => node instanceof nt) !== -1) {
+                this.inSimple++;
             }
+
         }
         if (!this.inSimple) {
             this.output.push('\n');
@@ -99,7 +100,7 @@ class XMLTranslator extends nodes.GenericNodeVisitor {
     }
 
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
-    public default_departure(node: NodeInterface) {
+    public default_departure(node: NodeInterface): void {
         this.level -= 1;
         if (!this.inSimple) {
             this.output.push(Array(this.level + 1).join(this.indent));
@@ -112,7 +113,7 @@ class XMLTranslator extends nodes.GenericNodeVisitor {
     }
 
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
-    public visit_Text(node: NodeInterface) {
+    public visit_Text(node: NodeInterface): void {
         const text = escapeXml(node.astext());
         this.output.push(text);
     }
@@ -121,6 +122,7 @@ class XMLTranslator extends nodes.GenericNodeVisitor {
     public depart_Text(node: NodeInterface): void {
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     public xmlDeclaration(outputEncoding: string): string {
         return '';
 

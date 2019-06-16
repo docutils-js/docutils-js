@@ -1,10 +1,10 @@
 import Component from './Component';
 import Reader from './Reader';
 import * as standalone from './readers/standalone';
-import { ApplyFunction } from "./types";
+import { ApplyFunction, TransformType } from "./types";
 
 export class ReReader extends Reader {
-    public getTransforms(): ApplyFunction[] {
+    public getTransforms(): TransformType[] {
         // @ts-ignore
         return Component.getTransforms.bind(this)();
     }

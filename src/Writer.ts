@@ -1,6 +1,6 @@
 import Component from "./Component";
 import { getLanguage } from "./languages";
-import { Document, WriterParts } from "./types";
+import { Destination, Document, WriterParts } from "./types";
 import Output from "./io/Output";
 import { InvalidStateError } from "./Exceptions";
 
@@ -17,7 +17,7 @@ export default abstract class Writer extends Component {
      * Final translated form of `document` (Unicode string for text, binary
      * string for other forms); set by `translate`.
      */
-    protected output?: string;
+    protected output?: string|{};
     /**
      * `docutils.io` Output object; where to write the document.
      * Set by `write`.
@@ -32,26 +32,28 @@ export default abstract class Writer extends Component {
         this.parts = {};
     }
 
-    public write(document: Document, destination: Output<string>): void {
+    public write(document: Document, destination: Destination|undefined): string|{}|undefined {
         this.document = document;
         if(document !== undefined) {
+            // @ts-ignore
             this.language = getLanguage(document.settings.docutilsCoreOptionParser.languageCode,
                 document.reporter);
         }
         this.destination = destination;
         this.translate();
-        //        console.log(this.output);
         let fn;
-        if (typeof this.destination === 'function') {
-            fn = this.destination;
-        } else
-        if (typeof this.destination.write === 'function') {
-            fn = this.destination.write.bind(this.destination);
+        if(this.destination) {
+            if (typeof this.destination === 'function') {
+                fn = this.destination;
+            } else if (typeof this.destination.write === 'function') {
+                fn = this.destination.write.bind(this.destination);
+            }
         }
         if(fn !== undefined && this.output !== undefined) {
+            // @ts-ignore
             return fn(this.output);
         } else {
-            throw new InvalidStateError();
+            return this.output;
         }
     }
 
@@ -61,6 +63,7 @@ export default abstract class Writer extends Component {
         if(this.document === undefined) {
             throw new InvalidStateError();
         }
+        // @ts-ignore
         this.parts.whole = this.output;
         this.parts.encoding = this.document.settings.docutilsCoreOptionParser.outputEncoding;
         this.parts.version = __version__;

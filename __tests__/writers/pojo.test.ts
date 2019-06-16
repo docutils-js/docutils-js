@@ -1,6 +1,6 @@
 import { Publisher } from '../../src/Core';
 import { StringInput, StringOutput } from '../../src/io';
-import defaults from "../../gen/defaults";
+import { defaults } from "../../gen/defaults";
 
 const currentLogLines = [];
 
@@ -46,12 +46,15 @@ I like food.
     });
     pub.setComponents(readerName, parserName, writerName);
     return new Promise((resolve, reject) => {
-        pub.publish({}, (error: string) => {
+        pub.publish({}, (error: Error|{}|undefined) => {
             if (error) {
                 reject(error);
                 return;
             }
-            expect(JSON.parse(destination.destination!)).toMatchSnapshot();
+            expect(destination).toBeDefined();
+            expect(destination.destination).toBeDefined();
+            // @ts-ignore
+            expect(JSON.parse(destination.destination)).toMatchSnapshot();
             currentLogLines.length = 0;
             resolve();
         });

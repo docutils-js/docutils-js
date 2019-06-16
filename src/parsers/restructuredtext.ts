@@ -4,6 +4,7 @@ import RSTStateMachine from './rst/RSTStateMachine';
 import StateFactory from './rst/StateFactory';
 import {Document, ParserArgs} from "../types";
 import { InlinerInterface } from "./rst/types";
+import { InvalidStateError } from "../Exceptions";
 
 class Parser extends BaseParser {
     private inliner?: InlinerInterface;
@@ -40,13 +41,17 @@ class Parser extends BaseParser {
             debugFn: this.debugFn,
             debug: document.reporter.debugFlag,
         });
-        let tabWidth = document.settings.docutilsParsersRstParser!.tabWidth;
+        if(document.settings.docutilsParsersRstParser === undefined) {
+            throw new InvalidStateError(('need document and config for rstparser'));
+        }
+        let tabWidth = document.settings.docutilsParsersRstParser.tabWidth;
         const inputLines = statemachine.string2lines(
             inputstring, {
                 tabWidth: tabWidth,
                 convertWhitespace: true,
             },
         );
+
         //      console.log(`initial state is ${this.initialState}`);
         if(this.stateMachine.debug) {
             console.log('fo')

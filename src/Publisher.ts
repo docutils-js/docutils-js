@@ -1,10 +1,8 @@
-import {StringOutput} from './io';
+import { StringInput, StringOutput } from "./io";
 import { ApplicationError, InvalidStateError } from "./Exceptions";
-import OptionParser from './OptParse';
 import * as readers from './Readers';
 import * as writers from './Writers';
 import SettingsSpec from './SettingsSpec';
-import Source, { SourceConstructor } from "./Sources";
 /* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */
 import pojoTranslate from './fn/pojoTranslate';
 import {Settings} from "../gen/Settings";
@@ -33,6 +31,10 @@ interface OutputConstructor<T> {
     new (): Output<T>;
 }
 
+interface InputConstructor {
+    new (): Input;
+}
+
 /**
  * Publisher class.
  */
@@ -42,16 +44,16 @@ class Publisher {
         return this._document;
     }
     private settings: Settings;
-    private debugFn: DebugFunction;
+    private debugFn: DebugFunction = (msg) => {};
     private reader?: Reader;
     private _document: Document | undefined;
     private parser?: Parser;
     private writer?: Writer;
     private source?: Input;
-    private sourceClass?: SourceConstructor;
+    //KM1 private sourceClass?: InputConstructor;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    private destination?: Output<any>;
-    private destinationClass?: OutputConstructor<{}>;
+    private destination?: Output<string>;
+    //KM1 private destinationClass?: OutputConstructor<{}>;
     private debug: boolean = false;
 
     /**
@@ -85,23 +87,15 @@ class Publisher {
         this.parser = parser;
         this.writer = writer;
         this.source = source;
-        if (sourceClass2 === undefined) {
-            this.sourceClass = Source;
-        } else {
-            this.sourceClass = sourceClass2;
-        }
-
         this.destination = destination;
-        if (destinationClass2 === undefined) {
-            this.destinationClass = StringOutput
-        } else {
-            this.destinationClass = destinationClass2;
-        }
+        //KM1 this.sourceClass = sourceClass2;
+        //KM1 this.destinationClass = destinationClass2;
         this.settings = settings;
     }
 
     public setReader(readerName: string, parser?: Parser, parserName?: string): void {
         const ReaderClass = readers.getReaderClass(readerName);
+        // @ts-ignore
         this.reader = new ReaderClass({
             parser, parserName, debug: this.debug, debugFn: this.debugFn,
         });
@@ -114,6 +108,7 @@ class Publisher {
         const writerClass = writers.getWriterClass(writerName);
         /* not setting document here, the write method takes it, which
          * is confusing */
+        // @ts-ignore
         this.writer = new writerClass();
     }
 
@@ -131,7 +126,7 @@ class Publisher {
             this.setWriter(writerName);
         }
     }
-
+    /*
     public setupOptionParser(
         args: {
             usage: string; description: string; settingsSpec: SettingsSpec;
@@ -160,13 +155,14 @@ class Publisher {
         //      console.log(JSON.stringify(optionParser.settingsSpec));
         return optionParser;
     }
-
+*/
     public processCommandLine(
         args: {
             argv: string[]; usage: string; description: string; settingsSpec: SettingsSpec; configSection: string;
             settingsOverrides: {};
         }
     ): void {
+        /*
         const optionParser: OptionParser= this.setupOptionParser({
             usage: args.usage,
             description: args.description,
@@ -179,7 +175,10 @@ class Publisher {
             argv = process.argv.slice(2);
         }
         const settings = optionParser.parseArgs(argv);
+        // @ts-ignore
         this.settings = settings;
+
+         */
     }
 
     public setIO(sourcePath?: string, destinationPath?: string): void {
@@ -199,6 +198,7 @@ class Publisher {
         } else {
             this.settings._source = sourcePath;
         }
+        /*//KM1
         try {
             const SourceClass = this.sourceClass;
             let inputEncoding: string | undefined = this.settings.docutilsCoreOptionParser.inputEncoding;
@@ -214,6 +214,7 @@ class Publisher {
         } catch (error) {
             throw new ApplicationError(`Unable to instantiate Source class ${this.sourceClass.constructor.name}: ${error.message}`, { error });
         }
+        */
     }
 
     public setDestination(args: { destination?: Output<{}>; destinationPath?: string }): void {
@@ -224,17 +225,17 @@ class Publisher {
         } else {
             this.settings._destination = destinationPath;
         }
-        const DestinationClass = this.destinationClass;
+        //const DestinationClass = this.destinationClass;
         const outputEncoding = this.settings.docutilsCoreOptionParser.outputEncoding;
         let outputEncodingErrorHandler = this.settings.docutilsCoreOptionParser.outputEncodingErrorHandler;
-        this.destination = new DestinationClass(
-            {
-                destination,
-                destinationPath,
-                encoding: outputEncoding,
-                errorHandler: outputEncodingErrorHandler,
-            },
-        );
+        // this.destination = new DestinationClass(
+        //     {
+        //         destination,
+        //         destinationPath,
+        //         encoding: outputEncoding,
+        //         errorHandler: outputEncodingErrorHandler,
+        //     },
+        // );
     }
 
     public applyTransforms(): void {
@@ -257,7 +258,7 @@ class Publisher {
 
     /* This doesnt seem to return anything ? */
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    public publish(args: any, cb: (error: undefined | {}, output: undefined | {}) => void): void {
+    public publish(args: any, cb: (error: Error | undefined | {}, output: undefined | {}) => void): void {
 
         const {
             /* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */
@@ -281,25 +282,30 @@ class Publisher {
             if (typeof this.reader === 'undefined') {
                 throw new ApplicationError('Need defined reader with "read" method');
             }
-            if(this.writer === undefined) {
-                throw new InvalidStateError('need Writer');
+            if(this.writer === undefined || this.source === undefined || this.parser === undefined) {
+                throw new InvalidStateError('need Writer and source');
             }
             const writer = this.writer;
+            if(this.settings === undefined) {
+                throw new InvalidStateError('need serttings');
+            }
             this.reader.read(
                 this.source, this.parser, this.settings,
-                ((error: {}, document: Document): void => {
+                ((error: Error | {} | undefined, document: Document|undefined): void => {
                     if (error) {
                         cb(error, undefined);
                         return;
                     }
                     this._document = document;
-                    if (!document) {
-                        throw new Error('need document');
+                    if (document === undefined || this.destination === undefined) {
+                        throw new InvalidStateError('need document and destination');
                     }
                     this.applyTransforms();
 
+                    // @ts-ignore
                     const output = writer.write(document, this.destination);
                     writer.assembleParts();
+                    // @ts-ignore
                     cb(undefined, output);
                 }),
             );

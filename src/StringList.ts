@@ -49,7 +49,7 @@ class StringList extends ViewList {
                 const [source, offset] = this.info(end);
                 throw new UnexpectedIndentationError(this.slice(start, end) as StringList,
                     source, offset === undefined ? undefined : offset + 1);
-                }
+            }
             end += 1;
         }
         return this.slice(start, end) as StringList;

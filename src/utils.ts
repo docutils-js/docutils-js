@@ -1,8 +1,7 @@
 import { combining } from "./utils/combining";
 import { Settings } from "../gen/Settings";
 import { Document, NodeInterface } from "./types";
-import { nodes } from "./index";
-
+import * as nodes from './nodes';
 /** Return indices of all combining chars in  Unicode string `text`.
 
  >>> from docutils.utils import find_combining_chars

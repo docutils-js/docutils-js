@@ -1,7 +1,5 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`_domNode 1`] = `"<paragraph>test</paragraph>"`;
-
 exports[`paragraph with text 1`] = `"<paragraph>This is my paragraph text.</paragraph>"`;
 
 exports[`paragraph with text 2`] = `
@@ -43,7 +41,6 @@ paragraph {
       "names": Array [],
       "rawsource": "",
       "referenced": false,
-      "source": "",
       "tagname": "Text",
     },
   ],
@@ -76,7 +73,6 @@ paragraph {
   "nodeName": Symbol(Element),
   "rawsource": "",
   "referenced": false,
-  "source": "",
   "tagname": "paragraph",
 }
 `;

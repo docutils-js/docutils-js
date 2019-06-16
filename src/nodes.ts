@@ -28,6 +28,7 @@ import {
     FastTraverseArg,
     HasIndent,
     NameIds,
+    NodeClass,
     NodeInterface,
     QuoteattrCallback,
     ReporterInterface,
@@ -490,10 +491,6 @@ class Labeled {
 //  Functional Node: NodeInterface Base Classes
 // ==============================
 
-
-interface NodeClass {
-    new (): NodeInterface;
-}
 
 /**
  * Node class.

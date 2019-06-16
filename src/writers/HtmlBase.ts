@@ -3,14 +3,22 @@ import BaseWriter from '../Writer';
 import * as nodes from '../nodes';
 import * as utils from '../utils';
 import { basename } from '../utils/paths';
-import { getLanguage } from '../languages';
 import { UnimplementedError } from '../Exceptions';
 import {Settings} from "../../gen/Settings";
 import {Document, Attributes, NodeInterface} from "../types";
 import {row, tgroup} from "../nodes";
+import { RSTLanguage } from "../parsers/rst/types";
+import { getLanguage } from "../parsers/rst/languages";
 
 /* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */
 const __docformat__ = 'reStructuredText';
+
+interface AttributionFormats {
+    dash: string[];
+    parentheses: string[];
+    parens: string[];
+    none: string[];
+}
 
 /* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */
 const __version__ = '';
@@ -33,7 +41,7 @@ const template = ejs.compile(defaultTemplate, {});
 class HTMLTranslator extends nodes.NodeVisitor {
     private body: string[];
     private settings: Settings;
-    private language: any;
+    private language?: RSTLanguage;
     private meta: string[];
     private headPrefix: string[];
     private htmlProlog: string[];
@@ -45,10 +53,9 @@ class HTMLTranslator extends nodes.NodeVisitor {
     private htmlTitle: string[];
     private title: string[];
     private sectionLevel: number;
-    private initialHeaderLevel: number;
+    private initialHeaderLevel: number = -1;
     private topicClasses: string[];
-    private topic: any;
-    private colspecs: any[];
+    private colspecs: NodeInterface[];
     private inMailto: boolean;
     private inFootnoteList: boolean;
     private doctype: string= '';
@@ -68,22 +75,36 @@ class HTMLTranslator extends nodes.NodeVisitor {
     private inDocinfo: boolean;
     private contentType?: string;
     private readonly langAttribute: string = 'lang';
-    private mathOutput: any[];
-    private mathOutputOptions: any[];
+    private mathOutput: string = '';
+    private mathOutputOptions: string[] = [];
     private fragment: any[];
     private bodySuffix: string[];
     private bodyPrefix: string[];
+    private tableStyle: string = '';
+    private attribution: string = '';
 
     public constructor(document: Document) {
         super(document);
         this.settings = document.settings;
         const settings = this.settings;
-        const langCode = settings.docutilsCoreOptionParser!.languageCode;
-        this.language = getLanguage(langCode, document.reporter);
+        const langCode = settings.docutilsCoreOptionParser.languageCode;
+        if(langCode !== undefined) {
+            this.language = getLanguage(langCode);
+        }
         this.meta = [];// fixme: this.meta = [this.generator % docutils.__version__]
         this.headPrefix = [];
         this.htmlProlog = [];
-        if (settings.docutilsWritersHtml4Css1Writer!.xmlDeclaration) {
+
+        let myConfig = settings.docutilsWritersHtml4Css1Writer;
+        if(myConfig !== undefined) {
+            if(myConfig.attribution !== undefined) {
+                this.attribution = myConfig.attribution;
+            }
+            if(myConfig.tableStyle !== undefined) {
+                this.tableStyle = myConfig.tableStyle;
+            }
+        }
+        if (myConfig && myConfig.xmlDeclaration) {
             /*            this.head_prefix.append(this.xml_declaration
                           % settings.output_encoding)
                           # this.content_type = ""
@@ -103,11 +124,16 @@ class HTMLTranslator extends nodes.NodeVisitor {
         this.fragment = [];
         this.bodySuffix = ['</body>\n</html\n'];
         this.sectionLevel = 0;
-        this.initialHeaderLevel = parseInt(settings.docutilsWritersHtml4Css1Writer!.initialHeaderLevel, 10);
-        this.mathOutput = utils.pySplit(settings.docutilsWritersHtml4Css1Writer!.mathOutput || '');
-        this.mathOutputOptions = this.mathOutput.slice(1, this.mathOutput.length - 1);
-        this.mathOutput = this.mathOutput[0].toLowerCase();
-        this.context = [];
+        if(myConfig) {
+            if(myConfig.initialHeaderLevel !== undefined) {
+                this.initialHeaderLevel = parseInt(myConfig.initialHeaderLevel, 10);
+            }
+            const mathOutput = utils.pySplit(myConfig.mathOutput || '');
+
+            this.mathOutputOptions = mathOutput.slice(1, this.mathOutput.length - 1);
+            this.mathOutput = this.mathOutput[0].toLowerCase();
+        }this.context = [];
+
 
         this.topicClasses = [];
         this.colspecs = [];
@@ -340,7 +366,7 @@ class HTMLTranslator extends nodes.NodeVisitor {
         this.body.push('</div>\n');
 
         /* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */
-        const attributionFormats = {
+        const attributionFormats: AttributionFormats = {
             dash: ['\u2014', ''],
             parentheses: ['(', ')'],
             parens: ['(', ')'],
@@ -350,7 +376,7 @@ class HTMLTranslator extends nodes.NodeVisitor {
 
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
     public visit_attribution(node: NodeInterface) {
-        const [prefix, suffix] = this.attribution_formats[this.settings.docutilsWritersHtml4Css1Writer!.attribution];
+        const [prefix, suffix] = this.attribution_formats[this.attribution];
         this.context.push(suffix);
         this.body.push(
             this.starttag(node, 'p', prefix, false, { CLASS: 'attribution' }),
@@ -538,9 +564,15 @@ class HTMLTranslator extends nodes.NodeVisitor {
         if (node.nextNode({ descend: false, siblings: true }) instanceof nodes.colspec) {
             return;
         }
+        // @ts-ignore
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         if ('colwidths-auto' in node.parent!.parent!.attributes.classes
-            || ('colwidths-auto' in this.settings.docutilsWritersHtml4Css1Writer!.tableStyle
-                && (!('colwidths-given' in node.parent!.parent!.attributes.classes)))) {
+          // @ts-ignore
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+          || ('colwidths-auto' in this.settings.docutilsWritersHtml4Css1Writer!.tableStyle
+            // @ts-ignore
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            && (!('colwidths-given' in node.parent!.parent!.attributes.classes)))) {
             return;
         }
         /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,@typescript-eslint/no-unused-vars,no-unused-vars */
@@ -698,6 +730,7 @@ class HTMLTranslator extends nodes.NodeVisitor {
             const metaTag = `<meta name="${name}" content="${this.attVal(node.astext())}" />\n`;
             this.addMeta(metaTag);
         }
+        // @ts-ignore
         this.body.push(`<dt class="${name}">${this.language.labels[name]}</dt>\n`);
         this.body.push(this.starttag(node, 'dd', '', false, { CLASS: name }));
     }
@@ -771,7 +804,10 @@ class HTMLTranslator extends nodes.NodeVisitor {
             atts.class.push('head');
         }
         const ggParent = node.parent!.parent!.parent!;
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        // @ts-ignore
         let stubs: any[] = ggParent.getCustomAttr('stubs');
+        // @ts-ignore
         if(stubs[node.parent!.getCustomAttr('column')]) {
             // "stubs" list is an attribute of the tgroup element
             atts.class.push('stub');
@@ -1636,7 +1672,7 @@ class HTMLTranslator extends nodes.NodeVisitor {
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
     public visit_table(node: NodeInterface) {
         const atts: any = {};
-        const classes = this.settings.docutilsWritersHtml4Css1Writer!.tableStyle.split(',').map((cls: string) => cls.replace(/^[ \t\n]*/, '').replace(/[ \t\n]$/, ''));
+        const classes = this.tableStyle.split(',').map((cls: string) => cls.replace(/^[ \t\n]*/, '').replace(/[ \t\n]$/, ''));
         if ('align' in node.attributes) {
             classes.push(`align-${node.attributes.align}`);
         }
@@ -1725,7 +1761,7 @@ class HTMLTranslator extends nodes.NodeVisitor {
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
     public visit_topic(node: NodeInterface) {
         this.body.push(this.starttag(node, 'div', '\n', false, { CLASS: 'topic' }));
-        this.topic.classes = node.attributes.classes;
+        this.topicClasses = node.attributes.classes; // fixme checkme
     }
     // TODO: replace with ::
     //   this.in_contents = 'contents' in node.attributes['classes']
@@ -1816,6 +1852,7 @@ class HTMLTranslator extends nodes.NodeVisitor {
 
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,@typescript-eslint/no-unused-vars,no-unused-vars */
     public depart_title(node: NodeInterface) {
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         this.body.push(this.context.pop()!);
         if (this.inDocumentTitle) {
             this.title = this.body.slice(this.inDocumentTitle, this.body.length - 2);
@@ -1840,6 +1877,7 @@ class HTMLTranslator extends nodes.NodeVisitor {
 
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,@typescript-eslint/no-unused-vars,no-unused-vars */
     public depart_bullet_list(node: NodeInterface) {
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         this.compactSimple = this.context.pop()!.length > 0;
         this.compactParagraph = this.compactSimple;
         this.body.push('</ul>\n');
@@ -1865,6 +1903,7 @@ class HTMLTranslator extends nodes.NodeVisitor {
         this.body.push('</p>');
         if (!((node.parent instanceof nodes.list_item
                || node.parent instanceof nodes.entry)
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
               && node.parent!.children.length === 1)) {
             this.body.push('\n');
         }
@@ -1928,8 +1967,8 @@ class HTMLBaseWriter extends BaseWriter {
     }
 
     public _init() {
-        super._init();
-        this.defaultTemplateContent = defaultTemplate;
+        //fixme
+        // this.defaultTemplateContent = defaultTemplate;
         this.template = template;
         this.visitorAttributes = [
             'headPrefix', 'head', 'stylesheet', 'bodyPrefix',

@@ -2,7 +2,7 @@ import { createReadStream } from 'fs';
 import Input from './io/Input';
 import Output from './io/Output';
 import { ApplicationError } from './Exceptions';
-import { ReadCallback } from "./types";
+import { ReadCallback, ReadInputCallback } from "./types";
 
 /** Direct string input. */
 export class StringInput extends Input {
@@ -12,7 +12,7 @@ export class StringInput extends Input {
         this.sourcePath = '<string>';
     }
 
-    public read(cb: ReadCallback<{}>): void {
+    public read(cb: ReadInputCallback<string|string[]|{}>): void {
         cb(undefined, this.source);
     }
 }

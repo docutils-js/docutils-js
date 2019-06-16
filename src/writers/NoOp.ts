@@ -10,7 +10,7 @@ class NoOpWriter extends BaseWriter {
     /**
      * Translate the document to plain old javascript object
      */
-    public translate() {
+    public translate(): void {
         this.output = this.document;
     }
 }

@@ -41,16 +41,19 @@ test.each(lineArray)('%s', (index, lines) => {
     expect(s).toMatchSnapshot();
     s.trimLeft(3);
     expect(s).toMatchSnapshot();
-    s.trimTop();
+    // @ts-ignore
+  s.trimTop();
     expect(s).toMatchSnapshot();
-    s.trimTop(2);
+    // @ts-ignore
+  s.trimTop(2);
     expect(s).toHaveLength(0);
 });
 
 test.each(lineArray)('%s splice', (index, lines) => {
     const s = lines.slice(0, lines.length);
     expect(s).toMatchSnapshot('original');
-    expect(s.splice(0, 1)).toMatchSnapshot('splice return');
+    // @ts-ignore
+  expect(s.splice(0, 1)).toMatchSnapshot('splice return');
     expect(s).toMatchSnapshot('final');
 });
 

@@ -28,9 +28,9 @@ export function publish(args: any): void {
         reader, parser, writer, settings,
     });
     pub.setComponents(readerName, parserName, writerName);
-    pub.publish2({
-        argv, usage, description, settingsSpec, settingsOverrides, configSection, enableExitStatus,
-    });
+    //pub.publish2({
+    //    argv, usage, description, settingsSpec, settingsOverrides, configSection, enableExitStatus,
+    //});
 }
 
 

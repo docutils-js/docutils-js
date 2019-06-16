@@ -3,7 +3,7 @@ import {Document} from "../types";
 
 function pojoTranslate(document: Document): {} {
     const writer = new Writer();
-    const output = writer.write(document, (r: {}): {} => r);
+    const output = writer.write(document, undefined);
     if (typeof output === 'undefined') {
         throw new Error('undefined output');
     }

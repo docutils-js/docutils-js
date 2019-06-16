@@ -1554,11 +1554,13 @@ if(srcline !== undefined) {
             throw new TransitionCorrection("text");
         } else {
             const blocktext = this.rstStateMachine.line;
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             const msg = this.reporter!.severe(
                 "Unexpected section title or transition.",
                 [new nodes.literal_block(blocktext, blocktext)],
                 { line: this.rstStateMachine.absLineNumber() }
             );
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             this.parent!.add(msg);
             return [[], nextState, []];
         }
@@ -1681,9 +1683,9 @@ if(srcline !== undefined) {
    */
     private parseExtensionOptions(optionSpec: any, datalines: StringList): [boolean, any] {
         const node = new nodes.field_list();
-        const [newline_offset, blank_finish] = this.nestedListParse(datalines,
+        const [newlineOffset, blankFinish] = this.nestedListParse(datalines,
             { inputOffset: 0, node, initialState: "ExtensionOptions", blankFinish: true });
-        if (newline_offset !== datalines.length) { // incomplete parse of block
+        if (newlineOffset !== datalines.length) { // incomplete parse of block
             return [false, "invalid option block"];
         }
         let options;
