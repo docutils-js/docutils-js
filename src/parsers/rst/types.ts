@@ -4,7 +4,7 @@ import StringList from "../../StringList";
 import { Settings } from "../../../gen/Settings";
 
 export interface Explicit {
-  [patternName: string]: {},
+    [patternName: string]: {};
 }
 export interface CommonParseArgs {
     inputLines?: StringList;
@@ -43,12 +43,12 @@ interface StateMachineClassArgs {
 
 export interface RstMemo {
     document: Document;
-    reporter: ReporterInterface,
-    language: IRSTLanguage,
-    titleStyles: (string[] | string)[]
-    sectionLevel: number,
-    sectionBubbleUpKludge: boolean,
-    inliner: Inliner,
+    reporter: ReporterInterface;
+    language?: RSTLanguage;
+    titleStyles: (string[] | string)[];
+    sectionLevel: number;
+    sectionBubbleUpKludge: boolean;
+    inliner: InlinerInterface;
 }
 
 
@@ -60,21 +60,21 @@ export class DirectiveError extends Error {
 }
 
 export interface IDirective {
-  debug(message: any): DirectiveError;
-  info(message: any): DirectiveError;
-  warning(message: any): DirectiveError;
-  error(message: any): DirectiveError;
-  severe(message: any): DirectiveError;
+    debug(message: any): DirectiveError;
+    info(message: any): DirectiveError;
+    warning(message: any): DirectiveError;
+    error(message: any): DirectiveError;
+    severe(message: any): DirectiveError;
 }
-export interface IDirectives {
-[directiveName: string]: any
+export interface DirectivesInterface {
+    [directiveName: string]: any;
 };
 
-export interface IRSTLanguage {
-    directives: IDirectives;
+export interface RSTLanguage {
+    directives: DirectivesInterface;
 }
 export interface InlinerInterface {
-  initCustomizations(settings: Settings): void;
+    initCustomizations(settings: Settings): void;
 
-  parse(text: string, args: { lineno: number, memo: any, parent: ElementInterface }): any[][];
+    parse(text: string, args: { lineno: number; memo: any; parent: ElementInterface }): any[][];
 }

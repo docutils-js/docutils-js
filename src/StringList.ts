@@ -39,9 +39,9 @@ class StringList extends ViewList {
             if (flushLeft && (line.substring(0, 1) === ' ')) {
                 // eslint-disable-next-line @typescript-eslint/no-unused-vars
                 const [source, offset] = this.info(end);
-                throw new UnexpectedIndentationError('fixme',/*this.slice(start, end),
-                                                     source, offset + 1*/);
-            }
+                throw new UnexpectedIndentationError(this.slice(start, end) as StringList,
+                    source, offset === undefined ? undefined : offset + 1);
+                }
             end += 1;
         }
         return this.slice(start, end) as StringList;
@@ -101,7 +101,7 @@ class StringList extends ViewList {
             block.trimLeft(indent, firstIndent != null ? 1 : 0);
         }
 
-        return [block, indent || 0, blankFinish];
+        return [block, indent || 0, blankFinish || false];
     }
 
     public get2dBlock(

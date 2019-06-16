@@ -166,7 +166,7 @@ export interface TextElementInterface extends ElementInterface {
 export interface Document extends ElementInterface {
     transformMessages: {}[];
     nameIds: NameIds;
-    noteSource: {};
+
     reporter: ReporterInterface;
     settings: Settings;
 
@@ -179,11 +179,11 @@ export interface Document extends ElementInterface {
 
     noteRefname(ref: reference): void;
 
-    noteExplicitTarget(target: NodeInterface, parent: NodeInterface): void;
+    noteExplicitTarget(target: NodeInterface, parent?: NodeInterface): void;
 
     noteIndirectTarget(target: NodeInterface): void;
 
-    setId(p: NodeInterface, msgnode?: ElementInterface): void;
+    setId(p: NodeInterface, msgnode?: ElementInterface): string;
 
     noteFootnoteRef(refnode: NodeInterface): void;
 
@@ -209,6 +209,8 @@ export interface Document extends ElementInterface {
     noteAutofootnote(f: footnote): void;
 
     getDecoration(): decoration;
+
+    noteSource(source: string | undefined, offset: number|undefined): void;
 }
 
 export interface TransformSpecInterface {
@@ -271,25 +273,23 @@ export interface ReporterInterface {
 
     systemMessage(level: number, message: string | Error, children: Element[], attributes: Attributes): NodeInterface;
 
-    notifyObservers(message: string): void;
-
+   
     attachObserver(observer: {}): void;
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     debug(message: string | Error, children?: NodeInterface[], kwargs?: Attributes): NodeInterface | undefined;
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    info(message: string | Error, children?: NodeInterface[], kwargs?: Attributes): NodeInterface;
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    info(message: string | Error, children?: NodeInterface[], kwargs?: Attributes): NodeInterface | undefined;
+    warning(message: string | Error, children?: NodeInterface[], kwargs?: Attributes): NodeInterface;
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    warning(message: string | Error, children?: NodeInterface[], kwargs?: Attributes): NodeInterface | undefined;
+    error(message: string | Error, children?: NodeInterface[], kwargs?: Attributes): NodeInterface;
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    error(message: string | Error, children?: NodeInterface[], kwargs?: Attributes): NodeInterface | undefined;
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    severe(message: string | Error, children?: NodeInterface[], kwargs?: Attributes): NodeInterface | undefined;
+    severe(message: string | Error, children?: NodeInterface[], kwargs?: Attributes): NodeInterface;
 }
 
 export interface Statefactory {
@@ -338,7 +338,6 @@ export interface Statemachine {
     insertInput(inputLines: StringList, source?: string): void;
 
     getTextBlock(flushLeft: boolean): StringList;
-    checkLine(context: {}[], state: string|StateInterface, transitions: ({}|string)[] | undefined | null): [{}[], string|StateInterface, {}[]];
     addState(stateClass: StateInterface): void;
 
     addStates(stateClasses: StateInterface[]): void;
@@ -355,6 +354,7 @@ export interface Statemachine {
 }
 
 export interface StateType {
+    stateName: string;
 
 }
 export interface StateInterface {
@@ -379,6 +379,10 @@ export interface StateInterface {
 
     bof(context: (string|{})[]): string[][];
     eof(context: (string|{})[]): string[];
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    noMatch(context: any[], transitions: TransitionsArray|undefined): [{}[], (string | StateInterface), {}[]];
+
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -433,7 +437,7 @@ export interface TraverseArgs {
 export interface WhitespaceStatemachine extends Statemachine {
     getIndented(labeled: GetIndentedArgs): [StringList, number, number, boolean];
 
-    getKnownIndented(labeled: GetIndentedArgs): [StringList, number, number, boolean];
+    getKnownIndented(labeled: GetIndentedArgs): [StringList, number, boolean];
 
     getFirstKnownIndented(args: GetIndentedArgs): [StringList, number, number, boolean];
 }
@@ -490,7 +494,7 @@ export interface NameIds {
 }
 
 export interface ObserverCallback {
-    (message: {}): void;
+    (source?: string, lineno?: number): void;
 }
 
 export interface Transitions {
@@ -513,4 +517,8 @@ export interface Components {
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface TransformInterface {
     apply(): void;
+}
+
+export interface TransitionsArray {
+    [index: number]: string|string[];
 }

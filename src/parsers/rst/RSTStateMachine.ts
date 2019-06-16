@@ -2,7 +2,7 @@ import StateMachineWS from '../../StateMachineWS';
 import Inliner from './Inliner';
 import * as languages from '../../languages';
 import {ElementInterface, StateMachineRunArgs} from "../../types";
-import {RstMemo} from "./types";
+import { RSTLanguage, RstMemo } from "./types";
 import { getLanguage } from "./languages";
 
 /**
@@ -11,6 +11,7 @@ import { getLanguage } from "./languages";
  * The entry point to reStructuredText parsing is the `run()` method.
  */
 class RSTStateMachine extends StateMachineWS {
+    public rstLanguage?: RSTLanguage;
     public matchTitles?: boolean;
     public node?: ElementInterface;
     public memo?: RstMemo;
@@ -30,17 +31,18 @@ class RSTStateMachine extends StateMachineWS {
         if (cArgs.matchTitles === undefined) {
             cArgs.matchTitles = true;
         }
-        this.language = getLanguage(document.settings.docutilsCoreOptionParser!.languageCode);
+        const languageCode = document.settings.docutilsCoreOptionParser.languageCode;
+        this.rstLanguage= getLanguage(languageCode);
         this.matchTitles = cArgs.matchTitles;
         /* istanbul ignore next */
         if (cArgs.inliner === undefined) {
-            cArgs.inliner = new Inliner();
+            cArgs.inliner = new Inliner(document);
         }
         cArgs.inliner.initCustomizations(document.settings);
         this.memo = {
             document,
             reporter: document.reporter,
-            language: this.language,
+            language: this.rstLanguage,
             titleStyles: [],
             sectionLevel: 0,
             sectionBubbleUpKludge: false,

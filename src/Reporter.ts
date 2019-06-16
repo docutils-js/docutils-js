@@ -122,7 +122,7 @@ class Reporter implements ReporterInterface {
         return msg;
     }
 
-    public notifyObservers(message: {}): void {
+    public notifyObservers(message: SystemMessage): void {
         this.observers.forEach((o): void => o(message));
     }
 
@@ -137,19 +137,19 @@ class Reporter implements ReporterInterface {
         return undefined;
     }
 
-    public info(message: string | Error, children?: NodeInterface[], kwargs?: Attributes): NodeInterface | undefined {
+    public info(message: string | Error, children?: NodeInterface[], kwargs?: Attributes): NodeInterface {
         return this.systemMessage(this.INFO_LEVEL, message, children, kwargs);
     }
 
-    public warning(message: string | Error, children?: NodeInterface[], kwargs?: Attributes): NodeInterface | undefined {
+    public warning(message: string | Error, children?: NodeInterface[], kwargs?: Attributes): NodeInterface {
         return this.systemMessage(this.WARNING_LEVEL, message, children, kwargs);
     }
 
-    public error(message: string | Error, children?: NodeInterface[], kwargs?: Attributes): NodeInterface | undefined {
+    public error(message: string | Error, children?: NodeInterface[], kwargs?: Attributes): NodeInterface {
         return this.systemMessage(this.ERROR_LEVEL, message, children, kwargs);
     }
 
-    public severe(message: string | Error, children?: NodeInterface[], kwargs?: Attributes): NodeInterface | undefined {
+    public severe(message: string | Error, children?: NodeInterface[], kwargs?: Attributes): NodeInterface {
         return this.systemMessage(this.SEVERE_LEVEL, message, children, kwargs);
     }
 

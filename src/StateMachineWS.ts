@@ -20,7 +20,7 @@ class StateMachineWS extends StateMachine implements WhitespaceStatemachine {
         if (typeof labeled.stripIndent === 'undefined') {
             cArgs.stripIndent = true;
         }
-        let offset = this.absLineOffset();
+        let offset = this.absLineOffset() || 0;
 
         const [indented, indent, blankFinish] = this.inputLines.getIndented({
             start: this.lineOffset,
@@ -37,13 +37,13 @@ class StateMachineWS extends StateMachine implements WhitespaceStatemachine {
         return [indented, indent, offset, blankFinish];
     }
 
-    public getKnownIndented(labeled: GetIndentedArgs): [StringList, number, number, boolean] {
+    public getKnownIndented(labeled: GetIndentedArgs): [StringList, number, boolean] {
         const cArgs: GetIndentedArgs = {...labeled};
         /* istanbul ignore if */
         if (typeof cArgs.stripIndent === 'undefined') {
             cArgs.stripIndent = true;
         }
-        let offset = this.absLineOffset();
+        let offset = this.absLineOffset() || 0;
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const [indented, indent, blankFinish] = this.inputLines.getIndented({
             start: this.lineOffset,
@@ -68,7 +68,7 @@ class StateMachineWS extends StateMachine implements WhitespaceStatemachine {
         if (cArgs.stripTop === undefined) {
             cArgs.stripTop = true;
         }
-        let offset = this.absLineOffset();
+        let offset = this.absLineOffset() || 0;
         const [indented, indent, blankFinish] = this.inputLines.getIndented({
             start: this.lineOffset,
             untilBlank: cArgs.untilBlank,

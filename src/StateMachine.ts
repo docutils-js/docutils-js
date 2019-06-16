@@ -1,24 +1,30 @@
-import UnknownStateError from './error/UnknownStateError';
-import { isIterable } from './utils';
+import { isIterable } from "./utils";
 import {
-    ApplicationError, EOFError, InvalidArgumentsError, InvalidStateError, UnimplementedError as Unimp
+    ApplicationError,
+    EOFError,
+    InvalidArgumentsError,
+    InvalidStateError,
+    UnimplementedError as Unimp
 } from "./Exceptions";
-import UnexpectedIndentationError from './error/UnexpectedIndentationError';
-import StateCorrection from './StateCorrection';
-import TransitionCorrection from './TransitionCorrection';
-import DuplicateStateError from './error/DuplicateStateError';
-import StringList from './StringList';
+import StateCorrection from "./StateCorrection";
+import StringList from "./StringList";
 import {
+    CoreLanguage,
+    DebugFunction,
     NodeInterface,
+    ObserverCallback,
+    ReporterInterface,
     Statefactory,
+    StateInterface,
     Statemachine,
     StateMachineRunArgs,
-    StateInterface,
-    DebugFunction,
-    CoreLanguage,
-    ReporterInterface, StateType
+    StateType,
+    Transitions,
+    TransitionsArray
 } from "./types";
-import State from './states/State';
+import State from "./states/State";
+import TransitionCorrection from "./TransitionCorrection";
+import UnexpectedIndentationError from "./error/UnexpectedIndentationError";
 
 interface States {
     [stateName: string]: StateInterface;
@@ -69,7 +75,7 @@ class StateMachine implements Statemachine {
 
     public reporter?: ReporterInterface;
 
-    private observers: {}[];
+    private observers: ObserverCallback[];
 
     private currentState?: string;
 
@@ -171,7 +177,7 @@ class StateMachine implements Statemachine {
         if (this.debug && this.debugFn !== undefined) {
             this.debugFn(`\nStateMachine.run: input_lines (line_offset=${this.lineOffset}):\n| ${this.inputLines.join('\n| ')}`);
         }
-        let transitions;
+        let transitions: TransitionsArray | undefined
         const results: (string|{})[] = [];
         let state = this.getState();
         let nextStateName: string;
@@ -211,6 +217,7 @@ class StateMachine implements Statemachine {
                             throw new Error('context should be array');
                         }
 
+                        this.checkLine(context, state, transitions);
                         const r: [{}[], string|StateInterface, {}[]] = this.checkLine(context, state, transitions);
                         /* istanbul ignore if */
                         if (!isIterable(r)) {
@@ -242,7 +249,7 @@ class StateMachine implements Statemachine {
                 } catch (error) {
                     if (error instanceof TransitionCorrection) {
                         this.previousLine();
-                        transitions = [error.args[0]];
+                        transitions = [error.stateName];
                         if(this.debug) {
                             this.debugFn(`\nStateMachine.run: TransitionCorrection to `
                             + `state "${state.stateName}", transition ${transitions[0]}.`);
@@ -256,7 +263,7 @@ class StateMachine implements Statemachine {
                         nextStateVar = nextStateName;
                         let tstr;
                         if (error.args.length === 1) {
-                            transitions = null;
+                            transitions = undefined;
                             tstr = '';
                         } else {
                             transitions = [error.args[1]];
@@ -301,9 +308,8 @@ class StateMachine implements Statemachine {
             throw new InvalidStateError();
         }
         if (this.states[this.currentState] === undefined) {
-            throw new UnknownStateError(this.currentState,
-                JSON.stringify(this.states));
-        }
+            throw new UnknownStateError(this.currentState);
+                }
         console.log(this.currentState);
         return this.states[this.currentState];
     }
@@ -442,7 +448,7 @@ class StateMachine implements Statemachine {
      * value is returned.
      */
     public checkLine(context: {}[], state: StateInterface,
-        transitions: ({}|string)[] | undefined | null): [{}[], string|StateInterface, {}[]] {
+        transitions?: TransitionsArray): [{}[], string|StateInterface, {}[]] {
         /* istanbul ignore if */
         if (!Array.isArray(context)) {
             throw new Error('context should be array');
@@ -459,8 +465,10 @@ class StateMachine implements Statemachine {
 
         /* eslint-disable-next-line no-restricted-syntax */
         // @ts-ignore
-        for (const name of transitions) {
-        // how is this initialized?
+        Object.entries(transitions).forEach(([k, v]) => {
+            const [ pattern, method, nextState] = v;
+        });
+        /*
             const [pattern, method, nextState] = state.transitions[name];
             const result = pattern.exec(this.line);
             if (result) {
@@ -472,7 +480,7 @@ class StateMachine implements Statemachine {
                 // console.log(`pattern match for ${name}`);
                 const r = method.bind(state)({ pattern, result, input: this.line },
                     context, nextState);
-                /* istanbul ignore if */
+                // istanbul ignore if
                 if (r === undefined) {
                     throw new Error();
                 }
@@ -480,7 +488,7 @@ class StateMachine implements Statemachine {
                 // console.log(r);
                 return r;
             }
-        }
+            */
         return state.noMatch(context, transitions);
     }
 
@@ -525,11 +533,11 @@ class StateMachine implements Statemachine {
         //fixme
     }
 
-    public attachObserver(observer: {}): void {
+    public attachObserver(observer: ObserverCallback   ): void {
         this.observers.push(observer);
     }
 
-    public detachObserver(observer: {}): void {
+    public detachObserver(observer: ObserverCallback): void {
         this.observers.splice(this.observers.indexOf(observer), 1);
     }
 
@@ -556,7 +564,7 @@ class StateMachine implements Statemachine {
                 if (!isIterable(info)) {
                     throw new Error('isIterable');
                 }
-                observer(...info);
+                observer(info[0], info[1]);
             } catch (err) {
                 /* eslint-disable-next-line no-console */
                 console.log(err.stack);
@@ -576,7 +584,9 @@ function expandtabs(strVal: string): string {
     }
     return strVal;
 }
-export function string2lines(astring?: string, args?: { tabWidth?: number; convertWhitespace?: boolean; Whitespace?: RegExp | string }): string[] {
+export function string2lines(astring?: string, args?:
+{ tabWidth?: number; convertWhitespace?: boolean;
+    whitespace?: RegExp | string; }): string[] {
     if (!astring) {
         astring = '';
     }
@@ -598,5 +608,15 @@ export function string2lines(astring?: string, args?: { tabWidth?: number; conve
     }
     return result.map(expandtabs);
 }
+
+export class StateMachineError extends Error { }
+export class UnknownStateError extends StateMachineError { }
+export class DuplicateStateError extends StateMachineError { }
+export class UnknownTransitionError extends StateMachineError { }
+export class DuplicateTransitionError extends StateMachineError { }
+export class TransitionPatternNotFound extends StateMachineError { }
+export class TransitionMethodNotFound extends StateMachineError { }
+//export class UnexpectedIndentationError extends StateMachineError { }
+//export class TransitionCorrection extends Error { }
 
 export { StateMachine };

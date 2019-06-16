@@ -105,9 +105,9 @@ class Inliner implements InlinerInterface {
     private nonWhitespaceEscapeBefore: string;
     private nonUnescapedWhitespaceEscapeBefore: string;
     public patterns: any;
-    private reporter?: ReporterInterface;
+    private reporter: ReporterInterface;
     private parent?: ElementInterface;
-    private document?: Document;
+    private document: Document;
     private simplename: string = '';
     private parts: any[] = [];
     private startStringPrefix: string = '';
@@ -115,7 +115,7 @@ class Inliner implements InlinerInterface {
     /**
      * Create Inliner instance
      */
-    constructor() {
+    public constructor(document: Document) {
         this.dispatch = {
             '*': this.emphasis.bind(this),
             '**': this.strong.bind(this),
@@ -127,10 +127,10 @@ class Inliner implements InlinerInterface {
             '|': this.substitution_reference.bind(this),
             __: this.anonymous_reference.bind(this),
         };
-        /*
-         */
+        this.document = document;
 
-        this.implicitDispatch = [];
+this.reporter = document.reporter;
+this.implicitDispatch = [];
         this.nonWhitespaceAfter = '';
         this.nonWhitespaceBefore = '(?<!\\s)';
         this.nonWhitespaceEscapeBefore = '(?<![\\s\\x00])';
@@ -139,25 +139,25 @@ class Inliner implements InlinerInterface {
     }
 
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
-    inline_internal_target(match: any, lineno: number) {
+    public inline_internal_target(match: any, lineno: number) {
         const [before, inlines, remaining,
-               /* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */
-               sysmessages, endstring] = this.inline_obj(match,
-                                                         lineno,
-                                                         this.patterns.target,
-                                                         nodes.target);
+            /* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */
+            sysmessages, endstring] = this.inline_obj(match,
+            lineno,
+            this.patterns.target,
+            nodes.target);
         if (inlines && inlines.length && inlines[0] instanceof nodes.target) {
             // assert len(inlines) == 1
             const target = inlines[0];
             const name = nodes.fullyNormalizeName(target.astext());
             target.attributes.names.push(name);
-            this.document!.noteExplicitTarget(target, this.parent);
+            this.document.noteExplicitTarget(target, this.parent);
         }
         return [before, inlines, remaining, sysmessages];
     }
 
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
-    substitution_reference(match: any, lineno: number) {
+    public substitution_reference(match: any, lineno: number) {
         const [before, inlines, remaining, sysmessages, endstring] = this.inline_obj(
             match, lineno, this.patterns.substitution_ref,
             nodes.substitution_reference,
@@ -186,7 +186,7 @@ class Inliner implements InlinerInterface {
     }
 
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,@typescript-eslint/no-unused-vars,no-unused-vars */
-    footnote_reference(match: any, lineno: number) {
+    public footnote_reference(match: any, lineno: number) {
         const label = match.groups.footnotelabel;
         let refname = nodes.fullyNormalizeName(label);
         const string = match.result.input;
@@ -195,7 +195,7 @@ class Inliner implements InlinerInterface {
         let refnode;
         if (match.groups.citationlabel) {
             refnode = new nodes.citation_reference(`[${label}]_`, '', [],
-                                                   { refname });
+                { refname });
             refnode.add(new nodes.Text(label));
             this.document!.noteCitationRef(refnode);
         } else {
@@ -224,7 +224,7 @@ class Inliner implements InlinerInterface {
         return [before, [refnode], remaining, []];
     }
 
-    reference(match: any, lineno: number, anonymous = false) {
+    public reference(match: any, lineno: number, anonymous = false) {
         const referencename = match.groups.refname;
         const refname = nodes.fullyNormalizeName(referencename);
         const referencenode = new nodes.reference(
@@ -253,27 +253,27 @@ class Inliner implements InlinerInterface {
     problematic(text: any, rawsource: any, message: NodeInterface) {
         const msgid = this.document!.setId(message, this.parent);
         const problematic = new nodes.problematic(rawsource, text, [], { refid: msgid });
-        const prbid = this.document!.setId(problematic);
+        const prbid = this.document.setId(problematic);
         message.addBackref(prbid);
         return problematic;
     }
 
     emphasis(match: any, lineno: number) {
         const [before, inlines, remaining,
-               /* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */
-               sysmessages, endstring] = this.inline_obj(
-                   match, lineno, this.patterns.emphasis, nodes.emphasis,
-               );
+            /* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */
+            sysmessages, endstring] = this.inline_obj(
+            match, lineno, this.patterns.emphasis, nodes.emphasis,
+        );
         return [before, inlines, remaining, sysmessages];
     }
 
     strong(match: any, lineno: number) {
         const [before, inlines, remaining,
-               /* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */
-               sysmessages, endstring] = this.inline_obj(match,
-                                                         lineno,
-                                                         this.patterns.strong,
-                                                         nodes.strong);
+            /* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */
+            sysmessages, endstring] = this.inline_obj(match,
+            lineno,
+            this.patterns.strong,
+            nodes.strong);
         return [before, inlines, remaining, sysmessages];
     }
 
@@ -298,7 +298,7 @@ class Inliner implements InlinerInterface {
             const textend = matchend + endmatch.index + endmatch[0].length;
             if (endmatch[3]) {
                 if (role) {
-                    const msg = this.reporter!.warning(
+                    const msg = this.reporter.warning(
                         'Multiple roles in interpreted text (both '
                             + 'prefix and suffix present; only one allowed).',
                         [], { line: lineno },
@@ -306,7 +306,7 @@ class Inliner implements InlinerInterface {
                     const text = unescape(string.substring(rolestart, textend), true);
                     const prb = this.problematic(text, text, msg);
                     return [string.substring(0, rolestart), [prb],
-                            string.substring(textend), [msg]];
+                        string.substring(textend), [msg]];
                 }
                 role = endmatch[3];
                 role = role.substring(1, role.length - 1);
@@ -323,18 +323,18 @@ class Inliner implements InlinerInterface {
                     const text = unescape(string.substring(rolestart, textend), true);
                     const prb = this.problematic(text, text, msg);
                     return [string.substring(0, rolestart), [prb],
-                            string.substring(textend), [msg]];
+                        string.substring(textend), [msg]];
                 }
                 return this.phrase_ref(string.substring(0, matchstart),
-                                       string.substring(textend), rawsource,
-                                       escaped, unescape(escaped));
+                    string.substring(textend), rawsource,
+                    escaped, unescape(escaped));
             }
             rawsource = unescape(string.substring(rolestart, textend), true);
             const [nodelist, messages] = this.interpreted(rawsource,
-                                                          escaped, role,
-                                                          lineno);
+                escaped, role,
+                lineno);
             return [string.substring(0, rolestart), nodelist,
-                    string.substring(textend), messages];
+                string.substring(textend), messages];
         }
         const msg = this.reporter!.warning(
             'Inline interpreted text or phrase reference start-string '
@@ -346,7 +346,7 @@ class Inliner implements InlinerInterface {
     }
 
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
-    phrase_ref(before:any, after: any, rawsource: any, escaped: any, text: any) {
+    phrase_ref(before: any, after: any, rawsource: any, escaped: any, text: any) {
         const match = this.patterns.embedded_link.exec(escaped);
         let aliastype;
         let aliastext;
@@ -397,7 +397,7 @@ class Inliner implements InlinerInterface {
 
         const refname = nodes.fullyNormalizeName(text);
         const reference = new nodes.reference(rawsource, text, [],
-                                              { name: nodes.whitespaceNormalizeName(text) });
+            { name: nodes.whitespaceNormalizeName(text) });
         reference.children[0].rawsource = rawtext;
         const nodeList = [reference];
 
@@ -458,7 +458,7 @@ class Inliner implements InlinerInterface {
 
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
     inline_obj(match: any, lineno: number, endPattern: any, nodeclass: any,
-               restore_backslashes = false) {
+        restore_backslashes = false) {
         /* istanbul ignore if */
         if (typeof nodeclass !== 'function') {
             throw new Error();
@@ -485,7 +485,7 @@ class Inliner implements InlinerInterface {
         //      console.log(endPattern);
         const endmatch = endPattern.exec(string.substring(matchend));
         let text; let
-        rawsource;
+            rawsource;
         if (endmatch && endmatch.index) { // 1 or more chars
             const _text = endmatch.input.substring(0, endmatch.index);
             text = unescape(_text, restore_backslashes);
@@ -495,7 +495,7 @@ class Inliner implements InlinerInterface {
             const node = new nodeclass(rawsource, text);
             node.children[0].rawsource = unescape(_text, true);
             return [string.substr(0, matchstart), [node],
-                    string.substr(textend), [], endmatch[1]];
+                string.substr(textend), [], endmatch[1]];
         }
         const msg = this.reporter!.warning(
             `Inline ${nodeclass.constructor.name} start-string without end-string.`, { line: lineno },
@@ -509,12 +509,12 @@ class Inliner implements InlinerInterface {
     initCustomizations(settings: Settings) {
         let startStringPrefix;
         let
-          endStringSuffix;
+            endStringSuffix;
         /* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */
         let ssn;
         let
-          /* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */
-          esn;
+            /* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */
+            esn;
         if (settings.docutilsParsersRstParser!.characterLevelInlineMarkup) {
             startStringPrefix = "(^|(?<!\\x00))";
             ssn = [null, null];
@@ -559,22 +559,22 @@ class Inliner implements InlinerInterface {
                     "_`", // inline internal target
                     [2, "\\|(?!\\|)", null]] // substitution reference
             ],
-                [1, "whole", "", endStringSuffix, // whole constructs
-                    [0, // reference name & end-string
-                        [2, `(${this.simplename})(__?)`, "refname", "refend"],
-                        [1, "footnotelabel", "\\[", [2, "(\\]_)", "fnend"],
-                            [0, "[0-9]+", // manually numbered
-                                [2, `\\#(${this.simplename})?`, null], // auto-numbered (w/ label?)
-                                "\\*", // auto-symbol
-                                [2, `(${this.simplename})`, "citationlabel"]] // citation reference
-                        ]
+            [1, "whole", "", endStringSuffix, // whole constructs
+                [0, // reference name & end-string
+                    [2, `(${this.simplename})(__?)`, "refname", "refend"],
+                    [1, "footnotelabel", "\\[", [2, "(\\]_)", "fnend"],
+                        [0, "[0-9]+", // manually numbered
+                            [2, `\\#(${this.simplename})?`, null], // auto-numbered (w/ label?)
+                            "\\*", // auto-symbol
+                            [2, `(${this.simplename})`, "citationlabel"]] // citation reference
                     ]
-                ],
-                [1, "backquote", // interpreted text or phrase reference
-                    [2, `((:${this.simplename}:)?)`, "role", null], // optional role
-                    this.nonWhitespaceAfter,
-                    [0, [2, "`(?!`)", null]] // but not literal
                 ]
+            ],
+            [1, "backquote", // interpreted text or phrase reference
+                [2, `((:${this.simplename}:)?)`, "role", null], // optional role
+                this.nonWhitespaceAfter,
+                [0, [2, "`(?!`)", null]] // but not literal
+            ]
             ]
         ];
         this.startStringPrefix = startStringPrefix;
@@ -591,15 +591,15 @@ class Inliner implements InlinerInterface {
             literal: new RegExp(`${this.nonWhitespaceBefore}(\`\`)${endStringSuffix}`),
             target: new RegExp(`${this.nonWhitespaceEscapeBefore}(\`)${endStringSuffix}`),
             substitution_ref: new RegExp(`${this.nonWhitespaceEscapeBefore
-              }(\\|_{0,2})${
-              endStringSuffix}`),
+            }(\\|_{0,2})${
+                endStringSuffix}`),
             email: new RegExp(emailPattern), // fixme % args + '$',
             // re.VERBOSE | re.UNICODE),
             uri: new RegExp(`${startStringPrefix}((([a-zA-Z][a-zA-Z0-9.+-]*):(((//?)?${uric}*${uriEnd})(\\?${uric}*${uriEnd})?(\\#${uriEnd})?))|(${emailPattern}))${endStringSuffix}`)
         };
     }
 
-    parse(text: string, args: { lineno: number, memo: any, parent: ElementInterface }) {
+    parse(text: string, args: { lineno: number; memo: any; parent: ElementInterface }) {
         const { lineno, memo, parent } = args;
         this.reporter = memo.reporter;
         this.document = memo.document;
@@ -629,11 +629,11 @@ class Inliner implements InlinerInterface {
                 let before;
                 let inlines;
                 let
-                  sysmessages;
+                    sysmessages;
                 //              console.log(`name is ${mname}`);
 
                 [before, inlines, remaining, sysmessages] = method(
-                  { result: match, match, groups: rr }, lineno
+                    { result: match, match, groups: rr }, lineno
                 );
                 unprocessed.push(before);
                 /* istanbul ignore if */
@@ -643,7 +643,7 @@ class Inliner implements InlinerInterface {
                 messages.push(...sysmessages);
                 if (inlines) {
                     processed.push(...this.implicit_inline(unprocessed.join(""),
-                      lineno));
+                        lineno));
                     processed.push(...inlines);
                     unprocessed = [];
                 }
@@ -717,7 +717,7 @@ class Inliner implements InlinerInterface {
             { line: lineno },
         );
         return [[this.problematic(rawsource, rawsource, msg)],
-                [...messages, msg]];
+            [...messages, msg]];
     }
 
     literal(match: any, lineno: number) {

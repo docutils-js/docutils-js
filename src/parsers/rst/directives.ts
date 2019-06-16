@@ -5,7 +5,7 @@ import * as images from "./directives/images";
 import * as parts from "./directives/parts";
 import { ApplicationError } from "../../Exceptions";
 import { Document } from "../../types";
-import { IRSTLanguage } from "./types";
+import { RSTLanguage } from "./types";
 import { escape2null, pySplit, splitEscapedWhitespace } from "../../utils";
 
 const dirMap: any = { images, parts };
@@ -68,7 +68,7 @@ return uri;
 
 const _directives: any = {};
 
-function directive(directiveName: string, languageModule: IRSTLanguage, document: Document) {
+function directive(directiveName: string, languageModule: RSTLanguage, document: Document) {
     const normName = directiveName.toLowerCase();
     const messages: any[] = [];
     const msgText = [];

@@ -1,9 +1,9 @@
 /* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */
-import { IDirectives } from "../types";
+import { DirectivesInterface } from "../types";
 
 const __docformat__ = 'reStructuredText';
 
-export const directives: IDirectives = {
+export const directives: DirectivesInterface = {
       // language-dependent: fixed
       attention: 'attention',
       caution: 'caution',

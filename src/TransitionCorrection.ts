@@ -1,9 +1,9 @@
 export default class TransitionCorrection extends Error {
-    public args: (string|{})[];
+    public stateName: string;
     // @ts-ignore
     public constructor(stateName: string, ...args) {
         super();
-        this.args = [stateName, args];
+        this.stateName = stateName;
         if (Error.captureStackTrace) {
             Error.captureStackTrace(this, TransitionCorrection);
         }

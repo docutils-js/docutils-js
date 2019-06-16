@@ -1,9 +1,9 @@
 import * as en from './languages/en';
-import { IRSTLanguage } from "./types";
+import { RSTLanguage } from "./types";
 
-export function getLanguage(languageCode: string): IRSTLanguage | undefined {
-if(languageCode === 'en') {
-return en;
-}
-return undefined;
+export function getLanguage(languageCode: string): RSTLanguage | undefined {
+    if(languageCode === 'en') {
+        return en;
+    }
+    return undefined;
 }

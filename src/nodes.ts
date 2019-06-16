@@ -24,14 +24,17 @@ import { checkDocumentArg, isIterable, pySplit } from "./utils";
 import {
     Attributes,
     Document,
-    ElementInterface, FastTraverseArg,
+    ElementInterface,
+    FastTraverseArg,
     HasIndent,
     NameIds,
-    NodeInterface, QuoteattrCallback,
+    NodeInterface,
+    QuoteattrCallback,
     ReporterInterface,
     SystemMessage,
     TextElementInterface,
-    TraverseArgs, Visitor
+    TraverseArgs,
+    Visitor
 } from "./types";
 import { Settings } from "../gen/Settings";
 
@@ -1714,9 +1717,11 @@ class document extends Element implements Document {
         this.setNameIdMap(target, id, msgnode);
     }
 
-    public noteExplicitTarget(target: NodeInterface, msgnode: NodeInterface): void {
-        const id = this.setId(target, msgnode);
-        this.setNameIdMap(target, id, msgnode, true);
+    public noteExplicitTarget(target: NodeInterface, msgnode?: NodeInterface): void {
+        if(msgnode !== undefined) {
+            const id = this.setId(target, msgnode);
+            this.setNameIdMap(target, id, msgnode, true);
+        }
     }
 
     public noteRefname(node: NodeInterface): void {
@@ -1816,7 +1821,7 @@ class document extends Element implements Document {
         const name = whitespaceNormalizeName(defName);
         if (Object.keys(this.substitutionDefs).includes(name)) {
             const msg = this.reporter.error(`Duplicate substitution definition name: "${name}".`, [],
-              { baseNode: subdef });
+                { baseNode: subdef });
             if (msgnode != null && msg !== undefined) {
                 msgnode.add(msg);
             }
@@ -1843,7 +1848,7 @@ class document extends Element implements Document {
         this.transformMessages.push(message);
     }
 
-    public noteSource(source: string, offset: number): void {
+    noteSource(source: string, offset: number): void {
         this.currentSource = source;
         if (offset === undefined) {
             this.currentLine = offset;
