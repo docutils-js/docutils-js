@@ -126,10 +126,11 @@ class Text extends RSTState {
             block = this.rstStateMachine.getTextBlock(true);
         } catch (error) {
             if (error instanceof UnexpectedIndentationError) {
-                let src; let
-                    srcline;
-                [block, src, srcline] = error.args;
-                msg = this.reporter!.error('Unexpected indentation.',
+
+                block = error.block;
+                const src = error.source;
+                const srcline = error.lineno;
+                msg = this.reporter!.error('Unexpected indentation.',[],
                     { source: src, line: srcline });
             } else {
                 throw error;
@@ -202,7 +203,7 @@ class Text extends RSTState {
     }
 
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
-    definition_list_item(termline: string[]) {
+    public definition_list_item(termline: string[]): [NodeInterface, boolean] {
         /* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */
         const [indented, indent, lineOffset, blankFinish] = this.rstStateMachine.getIndented({});
         const itemnode = new nodes.definition_list_item(
@@ -227,7 +228,7 @@ class Text extends RSTState {
     }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    public term(lines: any[], lineno: number): {}[] {
+    public term(lines: any[], lineno: number): [NodeInterface[], NodeInterface[]] {
         const [textNodes, messages] = this.inline_text(lines[0], lineno);
         const termNode = new nodes.term(lines[0]);
         //     [termNode.source,

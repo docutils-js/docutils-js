@@ -6,7 +6,7 @@ import {Document, ParserArgs} from "../types";
 import { InlinerInterface } from "./rst/types";
 
 class Parser extends BaseParser {
-    private inliner: InlinerInterface;
+    private inliner?: InlinerInterface;
     private initialState: string;
     private stateMachine?: RSTStateMachine;
     public constructor(args: ParserArgs = {}) {
@@ -19,7 +19,9 @@ class Parser extends BaseParser {
             this.initialState = 'Body';
         }
 
-        this.inliner = args.inliner;
+        if(args.inliner !== undefined) {
+            this.inliner = args.inliner;
+        }
     }
 
     public parse(inputstring: string, document: Document): void {
@@ -50,6 +52,7 @@ class Parser extends BaseParser {
             console.log('fo')
         }
         this.stateMachine.run({ inputLines, document,
+            inputOffset: 0,
             inliner: this.inliner });
         this.finishParse();
     }

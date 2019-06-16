@@ -603,9 +603,9 @@ class SimpleTableParser extends TableParser {
     }
 
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
-    init_row(colspec: number[][], offset: number) {
+    public init_row(colspec: number[][], offset: number): [number, number, number, {}[]][] {
         let i = 0;
-        const cells = [];
+        const cells: [number, number, number, {}[]][] = [];
         /* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars,no-restricted-syntax */
         for (const [start, end] of colspec) {
             let morecols = 0;

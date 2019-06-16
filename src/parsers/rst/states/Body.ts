@@ -136,13 +136,20 @@ class Body extends RSTState {
         this.patterns = {
             bullet: "[-+*\\u2022\\u2023\\u2043]( +|$)",
             enumerator: `(${pats.parens}|${pats.rparen}|${pats.period})( +|$)`,
+            // eslint-disable-next-line @typescript-eslint/camelcase
             field_marker: ":(?![: ])([^:\\\\]|\\\\.|:(?!([ `]|$)))*(?<! ):( +|$)",
+            // eslint-disable-next-line @typescript-eslint/camelcase
             grid_table_top: this.gridTableTopPat,
+            // eslint-disable-next-line @typescript-eslint/camelcase
             option_marker: `${pats.option}(, ${pats.option})*(  +| ?$)`,
+            // eslint-disable-next-line @typescript-eslint/camelcase
             doctest: ">>>( +|$)",
             line_block: "\\|( +|$)",
+            // eslint-disable-next-line @typescript-eslint/camelcase
             simple_table_top: this.simpleTableTopPat,
+            // eslint-disable-next-line @typescript-eslint/camelcase
             explicit_markup: "\\.\\.( +|$)",
+            // eslint-disable-next-line @typescript-eslint/camelcase
             anonymous: "__( +|)",
             line: `(${pats.nonalphanum7bit})\\1* *$`,
             text: ""
@@ -279,8 +286,8 @@ if(srcline !== undefined) {
     }
 
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
-    public make_target(block: any, blockText: any, lineno: number, target_name: string) {
-        const [targetType, data] = this.parse_target(block, blockText, lineno);
+    public make_target(block: any, blockText: any, lineno: number, target_name: string): NodeInterface|undefined {
+        const [targetType, data, node] = this.parse_target(block, blockText, lineno);
         //        console.log(`target type if ${targetType} and data is ${data}`);
         if (targetType === "refname") {
             const target = new nodes.target(blockText, "", [], { refname: fullyNormalizeName(data) });
@@ -294,7 +301,7 @@ if(srcline !== undefined) {
             this.add_target(target_name, data, target, lineno);
             return target;
         }
-        return data;
+        return node;
     }
 
     /**
@@ -308,7 +315,7 @@ if(srcline !== undefined) {
    */
 
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,@typescript-eslint/no-unused-vars,no-unused-vars */
-    public parse_target(block: string[], blockText: any | any[], lineno: number) {
+    public parse_target(block: string[], blockText: any | any[], lineno: number): [string, string, NodeInterface?] {
         if (block.length && block[block.length - 1].trim().endsWith("_")) {
             const lines: string[] = [];
             block.forEach(line => lines.push(line.trim()));
@@ -616,7 +623,7 @@ if(srcline !== undefined) {
         const matchEnd = match.result.index + match.result[0].length;
         if (!match.result.input.substring(matchEnd).trim()
       && this.rstStateMachine.isNextLineBlank()) { // # an empty comment?
-            return [[new nodes.comment()], 1]; // "A tiny but practical wart."
+            return [[new nodes.comment()], true]; // "A tiny but practical wart."
         }
         const [indented,
             /* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */
@@ -686,7 +693,7 @@ if(srcline !== undefined) {
     public explicit_list(blankFinish: boolean) {
         const offset = this.rstStateMachine.lineOffset + 1; // next line
         const [newlineOffset, blankFinish1] = this.nestedListParse(
-            this.rstStateMachine.inputLines.slice(offset),
+            this.rstStateMachine.inputLines.slice(offset) as StringList,
             {
                 inputOffset: this.rstStateMachine.absLineOffset() + 1,
                 node: this.parent,
@@ -710,7 +717,7 @@ if(srcline !== undefined) {
     }
 
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
-    public anonymous_target(match: any) {
+    public anonymous_target(match: any): [NodeInterface[], boolean] {
         const lineno = this.rstStateMachine.absLineNumber();
         /* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */
         const [block, indent, offset, blankFinish] = this.rstStateMachine.getFirstKnownIndented({
@@ -723,7 +730,7 @@ if(srcline !== undefined) {
         const block2 = new StringList(blockLines);
 
         const target = this.make_target(block2, blocktext, lineno, "");
-        return [[target], blankFinish];
+        return [target !== undefined ? [target] : [], blankFinish];
     }
 
     public indent(match: any, context: any[], nextState: any) {
@@ -767,7 +774,7 @@ if(srcline !== undefined) {
             }
             lineOffset = newLineOffset;
             while (indented && indented.length && !indented[0]) {
-                indented = indented.slice(1);
+                indented = indented.slice(1) as StringList;
                 lineOffset += 1;
             }
         }
@@ -787,9 +794,9 @@ if(srcline !== undefined) {
                     if (match) {
                         const [attributionEnd, indent] = this.check_attribution(indented, i);
                         if (attributionEnd) {
-                            const aLines = indented.slice(i, attributionEnd);
-                            aLines.trimEnd(match.index + match[0].length, undefined, 1);
-                            aLines.trimEnd(indent, 1);
+                            const aLines = indented.slice(i, attributionEnd) as StringList;
+                            aLines.trimLeft(match.index + match[0].length, undefined, 1);
+                            aLines.trimLeft(indent, 1);
                             return [indented.slice(0, i), aLines,
                                 i, indented.slice(attributionEnd),
                                 lineOffset + attributionEnd];
@@ -852,7 +859,7 @@ if(srcline !== undefined) {
         enumlist.add(listitem);
         const offset = this.rstStateMachine.lineOffset + 1; // next line
         const [newlineOffset, blankFinish2] = this.nestedListParse(
-            this.rstStateMachine.inputLines.slice(offset),
+            this.rstStateMachine.inputLines.slice(offset) as StringList,
             {
                 inputOffset: this.rstStateMachine.absLineOffset() + 1,
                 node: enumlist,
@@ -881,16 +888,19 @@ if(srcline !== undefined) {
         const anode = new nodes.attribution(text, "", textnodes);
         const [source, line] = this.rstStateMachine.getSourceAndLine(lineno);
         anode.source = source;
-        anode.line = line;
+        if(line !== undefined) {
+            anode.line = line;
+        }
         return [anode, messages];
     }
 
     public bullet(match: any, context: any[], nextState: any) {
-    //      console.log(`in bullet`);
         const bulletlist = new nodes.bullet_list();
-        [bulletlist.source,
-            bulletlist.line] = this.rstStateMachine.getSourceAndLine();
-        //      console.log(`${bulletlist.source} ${bulletlist.line}`);
+        let sourceAndLine = this.rstStateMachine.getSourceAndLine();
+        bulletlist.source = sourceAndLine[0];
+        if(sourceAndLine[1] !== undefined) {
+            bulletlist.line = sourceAndLine[1];
+        }
         /* istanbul ignore if */
         if (!this.parent) {
             throw new Error("no parent");
@@ -911,7 +921,7 @@ if(srcline !== undefined) {
         bulletlist.append(i);
         const offset = this.rstStateMachine.lineOffset + 1;
         const [newLineOffset, blankFinish2] = this.nestedListParse(
-            this.rstStateMachine.inputLines.slice(offset), {
+            this.rstStateMachine.inputLines.slice(offset) as StringList, {
                 inputOffset: this.rstStateMachine.absLineOffset() + 1,
                 node: bulletlist,
                 initialState: "BulletList",
@@ -927,7 +937,7 @@ if(srcline !== undefined) {
     }
 
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
-    public list_item(indent: number) {
+    public list_item(indent: number): [NodeInterface, boolean] {
     //      console.log(`in list_item (indent=${indent})`);
     /* istanbul ignore if */
         if (indent == null) {
@@ -966,7 +976,7 @@ if(srcline !== undefined) {
         fieldList.add(field);
         const offset = this.rstStateMachine.lineOffset + 1;
         const [newlineOffset, blankFinish2] = this.nestedListParse(
-            this.rstStateMachine.inputLines.slice(offset),
+            this.rstStateMachine.inputLines.slice(offset) as StringList,
             {
                 inputOffset: this.rstStateMachine.absLineOffset() + 1,
                 node: fieldList,
@@ -982,7 +992,7 @@ if(srcline !== undefined) {
         return [[], nextState, []];
     }
 
-    public field(match: any) {
+    public field(match: any): [NodeInterface, boolean] {
         const name = this.parse_field_marker(match);
         const [src, srcline] = this.rstStateMachine.getSourceAndLine();
         const lineno = this.rstStateMachine.absLineNumber();
@@ -992,7 +1002,10 @@ if(srcline !== undefined) {
         );
         const fieldNode = new nodes.field();
         fieldNode.source = src;
-        fieldNode.line = srcline;
+        if(srcline !== undefined) {
+            fieldNode.line = srcline;
+
+        }
         const [nameNodes, nameMessages] = this.inline_text(name, lineno);
         fieldNode.add(new nodes.field_name(name, "", nameNodes, {}));
         const fieldBody = new nodes.field_body(
@@ -1026,7 +1039,7 @@ if(srcline !== undefined) {
         const optionlist = new nodes.option_list();
         /* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */// fixme
         const [source, line] = this.rstStateMachine.getSourceAndLine();
-        let listitem;
+        let listitem: NodeInterface;
         let blankFinish;
         try {
             [listitem, blankFinish] = this.option_list_item(match);
@@ -1055,7 +1068,7 @@ if(srcline !== undefined) {
         optionlist.add(listitem);
         const offset = this.rstStateMachine.lineOffset + 1; // next line
         const [newlineOffset, blankFinish3] = this.nestedListParse(
-            this.rstStateMachine.inputLines.slice(offset),
+            this.rstStateMachine.inputLines.slice(offset) as StringList,
             {
                 inputOffset: this.rstStateMachine.absLineOffset() + 1,
                 node: optionlist,
@@ -1072,7 +1085,7 @@ if(srcline !== undefined) {
     }
 
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
-    public option_list_item(match: any) {
+    public option_list_item(match: any): [NodeInterface, boolean] {
         const offset = this.rstStateMachine.absLineOffset();
         const options = this.parse_option_marker(match);
         const [indented,
@@ -1170,7 +1183,7 @@ if(srcline !== undefined) {
         if (!blankFinish) {
             const offset = this.rstStateMachine.lineOffset + 1; // next line
             const [newLineOffset, blankFinish2] = this.nestedListParse(
-                this.rstStateMachine.inputLines.slice(offset),
+                this.rstStateMachine.inputLines.slice(offset) as StringList,
                 {
                     inputOffset: this.rstStateMachine.absLineOffset() + 1,
                     node: block,
@@ -1199,7 +1212,7 @@ if(srcline !== undefined) {
     /** Return one line element of a line_block. */
 
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
-    public line_block_line(match: any, lineno: number) {
+    public line_block_line(match: any, lineno: number):  [NodeInterface, NodeInterface[], boolean]  {
     /* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */
         const [indented, indent, lineOffset, blankFinish] = this
             .rstStateMachine.getFirstKnownIndented(
@@ -1316,7 +1329,7 @@ if(srcline !== undefined) {
                 nodelist = [table, ...messages];
             } catch (error) {
                 if (error instanceof tableparser.TableMarkupError) {
-                    nodelist = [...this.malformed_table(block, error.args ? error.args.join(" ") : "",
+                    nodelist = [...this.malformed_table(block, error.message,
                         error.offset), ...messages];
                 } else {
                     throw error;
@@ -1337,9 +1350,10 @@ if(srcline !== undefined) {
             block = this.rstStateMachine.getTextBlock(true);
         } catch (error) {
             if (error instanceof UnexpectedIndentationError) {
-                const [block2, src, srcline] = error.args;
-                block = block2;
-                messages.push(this.reporter!.error("Unexpected indentation.", [],
+                const block2 = error.block;
+                const src = error.source;
+                const srcline = error.lineno;
+                                messages.push(this.reporter!.error("Unexpected indentation.", [],
                     { source: src, line: srcline }));
                 blankFinish = 0;
             }
@@ -1442,7 +1456,7 @@ if(srcline !== undefined) {
             return [[], messages, !extra];
         }
         this.rstStateMachine.nextLine(end! - start);
-        block = lines.slice(start, end! + 1);
+        block = lines.slice(start, end! + 1) as StringList;
         // for East Asian chars:
         block.padDoubleWidth(this.doubleWidthPadChar);
         return [block, [], end === limit || !lines[end! + 1].trim()];
@@ -1533,7 +1547,7 @@ if(srcline !== undefined) {
         } else if (match.match.input.trim().length < 4) {
             const msg = this.reporter!.info(
                 "Unexpected possible title overline or transition.\n"
-        + "Treating it as ordinary text because it's so short.",
+        + "Treating it as ordinary text because it's so short.", [],
                 { line: this.rstStateMachine.absLineNumber() }
             );
             this.parent!.add(msg);
@@ -1592,8 +1606,8 @@ if(srcline !== undefined) {
             if (i === -1) {
                 i = indented.length;
             }
-            argBlock = indented.slice(0, i);
-            content = indented.slice(i + 1, 0);
+            argBlock = indented.slice(0, i) as StringList;
+            content = indented.slice(i + 1, 0) as StringList;
             contentOffset = lineOffset + i + 1;
         } else {
             content = indented;
@@ -1631,10 +1645,11 @@ if(srcline !== undefined) {
     private parseDirectiveOptions(option_presets: any, optionSpec: any, argBlock: StringList): [any | null, StringList] {
         let options: any = { ...option_presets };
         let optBlock: StringList;
+        // @ts-ignore
         let i = argBlock.findIndex(line => this.patterns.field_marker.test(line));
         if (i !== -1) {
-            optBlock = argBlock.slice(i);
-            argBlock = argBlock.slice(0);
+            optBlock = argBlock.slice(i) as StringList;
+            argBlock = argBlock.slice(0) as StringList;
         } else {
             i = argBlock.length;
             optBlock = new StringList([]);

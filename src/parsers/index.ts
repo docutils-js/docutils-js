@@ -1,7 +1,8 @@
 import Parser from '../Parser';
 import RestructuredTextParser from './restructuredtext';
+import { ParserConsructor } from "../types";
 
-function getParserClass(parserName: string): {} {
+function getParserClass(parserName: string): ParserConsructor {
     if (parserName === 'restructuredtext') {
         return RestructuredTextParser;
     }

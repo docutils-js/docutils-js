@@ -78,7 +78,7 @@ class Messages extends Transform {
             throw new Error('need transformmessages');
         }
         const threshold = this.document.reporter.reportLevel;
-        const messages = unfiltered.filter(msg => msg.attributes.level
+        const messages = unfiltered.filter((msg: NodeInterface): boolean => msg.attributes.level
                                            >= threshold && msg.parent == null);
         if (messages.length) {
             const section = new nodes.section('', '', [], { classes: 'system-messages' });
@@ -98,7 +98,7 @@ class FilterMessages extends Transform {
     public apply() {
         this.document.traverse({ condition: nodes.system_message}).forEach((node, i) => {
             if (node.attributes.level < this.document.reporter.reportLevel) {
-                node.parent.children.pop(i);
+                //node.parent!.children.pop(i);
             }
         });
     }
@@ -111,6 +111,8 @@ FilterMessages.defaultPriority = 870;
  * @todo
  */
 class TestMessages extends Transform {
+    public apply(): void {
+    }
 }
 TestMessages.defaultPriority = 880;
 

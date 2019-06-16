@@ -1,5 +1,5 @@
 import TransformSpec from '../TransformSpec';
-import { ReadCallback } from "../types";
+import { ReadCallback, ReadInputCallback } from "../types";
 
 abstract class Input extends TransformSpec {
     public componentType: string = "input";
@@ -8,7 +8,7 @@ abstract class Input extends TransformSpec {
     private defaultSourcePath?: string;
     private encoding?: string;
     private errorHandler?: string;
-    protected sourcePath?: string;
+    public sourcePath?: string;
     protected source?: {};
     public constructor(
         args: {
@@ -28,7 +28,7 @@ abstract class Input extends TransformSpec {
     }
 
     /* istanbul ignore method */
-    abstract read(cb: ReadCallback): void;
+    abstract read(cb: ReadInputCallback<string | string[]>): void;
 
     /* istanbul ignore method */
     public decode(data: string): string {

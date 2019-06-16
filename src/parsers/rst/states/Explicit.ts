@@ -28,7 +28,7 @@ class Explicit extends SpecializedBody {
                 } catch (error) {
                     if (error instanceof MarkupError) {
                         const lineno = this.rstStateMachine.absLineNumber();
-                        const message = error.args.join(' ');
+                        const message = error.message;
                         errors.push(this.reporter!.warning(message, [], { line: lineno }));
                         break;
                     }

@@ -2,7 +2,7 @@ import Component from "./Component";
 import { DebugFunction, Document, ParserArgs } from "./types";
 
 abstract class Parser extends Component {
-    public debugFn: DebugFunction;
+    public debugFn: DebugFunction = (msg) => {};
     protected debug: boolean;
 
     public constructor(args: ParserArgs = {}) {
@@ -10,7 +10,9 @@ abstract class Parser extends Component {
         this.componentType = 'parser';
         this.configSection = 'parsers';
         this.debug = args.debug || false;
-        this.debugFn = args.debugFn;
+        if(args.debugFn !== undefined) {
+            this.debugFn = args.debugFn;
+        }
     }
 
     /* istanbul ignore function */

@@ -1,6 +1,6 @@
 import SpecializedText from './SpecializedText';
 import { columnWidth } from '../../../utils';
-import { EOFError } from '../../../Exceptions';
+import { ApplicationError, EOFError, InvalidStateError } from "../../../Exceptions";
 import * as nodes from '../../../nodes';
 import StateCorrection from '../../../StateCorrection';
 import RSTStateMachine from "../RSTStateMachine";
@@ -18,9 +18,12 @@ class Line extends SpecializedText {
 
     // @ts-ignore
     public eof(context) {
+      if(this.memo === undefined) {
+        throw new InvalidStateError();
+      }
         const marker = context[0].trim();
         if (this.memo.sectionBubbleUpKludge) {
-            this.memo!.sectionBubbleUpKludge = false;
+            this.memo.sectionBubbleUpKludge = false;
         } else if (marker.length < 4) {
             this.stateCorrection(context);
         }
@@ -45,7 +48,7 @@ class Line extends SpecializedText {
         }
         const transition = new nodes.transition(marker);
         transition.source = src;
-        transition.line = srcline - 1;
+        transition.line = srcline === undefined ? -1 : srcline - 1;
         this.parent!.add(transition);
         return [[], 'Body', []];
     }
@@ -57,7 +60,7 @@ class Line extends SpecializedText {
         const lineno = this.rstStateMachine.absLineNumber() - 1;
         let overline = context[0];
         let title = match.result.input;
-        let underline = '';
+        let underline: string|undefined = '';
         try {
             underline = this.rstStateMachine.nextLine();
         } catch (error) {
@@ -80,7 +83,9 @@ class Line extends SpecializedText {
         }
         const source = [overline, title, underline].join('\n');
         overline = overline.trimRight();
-        underline = underline.trimRight();
+      underline = underline || '';
+      underline = underline.trimRight();
+
         if (!this.transitions.underline[0].test(underline)) {
             const blocktext = `${overline}\n${title}\n${underline}`;
             if (overline.trimEnd().length < 4) {

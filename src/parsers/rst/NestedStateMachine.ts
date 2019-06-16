@@ -1,12 +1,14 @@
 import StateMachineWS from '../../StateMachineWS';
 import {StateMachineRunArgs} from "../../types";
+import { NestedStateMachineRunArgs, RSTLanguage, RstMemo } from "./types";
 
 class NestedStateMachine extends StateMachineWS {
-    public memo: any;
-    run(args: StateMachineRunArgs) {
-    const {
-    inputLines, inputOffset, memo, node, matchTitles,
-} = args;
+    public memo?: RstMemo;
+  private rstLanguage: RSTLanguage | undefined;
+    public run(args: NestedStateMachineRunArgs) {
+        const {
+            inputLines, inputOffset, memo, node, matchTitles,
+        } = args;
         /* istanbul ignore if */
         if (!inputLines) {
             throw new Error('need inputlines');
@@ -27,7 +29,7 @@ class NestedStateMachine extends StateMachineWS {
 
         this.attachObserver(this.document.noteSource.bind(this.document));
         this.reporter = memo.reporter;
-        this.language = memo.language;
+        this.rstLanguage = memo.language;
         this.node = node;
         const results = super.run({inputLines, inputOffset});
         /* istanbul ignore if */

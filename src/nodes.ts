@@ -544,7 +544,7 @@ abstract class Node implements NodeInterface {
 
     public source: string|undefined;
 
-    public line: number = 0;
+    public line: number | undefined = 0;
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     public classTypes: any[] = [];

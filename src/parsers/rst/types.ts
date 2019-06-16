@@ -1,5 +1,13 @@
 import Inliner from "./Inliner";
-import { Document, ElementInterface, NodeInterface, ReporterInterface, LogLevel, StateMachineCommonArgs } from "../../types";
+import {
+    Document,
+    ElementInterface,
+    LogLevel,
+    NodeInterface,
+    ReporterInterface,
+    StateMachineCommonArgs,
+    StateMachineRunArgs
+} from "../../types";
 import StringList from "../../StringList";
 import { Settings } from "../../../gen/Settings";
 
@@ -78,4 +86,10 @@ export interface InlinerInterface {
     initCustomizations(settings: Settings): void;
 
     parse(text: string, args: { lineno: number; memo: any; parent: ElementInterface }): any[][];
+
+  adjustUri(uri: string): string;
+}
+
+export interface NestedStateMachineRunArgs extends StateMachineRunArgs {
+    memo: RstMemo;
 }

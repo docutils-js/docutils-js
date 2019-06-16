@@ -62,9 +62,9 @@ class StateMachine implements Statemachine {
      **/
     public stateFactory: Statefactory;
 
-    public lineOffset: number;
+    public lineOffset: number = -1;
 
-    public line?: string = '';
+    public line: string = '';
 
     public inputOffset: number = 0;
 
@@ -160,6 +160,7 @@ class StateMachine implements Statemachine {
      */
     public run(args: StateMachineRunArgs): (string|{})[] {
         const cArgs: StateMachineRunArgs = { ...args };
+        // RUNTIMEINIT
         this.runtimeInit();
         if (cArgs.inputLines instanceof StringList) {
             this.inputLines = cArgs.inputLines;
@@ -218,7 +219,7 @@ class StateMachine implements Statemachine {
                         }
 
                         this.checkLine(context, state, transitions);
-                        const r: [{}[], string|StateInterface, {}[]] = this.checkLine(context, state, transitions);
+                        const r = this.checkLine(context, state, transitions);
                         /* istanbul ignore if */
                         if (!isIterable(r)) {
                             throw new Error(`Expect iterable result, got: ${r}`);
@@ -365,10 +366,8 @@ class StateMachine implements Statemachine {
         return this.inputLines.source(lineOffset - this.inputOffset);
     }
 
-    public absLineOffset(): number|undefined {
-        if(this.inputOffset === undefined) {
-            return undefined;
-        }
+    public absLineOffset(): number {
+
         return this.lineOffset + this.inputOffset;
     }
 
@@ -448,7 +447,7 @@ class StateMachine implements Statemachine {
      * value is returned.
      */
     public checkLine(context: {}[], state: StateInterface,
-        transitions?: TransitionsArray): [{}[], string|StateInterface, {}[]] {
+        transitions?: TransitionsArray):  [{}[], (string | StateInterface | undefined), {}[]] {
         /* istanbul ignore if */
         if (!Array.isArray(context)) {
             throw new Error('context should be array');
@@ -523,9 +522,10 @@ class StateMachine implements Statemachine {
         stateClasses.forEach(this.addState.bind(this));
     }
 
-    public runtimeInit(): void{
+    public runtimeInit(): void {
         // @ts-ignore
-        Object.values(this.states).forEach((s): void => s.runtimeInit());
+        console.log('runtime init');
+        Object.values(this.states).forEach((s: StateInterface): void => s.runtimeInit());
     }
 
 

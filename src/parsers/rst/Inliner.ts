@@ -685,9 +685,10 @@ this.implicitDispatch = [];
         return [new nodes.Text(unescape(text), unescape(text, true))];
     }
 
-    adjustUri(uri: string) {
+    public adjustUri(uri: string): string {
         return uri; // fixme
     }
+
     /*
     //console.log(uri);
     const match = this.patterns.email.exec(uri)

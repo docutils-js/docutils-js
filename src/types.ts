@@ -9,10 +9,11 @@ import { Settings } from "../gen/Settings";
 import Transformer from "./Transformer";
 import StringList from "./StringList";
 import { InlinerInterface } from "./parsers/rst/types";
+import Parser from "./Parser";
 
 export interface ParserArgs
 {
-    inliner?: {};
+    inliner?: InlinerInterface;
     rfc2822?: boolean;
     debug?: boolean;
     debugFn?: DebugFunction;
@@ -52,7 +53,7 @@ export interface NodeInterface extends SourceLocation {
     /** Path or description of the input source which generated this Node. */
     source?: string;
     /** The line number (1-based) of the beginning of this Node in `source`. */
-    line: number;
+    line: number | undefined;
 
     attributes: Attributes;
 
@@ -164,7 +165,7 @@ export interface TextElementInterface extends ElementInterface {
 }
 
 export interface Document extends ElementInterface {
-    transformMessages: {}[];
+    transformMessages: Systemmessage[];
     nameIds: NameIds;
 
     reporter: ReporterInterface;
@@ -359,7 +360,6 @@ export interface StateType {
 }
 export interface StateInterface {
     stateName: string;
-    transitions: Transitions;
 
     runtimeInit(): void;
 
@@ -381,7 +381,7 @@ export interface StateInterface {
     eof(context: (string|{})[]): string[];
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    noMatch(context: any[], transitions: TransitionsArray|undefined): [{}[], (string | StateInterface), {}[]];
+    noMatch(context: any[], transitions: TransitionsArray|undefined): [{}[], (string | StateInterface | undefined), {}[]];
 
 }
 
@@ -400,6 +400,7 @@ export interface StateMachineRunArgs extends StateMachineCommonArgs {
     document?: Document;
     inliner?: InlinerInterface;
 }
+
 
 export interface GetIndentedArgs {
     start?: number;
@@ -498,11 +499,16 @@ export interface ObserverCallback {
 }
 
 export interface Transitions {
-    [name: string]: StateInterface;
+    [name: string]: [RegExp, TransitionFunction, string];
 }
 
-export interface ReadCallback {
-    (error: Error | undefined | {}, output: {} | undefined): void;
+export interface ReadCallback<T> {
+    (error: Error | undefined | {}, output: T | undefined): void;
+}
+
+
+export interface ReadInputCallback<T> {
+    (error: Error | undefined | {}, output: T | undefined): void;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -521,4 +527,18 @@ export interface TransformInterface {
 
 export interface TransitionsArray {
     [index: number]: string|string[];
+}
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface TransitionFunction {
+
+}
+
+export interface ParserConsructor {
+    new(args: ParserArgs): Parser;
+}
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface WriterParts {
+    [partName: string]: string | undefined;
 }

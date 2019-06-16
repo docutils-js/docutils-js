@@ -4,6 +4,14 @@ import UnexpectedIndentationError from './error/UnexpectedIndentationError';
 import {GetIndentedArgs} from "./types";
 
 class StringList extends ViewList {
+    // @ts-ignore
+    public splice(index: number, num: number, ...elems): StringList {
+        return super.splice(index, num, ...elems) as StringList;
+    }
+
+    public slice(start: number = 0, end: number = this.length): StringList {
+        return super.slice(start, end) as StringList;
+    }
     public constructor(
         initlist: string[],
         source?: string,

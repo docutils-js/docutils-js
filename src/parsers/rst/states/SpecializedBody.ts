@@ -86,7 +86,7 @@ class SpecializedBody extends Body {
 
     /* istanbul ignore next */
     // @ts-ignore
-    oublic anonymous() {
+    public anonymous() {
         // @ts-ignore
         this.invalid_input();
     }

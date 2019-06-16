@@ -1,7 +1,7 @@
 import { InvalidArgumentsError } from "../Exceptions";
 import UnknownTransitionError from "../error/UnknownTransitionError";
 import DuplicateTransitionError from "../error/DuplicateTransitionError";
-import { ReporterInterface, StateInterface, Transitions } from "../types";
+import { ReporterInterface, StateInterface, TransitionFunction, Transitions, TransitionsArray } from "../types";
 import { StateMachine } from "../StateMachine";
 import { RSTStateArgs } from "../parsers/rst/types";
 
@@ -10,7 +10,7 @@ class State implements StateInterface {
       * {Name: pattern} mapping, used by `make_transition()`. Each pattern may
       * be a string or a compiled `re` pattern. Override in subclasses.
      */
-    public patterns?: {};
+    public patterns: {} = {};
     /**
      * A list of transitions to initialize when a `State` is instantiated.
      * Each entry is either a transition name string, or a (transition name, next
@@ -112,7 +112,7 @@ class State implements StateInterface {
         this.transitionOrder.splice(this.transitionOrder.indexOf(name), 1);
     }
 
-    public makeTransition(name: string, nextState?: any) {
+    public makeTransition(name: string, nextState?: any): [RegExp, TransitionFunction, string]  {
         if (name == null) {
             throw new InvalidArgumentsError('need transition name');
         }
@@ -140,9 +140,9 @@ class State implements StateInterface {
         return [pattern, method, nextState];
     }
 
-    public makeTransitions(nameList: string[]): [string, {}][] {
-        const names: any[] = [];
-        const transitions: any = {};
+    public makeTransitions(nameList: (string|string[])[]): [string[], Transitions] {
+        const names: string[] = [];
+        const transitions: Transitions = {};
         /* istanbul ignore if */
         if (!Array.isArray(nameList)) {
             // console.log('warning, not an array');
@@ -168,12 +168,12 @@ class State implements StateInterface {
     }
 
     /* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars,@typescript-eslint/no-explicit-any */
-    public noMatch(context: any[], transitions: any): any[] {
-        return [context, null, []];
+    public noMatch(context: any[], transitions: TransitionsArray|undefined): [{}[], (string | StateInterface | undefined), {}[]] {
+        return [context, undefined, []];
     }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    public bof(context: {}[]): {}[][] {
+    public bof(context: string[]): string[][] {
         return [context, []];
     }
 
@@ -185,6 +185,8 @@ class State implements StateInterface {
     public nop(match: {}, context: {}[], nextState: {}): {}[] {
         return [context, nextState, []];
     }
+
+    public stateName: string = '';
 }
 
 export default State;

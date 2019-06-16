@@ -4,7 +4,7 @@ import {RSTStateArgs} from "../parsers/rst/types";
 
 class StateWS extends State {
     private wsPatterns: any;
-    private wsInitialTransitions: any[] = [];
+    private wsInitialTransitions: any[] = ['blank', 'indent'];
     private wsStateMachine: StateMachineWS;
     public constructor(stateMachine: StateMachineWS, args: any) {
         super(stateMachine, args);
@@ -37,7 +37,7 @@ class StateWS extends State {
             blank: ' *$',
             indent: ' +',
         };
-        this.wsInitialTransitions = ['blank', 'indent'];
+
     }
 
     public addInitialTransitions() {

@@ -2,9 +2,8 @@ import Component from "./Component";
 import * as universal from "./transforms/universal";
 import parsers from "./parsers";
 import newDocument from "./newDocument";
-import { DebugFunction, Document, ReadCallback, TransformType } from "./types";
+import { DebugFunction, Document, ParserConsructor, ReadCallback, TransformType } from "./types";
 import { Settings } from "../gen/Settings";
-import Source from "./Sources";
 import Parser from "./Parser";
 import Input from "./io/Input";
 import { InvalidStateError } from "./Exceptions";
@@ -20,13 +19,17 @@ interface TransformClass {
     apply(): void;
 }
 
+interface HandleDocumentCallback {
+    (error: Error | undefined | {}, document: Document|undefined): void;
+}
+
 export default class Reader extends Component {
     public componentType: string = 'reader';
     public  document?: Document;
     protected parseFn?: ParseFunction;
     private settings?: Settings;
-    protected source: Source;
-    protected input: string = '';
+    protected source: Input|undefined;
+    protected input: string|string[] = '';
     public parser?: Parser;
     private debug: boolean = false;
     private debugFn?: DebugFunction;
@@ -67,7 +70,7 @@ export default class Reader extends Component {
     }
 
     public setParser(parserName: string): void {
-        const ParserClass = parsers.getParserClass(parserName);
+        const ParserClass: ParserConsructor = parsers.getParserClass(parserName);
         this.parser = new ParserClass({
             debug: this.debug,
             debugFn: this.debugFn,
@@ -80,7 +83,7 @@ export default class Reader extends Component {
       *   test123
       *
       */
-    public read(source: Input, parser: Parser, settings: Settings, cb: ReadCallback): void {
+    public read(source: Input, parser: Parser, settings: Settings, cb: HandleDocumentCallback): void {
         this.source = source;
         if (!this.parser) {
             this.parser = parser;
@@ -90,12 +93,14 @@ export default class Reader extends Component {
             throw new Error('Need source');
         }
 
-        this.source.read((error: Error, data: string): void => {
+        this.source.read((error: Error | undefined | {}, output: string  | string[] | undefined): void => {
             if (error) {
                 cb(error, undefined);
                 return;
             }
-            this.input = data;
+            if(output != undefined) {
+                this.input = output;
+            }
             this.parse();
             cb(undefined, this.document);
         });
@@ -113,15 +118,17 @@ export default class Reader extends Component {
     /* Delegates to this.parser, providing arguments
        based on instance variables */
     public parse(): void {
+        const input = Array.isArray(this.input) ? this.input.join('') : this.input;
+
         if (this.parser) {
             const document = this.newDocument();
-            this.parser.parse(this.input, document);
+            this.parser.parse(input, document);
             this.document = document;
             if (this.input === undefined) {
                 throw new Error(`need input, i have ${this.input}`);
             }
         } else if(this.parseFn !== undefined) {
-            const document = this.parseFn(this.input);
+            const document = this.parseFn(input);
             this.document = document;
         } else {
             throw new InvalidStateError();
@@ -136,7 +143,7 @@ export default class Reader extends Component {
         }
         const document = newDocument({
             sourcePath:
-                                       this.source && this.source.sourcePath,
+                                       this.source && this.source.sourcePath || '',
         },
         this.settings);
         return document;

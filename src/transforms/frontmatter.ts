@@ -108,7 +108,7 @@ export class SectionSubTitle extends TitlePromoter {
             // sections, but we call self.promote_subtitle for those
             // sections nonetheless.  To do: Write a test case which
             // shows the problem and discuss on Docutils-develop.
-                this.promoteSubtitle(section);
+                this.promoteSubtitle(section as ElementInterface);
             });
         }
     }

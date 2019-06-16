@@ -33,13 +33,12 @@ test('rst2pojo pipeline', () => {
     };
 
     const { readerName, parserName, writerName } = args;
-    const source = new StringInput({
- source: `Random test
+    const source = new StringInput(`Random test
 ===========
 I like food.
 
 `,
-});
+);
 
     const destination = new StringOutput();
     const pub = new Publisher({
