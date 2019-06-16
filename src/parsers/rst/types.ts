@@ -4,7 +4,8 @@ import StringList from "../../StringList";
 import { Settings } from "../../../gen/Settings";
 
 export interface Explicit {
-    [patternName: string]: {};
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    [patternName: string]: any;
 }
 export interface CommonParseArgs {
     inputLines?: StringList;

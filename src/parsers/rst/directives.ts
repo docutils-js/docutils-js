@@ -68,7 +68,7 @@ return uri;
 
 const _directives: any = {};
 
-function directive(directiveName: string, languageModule: RSTLanguage, document: Document) {
+function directive(directiveName: string, document: Document, languageModule?: RSTLanguage) {
     const normName = directiveName.toLowerCase();
     const messages: any[] = [];
     const msgText = [];

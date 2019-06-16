@@ -173,7 +173,7 @@ export interface Document extends ElementInterface {
     // eslint-disable-next-line @typescript-eslint/camelcase,camelcase
     transformer: Transformer;
 
-    noteTransformMessage(message: SystemMessage): void;
+    noteTransformMessage(message: Systemmessage): void;
 
     noteImplicitTarget(target: NodeInterface, msgnode: NodeInterface): void;
 
@@ -273,7 +273,7 @@ export interface ReporterInterface {
 
     systemMessage(level: number, message: string | Error, children: Element[], attributes: Attributes): NodeInterface;
 
-   
+
     attachObserver(observer: {}): void;
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -294,7 +294,7 @@ export interface ReporterInterface {
 
 export interface Statefactory {
 
-    withStateClasses(strings: StateType[]): Statefactory;
+    withStateClasses(strings: (StateType|string)[]): Statefactory;
 
     createState(stateName: string, stateMachine: Statemachine): StateInterface;
 
@@ -486,7 +486,7 @@ export interface ApplyFunction {
     (): void;
 }
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface SystemMessage extends NodeInterface {
+export interface Systemmessage extends NodeInterface {
 }
 
 export interface NameIds {

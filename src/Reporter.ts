@@ -1,7 +1,7 @@
 import * as nodes from "./nodes";
 import { isIterable } from "./utils";
 import { SystemMessage, UnimplementedError as Unimp } from "./Exceptions";
-import { Attributes, NodeInterface, ObserverCallback, ReporterInterface, WritableStream } from "./types";
+import { Attributes, NodeInterface, ObserverCallback, ReporterInterface, Systemmessage, WritableStream } from "./types";
 
 /**
     Return the "source" and "line" attributes from the `node` given or from
@@ -18,9 +18,13 @@ function getSourceLine(node: NodeInterface): [string | undefined, number | undef
     return [undefined, undefined];
 }
 
+interface ReporterObserverCallback {
+    (msg: Systemmessage): void;
+}
+
 class Reporter implements ReporterInterface {
     private source: string;
-    private observers: ObserverCallback[];
+    private observers: ReporterObserverCallback[];
     private maxLevel: number;
     private debugLevel: number = 0;
     public  DEBUG_LEVEL: number;
@@ -103,7 +107,7 @@ class Reporter implements ReporterInterface {
             // fixme
         }
 
-        const msg = new nodes.system_message(myMessage, children, attributes);
+        const msg: Systemmessage = new nodes.system_message(myMessage, children, attributes);
         if (this.stream) { // fixme
             this.stream.write(`${msg.astext()}\n`);
         }
@@ -122,11 +126,11 @@ class Reporter implements ReporterInterface {
         return msg;
     }
 
-    public notifyObservers(message: SystemMessage): void {
+    public notifyObservers(message: Systemmessage): void {
         this.observers.forEach((o): void => o(message));
     }
 
-    public attachObserver(observer: ObserverCallback): void {
+    public attachObserver(observer: ReporterObserverCallback): void {
         this.observers.push(observer);
     }
 

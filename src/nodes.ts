@@ -31,7 +31,7 @@ import {
     NodeInterface,
     QuoteattrCallback,
     ReporterInterface,
-    SystemMessage,
+    Systemmessage,
     TextElementInterface,
     TraverseArgs,
     Visitor
@@ -1515,9 +1515,9 @@ class document extends Element implements Document {
 
     public decoration?: decoration;
 
-    public transformMessages: SystemMessage[];
+    public transformMessages: Systemmessage[];
 
-    public parseMessages: SystemMessage[];
+    public parseMessages: Systemmessage[];
 
     public transformer: Transformer;
 
@@ -1840,11 +1840,11 @@ class document extends Element implements Document {
         this.transformer.addPending(pending, priority);
     }
 
-    public noteParseMessage(message: SystemMessage): void {
+    public noteParseMessage(message: Systemmessage): void {
         this.parseMessages.push(message);
     }
 
-    public noteTransformMessage(message: SystemMessage): void {
+    public noteTransformMessage(message: Systemmessage): void {
         this.transformMessages.push(message);
     }
 
@@ -2777,7 +2777,7 @@ class entry extends Element {
 }
 
 /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,@typescript-eslint/class-name-casing */
-class system_message extends Element implements SystemMessage {
+class system_message extends Element implements Systemmessage {
     public constructor(message: string, children: NodeInterface[], attributes: Attributes) {
         super((attributes.rawsource || ""),
             (message ? [new paragraph("", message), ...children] : children),

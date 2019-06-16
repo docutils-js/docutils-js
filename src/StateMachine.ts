@@ -60,7 +60,7 @@ class StateMachine implements Statemachine {
      *  - `initialState`: a string, the class name of the initial state.
      *  - `debug`: a boolean; produce verbose output if true (nonzero).
      **/
-    protected stateFactory: Statefactory;
+    public stateFactory: Statefactory;
 
     public lineOffset: number;
 

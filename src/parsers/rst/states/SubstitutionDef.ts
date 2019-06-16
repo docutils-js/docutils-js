@@ -4,7 +4,8 @@ import * as nodes from '../../../nodes';
 import * as RegExps from '../RegExps';
 import RSTStateMachine from "../RSTStateMachine";
 import {RSTStateArgs} from "../types";
-import { StateInterface } from "../../../types";
+import { NodeInterface, StateInterface } from "../../../types";
+import StringList from "../../../StringList";
 
 /** Parser for the contents of a substitution_definition element. */
 class SubstitutionDef extends Body {
@@ -35,8 +36,10 @@ class SubstitutionDef extends Body {
         if(source !== undefined) {
             literalBlock.source = source;
         }
-        literalBlock.line = line;
-        const nodelist: any[] = [literalBlock];
+        if(line !== undefined) {
+            literalBlock.line = line;
+        }
+        const nodelist: NodeInterface[] = [literalBlock];
         if (!blankFinish) {
             nodelist.push(this.unindentWarning('Literal block'));
         }
@@ -51,7 +54,7 @@ class SubstitutionDef extends Body {
         const newAbsOffset = this.nestedParse(
 
             {
-                inputLines: this.rstStateMachine.inputLines.slice(offset),
+                inputLines: this.rstStateMachine.inputLines.slice(offset) as StringList,
                 inputOffset: absLineOffset,
                 node: parentNode,
                 matchTitles: false,

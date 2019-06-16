@@ -183,8 +183,9 @@ class Body extends RSTState {
         if(src !== undefined) {
           footnote.source = src;
         }
-
-        footnote.line = srcline;
+if(srcline !== undefined) {
+    footnote.line = srcline;
+}
         if (name[0] === "#") { // auto-numbered
             name = name.substring(1); // autonumber label
             footnote.attributes.auto = 1;
@@ -215,7 +216,7 @@ class Body extends RSTState {
         return [[footnote], blankFinish];
     }
 
-    citation(match: any) {
+    public citation(match: any) {
         const [src, srcline] = this.rstStateMachine.getSourceAndLine();
         /* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */
         const [indented, indent, offset, blankFinish] = this.rstStateMachine.getFirstKnownIndented({
@@ -226,7 +227,9 @@ class Body extends RSTState {
         const citation = new nodes.citation(indented.join("\n"));
 
         citation.source = src;
-        citation.line = srcline;
+        if(srcline !== undefined) {
+            citation.line = srcline;
+        }
         citation.add(new nodes.label("", label));
         citation.attributes.names.push(name);
         this.document!.noteCitation(citation);
@@ -239,7 +242,7 @@ class Body extends RSTState {
     }
 
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
-    hyperlink_target(match: any) {
+    public hyperlink_target(match: any) {
         const pattern = this.explicit.patterns.target;
         const lineno = this.rstStateMachine.absLineNumber();
         /* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */
@@ -276,7 +279,7 @@ class Body extends RSTState {
     }
 
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
-    make_target(block: any, blockText: any, lineno: number, target_name: string) {
+    public make_target(block: any, blockText: any, lineno: number, target_name: string) {
         const [targetType, data] = this.parse_target(block, blockText, lineno);
         //        console.log(`target type if ${targetType} and data is ${data}`);
         if (targetType === "refname") {
@@ -305,7 +308,7 @@ class Body extends RSTState {
    */
 
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,@typescript-eslint/no-unused-vars,no-unused-vars */
-    parse_target(block: string[], blockText: any | any[], lineno: number) {
+    public parse_target(block: string[], blockText: any | any[], lineno: number) {
         if (block.length && block[block.length - 1].trim().endsWith("_")) {
             const lines: string[] = [];
             block.forEach(line => lines.push(line.trim()));
@@ -321,7 +324,7 @@ class Body extends RSTState {
     }
 
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
-    is_reference(reference: string) {
+    public is_reference(reference: string) {
         const match = this.explicit.patterns.reference.exec(
             `^${nodes.whitespaceNormalizeName(reference)}`
         );
@@ -332,7 +335,7 @@ class Body extends RSTState {
     }
 
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
-    add_target(targetname: string, refuri: string, target: NodeInterface, lineno: number) {
+    public add_target(targetname: string, refuri: string, target: NodeInterface, lineno: number) {
         target.line = lineno;
         if (targetname) {
             const name = fullyNormalizeName(unescape(targetname));
@@ -359,7 +362,7 @@ class Body extends RSTState {
     }
 
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
-    substitution_def(match: any) {
+    public substitution_def(match: any) {
         const pattern = this.explicit.patterns.substitution;
         /* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */
         const [src, srcline] = this.rstStateMachine.getSourceAndLine();
@@ -407,13 +410,16 @@ class Body extends RSTState {
             block.pop();
         }
         const subname = subDefMatch[2];
+        // eslint-disable-next-line @typescript-eslint/camelcase
         const substitutionNode: nodes.substitution_definition = new nodes.substitution_definition(blockText);
         substitutionNode.source = src;
-        substitutionNode.line = srcline;
+        if(srcline !== undefined) {
+            substitutionNode.line = srcline;
+        }
         if (!block.length) {
             const msg = this.reporter!.warning(
                 `Substitution definition "${subname}" missing contents.`,
-                new nodes.literal_block(blockText, blockText),
+                [new nodes.literal_block(blockText, blockText)],
                 { source: src, line: srcline }
             );
             return [[msg], myBlankFinish];
@@ -473,7 +479,7 @@ class Body extends RSTState {
         return [[substitutionNode], blankFinish];
     }
 
-    disallowedInsideSubstitutionDefinitions(node: NodeInterface) {
+    public disallowedInsideSubstitutionDefinitions(node: NodeInterface) {
 
         if (((node.attributes && node.attributes.ids && node.attributes.ids.length) || node instanceof nodes.reference
       || node instanceof nodes.footnote_reference) && node.attributes.auto) {
@@ -483,14 +489,15 @@ class Body extends RSTState {
     }
 
     /** Returns a 2-tuple: list of nodes, and a "blank finish" boolean. */
-    directive(match: any, optionPresets: any) {
+    public directive(match: any, optionPresets: any) {
         const typeName = match[1];
         if (typeof typeName === "undefined") {
             throw new Error("need typename");
         }
 
+        let language = this.memo && this.memo.language;
         const [directiveClass, messages] = directives.directive(
-            typeName, this.memo!.language, this.document!
+            typeName, this.document!, language
         );
         this.parent!.add(messages);
         if (directiveClass) {
@@ -588,7 +595,7 @@ class Body extends RSTState {
     }
 
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
-    unknown_directive(typeName: any): any[] {
+    public unknown_directive(typeName: any): any[] {
         const lineno = this.rstStateMachine.absLineNumber();
         const [indented,
             /* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */
@@ -605,7 +612,7 @@ class Body extends RSTState {
         return [[error], blankFinish];
     }
 
-    comment(match: any) {
+    public comment(match: any) {
         const matchEnd = match.result.index + match.result[0].length;
         if (!match.result.input.substring(matchEnd).trim()
       && this.rstStateMachine.isNextLineBlank()) { // # an empty comment?
@@ -627,7 +634,7 @@ class Body extends RSTState {
     /** Footnotes, hyperlink targets, directives, comments. */
 
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
-    explicit_markup(match: any, context: any[], nextState: any) {
+    public explicit_markup(match: any, context: any[], nextState: any) {
         const r = this.explicit_construct(match);
         /* istanbul ignore if */
         if (!isIterable(r)) {
@@ -642,7 +649,7 @@ class Body extends RSTState {
     /** Determine which explicit construct this is, parse & return it. */
 
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
-    explicit_construct(match: any) {
+    public explicit_construct(match: any) {
         const errors = [];
         const r = this.explicit.constructs.map(
             // @ts-ignore
@@ -676,7 +683,7 @@ class Body extends RSTState {
    */
 
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
-    explicit_list(blankFinish: boolean) {
+    public explicit_list(blankFinish: boolean) {
         const offset = this.rstStateMachine.lineOffset + 1; // next line
         const [newlineOffset, blankFinish1] = this.nestedListParse(
             this.rstStateMachine.inputLines.slice(offset),
@@ -695,7 +702,7 @@ class Body extends RSTState {
     }
 
     /** Anonymous hyperlink targets. */
-    anonymous(match: any, context: any[], nextState: any) {
+    public anonymous(match: any, context: any[], nextState: any) {
         const [nodelist, blankFinish] = this.anonymous_target(match);
         this.parent!.add(nodelist);
         this.explicit_list(blankFinish);
@@ -703,7 +710,7 @@ class Body extends RSTState {
     }
 
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
-    anonymous_target(match: any) {
+    public anonymous_target(match: any) {
         const lineno = this.rstStateMachine.absLineNumber();
         /* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */
         const [block, indent, offset, blankFinish] = this.rstStateMachine.getFirstKnownIndented({
@@ -719,7 +726,7 @@ class Body extends RSTState {
         return [[target], blankFinish];
     }
 
-    indent(match: any, context: any[], nextState: any) {
+    public indent(match: any, context: any[], nextState: any) {
     /* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */
         const [indented, indent, lineOffset, blankFinish] = this.rstStateMachine.getIndented({});
         /* istanbul ignore if */
@@ -735,7 +742,7 @@ class Body extends RSTState {
     }
 
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
-    block_quote(indented: StringList, lineOffset: number) {
+    public block_quote(indented: StringList, lineOffset: number) {
     /* istanbul ignore if */
         if (!indented) {
             throw new Error();
@@ -768,7 +775,7 @@ class Body extends RSTState {
     }
 
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
-    split_attribution(indented: StringList, lineOffset: number) {
+    public split_attribution(indented: StringList, lineOffset: number) {
         this.attribution_pattern = new RegExp("(---?(?!-)|\\u2014) *(?=[^ \\n])");
         let blank;
         let nonblankSeen = false;
@@ -798,7 +805,7 @@ class Body extends RSTState {
     }
 
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
-    check_attribution(indented: StringList, attributionStart: any) {
+    public check_attribution(indented: StringList, attributionStart: any) {
         let indent = null;
         let i;
         for (i = attributionStart + 1; i < indented.length; i += 1) {
@@ -819,7 +826,7 @@ class Body extends RSTState {
     }
 
     /** Enumerated List Item */
-    enumerator(match: any, context: any[], nextState: any) {
+    public enumerator(match: any, context: any[], nextState: any) {
         const [format, sequence, text, ordinal] = this.parseEnumerator(match);
         if (!this.isEnumeratedListItem(ordinal, sequence, format)) {
             throw new TransitionCorrection("text");
@@ -867,7 +874,7 @@ class Body extends RSTState {
     }
 
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
-    parse_attribution(indented: string[], lineOffset: number) {
+    public parse_attribution(indented: string[], lineOffset: number) {
         const text = indented.join("\n").trimRight();
         const lineno = this.rstStateMachine.absLineNumber() + lineOffset;
         const [textnodes, messages] = this.inline_text(text, lineno);
@@ -878,7 +885,7 @@ class Body extends RSTState {
         return [anode, messages];
     }
 
-    bullet(match: any, context: any[], nextState: any) {
+    public bullet(match: any, context: any[], nextState: any) {
     //      console.log(`in bullet`);
         const bulletlist = new nodes.bullet_list();
         [bulletlist.source,
@@ -920,7 +927,7 @@ class Body extends RSTState {
     }
 
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
-    list_item(indent: number) {
+    public list_item(indent: number) {
     //      console.log(`in list_item (indent=${indent})`);
     /* istanbul ignore if */
         if (indent == null) {
@@ -951,7 +958,7 @@ class Body extends RSTState {
     }
 
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
-    field_marker(match: any, context: any[], nextState: any) {
+    public field_marker(match: any, context: any[], nextState: any) {
         const fieldList = new nodes.field_list();
         this.parent!.add(fieldList);
         const [field, blankFinish1] = this.field(match);
@@ -975,7 +982,7 @@ class Body extends RSTState {
         return [[], nextState, []];
     }
 
-    field(match: any) {
+    public field(match: any) {
         const name = this.parse_field_marker(match);
         const [src, srcline] = this.rstStateMachine.getSourceAndLine();
         const lineno = this.rstStateMachine.absLineNumber();
@@ -1001,21 +1008,21 @@ class Body extends RSTState {
     /** Extract & return field name from a field marker match. */
 
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
-    parse_field_marker(match: any) {
+    public parse_field_marker(match: any) {
         let field = match.result[0].substring(1);
         field = field.substring(0, field.lastIndexOf(":"));
         return field;
     }
 
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
-    parse_field_body(indented: StringList, offset: number, node: NodeInterface) {
+    public parse_field_body(indented: StringList, offset: number, node: NodeInterface): void {
         this.nestedParse({ inputLines: indented, inputOffset: offset, node });
     }
 
     /** Option list item. */
 
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
-    option_marker(match: any, context: any[], nextState: any) {
+    public option_marker(match: any, context: any[], nextState: any) {
         const optionlist = new nodes.option_list();
         /* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */// fixme
         const [source, line] = this.rstStateMachine.getSourceAndLine();
@@ -1065,7 +1072,7 @@ class Body extends RSTState {
     }
 
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
-    option_list_item(match: any) {
+    public option_list_item(match: any) {
         const offset = this.rstStateMachine.absLineOffset();
         const options = this.parse_option_marker(match);
         const [indented,
@@ -1101,7 +1108,7 @@ class Body extends RSTState {
    */
 
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
-    parse_option_marker(match: any) {
+    public parse_option_marker(match: any) {
         const optlist: any[] = [];
         const optionstrings: string[] = match.result[0].trimEnd().split(", ");
         optionstrings.forEach((optionstring) => {
@@ -1140,7 +1147,7 @@ class Body extends RSTState {
         return optlist;
     }
 
-    doctest(match: any, context: any[], nextState: any) {
+    public doctest(match: any, context: any[], nextState: any) {
         const data = this.rstStateMachine.getTextBlock().join("\n");
         // TODO: prepend class value ['pycon'] (Python Console)
         // parse with `directives.body.CodeBlock` (returns literal-block
@@ -1152,7 +1159,7 @@ class Body extends RSTState {
     /** First line of a line block. */
 
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
-    line_block(match: any, context: any[], nextState: any): any[] {
+    public line_block(match: any, context: any[], nextState: any): any[] {
         const block = new nodes.line_block();
         this.parent!.add(block);
         const lineno = this.rstStateMachine.absLineNumber();
@@ -1192,7 +1199,7 @@ class Body extends RSTState {
     /** Return one line element of a line_block. */
 
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
-    line_block_line(match: any, lineno: number) {
+    public line_block_line(match: any, lineno: number) {
     /* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */
         const [indented, indent, lineOffset, blankFinish] = this
             .rstStateMachine.getFirstKnownIndented(
@@ -1212,7 +1219,7 @@ class Body extends RSTState {
     }
 
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
-    nest_line_block_lines(block: any | any[]) {
+    public nest_line_block_lines(block: any | any[]) {
         for (let i = 1; i < block.length; i += 1) {
             if (typeof block[i].indent === "undefined") {
                 block[i].indent = block[i - 1].indent;
@@ -1222,7 +1229,7 @@ class Body extends RSTState {
     }
 
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
-    nest_line_block_segment(block: any | any[]) {
+    public nest_line_block_segment(block: any | any[]) {
         const indents = [];
         let least;
         for (let i = 0; i < block.length; i += 1) {
@@ -1261,7 +1268,7 @@ class Body extends RSTState {
     /** Top border of a full table. */
 
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
-    grid_table_top(match: any, context: any[], nextState: any) {
+    public grid_table_top(match: any, context: any[], nextState: any) {
         return this.table_top(match, context, nextState,
             this.isolate_grid_table.bind(this),
             tableparser.GridTableParser);
@@ -1270,7 +1277,7 @@ class Body extends RSTState {
     /** Top border of a simple table. */
 
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
-    simple_table_top(match: any, context: any[], nextState: any) {
+    public simple_table_top(match: any, context: any[], nextState: any) {
         return this.table_top(match, context, nextState,
             this.isolate_simple_table.bind(this),
             tableparser.SimpleTableParser);
@@ -1279,7 +1286,7 @@ class Body extends RSTState {
     /* Top border of a generic table. */
 
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
-    table_top(match: any, context: any[], nextState: any, isolate_function: any, parser_class: any): any[] {
+    public table_top(match: any, context: any[], nextState: any, isolate_function: any, parser_class: any): any[] {
         const [nodelist, blankFinish] = this.table(isolate_function, parser_class);
         this.parent!.add(nodelist);
         if (!blankFinish) {
@@ -1293,7 +1300,7 @@ class Body extends RSTState {
     }
 
     /** Parse a table. */
-    table(isolateFunction: any, parserClass: any): any[] {
+    public table(isolateFunction: any, parserClass: any): any[] {
         const r = isolateFunction();
         if (!isIterable(r)) {
             throw new Error();
@@ -1322,7 +1329,7 @@ class Body extends RSTState {
     }
 
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
-    isolate_grid_table() {
+    public isolate_grid_table() {
         const messages = [];
         let block;
         let blankFinish = 1;
@@ -1384,7 +1391,7 @@ class Body extends RSTState {
     }
 
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
-    isolate_simple_table() {
+    public isolate_simple_table() {
         const start = this.rstStateMachine.lineOffset;
         const lines = this.rstStateMachine.inputLines;
         const limit = lines.length - 1;
@@ -1442,7 +1449,7 @@ class Body extends RSTState {
     }
 
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
-    malformed_table(block: any, detail = "", offset = 0) {
+    public malformed_table(block: any, detail = "", offset = 0) {
         //        throw new Error(detail);
         block.replace(this.doubleWidthPadChar, "");
         const data = block.join("\n");
@@ -1460,7 +1467,7 @@ class Body extends RSTState {
     }
 
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
-    build_table(tabledata: any[], tableline: any[] | any, stubColumns = 0, widths?: string) {
+    public build_table(tabledata: any[], tableline: any[] | any, stubColumns = 0, widths?: string) {
         const [colwidths, headRows, bodyrows] = tabledata;
         const table = new nodes.table();
         if (widths === "auto") {
@@ -1491,7 +1498,7 @@ class Body extends RSTState {
         return table;
     }
 
-    buildTableRow(rowdata: any[][], tableline: any[]) {
+    public buildTableRow(rowdata: any[][], tableline: any[]) {
         const row = new nodes.row("", [], {});
         // @ts-ignore
         rowdata.filter(x => x).forEach(([morerows, morecols, offset, cellblock]) => {
@@ -1517,7 +1524,7 @@ class Body extends RSTState {
         return row;
     }
 
-    line(match: any, context: any[], nextState: any) {
+    public line(match: any, context: any[], nextState: any) {
         if (this.rstStateMachine.matchTitles) {
             return [[match.input], "Line", []];
         }
@@ -1545,7 +1552,7 @@ class Body extends RSTState {
 
 
     /* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */
-    text(match: any, context: any[], nextState: any) {
+    public text(match: any, context: any[], nextState: any) {
     /* istanbul ignore if */
         if (match.input === undefined) {
             throw new Error("");

@@ -497,8 +497,8 @@ this.implicitDispatch = [];
             return [string.substr(0, matchstart), [node],
                 string.substr(textend), [], endmatch[1]];
         }
-        const msg = this.reporter!.warning(
-            `Inline ${nodeclass.constructor.name} start-string without end-string.`, { line: lineno },
+        const msg = this.reporter.warning(
+            `Inline ${nodeclass.constructor.name} start-string without end-string.`, [],{ line: lineno },
         );
         text = string.substring(matchstart, matchend);// unescape(string[matchstart:matchend], True)
         rawsource = text;// unescape(string[matchstart:matchend], True)
@@ -506,7 +506,7 @@ this.implicitDispatch = [];
         return [string.substring(0, matchstart), [prb], string.substring(matchend), [msg], ''];
     }
 
-    initCustomizations(settings: Settings) {
+    public initCustomizations(settings: Settings) {
         let startStringPrefix;
         let
             endStringSuffix;
