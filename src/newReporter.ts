@@ -1,7 +1,7 @@
 import Reporter from './Reporter';
 import { ApplicationError } from './Exceptions';
 import {DocutilsCoreOptionParser, Settings} from '../gen/Settings';
-import defaults from "../gen/defaults";
+import {defaults }from "../gen/defaults";
 import { ReporterInterface } from "./types";
 
 export default function newReporter(labeled: { sourcePath: string }, settings: Settings): ReporterInterface {

@@ -2,7 +2,14 @@ import StateWS from "../../../states/StateWS";
 import NestedStateMachine from "../NestedStateMachine";
 import * as nodes from "../../../nodes";
 import { EOFError, InvalidArgumentsError } from "../../../Exceptions";
-import { Document, ElementInterface, NodeInterface, Systemmessage } from "../../../types";
+import {
+    Document,
+    ElementInterface,
+    NodeInterface,
+    StateInterface,
+    Systemmessage,
+    TransitionsArray
+} from "../../../types";
 import StringList from "../../../StringList";
 import Inliner from "../Inliner";
 import RSTStateMachine from "../RSTStateMachine";
@@ -75,12 +82,12 @@ abstract class RSTState extends StateWS {
     }
 
     /* istanbul ignore next */
-    public noMatch(context: any[], transitions: any[]) {
+    noMatch(context: any[], transitions: TransitionsArray|undefined): [{}[], (string | StateInterface | undefined), {}[]] {
         this.reporter!.severe(`Internal error: no transition pattern match.  State: "${this.constructor.name}"; transitions: ${transitions}; context: ${context}; current line: ${this.rstStateMachine.line}.`);
-        return [context, null, []];
+        return [context, undefined, []];
     }
 
-    public bof(): {}[][] {
+    public bof(): string[][] {
         return [[], []];
     }
 

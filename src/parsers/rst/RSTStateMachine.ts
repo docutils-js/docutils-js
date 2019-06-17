@@ -32,7 +32,9 @@ class RSTStateMachine extends StateMachineWS {
             cArgs.matchTitles = true;
         }
         const languageCode = document.settings.docutilsCoreOptionParser.languageCode;
-        this.rstLanguage= getLanguage(languageCode);
+        if(languageCode !== undefined) {
+            this.rstLanguage = getLanguage(languageCode);
+        }
         this.matchTitles = cArgs.matchTitles;
         /* istanbul ignore next */
         if (cArgs.inliner === undefined) {

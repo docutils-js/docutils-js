@@ -126,7 +126,7 @@ class HTMLTranslator extends nodes.NodeVisitor {
         this.sectionLevel = 0;
         if(myConfig) {
             if(myConfig.initialHeaderLevel !== undefined) {
-                this.initialHeaderLevel = parseInt(myConfig.initialHeaderLevel, 10);
+                this.initialHeaderLevel = myConfig.initialHeaderLevel;
             }
             const mathOutput = utils.pySplit(myConfig.mathOutput || '');
 
