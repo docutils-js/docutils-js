@@ -35,9 +35,7 @@ function createRSTStateMachine() {
 
 function createBody(optSm?: any) {
     const stateMachine = optSm || createRSTStateMachine();
-    const body = new Body(stateMachine,
-        { debug:  true,
-    });
+    const body = new Body(stateMachine, true);
     return body;
 }
 

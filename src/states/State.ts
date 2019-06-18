@@ -1,9 +1,17 @@
 import { InvalidArgumentsError } from "../Exceptions";
 import UnknownTransitionError from "../error/UnknownTransitionError";
 import DuplicateTransitionError from "../error/DuplicateTransitionError";
-import { ReporterInterface, StateInterface, TransitionFunction, Transitions, TransitionsArray } from "../types";
+import {
+    CreateStateMachineFunction,
+    ReporterInterface,
+    StateInterface,
+    Statemachine, StateMachineFactoryFunction,
+    TransitionFunction,
+    Transitions,
+    TransitionsArray
+} from "../types";
 import { StateMachine } from "../StateMachine";
-import { RSTStateArgs } from "../parsers/rst/types";
+import { RSTStateArgs, StatemachineConstructor } from "../parsers/rst/types";
 
 class State implements StateInterface {
     /**
@@ -19,24 +27,26 @@ class State implements StateInterface {
     protected initialTransitions?: string[] | string[][];
 
 
-    protected indentSm?: any;
-    protected nestedSm?: any;
-    protected nestedSmKwargs?: any;
+    //protected nestedSm?: StatemachineConstructor<Statemachine> ;
+    //protected nestedSmKwargs?: any;
 
-    protected knownIndentSm: any;
+    public createNestedStateMachine?: StateMachineFactoryFunction<Statemachine>
+    public createKnownIndentStateMachine?: StateMachineFactoryFunction<Statemachine>;
+    public createIndentStateMachine?: StateMachineFactoryFunction<Statemachine>;
+    //protected knownIndentSm: StatemachineConstructor<Statemachine> | undefined;
     protected debug?: boolean;
-    protected knownIndentSmKwargs: any;
-    protected indentSmKwargs: any;
+    //protected knownIndentSmKwargs: any;
+    //protected indentSmKwargs: any;
 
     public transitionOrder: string[] = [];
     public transitions: Transitions = { };
     protected reporter?: ReporterInterface;
     private stateMachine?: StateMachine;
 
-    public constructor(stateMachine: StateMachine, args: { debug?: boolean}) {
+    public constructor(stateMachine: StateMachine, debug: boolean = false) {
         this.stateMachine = stateMachine;
-        this.debug = args.debug;
-        this._init(stateMachine, args);
+        this.debug = debug;
+        this._init(stateMachine, debug);
 
         this.addInitialTransitions();
         /* istanbul ignore if */
@@ -44,32 +54,18 @@ class State implements StateInterface {
             throw new Error('Need state machine');
         }
 
+        if(this.createNestedStateMachine === undefined) {
+            this.createNestedStateMachine = this.stateMachine.createStateMachine;
+        }
 
-        if (!this.nestedSm) {
-            this.nestedSm = this.stateMachine.constructor;
-        }
-        // fix me - this needs revision
-        /* istanbul ignore if */
-        if (!this.nestedSmKwargs) {
-            // console.log('I am bogus');
-            throw new Error();
-            /*
-            this.nestedSmKwargs = {
-                stateClasses: [this.constructor],
-                initialState: this.constructor.name,
-                debug: this.debug,
-                debugFn: this.debugFn,
-            };
-*/
-        }
     }
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars
-    public _init(stateMachine: StateMachine, args: RSTStateArgs) {
+    public _init(stateMachine: StateMachine, debug: boolean): void {
         /* empty */
         this.patterns = {};
         this.initialTransitions = undefined;
-        this.nestedSm = null;
+        //this.nestedSm = undefined;
     }
 
     public runtimeInit(): void {
@@ -83,7 +79,7 @@ class State implements StateInterface {
     public addInitialTransitions(): void {
         if (this.initialTransitions) {
             const [names, transitions] = this.makeTransitions(this.initialTransitions);
-            this.addTransitions(names as any[], transitions);
+            this.addTransitions(names as string[], transitions);
         }
     }
 

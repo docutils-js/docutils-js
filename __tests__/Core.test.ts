@@ -1,7 +1,7 @@
 import { Publisher } from '../src/Core';
 import { StringInput, StringOutput } from '../src/io';
 import * as nodes from '../src/nodes';
-import { defaults } from "../gen/defaults";
+import { defaults as def } from "../gen/defaults";
 import {NodeInterface} from "../src/types";
 
 const currentLogLines = [];
@@ -22,7 +22,7 @@ const defaultArgs = {
     writerName: 'xml',
 };
 
-const defaultSettings = { ...defaults };
+const defaultSettings = { ...def };
 
 test('full rst2xml pipeline with specific input', () => {
     const settings = { ...defaultSettings };
@@ -42,11 +42,11 @@ test('full rst2xml pipeline with specific input', () => {
 `
     );
     const destination = new StringOutput();
-    if(defaults === undefined) {
+    if(def === undefined) {
         throw new Error('no defaults');
     }
     const pub = new Publisher({
-        source, destination, settings: defaults, debug: true, debugFn,
+        source, destination, settings: def, debug: true, debugFn,
     });
     pub.setComponents(readerName, parserName, writerName);
     return new Promise((resolve, reject) => {

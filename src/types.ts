@@ -303,10 +303,18 @@ export interface Statefactory {
     getStateClasses(): StateType[];
 }
 
+export interface States {
+    [stateName: string]: StateInterface;
+}
+
 export interface Statemachine {
+    states: States;
 
+    createStateMachine(): Statemachine;
+    runtimeInit(): void;
+    addState(stateClass: StateInterface): void;
+    addStates(stateClasses: StateInterface[]): void;
     unlink(): void;
-
     run(args: StateMachineRunArgs): (string|{})[];
 
     /**
@@ -316,43 +324,22 @@ export interface Statemachine {
      *         `UnknownStateError` raised if `next_state` unknown.
      */
     getState(nextState?: string): StateInterface;
-
-    nextLine(n: number): string| undefined;
-
-    isNextLineBlank(): boolean;
-
-    atEof(): boolean;
-
-    atBof(): boolean;
-
-    previousLine(n: number): string;
-
-    gotoLine(lineOffset: number): string | undefined;
-
-    getSource(lineOffset: number): string | undefined;
-
-    absLineOffset(): number|undefined;
-
     absLineNumber(): number;
-
-    getSourceAndLine(lineno: number): [string | undefined, number | undefined];
-
-    insertInput(inputLines: StringList, source?: string): void;
-
-    getTextBlock(flushLeft: boolean): StringList;
-    addState(stateClass: StateInterface): void;
-
-    addStates(stateClasses: StateInterface[]): void;
-
-    runtimeInit(): void;
-
-    error(): void;
-
+    absLineOffset(): number|undefined;
+    atBof(): boolean;
+    atEof(): boolean;
     attachObserver(observer: {}): void;
-
     detachObserver(observer: {}): void;
-
+    error(): void;
+    getSource(lineOffset: number): string | undefined;
+    getSourceAndLine(lineno: number): [string | undefined, number | undefined];
+    getTextBlock(flushLeft: boolean): StringList;
+    gotoLine(lineOffset: number): string | undefined;
+    insertInput(inputLines: StringList, source?: string): void;
+    isNextLineBlank(): boolean;
+    nextLine(n: number): string| undefined;
     notifyObservers(): void;
+    previousLine(n: number): string;
 }
 
 export interface StateType {
@@ -361,6 +348,7 @@ export interface StateType {
 }
 export interface StateInterface {
     stateName: string;
+    blankFinish?: boolean;
 
     runtimeInit(): void;
 
@@ -388,10 +376,8 @@ export interface StateInterface {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface StateMachineCommonArgs {
-}
 
-export interface StateMachineRunArgs extends StateMachineCommonArgs {
+export interface StateMachineRunArgs  {
     inputLines: StringList | string | string[];
     inputOffset: number;
     context?: {}[];
@@ -555,4 +541,20 @@ export interface WriteFunction {
 
 export interface Destination extends Output<string>, WriteFunction {
 
+}
+
+export interface StateMachineConstructorArgs {
+    stateFactory?: Statefactory;
+    initialState?: string;
+    debug?: boolean;
+    debugFn?: DebugFunction;
+}
+
+export interface CreateStateMachineFunction<T> {
+    (args: StateMachineConstructorArgs): T;
+}
+
+
+export interface StateMachineFactoryFunction<T> {
+    (): T;
 }

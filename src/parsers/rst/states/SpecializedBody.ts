@@ -4,9 +4,6 @@ import RSTStateMachine from "../RSTStateMachine";
 import {RSTStateArgs} from "../types";
 
 class SpecializedBody extends Body {
-    public _init(stateMachine: RSTStateMachine, args: RSTStateArgs) {
-        super._init(stateMachine, args);
-    }
 
     /* istanbul ignore next */
     // @ts-ignore

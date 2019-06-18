@@ -17,9 +17,10 @@ import {
     Statefactory,
     StateInterface,
     Statemachine,
+    StateMachineConstructorArgs,
     StateMachineRunArgs,
+    States,
     StateType,
-    Transitions,
     TransitionsArray
 } from "./types";
 import State from "./states/State";
@@ -27,9 +28,15 @@ import TransitionCorrection from "./TransitionCorrection";
 import UnexpectedIndentationError from "./error/UnexpectedIndentationError";
 import { name } from "ejs";
 
-interface States {
-    [stateName: string]: StateInterface;
-}
+export class StateMachineError extends Error { }
+export class UnknownStateError extends StateMachineError { }
+export class DuplicateStateError extends StateMachineError { }
+export class UnknownTransitionError extends StateMachineError { }
+export class DuplicateTransitionError extends StateMachineError { }
+export class TransitionPatternNotFound extends StateMachineError { }
+export class TransitionMethodNotFound extends StateMachineError { }
+//export class UnexpectedIndentationError extends StateMachineError { }
+//export class TransitionCorrection extends Error { }
 
 /**
  * A finite state machine for text filters using regular expressions.
@@ -43,7 +50,7 @@ interface States {
  * results of processing in a list.
  */
 class StateMachine implements Statemachine {
-    protected states: States = {};
+    states: States = {};
 
     public inputLines: StringList = new StringList([]);
 
@@ -61,7 +68,7 @@ class StateMachine implements Statemachine {
      *  - `initialState`: a string, the class name of the initial state.
      *  - `debug`: a boolean; produce verbose output if true (nonzero).
      **/
-    public stateFactory: Statefactory;
+    public stateFactory?: Statefactory;
 
     public lineOffset: number = -1;
 
@@ -83,12 +90,7 @@ class StateMachine implements Statemachine {
     private initialState?: string;
 
     public constructor(
-        args: {
-            stateFactory: Statefactory;
-            initialState: string;
-            debug?: boolean;
-            debugFn?: DebugFunction;
-        }
+        args: StateMachineConstructorArgs
     ) {
         const cArgs = { ... args };
         /* Initialize instance junk that we can't do except through
@@ -103,7 +105,9 @@ class StateMachine implements Statemachine {
             /* eslint-disable-next-line no-console */
             cArgs.debugFn = console.log;
         }
-        this.stateFactory = cArgs.stateFactory;
+        if(cArgs.stateFactory !== undefined) {
+            this.stateFactory = cArgs.stateFactory;
+        }
         if(cArgs.debugFn !== undefined) {
             this.debugFn = cArgs.debugFn;
         }
@@ -126,6 +130,10 @@ class StateMachine implements Statemachine {
 
     public _init(): void {
         // do-nothing
+    }
+
+    public createStateMachine(): Statemachine {
+        return this.constructor({ debug: this.debug, dbeugFn: this.debugFn });
     }
 
     public forEachState(cb: (state: State) => void): void {
@@ -516,6 +524,9 @@ class StateMachine implements Statemachine {
             throw new Error(`need statename for ${stateClass}`);
         }
 
+        if(this.stateFactory === undefined) {
+            throw new InvalidStateError('stateFacory');
+        }
         const r = this.stateFactory.createState(stateName, this);
         this.states[stateName] = r;
     }
@@ -613,15 +624,5 @@ export function string2lines(astring?: string, args?:
     }
     return result.map(expandtabs);
 }
-
-export class StateMachineError extends Error { }
-export class UnknownStateError extends StateMachineError { }
-export class DuplicateStateError extends StateMachineError { }
-export class UnknownTransitionError extends StateMachineError { }
-export class DuplicateTransitionError extends StateMachineError { }
-export class TransitionPatternNotFound extends StateMachineError { }
-export class TransitionMethodNotFound extends StateMachineError { }
-//export class UnexpectedIndentationError extends StateMachineError { }
-//export class TransitionCorrection extends Error { }
 
 export { StateMachine };

@@ -1,25 +1,26 @@
 import StateWS from "../../../states/StateWS";
 import NestedStateMachine from "../NestedStateMachine";
 import * as nodes from "../../../nodes";
-import { EOFError, InvalidArgumentsError } from "../../../Exceptions";
+import { EOFError, InvalidArgumentsError, InvalidStateError } from "../../../Exceptions";
 import {
     Document,
     ElementInterface,
     NodeInterface,
     StateInterface,
+    Statemachine, StateMachineFactoryFunction,
     Systemmessage,
     TransitionsArray
 } from "../../../types";
 import StringList from "../../../StringList";
-import Inliner from "../Inliner";
 import RSTStateMachine from "../RSTStateMachine";
-import { Explicit, InlinerInterface, NestedParseArgs, RstMemo, RSTStateArgs } from "../types";
+import { Explicit, InlinerInterface, NestedParseArgs, RstMemo, RSTStateArgs, StatemachineConstructor } from "../types";
 
 abstract class RSTState extends StateWS {
+    // added for us
     public static stateName: string;
 
-    private nestedSmCache: any[] = [];
-
+    protected nestedSm?: StatemachineConstructor<Statemachine> = NestedStateMachine;
+    private nestedSmCache: Statemachine[] = [];
 
     public explicit: Explicit = {};
     public memo?: RstMemo;
@@ -35,26 +36,30 @@ abstract class RSTState extends StateWS {
 
     public doubleWidthPadChar: string = '';
 
-    public constructor(stateMachine: RSTStateMachine, args: any) {
-        super(stateMachine, args);
+    public constructor(stateMachine: RSTStateMachine, debug: boolean = false) {
+        super(stateMachine, debug);
         this.rstStateMachine = stateMachine;
     }
 
     // fixme this whole thing needs rework
-    public _init(stateMachine: RSTStateMachine, args: RSTStateArgs) {
-        super._init(stateMachine, args);
+    public _init(stateMachine: RSTStateMachine, debug: boolean = false) {
+        super._init(stateMachine, debug);
         this.rstStateMachine = stateMachine;
         this.nestedSm = NestedStateMachine;
         this.nestedSmCache = [];
-        this.stateClasses = args.stateClasses || [];
-
-        this.nestedSmKwargs = {
-            stateFactory: this.rstStateMachine.stateFactory.withStateClasses(this.stateClasses),
-            initialState: 'Body',
-            debug: args && stateMachine ? stateMachine.debug : false,
-            /* eslint-disable-next-line no-console */
-            debugFn: args && stateMachine ? stateMachine.debugFn : console.log,
-        };
+        //this.stateClasses = args.stateClasses || [];
+        //
+        // if(this.stateClasses.length == 0) {
+        //     throw new InvalidStateError('No stateClasses')
+        // }
+        // KM2
+        // this.nestedSmKwargs = {
+        //     stateFactory: this.rstStateMachine.stateFactory.withStateClasses(this.stateClasses),
+        //     initialState: 'Body',
+        //     debug: args && stateMachine ? stateMachine.debug : false,
+        //     /* eslint-disable-next-line no-console */
+        //     debugFn: args && stateMachine ? stateMachine.debugFn : console.log,
+        // };
     }
 
     public runtimeInit() {
@@ -82,7 +87,7 @@ abstract class RSTState extends StateWS {
     }
 
     /* istanbul ignore next */
-    noMatch(context: any[], transitions: TransitionsArray|undefined): [{}[], (string | StateInterface | undefined), {}[]] {
+    public noMatch(context: any[], transitions: TransitionsArray|undefined): [{}[], (string | StateInterface | undefined), {}[]] {
         this.reporter!.severe(`Internal error: no transition pattern match.  State: "${this.constructor.name}"; transitions: ${transitions}; context: ${context}; current line: ${this.rstStateMachine.line}.`);
         return [context, undefined, []];
     }
@@ -92,57 +97,52 @@ abstract class RSTState extends StateWS {
     }
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars
-    public nestedParse(args: NestedParseArgs) {
+    public nestedParse(inputLines: StringList, inputOffset: number, node: NodeInterface, matchTitles: boolean = false,
+        factoryFunction?: StateMachineFactoryFunction<RSTStateMachine>) {
         /* istanbul ignore if */
         if (!this.memo || !this.memo.document) {
             throw new Error('need memo');
         }
         /* istanbul ignore if */
-        const block = args.inputLines;
+        const block = inputLines;
         if (!block) {
             throw new Error('need block');
         }
 
-        const mCopy = {...args};
         let useDefault = 0;
-        if (!mCopy.stateMachineClass) {
+        /*if (!mCopy.stateMachineClass) {
             mCopy.stateMachineClass = this.nestedSm;
             useDefault += 1;
         }
         if (!mCopy.stateMachineKwargs) {
             mCopy.stateMachineKwargs = this.nestedSmKwargs;
             useDefault += 1;
-        }
+        }*/
         const blockLength = block.length;
-
+        /*
         let stateMachine;
         if (useDefault === 2 && this.nestedSmCache.length > 0) {
             stateMachine = this.nestedSmCache.pop();
         }
 
-        if (!stateMachine) {
-
-            if (!mCopy.stateMachineKwargs!.stateFactory) {
-                throw new Error('need statefactory');
-            }
-            stateMachine = new mCopy.stateMachineClass({
-
-                debug: this.debug,
-                ...mCopy.stateMachineKwargs,
-            });
+  */
+        if(factoryFunction === undefined){
+            throw new InvalidStateError('factoryFunction');
         }
+        let stateMachine = factoryFunction();
         stateMachine.run({
             inputLines: block,
-            inputOffset: mCopy.inputOffset,
+            inputOffset: inputOffset,
             memo: this.memo,
-            node: mCopy.node,
-            matchTitles: mCopy.matchTitles,
+            node: node,
+            matchTitles: matchTitles,
         });
+        /*
         if (useDefault === 2) {
             this.nestedSmCache.push(stateMachine);
         } else {
             stateMachine.unlink();
-        }
+        }*/
         const newOffset = stateMachine.absLineOffset();
         if (block.parent && (block.length - blockLength) !== 0) {
             this.rstStateMachine.nextLine(block.length - blockLength);
@@ -156,40 +156,48 @@ abstract class RSTState extends StateWS {
         if (myargs.extraSettings == null) {
             myargs.extraSettings = {};
         }
-        if (!myargs.stateMachineClass) {
-            myargs.stateMachineClass = this.nestedSm;
+        // if (!myargs.stateMachineClass) {
+        //     myargs.stateMachineClass = this.nestedSm;
+        // }
+        // if (!myargs.stateMachineKwargs) {
+        //     myargs.stateMachineKwargs = {...this.nestedSmKwargs};
+        // }
+        // Copy the initial state
+        if(myargs.createStateMachine === undefined) {
+            myargs.createStateMachine = this.createIndentedStateMachine;
         }
-        if (!myargs.stateMachineKwargs) {
-            myargs.stateMachineKwargs = {...this.nestedSmKwargs};
+        if(myargs.createStateMachine === undefined) {
+            throw new InvalidStateError('createStateMachine');
         }
-        myargs.stateMachineKwargs!.initialState = myargs.initialState;
-        const stateMachine = new myargs.stateMachineClass({
-            stateFactory: this.rstStateMachine.stateFactory,
-            debug: this.debug,
-            ...myargs.stateMachineKwargs,
-        });
+        const stateMachine = myargs.createStateMachine();
+
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        myargs.stateMachineArgs!.initialState = myargs.initialState;
+
         if (!myargs.blankFinishState) {
             myargs.blankFinishState = myargs.initialState;
         }
         /* istanbul ignore if */
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         if (!(myargs.blankFinishState! in stateMachine.states)) {
             throw new InvalidArgumentsError(`invalid state ${myargs.blankFinishState}`);
         }
 
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         stateMachine.states[myargs.blankFinishState!].blankFinish = myargs.blankFinish;
-        Object.keys(myargs.extraSettings).forEach((key) => {
-            stateMachine.states[myargs.initialState][key] = myargs.extraSettings[key];
-        });
+        // Object.keys(myargs.extraSettings).forEach((key) => {
+        //     stateMachine.states[myargs.initialState][key] = myargs.extraSettings[key];
+        // });
         stateMachine.run({
             inputLines: block,
-            inputOffset: myargs.inputOffset,
+            inputOffset: myargs.inputOffset || 0,
             memo: this.memo,
             node: myargs.node,
             matchTitles: myargs.matchTitles,
         });
         const {blankFinish} = stateMachine.states[myargs.blankFinishState!];
         stateMachine.unlink();
-        return [stateMachine.absLineOffset(), blankFinish];
+        return [stateMachine.absLineOffset() || 0, blankFinish || false];
     }
 
     public section(args: {
@@ -248,7 +256,7 @@ abstract class RSTState extends StateWS {
     }
 
 
-    public newSubsection(args: {title: string; lineno: number; messages: Systemmessage[];}) {
+    public newSubsection(args: {title: string; lineno: number; messages: Systemmessage[]}) {
         const { title, lineno, messages} = args;
         const memo = this.memo!;
         const myLevel = memo.sectionLevel;
@@ -265,15 +273,14 @@ abstract class RSTState extends StateWS {
         this.document!.noteImplicitTarget(sectionNode, sectionNode);
         const offset = this.rstStateMachine.lineOffset + 1;
         const absoffset = this.rstStateMachine.absLineOffset() + 1;
-        const newabsoffset = this.nestedParse(
-            {
-                inputLines: this.rstStateMachine.inputLines.slice(offset) as StringList,
-                inputOffset: absoffset,
-                node: sectionNode as NodeInterface,
-                matchTitles: true,
-            }
+        const newabsoffset = this.nestedParse(this.rstStateMachine.inputLines.slice(offset) as StringList,
+            absoffset,
+            sectionNode as NodeInterface,
+            true,
+
         );
-        this.gotoLine(newabsoffset);
+        //@ts-ignore
+        this.gotoLine(newabsoffset!);
         if (memo.sectionLevel <= myLevel) {
             throw new EOFError();
         }
@@ -283,6 +290,7 @@ abstract class RSTState extends StateWS {
 
     public unindentWarning(nodeName: string): NodeInterface {
         const lineno = this.rstStateMachine.absLineNumber() + 1;
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         return this.reporter!.warning(`${nodeName} ends without a blank line; unexpected unindent.`, [], {line: lineno});
     }
 
@@ -317,6 +325,7 @@ abstract class RSTState extends StateWS {
 
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
     public inline_text(text: string, lineno: number) {
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         const r = this.inliner!.parse(text, {lineno, memo: this.memo, parent: this.parent!});
         return r;
     }

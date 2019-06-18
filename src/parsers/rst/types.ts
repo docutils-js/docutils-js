@@ -5,7 +5,9 @@ import {
     LogLevel,
     NodeInterface,
     ReporterInterface,
-    StateMachineCommonArgs,
+    Statemachine,
+    StateMachineConstructorArgs,
+    StateMachineFactoryFunction,
     StateMachineRunArgs
 } from "../../types";
 import StringList from "../../StringList";
@@ -14,6 +16,10 @@ import { Settings } from "../../../gen/Settings";
 export interface Explicit {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     [patternName: string]: any;
+}
+
+export interface RstStateMachineRunArgs extends StateMachineRunArgs {
+    memo?: RstMemo;
 }
 export interface CommonParseArgs {
     inputLines?: StringList;
@@ -32,23 +38,14 @@ export interface RSTParseArgs extends CommonParseArgs {
     document: Document;
 }
 
-export interface NestedParseArgs extends CommonParseArgs, StateMachineClassArgs {
-    initialState?: any;
+export interface NestedParseArgs extends CommonParseArgs {
+    createStateMachine?: StateMachineFactoryFunction<Rststatemachine>,
+    stateMachineArgs?: StateMachineConstructorArgs;
+    initialState: string;
     blankFinish?: boolean;
     blankFinishState?: string;
-    extraSettings?: any;
+    extraSettings?: { [settingName: string]: string|{} };
 }
-
-interface StateMachineArgs extends StateMachineCommonArgs {
-    initialState: string;
-    stateFactory: any;
-}
-
-interface StateMachineClassArgs {
-    stateMachineClass?: any;
-    stateMachineKwargs?: StateMachineArgs;
-}
-
 
 export interface RstMemo {
     document: Document;
@@ -62,13 +59,13 @@ export interface RstMemo {
 
 
 export class DirectiveError extends Error {
-    constructor(readonly level: LogLevel, readonly message: any) {
+    public constructor(readonly level: LogLevel, readonly message: any) {
         super(message);
     }
 
 }
 
-export interface IDirective {
+export interface DirectiveInterface {
     debug(message: any): DirectiveError;
     info(message: any): DirectiveError;
     warning(message: any): DirectiveError;
@@ -87,9 +84,17 @@ export interface InlinerInterface {
 
     parse(text: string, args: { lineno: number; memo: any; parent: ElementInterface }): any[][];
 
-  adjustUri(uri: string): string;
+    adjustUri(uri: string): string;
 }
 
 export interface NestedStateMachineRunArgs extends StateMachineRunArgs {
     memo: RstMemo;
+}
+
+export interface StatemachineConstructor<T> {
+    new (args: StateMachineConstructorArgs): T;
+}
+
+export interface Rststatemachine extends Statemachine {
+    run(args: RstStateMachineRunArgs): (string|{})[];
 }

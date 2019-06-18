@@ -4,7 +4,7 @@ import { NestedStateMachineRunArgs, RSTLanguage, RstMemo } from "./types";
 
 class NestedStateMachine extends StateMachineWS {
     public memo?: RstMemo;
-  private rstLanguage: RSTLanguage | undefined;
+    private rstLanguage: RSTLanguage | undefined;
     public run(args: NestedStateMachineRunArgs) {
         const {
             inputLines, inputOffset, memo, node, matchTitles,

@@ -12,8 +12,8 @@ import RSTStateMachine from "../RSTStateMachine";
 import {RSTStateArgs} from "../types";
 
 class Text extends RSTState {
-    public _init(stateMachine: RSTStateMachine, args: RSTStateArgs) {
-        super._init(stateMachine, args);
+    public _init(stateMachine: RSTStateMachine, debug: boolean = false) {
+        super._init(stateMachine, debug);
         this.patterns = {
             underline: '([!-/:-@[-`{-~])\\1* *$',
             text: '',
@@ -26,8 +26,10 @@ class Text extends RSTState {
         const [paragraph, literalNext] = this.paragraph(
             context, this.rstStateMachine.absLineNumber() - 1,
         );
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         this.parent!.add(paragraph);
         if (literalNext) {
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             this.parent!.add(this.literal_block());
         }
 
@@ -68,7 +70,7 @@ class Text extends RSTState {
         return [[], 'Body', []];
     }
 
-    underline(match: any, context: any[], nextState: any): any[] {
+    public underline(match: any, context: any[], nextState: any): any[] {
         /* istanbul ignore if */
         if (!Array.isArray(context)) {
             throw new Error('Context should be array');
@@ -118,7 +120,7 @@ class Text extends RSTState {
         return [[], nextState, []];
     }
 
-    text(match: any, context: string[], nextState: State): any[] {
+    public text(match: any, context: string[], nextState: State): any[] {
         const startline = this.rstStateMachine.absLineNumber() - 1;
         let block;
         let msg;
@@ -159,7 +161,7 @@ class Text extends RSTState {
 
     /** Return a list of nodes. */
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,@typescript-eslint/no-unused-vars,no-unused-vars */
-    literal_block() {
+    public literal_block(): NodeInterface[] {
         /* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */
         const [indented, indent, offset, blankFinish] = this.rstStateMachine.getIndented({});
         while (indented && indented.length && !indented[indented.length - 1].trim()) {
@@ -181,7 +183,7 @@ class Text extends RSTState {
     }
 
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,@typescript-eslint/no-unused-vars,no-unused-vars */
-    quoted_literal_block() {
+    public quoted_literal_block() {
         const absLineOffset = this.rstStateMachine.absLineOffset();
         const offset = this.rstStateMachine.lineOffset;
         const parentNode = new nodes.Element();
@@ -192,13 +194,16 @@ class Text extends RSTState {
                 inputOffset: absLineOffset,
                 node: parentNode,
                 matchTitles: false,
-                stateMachineKwargs: {
-                    stateFactory: this.rstStateMachine.stateFactory.withStateClasses(['QuotedLiteralBlock']),
-                    initialState: 'QuotedLiteralBlock',
-                },
+                // stateMachineKwargs: {
+                //     //@ts-ignore
+                //     stateFactory: this.rstStateMachine.stateFactory!.withStateClasses(['QuotedLiteralBlock']),
+                //     initialState: 'QuotedLiteralBlock',
+                // },
             },
         );
-        this.gotoLine(newAbsOffset);
+        if(newAbsOffset !== undefined) {
+            this.gotoLine(newAbsOffset);
+        }
         return parentNode.children;
     }
 
@@ -223,7 +228,7 @@ class Text extends RSTState {
                 { line: lineno + 1 },
             ));
         }
-        this.nestedParse( { inputLines: indented, inputOffset: lineOffset, node: definition });
+        this.nestedParse(indented,  lineOffset, definition );
         return [itemnode, blankFinish];
     }
 
@@ -257,5 +262,4 @@ class Text extends RSTState {
     }
 }
 Text.stateName = 'Text';
-//Text.constructor.stateName = 'Text';
 export default Text;

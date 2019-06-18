@@ -9,8 +9,8 @@ import StringList from "../../../StringList";
 
 /** Parser for the contents of a substitution_definition element. */
 class SubstitutionDef extends Body {
-    public _init(stateMachine: RSTStateMachine, args: RSTStateArgs) {
-        super._init(stateMachine, args);
+    public _init(stateMachine: RSTStateMachine, debug: boolean = false) {
+        super._init(stateMachine, debug);
         this.patterns = {
             // eslint-disable-next-line @typescript-eslint/camelcase
             embedded_directive: new RegExp(`(${RegExps.simplename})::( +|$)`),
@@ -47,24 +47,23 @@ class SubstitutionDef extends Body {
     }
 
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,@typescript-eslint/no-unused-vars,no-unused-vars */
-    public quoted_literal_block() {
+    public quoted_literal_block(): NodeInterface[] {
         const absLineOffset = this.rstStateMachine.absLineOffset();
         const offset = this.rstStateMachine.lineOffset;
         const parentNode = new nodes.Element();
         const newAbsOffset = this.nestedParse(
+            this.rstStateMachine.inputLines.slice(offset) as StringList,
+            absLineOffset,
+            parentNode,
+            false)
+        // stateMachineKwargs: {
+        //     // @ts-ignore
+        //     stateFactory: this.rstStateMachine.stateFactory!.withStateClasses(['QuotedLiteralBlock']),
+        //     initialState: 'QuotedLiteralBlock',
+        // },
 
-            {
-                inputLines: this.rstStateMachine.inputLines.slice(offset) as StringList,
-                inputOffset: absLineOffset,
-                node: parentNode,
-                matchTitles: false,
-                stateMachineKwargs: {
-                    stateFactory: this.rstStateMachine.stateFactory.withStateClasses(['QuotedLiteralBlock']),
-                    initialState: 'QuotedLiteralBlock',
-                },
-            },
-        );
-        this.gotoLine(newAbsOffset);
+        //@ts-ignore
+        this.gotoLine(newAbsOffset!);
         return parentNode.children;
     }
 

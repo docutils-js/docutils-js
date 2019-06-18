@@ -1,8 +1,7 @@
-import StateMachineWS from '../../StateMachineWS';
-import Inliner from './Inliner';
-import * as languages from '../../languages';
-import {ElementInterface, StateMachineRunArgs} from "../../types";
-import { RSTLanguage, RstMemo } from "./types";
+import StateMachineWS from "../../StateMachineWS";
+import Inliner from "./Inliner";
+import { ElementInterface, StateMachineRunArgs } from "../../types";
+import { RSTLanguage, RstMemo, Rststatemachine, RstStateMachineRunArgs } from "./types";
 import { getLanguage } from "./languages";
 
 /**
@@ -10,12 +9,12 @@ import { getLanguage } from "./languages";
  *
  * The entry point to reStructuredText parsing is the `run()` method.
  */
-class RSTStateMachine extends StateMachineWS {
+class RSTStateMachine extends StateMachineWS implements Rststatemachine {
     public rstLanguage?: RSTLanguage;
     public matchTitles?: boolean;
     public node?: ElementInterface;
     public memo?: RstMemo;
-    public run(args: StateMachineRunArgs): (string|{})[] {
+    public run(args: RstStateMachineRunArgs): (string|{})[] {
         const cArgs = { ... args };
         /* istanbul ignore if */
         if (cArgs.inputOffset === undefined) {

@@ -13,8 +13,8 @@ import {RSTStateArgs} from "../types";
  */
 class QuotedLiteralBlock extends RSTState {
     private initial_lineno?: number;
-    public _init(stateMachine: RSTStateMachine, args: RSTStateArgs) {
-        super._init(stateMachine, args);
+    public _init(stateMachine: RSTStateMachine, debug: boolean) {
+        super._init(stateMachine, debug);
         this.patterns = {
             // eslint-disable-next-line @typescript-eslint/camelcase
             initial_quoted: `(${RegExps.nonalphanum7bit})`,

@@ -13,7 +13,7 @@ import UnexpectedIndentationError from "../../../error/UnexpectedIndentationErro
 import RSTStateMachine from "../RSTStateMachine";
 import { NodeInterface } from "../../../types";
 import { line_block } from "../../../nodes";
-import { IDirective, RSTStateArgs } from "../types";
+import { DirectiveInterface, RSTStateArgs } from "../types";
 import Directive from "../Directive";
 
 const fullyNormalizeName = nodes.fullyNormalizeName;
@@ -44,8 +44,8 @@ class Body extends RSTState {
     private simpleTableTopPat?: RegExp;
     private pats: any;
 
-    public constructor(stateMachine: RSTStateMachine, args: any) {
-        super(stateMachine, args);
+    public constructor(stateMachine: RSTStateMachine, debug: boolean = false) {
+        super(stateMachine, debug);
         const pats: any = {};
 
         pats.nonalphanum7bit = "[!-/:-@[-`{-~]";
@@ -56,8 +56,8 @@ class Body extends RSTState {
         this.pats = pats;
     }
 
-    public _init(stateMachine: RSTStateMachine, args: RSTStateArgs) {
-        super._init(stateMachine, args);
+    public _init(stateMachine: RSTStateMachine, debug: boolean) {
+        super._init(stateMachine, debug);
         //      this.doubleWidthPadChar = tableparser.TableParser.doubleWidthPadChar
 
         const enum_ = {};
@@ -181,18 +181,18 @@ class Body extends RSTState {
         const [src, srcline] = this.rstStateMachine.getSourceAndLine();
         /* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */
         const [indented, indent, offset, blankFinish] = this.rstStateMachine.getFirstKnownIndented(
-          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             { indent: match.index! + match[0].length }
         );
         const label = match[1];
         let name = fullyNormalizeName(label);
         const footnote = new nodes.footnote(indented.join("\n"));
         if(src !== undefined) {
-          footnote.source = src;
+            footnote.source = src;
         }
-if(srcline !== undefined) {
-    footnote.line = srcline;
-}
+        if(srcline !== undefined) {
+            footnote.line = srcline;
+        }
         if (name[0] === "#") { // auto-numbered
             name = name.substring(1); // autonumber label
             footnote.attributes.auto = 1;
@@ -218,7 +218,7 @@ if(srcline !== undefined) {
 
         /* istanbul ignore else */
         if (indented && indented.length) {
-            this.nestedParse({ inputLines: indented, inputOffset: offset, node: footnote });
+            this.nestedParse(indented, offset, footnote );
         }
         return [[footnote], blankFinish];
     }
@@ -239,11 +239,12 @@ if(srcline !== undefined) {
         }
         citation.add(new nodes.label("", label));
         citation.attributes.names.push(name);
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion,@typescript-eslint/no-non-null-assertion
         this.document!.noteCitation(citation);
         this.document!.noteExplicitTarget(citation, citation);
         /* istanbul ignore else */
         if (indented && indented.length) {
-            this.nestedParse({ inputLines: indented, inputOffset: offset, node: citation });
+            this.nestedParse(indented, offset, citation );
         }
         return [[citation], blankFinish];
     }
@@ -424,6 +425,7 @@ if(srcline !== undefined) {
             substitutionNode.line = srcline;
         }
         if (!block.length) {
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             const msg = this.reporter!.warning(
                 `Substitution definition "${subname}" missing contents.`,
                 [new nodes.literal_block(blockText, blockText)],
@@ -450,6 +452,7 @@ if(srcline !== undefined) {
             // this is a mixin check!!
             if (!(node.isInline()
         || node instanceof nodes.Text)) {
+                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
                 this.parent!.add(substitutionNode.children[i]);
                 substitutionNode.children.splice(i, 1);
             } else {
@@ -460,6 +463,7 @@ if(srcline !== undefined) {
         const result = substitutionNode.traverse(nodes.Element).map((node) => {
             if (this.disallowedInsideSubstitutionDefinitions(node)) {
                 const pformat = new nodes.literal_block("", node.pformat().trimEnd());
+                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
                 const msg = this.reporter!.error(
                     `Substitution definition contains illegal element <${node.tagname}>:`,
                     [pformat, new nodes.literal_block(blockText, blockText)],
@@ -473,6 +477,7 @@ if(srcline !== undefined) {
             return result[0];
         }
         if (substitutionNode.children.length === 0) {
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             const msg = this.reporter!.warning(
                 `Substitution definition "${subname}" empty or invalid.`,
                 [new nodes.literal_block(blockText, blockText)],
@@ -480,7 +485,9 @@ if(srcline !== undefined) {
             );
             return [[msg], blankFinish];
         }
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         this.document!.noteSubstitutionDef(
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             substitutionNode, subname, this.parent!
         );
         return [[substitutionNode], blankFinish];
@@ -504,8 +511,10 @@ if(srcline !== undefined) {
 
         let language = this.memo && this.memo.language;
         const [directiveClass, messages] = directives.directive(
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             typeName, this.document!, language
         );
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         this.parent!.add(messages);
         if (directiveClass) {
             return this.runDirective(
@@ -584,6 +593,7 @@ if(srcline !== undefined) {
         try {
             result = directiveInstance.run();
         } catch (error) {
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             const msgNode = this.reporter!.systemMessage(
                 error.level, error.msg, [], { line: lineno }
             );
@@ -611,6 +621,7 @@ if(srcline !== undefined) {
             offset,
             blankFinish] = this.rstStateMachine
             .getFirstKnownIndented({ indent: 0, stripIndent: false });
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         const text = indented.join("\n");
         const error = this.reporter!.error(
             `Unknown directive type "${typeName}".`,
@@ -648,6 +659,7 @@ if(srcline !== undefined) {
             throw new Error("");
         }
         const [nodelist, blankFinish] = r;
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         this.parent!.add(nodelist);
         this.explicit_list(blankFinish);
         return [[], nextState, []];
@@ -658,8 +670,11 @@ if(srcline !== undefined) {
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
     public explicit_construct(match: any) {
         const errors = [];
+        if(Object.keys(this.explicit).length === 0) {
+            throw new Error('invalid state! ' + JSON.stringify(this.explicit));
+        }
         if(this.explicit.constructs === undefined || this.explicit.constructs.map === undefined) {
-        throw new Error('beep');
+            throw new Error('beep');
         }
         const r = this.explicit.constructs.map(
             // @ts-ignore
@@ -676,6 +691,7 @@ if(srcline !== undefined) {
                 if (error instanceof MarkupError) {
                     const lineno = this.rstStateMachine.absLineNumber();
                     const message = error.message;//args ? error.args.join(" ") : "";
+                    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
                     errors.push(this.reporter!.warning(message, [], { line: lineno }));
                 } else {
                     throw error;
@@ -707,6 +723,7 @@ if(srcline !== undefined) {
         );
         this.gotoLine(newlineOffset);
         if (!blankFinish1) {
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             this.parent!.add(this.unindentWarning("Explicit markup"));
         }
     }
@@ -714,6 +731,7 @@ if(srcline !== undefined) {
     /** Anonymous hyperlink targets. */
     public anonymous(match: any, context: any[], nextState: any) {
         const [nodelist, blankFinish] = this.anonymous_target(match);
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         this.parent!.add(nodelist);
         this.explicit_list(blankFinish);
         return [[], nextState, []];
@@ -744,7 +762,9 @@ if(srcline !== undefined) {
             throw new Error();
         }
         const elements = this.block_quote(indented, lineOffset);
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         this.parent!.add(elements);
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         if (!blankFinish) {
             this.parent!.add(this.unindentWarning("Block quote"));
         }
@@ -766,7 +786,7 @@ if(srcline !== undefined) {
                 newLineOffset] = this.split_attribution(indented, lineOffset);
             const blockquote = new nodes.block_quote();
             indented = outIndented;
-            this.nestedParse({ inputLines: blockquoteLines, inputOffset: lineOffset, node: blockquote });
+            this.nestedParse(blockquoteLines, lineOffset, blockquote );
             elements.push(blockquote);
             if (attributionLines) { // fixme
                 const [attribution, messages] = this.parse_attribution(attributionLines,
@@ -961,11 +981,10 @@ if(srcline !== undefined) {
         }
         const listitem = new nodes.list_item(indented.join("\n"));
         if (indented && indented.length) { // fixme equivalent?
-            this.nestedParse({
-                inputLines: indented,
-                inputOffset: lineOffset,
-                node: listitem
-            });
+            this.nestedParse(indented,
+                lineOffset,
+                listitem
+            );
         }
         return [listitem, blankFinish];
     }
@@ -1032,7 +1051,7 @@ if(srcline !== undefined) {
 
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
     public parse_field_body(indented: StringList, offset: number, node: NodeInterface): void {
-        this.nestedParse({ inputLines: indented, inputOffset: offset, node });
+        this.nestedParse( indented, offset, node );
     }
 
     /** Option list item. */
@@ -1107,11 +1126,10 @@ if(srcline !== undefined) {
         const optionListItem = new nodes.option_list_item("", [optionGroup,
             description]);
         if (indented && indented.length) {
-            this.nestedParse({
-                inputLines: indented,
-                inputOffset: lineOffset,
-                node: description
-            });
+            this.nestedParse(indented,
+                lineOffset,
+                description
+            );
         }
         return [optionListItem, blankFinish];
     }
@@ -1356,7 +1374,7 @@ if(srcline !== undefined) {
                 const block2 = error.block;
                 const src = error.source;
                 const srcline = error.lineno;
-                                messages.push(this.reporter!.error("Unexpected indentation.", [],
+                messages.push(this.reporter!.error("Unexpected indentation.", [],
                     { source: src, line: srcline }));
                 blankFinish = 0;
             }
@@ -1531,11 +1549,11 @@ if(srcline !== undefined) {
             const entry = new nodes.entry("", [], attributes);
             row.add(entry);
             if (cellblock.join("")) {
-                this.nestedParse({
-                    inputLines: cellblock,
-                    inputOffset: tableline + offset,
-                    node: entry
-                });
+                this.nestedParse(
+                    cellblock,
+                    tableline + offset,
+                    entry
+                );
             }
         });
         return row;

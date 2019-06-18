@@ -1,4 +1,4 @@
-import { DirectiveError, IDirective } from "./types";
+import { DirectiveError, DirectiveInterface } from "./types";
 import { Statemachine, LogLevel } from "../../types";
 import State from "../../states/State";
 import StringList from "../../StringList";
@@ -91,7 +91,7 @@ import Body from "./states/Body";
  *         return [error]
  *
  */
-class Directive implements IDirective {
+class Directive implements DirectiveInterface {
   static optionSpec: any;
   static hasContent: boolean;
   name: string;

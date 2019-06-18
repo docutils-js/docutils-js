@@ -5,9 +5,6 @@ import RSTStateMachine from "../RSTStateMachine";
 import {RSTStateArgs} from "../types";
 
 class SpecializedText extends Text {
-    _init(stateMachine: RSTStateMachine, args: RSTStateArgs) {
-        super._init(stateMachine, args);
-    }
 
     /* istanbul ignore next */
     // @ts-ignore
