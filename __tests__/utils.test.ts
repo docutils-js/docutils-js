@@ -2,7 +2,7 @@ import * as utils from '../src/utils';
 import unescape from '../src/utils/unescape';
 import Reporter from '../src/Reporter';
 import newReporter from '../src/newReporter';
-import defaults from "../gen/defaults";
+import { defaults } from "../gen/defaults";
 import { LogLevel } from "../src/types";
 
 

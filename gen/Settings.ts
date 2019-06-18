@@ -72,7 +72,7 @@ export interface DocutilsCoreOptionParser {
     /** DocutilsCoreOptionParser: SUPPRESSHELP */
     exposeInternals?: string;
     /** DocutilsCoreOptionParser: SUPPRESSHELP */
-    strictVisitor?: string;
+    strictVisitor?: boolean;
 }
 
 export interface DocutilsFrontendOptionParser {

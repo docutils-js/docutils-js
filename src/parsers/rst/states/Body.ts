@@ -658,6 +658,9 @@ if(srcline !== undefined) {
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
     public explicit_construct(match: any) {
         const errors = [];
+        if(this.explicit.constructs === undefined || this.explicit.constructs.map === undefined) {
+        throw new Error('beep');
+        }
         const r = this.explicit.constructs.map(
             // @ts-ignore
             ([method, pattern]) => [method, pattern, pattern.exec(match.result.input)]

@@ -1,5 +1,5 @@
 import { newDocument, pojoTranslate } from '../../src/index';
-import defaults from "../../gen/defaults";
+import {  defaults } from "../../gen/defaults";
 
 
 /* what is this supposed to test? */

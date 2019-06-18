@@ -3,7 +3,7 @@ import * as path from 'path';
 import Parser from '../../src/parsers/restructuredtext';
 import newDocument from '../../src/newDocument';
 import * as nodes from '../../src/nodes';
-import defaults from "../../gen/defaults";
+import { defaults } from "../../gen/defaults";
 
 defaults.docutilsCoreOptionParser!.debug = true;
 

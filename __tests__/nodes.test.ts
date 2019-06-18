@@ -1,6 +1,6 @@
 import * as nodes from '../src/nodes';
 import newDocument from '../src/newDocument';
-import defaults from "../gen/defaults";
+import{ defaults} from "../gen/defaults";
 
 function createNodeVisitor() {
     let document = newDocument({sourcePath: ""}, defaults);

@@ -1,5 +1,5 @@
 import { newDocument } from '../src/index';
-import defaults from '../gen/defaults';
+import {defaults} from '../gen/defaults';
 
 test('newDocument', () => {
     const document = newDocument({ sourcePath: '<undefined>' }, defaults );

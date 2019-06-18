@@ -28,6 +28,7 @@ function parse(inputstring: string, document: Document): Document {
         },
     );
     stateMachine.run({
+    inputOffset: 0,
         inputLines, document,
         /* inliner: this.inliner */ });
     return document;

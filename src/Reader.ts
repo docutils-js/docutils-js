@@ -93,12 +93,12 @@ export default class Reader extends Component {
             throw new Error('Need source');
         }
 
-        this.source.read((error: Error | undefined | {}, output: string  | string[] | undefined): void => {
+        this.source.read((error: Error | undefined | {}, output: string | {}  | string[] | undefined): void => {
             if (error) {
                 cb(error, undefined);
                 return;
             }
-            if(output != undefined) {
+            if(output !== undefined && (Array.isArray(output) || typeof output === 'string')) {
                 this.input = output;
             }
             this.parse();

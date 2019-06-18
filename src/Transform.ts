@@ -11,8 +11,10 @@ export default abstract class Transform implements TransformInterface {
         this.document = document;
         this.startNode = startNode;
         let languageCode = document.settings.docutilsCoreOptionParser.languageCode;
+        if(languageCode !== undefined) {
         this.language = getLanguage(languageCode,
             document.reporter);
+            }
         this._init(document, startNode);
     }
 

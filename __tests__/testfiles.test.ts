@@ -1,7 +1,7 @@
 import { Publisher } from '../src/Core';
 import { StringInput, StringOutput } from '../src/io';
 import * as nodes from '../src/nodes';
-import defaults from "../gen/defaults";
+import { defaults } from "../gen/defaults";
 import {NodeInterface} from "../src/types";
 
 const path = require('path');
@@ -37,7 +37,7 @@ test.each(table)('%s', (file, input) => {
     const args = { ...defaultArgs };
 
     const { readerName, parserName, writerName } = args;
-    const source = new StringInput({ source: input });
+    const source = new StringInput( input);
     const destination = new StringOutput();
     const pub = new Publisher({
         source, destination, settings,

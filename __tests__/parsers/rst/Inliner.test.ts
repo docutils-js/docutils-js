@@ -4,7 +4,8 @@ import Inliner from '../../../src/parsers/rst/Inliner';
 import newReporter from '../../../src/newReporter';
 import newDocument from '../../../src/newDocument';
 import { nodeToXml } from '../../../src/nodes';
-import defaults from "../../../gen/defaults";
+import { defaults } from "../../../gen/defaults";
+import{ NodeInterface} from "../../../src/types";
 
 const currentLogLines: string[] = [];
 
@@ -17,9 +18,9 @@ afterEach(() => {
 });
 
 test('inliner 1', () => {
-    const inliner = new Inliner();
-    inliner.initCustomizations({...defaults});
     const document = newDocument({ sourcePath: ''}, { ...defaults});
+    const inliner = new Inliner(document);
+    inliner.initCustomizations({...defaults});
     const reporter = newReporter({ sourcePath: ''}, { ...defaults});
     let language;
     const memo = {
@@ -30,8 +31,8 @@ test('inliner 1', () => {
 
     const result = inliner.parse('`test`:foo:', { lineno: 1, memo, parent: document });
     const [nodes, messages] = result;
-    expect(nodes.map(n => formatXml(nodeToXml(n))).join('')).toMatchSnapshot();
-    expect(messages.map(n => formatXml(nodeToXml(n))).join('')).toMatchSnapshot();
+    expect(nodes.map((n: NodeInterface): string => formatXml(nodeToXml(n))).join('')).toMatchSnapshot();
+    expect(messages.map((n: NodeInterface): string => formatXml(nodeToXml(n))).join('')).toMatchSnapshot();
 });
 
 test.each([['Interpreted text', '`test`:foo:'],
@@ -41,9 +42,9 @@ test.each([['Interpreted text', '`test`:foo:'],
            ['Not sure', '_`hello`'],
            ['Interpreted text, no specified role', '`test`'],
           ])('%s', (testName, a) => {
-    const inliner = new Inliner();
-    inliner.initCustomizations({...defaults});
               const document = newDocument({sourcePath:''}, { ...defaults });
+    const inliner = new Inliner(document);
+    inliner.initCustomizations({...defaults});
               const reporter = newReporter({ sourcePath:''}, { ...defaults});
     let language;
     const memo = {
@@ -54,6 +55,6 @@ test.each([['Interpreted text', '`test`:foo:'],
 
     const result = inliner.parse(a, { lineno: 1, memo, parent: document });
               const [nodes, messages] = result;
-              expect(nodes.map(n => formatXml(nodeToXml(n))).join('')).toMatchSnapshot();
-              expect(messages.map(n => formatXml(nodeToXml(n))).join('')).toMatchSnapshot();
+    expect(nodes.map((n: NodeInterface): string => formatXml(nodeToXml(n))).join('')).toMatchSnapshot();
+    expect(messages.map((n: NodeInterface): string => formatXml(nodeToXml(n))).join('')).toMatchSnapshot();
 });

@@ -1,7 +1,7 @@
 import { Decorations } from '../../src/transforms/universal';
 // import * as nodes from '../../src/nodes';
 import { newDocument } from '../../src/index';
-import defaults from "../../gen/defaults";
+import { defaults } from "../../gen/defaults";
 
 test('Decorations.defaultPriority is 820', () => {
     expect(Decorations.defaultPriority).toBe(820);
