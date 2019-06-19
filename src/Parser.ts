@@ -2,7 +2,8 @@ import Component from "./Component";
 import { DebugFunction, Document, ParserArgs } from "./types";
 
 abstract class Parser extends Component {
-    public debugFn: DebugFunction = (msg) => {};
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    public debugFn: DebugFunction = (msg: string): void => {};
     protected debug: boolean;
 
     public constructor(args: ParserArgs = {}) {

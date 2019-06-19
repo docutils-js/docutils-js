@@ -13,14 +13,22 @@ import {
 } from "../../../types";
 import StringList from "../../../StringList";
 import RSTStateMachine from "../RSTStateMachine";
-import { Explicit, InlinerInterface, NestedParseArgs, RstMemo, RSTStateArgs, StatemachineConstructor } from "../types";
+import {
+    Explicit,
+    InlinerInterface,
+    NestedParseArgs,
+    RstMemo,
+    RSTStateArgs,
+    Rststatemachine,
+    StatemachineConstructor
+} from "../types";
 
 abstract class RSTState extends StateWS {
     // added for us
     public static stateName: string;
 
-    protected nestedSm?: StatemachineConstructor<Statemachine> = NestedStateMachine;
-    private nestedSmCache: Statemachine[] = [];
+    //    protected nestedSm?: StatemachineConstructor<Statemachine> = NestedStateMachine;
+    //    private nestedSmCache: Statemachine[] = [];
 
     public explicit: Explicit = {};
     public memo?: RstMemo;
@@ -45,8 +53,8 @@ abstract class RSTState extends StateWS {
     public _init(stateMachine: RSTStateMachine, debug: boolean = false) {
         super._init(stateMachine, debug);
         this.rstStateMachine = stateMachine;
-        this.nestedSm = NestedStateMachine;
-        this.nestedSmCache = [];
+        //this.nestedSm = NestedStateMachine;
+        //this.nestedSmCache = [];
         //this.stateClasses = args.stateClasses || [];
         //
         // if(this.stateClasses.length == 0) {
@@ -69,8 +77,11 @@ abstract class RSTState extends StateWS {
         if(!memo) {
             throw new Error('need memo')
         }
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         this.reporter = memo!.reporter;
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         this.inliner = memo!.inliner;
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         this.document = memo!.document;
         this.parent = this.rstStateMachine.node;
         if (!this.reporter!.getSourceAndLine) {
@@ -97,11 +108,21 @@ abstract class RSTState extends StateWS {
     }
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars
-    public nestedParse(inputLines: StringList, inputOffset: number, node: NodeInterface, matchTitles: boolean = false,
-        factoryFunction?: StateMachineFactoryFunction<RSTStateMachine>) {
+    public nestedParse(inputLines: StringList,
+        inputOffset: number,
+        node: NodeInterface,
+        matchTitles: boolean = false,
+        factoryFunction?: StateMachineFactoryFunction<Rststatemachine>) {
         /* istanbul ignore if */
         if (!this.memo || !this.memo.document) {
             throw new Error('need memo');
+        }
+        let fn: undefined|StateMachineFactoryFunction<Rststatemachine> ;
+        if(factoryFunction !== undefined) {
+            fn = factoryFunction;
+        } else if(this.createNestedStateMachine !== undefined) {
+            fn = this.createNestedStateMachine.bind(this);
+
         }
         /* istanbul ignore if */
         const block = inputLines;
@@ -126,10 +147,13 @@ abstract class RSTState extends StateWS {
         }
 
   */
-        if(factoryFunction === undefined){
+        if(fn === undefined){
             throw new InvalidStateError('factoryFunction');
         }
-        let stateMachine = factoryFunction();
+        let stateMachine = fn();
+        if(stateMachine.run === undefined) {
+            throw new InvalidStateError(`stateMachine.run`);
+        }
         stateMachine.run({
             inputLines: block,
             inputOffset: inputOffset,
@@ -163,8 +187,8 @@ abstract class RSTState extends StateWS {
         //     myargs.stateMachineKwargs = {...this.nestedSmKwargs};
         // }
         // Copy the initial state
-        if(myargs.createStateMachine === undefined) {
-            myargs.createStateMachine = this.createIndentedStateMachine;
+        if(myargs.createStateMachine === undefined && this.createIndentedStateMachine !== undefined) {
+            myargs.createStateMachine = this.createIndentedStateMachine.bind(this);
         }
         if(myargs.createStateMachine === undefined) {
             throw new InvalidStateError('createStateMachine');
@@ -179,12 +203,12 @@ abstract class RSTState extends StateWS {
         }
         /* istanbul ignore if */
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        if (!(myargs.blankFinishState! in stateMachine.states)) {
+        if (!(stateMachine.hasState(myargs.blankFinishState))) {
             throw new InvalidArgumentsError(`invalid state ${myargs.blankFinishState}`);
         }
 
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        stateMachine.states[myargs.blankFinishState!].blankFinish = myargs.blankFinish;
+        stateMachine.getState2(myargs.blankFinishState!).blankFinish= myargs.blankFinish;
         // Object.keys(myargs.extraSettings).forEach((key) => {
         //     stateMachine.states[myargs.initialState][key] = myargs.extraSettings[key];
         // });
@@ -195,7 +219,7 @@ abstract class RSTState extends StateWS {
             node: myargs.node,
             matchTitles: myargs.matchTitles,
         });
-        const {blankFinish} = stateMachine.states[myargs.blankFinishState!];
+        const {blankFinish} = stateMachine.getState2(myargs.blankFinishState);
         stateMachine.unlink();
         return [stateMachine.absLineOffset() || 0, blankFinish || false];
     }
@@ -280,6 +304,7 @@ abstract class RSTState extends StateWS {
 
         );
         //@ts-ignore
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         this.gotoLine(newabsoffset!);
         if (memo.sectionLevel <= myLevel) {
             throw new EOFError();

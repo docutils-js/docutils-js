@@ -1356,20 +1356,16 @@ class header extends Element {
 }
 // eslint-disable-next-line @typescript-eslint/class-name-casing
 class footer extends Element {
-    // @ts-ignore
-    public constructor(...args) {
-    // @ts-ignore
-        super(...args);
+    public constructor(rawsource?: string, children: NodeInterface[] = [], attributes: Attributes = {}) {
+        super(rawsource, children, attributes);
         this.classTypes = [Decorative];
     }
 }
 
 // eslint-disable-next-line @typescript-eslint/class-name-casing
 class decoration extends Element {
-    // @ts-ignore
-    public constructor(...args) {
-    // @ts-ignore
-        super(...args);
+    public constructor(rawsource?: string, children: NodeInterface[] = [], attributes: Attributes = {}) {
+        super(rawsource, children, attributes);
         this.classTypes = [Decorative];
     }
 
@@ -1474,7 +1470,7 @@ export interface TransformerInterface {
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 interface NameTypes {
-    [name: string]: any;
+    [name: string]: boolean;
 }
 
 interface Ids {
@@ -1639,7 +1635,7 @@ class document extends Element implements Document {
                 this.setDuplicateNameId(node, id, name, msgnode, explicit);
             } else {
                 this.nameIds[name] = id;
-                this.nameTypes[name] = explicit;
+                this.nameTypes[name] = explicit || false;
             }
         });
     }
@@ -1647,7 +1643,7 @@ class document extends Element implements Document {
     public setDuplicateNameId(node: NodeInterface, id: string, name: string, msgnode: NodeInterface, explicit?: boolean): void {
         const oldId = this.nameIds[name];
         const oldExplicit = this.nameTypes[name];
-        this.nameTypes[name] = oldExplicit || explicit;
+        this.nameTypes[name] = oldExplicit || explicit || false;
         let oldNode;
         if (explicit) {
             if (oldExplicit) {
@@ -1845,7 +1841,7 @@ class document extends Element implements Document {
         this.transformMessages.push(message);
     }
 
-    noteSource(source: string, offset: number): void {
+    public noteSource(source: string, offset: number): void {
         this.currentSource = source;
         if (offset === undefined) {
             this.currentLine = offset;
@@ -1882,10 +1878,8 @@ class FixedTextElement extends TextElement {
 class title extends TextElement {
     /* eslint-disable-next-line no-useless-constructor */
 
-    // @ts-ignore
-    public constructor(...args) {
-    // @ts-ignore
-        super(...args);
+    public constructor(rawsource?: string, text?: string, children: NodeInterface[] = [], attributes: Attributes = {}) {
+        super(rawsource, text, children, attributes);
         this.classTypes = [Titular, PreBibliographic];
     }
 }
@@ -1894,10 +1888,8 @@ class title extends TextElement {
 class subtitle extends TextElement {
     /* eslint-disable-next-line no-useless-constructor */
 
-    // @ts-ignore
-    public constructor(...args) {
-    // @ts-ignore
-        super(...args);
+    public constructor(rawsource?: string, text?: string, children: NodeInterface[] = [], attributes: Attributes = {}) {
+        super(rawsource, text, children, attributes);
         this.classTypes = [Titular, PreBibliographic];
     }
 }
@@ -1906,10 +1898,8 @@ class subtitle extends TextElement {
 class rubric extends TextElement {
     /* eslint-disable-next-line no-useless-constructor */
 
-    // @ts-ignore
-    public constructor(...args) {
-    // @ts-ignore
-        super(...args);
+    public constructor(rawsource?: string, text?: string, children: NodeInterface[] = [], attributes: Attributes = {}) {
+        super(rawsource, text, children, attributes);
         this.classTypes = [Titular];
     }
 }
@@ -1920,40 +1910,32 @@ class rubric extends TextElement {
 
 // eslint-disable-next-line @typescript-eslint/class-name-casing
 class docinfo extends Element {
-    // @ts-ignore
-    public constructor(...args) {
-    // @ts-ignore
-        super(...args);
+    public constructor(rawsource?: string, children: NodeInterface[] = [], attributes: Attributes = {}) {
+        super(rawsource, children, attributes);
         this.classTypes = [Bibliographic];
     }
 }
 
 // eslint-disable-next-line @typescript-eslint/class-name-casing
 class author extends TextElement {
-    // @ts-ignore
-    public constructor(...args) {
-    // @ts-ignore
-        super(...args);
+    public constructor(rawsource?: string, text?: string, children: NodeInterface[] = [], attributes: Attributes = {}) {
+        super(rawsource, text, children, attributes);
         this.classTypes = [Bibliographic];
     }
 }
 
 // eslint-disable-next-line @typescript-eslint/class-name-casing
 class authors extends Element {
-    // @ts-ignore
-    public constructor(...args) {
-    // @ts-ignore
-        super(...args);
+    public constructor(rawsource?: string, children?: NodeInterface[], attributes?: Attributes) {
+        super(rawsource, children, attributes);
         this.classTypes = [Bibliographic];
     }
 }
 
 // eslint-disable-next-line @typescript-eslint/class-name-casing
 class organization extends TextElement {
-    // @ts-ignore
-    public constructor(...args) {
-    // @ts-ignore
-        super(...args);
+    public constructor(rawsource?: string, text?: string, children: NodeInterface[] = [], attributes: Attributes = {}) {
+        super(rawsource, text, children, attributes);
         this.classTypes = [Bibliographic];
     }
 }
@@ -1970,73 +1952,58 @@ class address extends FixedTextElement {
 
 // eslint-disable-next-line @typescript-eslint/class-name-casing
 class contact extends TextElement {
-    // @ts-ignore
-    public constructor(...args) {
-    // @ts-ignore
-        super(...args);
+    public constructor(rawsource?: string, text?: string, children: NodeInterface[] = [], attributes: Attributes = {}) {
+        super(rawsource, text, children, attributes);
         this.classTypes = [Bibliographic];
     }
 }
 
 // eslint-disable-next-line @typescript-eslint/class-name-casing
 class version extends TextElement {
-    // @ts-ignore
-    public constructor(...args) {
-    // @ts-ignore
-        super(...args);
+    public constructor(rawsource?: string, text?: string, children: NodeInterface[] = [], attributes: Attributes = {}) {
+        super(rawsource, text, children, attributes);
         this.classTypes = [Bibliographic];
     }
 }
 
 // eslint-disable-next-line @typescript-eslint/class-name-casing
 class revision extends TextElement {
-    // @ts-ignore
-    public constructor(...args) {
-    // @ts-ignore
-        super(...args);
+    public constructor(rawsource?: string, text?: string, children: NodeInterface[] = [], attributes: Attributes = {}) {
+        super(rawsource, text, children, attributes);
         this.classTypes = [Bibliographic];
     }
 }
 
 // eslint-disable-next-line @typescript-eslint/class-name-casing
 class status extends TextElement {
-    // @ts-ignore
-    public constructor(...args) {
-    // @ts-ignore
-        super(...args);
+    public constructor(rawsource?: string, text?: string, children: NodeInterface[] = [], attributes: Attributes = {}) {
+        super(rawsource, text, children, attributes);
         this.classTypes = [Bibliographic];
     }
 }
 
 // eslint-disable-next-line @typescript-eslint/class-name-casing
 class date extends TextElement {
-    // @ts-ignore
-    public constructor(...args) {
-    // @ts-ignore
-        super(...args);
+    public constructor(rawsource?: string, text?: string, children: NodeInterface[] = [], attributes: Attributes = {}) {
+        super(rawsource, text, children, attributes);
         this.classTypes = [Bibliographic];
     }
 }
 
 // eslint-disable-next-line @typescript-eslint/class-name-casing
 class copyright extends TextElement {
-    // @ts-ignore
-    public constructor(...args) {
-    // @ts-ignore
-        super(...args);
+    public constructor(rawsource?: string, text?: string, children: NodeInterface[] = [], attributes: Attributes = {}) {
+        super(rawsource, text, children, attributes);
         this.classTypes = [Bibliographic];
     }
 }
-
 
 // eslint-disable-next-line @typescript-eslint/class-name-casing
 class section extends Element {
     /* eslint-disable-next-line no-useless-constructor */
 
-    // @ts-ignore
-    public constructor(...args) {
-    // @ts-ignore
-        super(...args);
+    public constructor(rawsource?: string, children: NodeInterface[] = [], attributes: Attributes = {}) {
+        super(rawsource, children, attributes);
         this.classTypes = [Structural];
     }
 }
@@ -2053,10 +2020,8 @@ class section extends Element {
  */
 // eslint-disable-next-line @typescript-eslint/class-name-casing
 class topic extends Element {
-    // @ts-ignore
-    public constructor(...args) {
-    // @ts-ignore
-        super(...args);
+    public constructor(rawsource?: string, children?: NodeInterface[], attributes?: Attributes) {
+        super(rawsource, children, attributes);
         this.classTypes = [Structural];
     }
 }
@@ -2077,10 +2042,8 @@ class topic extends Element {
 
 // eslint-disable-next-line @typescript-eslint/class-name-casing
 class sidebar extends Element {
-    // @ts-ignore
-    public constructor(...args) {
-    // @ts-ignore
-        super(...args);
+    public constructor(rawsource?: string, children?: NodeInterface[], attributes?: Attributes) {
+        super(rawsource, children, attributes);
         this.classTypes = [Structural];
     }
 }
@@ -2089,10 +2052,8 @@ class sidebar extends Element {
 class transition extends Element {
     /* eslint-disable-next-line no-useless-constructor */
 
-    // @ts-ignore
-    public constructor(...args) {
-    // @ts-ignore
-        super(...args);
+    public constructor(rawsource?: string, children?: NodeInterface[], attributes?: Attributes) {
+        super(rawsource, children, attributes);
         this.classTypes = [Structural];
     }
 } // Structural
@@ -2105,20 +2066,16 @@ class transition extends Element {
 class paragraph extends TextElement {
     /* eslint-disable-next-line no-useless-constructor */
 
-    // @ts-ignore
-    public constructor(...args) {
-    // @ts-ignore
-        super(...args);
+    public constructor(rawsource?: string, text?: string, children: NodeInterface[] = [], attributes: Attributes = {}) {
+        super(rawsource, text, children, attributes);
         this.classTypes = [General];
     }
 } // General
 
 // eslint-disable-next-line @typescript-eslint/class-name-casing
 class compound extends Element {
-    // @ts-ignore
-    public constructor(...args) {
-    // @ts-ignore
-        super(...args);
+    public constructor(rawsource?: string, children?: NodeInterface[], attributes?: Attributes) {
+        super(rawsource, children, attributes);
         this.classTypes = [General];
     }
 }
@@ -2126,10 +2083,8 @@ class compound extends Element {
 
 // eslint-disable-next-line @typescript-eslint/class-name-casing
 class container extends Element {
-    // @ts-ignore
-    public constructor(...args) {
-    // @ts-ignore
-        super(...args);
+    public constructor(rawsource?: string, children?: NodeInterface[], attributes?: Attributes) {
+        super(rawsource, children, attributes);
         this.classTypes = [General];
     }
 }
@@ -2137,11 +2092,8 @@ class container extends Element {
 /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,@typescript-eslint/class-name-casing */
 class bullet_list extends Element {
     /* eslint-disable-next-line no-useless-constructor */
-
-    // @ts-ignore
-    public constructor(...args) {
-    // @ts-ignore
-        super(...args);
+    public constructor(rawsource?: string, children?: NodeInterface[], attributes?: Attributes) {
+        super(rawsource, children, attributes);
         this.classTypes = [Sequential];
     }
 }
@@ -2158,10 +2110,8 @@ class enumerated_list extends Element {
 
     /* eslint-disable-next-line no-useless-constructor */
 
-    // @ts-ignore
-    public constructor(...args) {
-    // @ts-ignore
-        super(...args);
+    public constructor(rawsource?: string, children?: NodeInterface[], attributes?: Attributes) {
+        super(rawsource, children, attributes);
         this.classTypes = [Sequential];
     }
 }
@@ -2170,10 +2120,8 @@ class enumerated_list extends Element {
 class list_item extends Element {
     /* eslint-disable-next-line no-useless-constructor */
 
-    // @ts-ignore
-    public constructor(...args) {
-    // @ts-ignore
-        super(...args);
+    public constructor(rawsource?: string, children?: NodeInterface[], attributes?: Attributes) {
+        super(rawsource, children, attributes);
         this.classTypes = [Part];
     }
 }
@@ -2182,10 +2130,8 @@ class list_item extends Element {
 class definition_list extends Element {
     /* eslint-disable-next-line no-useless-constructor */
 
-    // @ts-ignore
-    public constructor(...args) {
-    // @ts-ignore
-        super(...args);
+    public constructor(rawsource?: string, children?: NodeInterface[], attributes?: Attributes) {
+        super(rawsource, children, attributes);
         this.classTypes = [Sequential];
     }
 }
@@ -2194,10 +2140,8 @@ class definition_list extends Element {
 class definition_list_item extends Element {
     /* eslint-disable-next-line no-useless-constructor */
 
-    // @ts-ignore
-    public constructor(...args) {
-    // @ts-ignore
-        super(...args);
+    public constructor(rawsource?: string, children?: NodeInterface[], attributes?: Attributes) {
+        super(rawsource, children, attributes);
         this.classTypes = [Part];
     }
 }
@@ -2206,10 +2150,8 @@ class definition_list_item extends Element {
 class term extends TextElement {
     /* eslint-disable-next-line no-useless-constructor */
 
-    // @ts-ignore
-    public constructor(...args) {
-    // @ts-ignore
-        super(...args);
+    public constructor(rawsource?: string, text?: string, children: NodeInterface[] = [], attributes: Attributes = {}) {
+        super(rawsource, text, children, attributes);
         this.classTypes = [Part];
     }
 }
@@ -2218,10 +2160,8 @@ class term extends TextElement {
 class classifier extends TextElement {
     /* eslint-disable-next-line no-useless-constructor */
 
-    // @ts-ignore
-    public constructor(...args) {
-    // @ts-ignore
-        super(...args);
+    public constructor(rawsource?: string, text?: string, children: NodeInterface[] = [], attributes: Attributes = {}) {
+        super(rawsource, text, children, attributes);
         this.classTypes = [Part];
     }
 }
@@ -2229,11 +2169,8 @@ class classifier extends TextElement {
 // eslint-disable-next-line @typescript-eslint/class-name-casing
 class definition extends Element {
     /* eslint-disable-next-line no-useless-constructor */
-
-    // @ts-ignore
-    public constructor(...args) {
-    // @ts-ignore
-        super(...args);
+    public constructor(rawsource?: string, children?: NodeInterface[], attributes?: Attributes) {
+        super(rawsource, children, attributes);
         this.classTypes = [Part];
     }
 }
@@ -2246,10 +2183,8 @@ class classifier(Part, TextElement): pass
 class field_list extends Element {
     /* eslint-disable-next-line no-useless-constructor */
 
-    // @ts-ignore
-    public constructor(...args) {
-    // @ts-ignore
-        super(...args);
+    public constructor(rawsource?: string, children?: NodeInterface[], attributes?: Attributes) {
+        super(rawsource, children, attributes);
         this.classTypes = [Sequential];
     }
 } // (Sequential, Element
@@ -2258,10 +2193,8 @@ class field_list extends Element {
 class field extends Element {
     /* eslint-disable-next-line no-useless-constructor */
 
-    // @ts-ignore
-    public constructor(...args) {
-    // @ts-ignore
-        super(...args);
+    public constructor(rawsource?: string, children?: NodeInterface[], attributes?: Attributes) {
+        super(rawsource, children, attributes);
         this.classTypes = [Part];
     }
 } // (Part
@@ -2269,10 +2202,8 @@ class field extends Element {
 class field_name extends TextElement {
     /* eslint-disable-next-line no-useless-constructor */
 
-    // @ts-ignore
-    public constructor(...args) {
-    // @ts-ignore
-        super(...args);
+    public constructor(rawsource?: string, text?: string, children: NodeInterface[] = [], attributes: Attributes = {}) {
+        super(rawsource, text, children, attributes);
         this.classTypes = [Part];
     }
 } // (Part
@@ -2280,20 +2211,17 @@ class field_name extends TextElement {
 class field_body extends Element {
     /* eslint-disable-next-line no-useless-constructor */
 
-    // @ts-ignore
-    public constructor(...args) {
-    // @ts-ignore
-        super(...args);
+
+    public constructor(rawsource?: string, children?: NodeInterface[], attributes?: Attributes) {
+        super(rawsource, children, attributes);
         this.classTypes = [Part];
     }
 } // (Part
 
 // eslint-disable-next-line @typescript-eslint/class-name-casing
 class option extends Element {
-    // @ts-ignore
-    public constructor(...args) {
-    // @ts-ignore
-        super(...args);
+    public constructor(rawsource?: string, children?: NodeInterface[], attributes?: Attributes) {
+        super(rawsource, children, attributes);
         this.classTypes = [Part];
         this.childTextSeparator = ""; // fixme test this
     }
@@ -2301,10 +2229,8 @@ class option extends Element {
 
 /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,@typescript-eslint/class-name-casing */
 class option_argument extends TextElement {
-    // @ts-ignore
-    public constructor(...args) {
-    // @ts-ignore
-        super(...args);
+    public constructor(rawsource?: string, text?: string, children: NodeInterface[] = [], attributes: Attributes = {}) {
+        super(rawsource, text, children, attributes);
         this.classTypes = [Part];
     }
 
@@ -2317,10 +2243,8 @@ class option_argument extends TextElement {
 
 /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,@typescript-eslint/class-name-casing */
 class option_group extends Element {
-    // @ts-ignore
-    public constructor(...args) {
-    // @ts-ignore
-        super(...args);
+    public constructor(rawsource?: string, children?: NodeInterface[], attributes?: Attributes) {
+        super(rawsource, children, attributes);
         this.classTypes = [Part];
         this.childTextSeparator = ", ";
     }
@@ -2330,10 +2254,8 @@ class option_group extends Element {
 class option_list extends Element {
     /* eslint-disable-next-line no-useless-constructor */
 
-    // @ts-ignore
-    public constructor(...args) {
-    // @ts-ignore
-        super(...args);
+    public constructor(rawsource?: string, children?: NodeInterface[], attributes?: Attributes) {
+        super(rawsource, children, attributes);
         this.classTypes = [Sequential];
     }
 } // Sequential
@@ -2341,10 +2263,8 @@ class option_list extends Element {
 class option_list_item extends Element {
     /* eslint-disable-next-line no-useless-constructor */
 
-    // @ts-ignore
-    public constructor(...args) {
-    // @ts-ignore
-        super(...args);
+    public constructor(rawsource?: string, children?: NodeInterface[], attributes?: Attributes) {
+        super(rawsource, children, attributes);
         this.classTypes = [Part];
         this.childTextSeparator = "  ";
     }
@@ -2354,10 +2274,8 @@ class option_list_item extends Element {
 class option_string extends TextElement {
     /* eslint-disable-next-line no-useless-constructor */
 
-    // @ts-ignore
-    public constructor(...args) {
-    // @ts-ignore
-        super(...args);
+    public constructor(rawsource?: string, text?: string, children: NodeInterface[] = [], attributes: Attributes = {}) {
+        super(rawsource, text, children, attributes);
         this.classTypes = [Part];
     }
 } // (Part
@@ -2366,10 +2284,8 @@ class option_string extends TextElement {
 class description extends Element {
     /* eslint-disable-next-line no-useless-constructor */
 
-    // @ts-ignore
-    public constructor(...args) {
-    // @ts-ignore
-        super(...args);
+    public constructor(rawsource?: string, children?: NodeInterface[], attributes?: Attributes) {
+        super(rawsource, children, attributes);
         this.classTypes = [Part];
     }
 } // (Part
@@ -2413,11 +2329,8 @@ class math_block extends FixedTextElement {
 /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,@typescript-eslint/class-name-casing */
 class line_block extends Element {
     /* eslint-disable-next-line no-useless-constructor */
-
-    // @ts-ignore
-    public constructor(...args) {
-    // @ts-ignore
-        super(...args);
+    public constructor(rawsource?: string, children?: NodeInterface[], attributes?: Attributes) {
+        super(rawsource, children, attributes);
         this.classTypes = [General];
     }
 }
@@ -2437,10 +2350,8 @@ class line extends TextElement implements HasIndent {
 class block_quote extends Element {
     /* eslint-disable-next-line no-useless-constructor */
 
-    // @ts-ignore
-    public constructor(...args) {
-    // @ts-ignore
-        super(...args);
+    public constructor(rawsource?: string, children?: NodeInterface[], attributes?: Attributes) {
+        super(rawsource, children, attributes);
         this.classTypes = [General];
     }
 }
@@ -2449,34 +2360,27 @@ class block_quote extends Element {
 class attribution extends TextElement {
     /* eslint-disable-next-line no-useless-constructor */
 
-    // @ts-ignore
-    public constructor(...args) {
-    // @ts-ignore
-        super(...args);
+    public constructor(rawsource?: string, text?: string, children: NodeInterface[] = [], attributes: Attributes = {}) {
+        super(rawsource, text, children, attributes);
         this.classTypes = [Part];
     }
 }
 
 // eslint-disable-next-line @typescript-eslint/class-name-casing
 class attention extends Element {
-    /* eslint-disable-next-line no-useless-constructor */
-
-    // @ts-ignore
-    public constructor(...args) {
-    // @ts-ignore
-        super(...args);
+    public constructor(rawsource?: string, children?: NodeInterface[], attributes?: Attributes) {
+        super(rawsource, children, attributes);
         this.classTypes = [Admonition];
     }
 }
+
 
 // eslint-disable-next-line @typescript-eslint/class-name-casing
 class caution extends Element {
     /* eslint-disable-next-line no-useless-constructor */
 
-    // @ts-ignore
-    public constructor(...args) {
-    // @ts-ignore
-        super(...args);
+    public constructor(rawsource?: string, children?: NodeInterface[], attributes?: Attributes) {
+        super(rawsource, children, attributes);
         this.classTypes = [Admonition];
     }
 }
@@ -2485,10 +2389,8 @@ class caution extends Element {
 class danger extends Element {
     /* eslint-disable-next-line no-useless-constructor */
 
-    // @ts-ignore
-    public constructor(...args) {
-    // @ts-ignore
-        super(...args);
+    public constructor(rawsource?: string, children?: NodeInterface[], attributes?: Attributes) {
+        super(rawsource, children, attributes);
         this.classTypes = [Admonition];
     }
 }
@@ -2497,10 +2399,8 @@ class danger extends Element {
 class error extends Element {
     /* eslint-disable-next-line no-useless-constructor */
 
-    // @ts-ignore
-    public constructor(...args) {
-    // @ts-ignore
-        super(...args);
+    public constructor(rawsource?: string, children?: NodeInterface[], attributes?: Attributes) {
+        super(rawsource, children, attributes);
         this.classTypes = [Admonition];
     }
 }
@@ -2509,10 +2409,8 @@ class error extends Element {
 class important extends Element {
     /* eslint-disable-next-line no-useless-constructor */
 
-    // @ts-ignore
-    public constructor(...args) {
-    // @ts-ignore
-        super(...args);
+    public constructor(rawsource?: string, children?: NodeInterface[], attributes?: Attributes) {
+        super(rawsource, children, attributes);
         this.classTypes = [Admonition];
     }
 }
@@ -2521,10 +2419,8 @@ class important extends Element {
 class note extends Element {
     /* eslint-disable-next-line no-useless-constructor */
 
-    // @ts-ignore
-    public constructor(...args) {
-    // @ts-ignore
-        super(...args);
+    public constructor(rawsource?: string, children?: NodeInterface[], attributes?: Attributes) {
+        super(rawsource, children, attributes);
         this.classTypes = [Admonition];
     }
 }
@@ -2533,10 +2429,8 @@ class note extends Element {
 class tip extends Element {
     /* eslint-disable-next-line no-useless-constructor */
 
-    // @ts-ignore
-    public constructor(...args) {
-    // @ts-ignore
-        super(...args);
+    public constructor(rawsource?: string, children?: NodeInterface[], attributes?: Attributes) {
+        super(rawsource, children, attributes);
         this.classTypes = [Admonition];
     }
 }
@@ -2545,10 +2439,8 @@ class tip extends Element {
 class hint extends Element {
     /* eslint-disable-next-line no-useless-constructor */
 
-    // @ts-ignore
-    public constructor(...args) {
-    // @ts-ignore
-        super(...args);
+    public constructor(rawsource?: string, children?: NodeInterface[], attributes?: Attributes) {
+        super(rawsource, children, attributes);
         this.classTypes = [Admonition];
     }
 }
@@ -2556,11 +2448,8 @@ class hint extends Element {
 // eslint-disable-next-line @typescript-eslint/class-name-casing
 class warning extends Element {
     /* eslint-disable-next-line no-useless-constructor */
-
-    // @ts-ignore
-    public constructor(...args) {
-    // @ts-ignore
-        super(...args);
+    public constructor(rawsource?: string, children?: NodeInterface[], attributes?: Attributes) {
+        super(rawsource, children, attributes);
         this.classTypes = [Admonition];
     }
 }
@@ -2569,11 +2458,9 @@ class warning extends Element {
 class admonition extends Element {
     /* eslint-disable-next-line no-useless-constructor */
 
-    // @ts-ignore
-    public constructor(...args) {
-    // @ts-ignore
-        super(...args);
-        this.classTypes = [Admonition];
+    public constructor(rawsource?: string, children?: NodeInterface[], attributes?: Attributes) {
+        super(rawsource, children, attributes);
+        this.classTypes = [General, BackLinkable, Labeled, Targetable];
     }
 }
 
@@ -2615,14 +2502,9 @@ class target extends TextElement {
     }
 }
 
-// eslint-disable-next-line @typescript-eslint/class-name-casing
 class footnote extends Element {
-    /* eslint-disable-next-line no-useless-constructor */
-
-    // @ts-ignore
-    public constructor(...args) {
-    // @ts-ignore
-        super(...args);
+    public constructor(rawsource?: string, children?: NodeInterface[], attributes?: Attributes) {
+        super(rawsource, children, attributes);
         this.classTypes = [General, BackLinkable, Labeled, Targetable];
     }
 }
@@ -2631,10 +2513,8 @@ class footnote extends Element {
 class citation extends Element {
     /* eslint-disable-next-line no-useless-constructor */
 
-    // @ts-ignore
-    public constructor(...args) {
-    // @ts-ignore
-        super(...args);
+    public constructor(rawsource?: string, children?: NodeInterface[], attributes?: Attributes) {
+        super(rawsource, children, attributes);
         this.classTypes = [General, BackLinkable, Labeled, Targetable];
     }
 }
@@ -2643,10 +2523,8 @@ class citation extends Element {
 class label extends TextElement {
     /* eslint-disable-next-line no-useless-constructor */
 
-    // @ts-ignore
-    public constructor(...args) {
-    // @ts-ignore
-        super(...args);
+    public constructor(rawsource?: string, text?: string, children: NodeInterface[] = [], attributes: Attributes = {}) {
+        super(rawsource, text, children, attributes);
         this.classTypes = [Part];
     }
 }
@@ -2655,10 +2533,8 @@ class label extends TextElement {
 class figure extends Element {
     /* eslint-disable-next-line no-useless-constructor */
 
-    // @ts-ignore
-    public constructor(...args) {
-    // @ts-ignore
-        super(...args);
+    public constructor(rawsource?: string, children?: NodeInterface[], attributes?: Attributes) {
+        super(rawsource, children, attributes);
         this.classTypes = [General];
     }
 }
@@ -2667,10 +2543,9 @@ class figure extends Element {
 class caption extends TextElement {
     /* eslint-disable-next-line no-useless-constructor */
 
-    // @ts-ignore
-    public constructor(...args) {
-    // @ts-ignore
-        super(...args);
+    public constructor(rawsource?: string, text?: string, children: NodeInterface[] = [], attributes: Attributes = {}) {
+        super(rawsource, text, children, attributes);
+
         this.classTypes = [Part];
     }
 }
@@ -2679,10 +2554,8 @@ class caption extends TextElement {
 class legend extends Element {
     /* eslint-disable-next-line no-useless-constructor */
 
-    // @ts-ignore
-    public constructor(...args) {
-    // @ts-ignore
-        super(...args);
+    public constructor(rawsource?: string, children?: NodeInterface[], attributes?: Attributes) {
+        super(rawsource, children, attributes);
         this.classTypes = [Part];
     }
 }
@@ -2691,10 +2564,8 @@ class legend extends Element {
 class table extends Element {
     /* eslint-disable-next-line no-useless-constructor */
 
-    // @ts-ignore
-    public constructor(...args) {
-    // @ts-ignore
-        super(...args);
+    public constructor(rawsource?: string, children?: NodeInterface[], attributes?: Attributes) {
+        super(rawsource, children, attributes);
         this.classTypes = [General];
     }
 }
@@ -2704,10 +2575,8 @@ class tgroup extends Element {
     public stubs?: {}[];
     /* eslint-disable-next-line no-useless-constructor */
 
-    // @ts-ignore
-    public constructor(...args) {
-    // @ts-ignore
-        super(...args);
+    public constructor(rawsource?: string, children?: NodeInterface[], attributes?: Attributes) {
+        super(rawsource, children, attributes);
         this.classTypes = [Part];
     }
 }
@@ -2716,10 +2585,8 @@ class tgroup extends Element {
 class colspec extends Element {
     /* eslint-disable-next-line no-useless-constructor */
 
-    // @ts-ignore
-    public constructor(...args) {
-    // @ts-ignore
-        super(...args);
+    public constructor(rawsource?: string, children?: NodeInterface[], attributes?: Attributes) {
+        super(rawsource, children, attributes);
         this.classTypes = [Part];
     }
 }
@@ -2728,10 +2595,8 @@ class colspec extends Element {
 class thead extends Element {
     /* eslint-disable-next-line no-useless-constructor */
 
-    // @ts-ignore
-    public constructor(...args) {
-    // @ts-ignore
-        super(...args);
+    public constructor(rawsource?: string, children?: NodeInterface[], attributes?: Attributes) {
+        super(rawsource, children, attributes);
         this.classTypes = [Part];
     }
 }
@@ -2740,10 +2605,8 @@ class thead extends Element {
 class tbody extends Element {
     /* eslint-disable-next-line no-useless-constructor */
 
-    // @ts-ignore
-    public constructor(...args) {
-    // @ts-ignore
-        super(...args);
+    public constructor(rawsource?: string, children?: NodeInterface[], attributes?: Attributes) {
+        super(rawsource, children, attributes);
         this.classTypes = [Part];
     }
 }
@@ -2753,10 +2616,8 @@ class row extends Element {
     public column?: number;
     /* eslint-disable-next-line no-useless-constructor */
 
-    // @ts-ignore
-    public constructor(...args) {
-    // @ts-ignore
-        super(...args);
+    public constructor(rawsource?: string, children?: NodeInterface[], attributes?: Attributes) {
+        super(rawsource, children, attributes);
         this.classTypes = [Part];
     }
 }
@@ -2765,10 +2626,8 @@ class row extends Element {
 class entry extends Element {
     /* eslint-disable-next-line no-useless-constructor */
 
-    // @ts-ignore
-    public constructor(...args) {
-    // @ts-ignore
-        super(...args);
+    public constructor(rawsource?: string, children?: NodeInterface[], attributes?: Attributes) {
+        super(rawsource, children, attributes);
         this.classTypes = [Part];
     }
 }
@@ -2887,10 +2746,8 @@ class raw extends FixedTextElement {
 class emphasis extends TextElement {
     /* eslint-disable-next-line no-useless-constructor */
 
-    // @ts-ignore
-    public constructor(...args) {
-    // @ts-ignore
-        super(...args);
+    public constructor(rawsource?: string, text?: string, children: NodeInterface[] = [], attributes: Attributes = {}) {
+        super(rawsource, text, children, attributes);
         this.classTypes = [Inline];
     }
 }
@@ -2899,10 +2756,8 @@ class emphasis extends TextElement {
 class strong extends TextElement {
     /* eslint-disable-next-line no-useless-constructor */
 
-    // @ts-ignore
-    public constructor(...args) {
-    // @ts-ignore
-        super(...args);
+    public constructor(rawsource?: string, text?: string, children: NodeInterface[] = [], attributes: Attributes = {}) {
+        super(rawsource, text, children, attributes);
         this.classTypes = [Inline];
     }
 } // Inline
@@ -2910,11 +2765,8 @@ class strong extends TextElement {
 // eslint-disable-next-line @typescript-eslint/class-name-casing
 class literal extends TextElement {
     /* eslint-disable-next-line no-useless-constructor */
-
-    // @ts-ignore
-    public constructor(...args) {
-    // @ts-ignore
-        super(...args);
+    public constructor(rawsource?: string, text?: string, children: NodeInterface[] = [], attributes: Attributes = {}) {
+        super(rawsource, text, children, attributes);
         this.classTypes = [Inline];
     }
 } // Inline
@@ -2923,10 +2775,8 @@ class reference extends TextElement {
     public indirectReferenceName: string | undefined;
     /* eslint-disable-next-line no-useless-constructor */
 
-    // @ts-ignore
-    public constructor(...args) {
-    // @ts-ignore
-        super(...args);
+    public constructor(rawsource?: string, text?: string, children: NodeInterface[] = [], attributes: Attributes = {}) {
+        super(rawsource, text, children, attributes);
         this.classTypes = [General, Inline, Referential];
     }
 } // General, Inline, Referential
@@ -2934,10 +2784,8 @@ class reference extends TextElement {
 class footnote_reference extends TextElement {
     /* eslint-disable-next-line no-useless-constructor */
 
-    // @ts-ignore
-    public constructor(...args) {
-    // @ts-ignore
-        super(...args);
+    public constructor(rawsource?: string, text?: string, children: NodeInterface[] = [], attributes: Attributes = {}) {
+        super(rawsource, text, children, attributes);
         this.classTypes = [General, Inline, Referential];
     }
 } // General, Inline, Referential
@@ -2945,10 +2793,8 @@ class footnote_reference extends TextElement {
 class citation_reference extends TextElement {
     /* eslint-disable-next-line no-useless-constructor */
 
-    // @ts-ignore
-    public constructor(...args) {
-    // @ts-ignore
-        super(...args);
+    public constructor(rawsource?: string, text?: string, children: NodeInterface[] = [], attributes: Attributes = {}) {
+        super(rawsource, text, children, attributes);
         this.classTypes = [General, Inline, Referential];
     }
 } // General, Inline, Referential
@@ -2956,10 +2802,8 @@ class citation_reference extends TextElement {
 class substitution_reference extends TextElement {
     /* eslint-disable-next-line no-useless-constructor */
 
-    // @ts-ignore
-    public constructor(...args) {
-    // @ts-ignore
-        super(...args);
+    public constructor(rawsource?: string, text?: string, children: NodeInterface[] = [], attributes: Attributes = {}) {
+        super(rawsource, text, children, attributes);
         this.classTypes = [Inline];
     }
 } // General, Inline, Referential
@@ -2967,10 +2811,8 @@ class substitution_reference extends TextElement {
 class title_reference extends TextElement {
     /* eslint-disable-next-line no-useless-constructor */
 
-    // @ts-ignore
-    public constructor(...args) {
-    // @ts-ignore
-        super(...args);
+    public constructor(rawsource?: string, text?: string, children: NodeInterface[] = [], attributes: Attributes = {}) {
+        super(rawsource, text, children, attributes);
         this.classTypes = [Inline];
     }
 } // General, Inline, Referential
@@ -2979,10 +2821,8 @@ class title_reference extends TextElement {
 class abbreviation extends TextElement {
     /* eslint-disable-next-line no-useless-constructor */
 
-    // @ts-ignore
-    public constructor(...args) {
-    // @ts-ignore
-        super(...args);
+    public constructor(rawsource?: string, text?: string, children: NodeInterface[] = [], attributes: Attributes = {}) {
+        super(rawsource, text, children, attributes);
         this.classTypes = [Inline];
     }
 }
@@ -2991,10 +2831,8 @@ class abbreviation extends TextElement {
 class acronym extends TextElement {
     /* eslint-disable-next-line no-useless-constructor */
 
-    // @ts-ignore
-    public constructor(...args) {
-    // @ts-ignore
-        super(...args);
+    public constructor(rawsource?: string, text?: string, children: NodeInterface[] = [], attributes: Attributes = {}) {
+        super(rawsource, text, children, attributes);
         this.classTypes = [Inline];
     }
 }
@@ -3003,10 +2841,8 @@ class acronym extends TextElement {
 class superscript extends TextElement {
     /* eslint-disable-next-line no-useless-constructor */
 
-    // @ts-ignore
-    public constructor(...args) {
-    // @ts-ignore
-        super(...args);
+    public constructor(rawsource?: string, text?: string, children: NodeInterface[] = [], attributes: Attributes = {}) {
+        super(rawsource, text, children, attributes);
         this.classTypes = [Inline];
     }
 }
@@ -3015,10 +2851,8 @@ class superscript extends TextElement {
 class subscript extends TextElement {
     /* eslint-disable-next-line no-useless-constructor */
 
-    // @ts-ignore
-    public constructor(...args) {
-    // @ts-ignore
-        super(...args);
+    public constructor(rawsource?: string, text?: string, children: NodeInterface[] = [], attributes: Attributes = {}) {
+        super(rawsource, text, children, attributes);
         this.classTypes = [Inline];
     }
 }
@@ -3027,10 +2861,8 @@ class subscript extends TextElement {
 class math extends TextElement {
     /* eslint-disable-next-line no-useless-constructor */
 
-    // @ts-ignore
-    public constructor(...args) {
-    // @ts-ignore
-        super(...args);
+    public constructor(rawsource?: string, text?: string, children: NodeInterface[] = [], attributes: Attributes = {}) {
+        super(rawsource, text, children, attributes);
         this.classTypes = [Inline];
     }
 }
@@ -3039,10 +2871,8 @@ class math extends TextElement {
 class image extends Element {
     /* eslint-disable-next-line no-useless-constructor */
 
-    // @ts-ignore
-    public constructor(...args) {
-    // @ts-ignore
-        super(...args);
+    public constructor(rawsource?: string, children?: NodeInterface[], attributes?: Attributes) {
+        super(rawsource, children, attributes);
         this.classTypes = [General, Inline];
     }
 
@@ -3056,10 +2886,8 @@ class image extends Element {
 class inline extends TextElement {
     /* eslint-disable-next-line no-useless-constructor */
 
-    // @ts-ignore
-    public constructor(...args) {
-    // @ts-ignore
-        super(...args);
+    public constructor(rawsource?: string, text?: string, children: NodeInterface[] = [], attributes: Attributes = {}) {
+        super(rawsource, text, children, attributes);
         this.classTypes = [Inline];
     }
 }
@@ -3068,10 +2896,8 @@ class inline extends TextElement {
 class problematic extends TextElement {
     /* eslint-disable-next-line no-useless-constructor */
 
-    // @ts-ignore
-    public constructor(...args) {
-    // @ts-ignore
-        super(...args);
+    public constructor(rawsource?: string, text?: string, children: NodeInterface[] = [], attributes: Attributes = {}) {
+        super(rawsource, text, children, attributes);
         this.classTypes = [Inline];
     }
 }
@@ -3080,10 +2906,8 @@ class problematic extends TextElement {
 class generated extends TextElement {
     /* eslint-disable-next-line no-useless-constructor */
 
-    // @ts-ignore
-    public constructor(...args) {
-    // @ts-ignore
-        super(...args);
+    public constructor(rawsource?: string, text?: string, children: NodeInterface[] = [], attributes: Attributes = {}) {
+        super(rawsource, text, children, attributes);
         this.classTypes = [Inline];
     }
 }

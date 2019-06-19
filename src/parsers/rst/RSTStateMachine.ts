@@ -1,6 +1,6 @@
 import StateMachineWS from "../../StateMachineWS";
 import Inliner from "./Inliner";
-import { ElementInterface, StateMachineRunArgs } from "../../types";
+import { ElementInterface, Statemachine, StateMachineFactoryFunction, StateMachineRunArgs } from "../../types";
 import { RSTLanguage, RstMemo, Rststatemachine, RstStateMachineRunArgs } from "./types";
 import { getLanguage } from "./languages";
 
@@ -14,6 +14,10 @@ class RSTStateMachine extends StateMachineWS implements Rststatemachine {
     public matchTitles?: boolean;
     public node?: ElementInterface;
     public memo?: RstMemo;
+    public createNestedStateMachine?: StateMachineFactoryFunction<Rststatemachine>
+    public createKnownIndentStateMachine?: StateMachineFactoryFunction<Rststatemachine>;
+    public createIndentStateMachine?: StateMachineFactoryFunction<Rststatemachine>;
+
     public run(args: RstStateMachineRunArgs): (string|{})[] {
         const cArgs = { ... args };
         /* istanbul ignore if */

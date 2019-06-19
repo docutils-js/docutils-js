@@ -1,7 +1,7 @@
 import * as nodes from "./nodes";
 import { isIterable } from "./utils";
 import { SystemMessage, UnimplementedError as Unimp } from "./Exceptions";
-import { Attributes, NodeInterface, ObserverCallback, ReporterInterface, Systemmessage, WritableStream } from "./types";
+import { Attributes, NodeInterface, ReporterInterface, Systemmessage, WritableStream } from "./types";
 
 /**
     Return the "source" and "line" attributes from the `node` given or from

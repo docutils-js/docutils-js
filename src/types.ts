@@ -308,8 +308,6 @@ export interface States {
 }
 
 export interface Statemachine {
-    states: States;
-
     createStateMachine(): Statemachine;
     runtimeInit(): void;
     addState(stateClass: StateInterface): void;
@@ -340,6 +338,10 @@ export interface Statemachine {
     nextLine(n: number): string| undefined;
     notifyObservers(): void;
     previousLine(n: number): string;
+
+    hasState(stateName: string): boolean;
+
+    getState2(stateName: string): StateInterface;
 }
 
 export interface StateType {

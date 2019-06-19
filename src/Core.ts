@@ -21,8 +21,7 @@ export function publish(args: any): void {
     const myArgs = { ..._defaults, ...args };
     const {
         reader, readerName, parser, parserName, writer, writerName,
-        settings, settingsSpec, settingsOverrides, configSection,
-        enableExitStatus, argv, usage, description,
+        settings,
     } = myArgs;
     const pub = new Publisher({
         reader, parser, writer, settings,

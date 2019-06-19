@@ -2,7 +2,7 @@ import Component from "./Component";
 import * as universal from "./transforms/universal";
 import parsers from "./parsers";
 import newDocument from "./newDocument";
-import { DebugFunction, Document, ParserConsructor, ReadCallback, TransformType } from "./types";
+import { DebugFunction, Document, ParserConsructor, TransformType } from "./types";
 import { Settings } from "../gen/Settings";
 import Parser from "./Parser";
 import Input from "./io/Input";

@@ -46,7 +46,7 @@ class HTMLTranslator extends nodes.NodeVisitor {
     private headPrefix: string[];
     private htmlProlog: string[];
     private compactSimple: boolean;
-    private context: string[];
+    private context: string[] = [];
     private compactParagraph?: boolean;
     private bodyPreDocinfo: string[];
     private inDocumentTitle: number;
@@ -82,6 +82,9 @@ class HTMLTranslator extends nodes.NodeVisitor {
     private bodyPrefix: string[];
     private tableStyle: string = '';
     private attribution: string = '';
+    private cloakEmailAddresses: boolean = true;
+    private compactLists?: number;
+    private compactFieldLists?: number;
 
     public constructor(document: Document) {
         super(document);
@@ -97,6 +100,7 @@ class HTMLTranslator extends nodes.NodeVisitor {
 
         let myConfig = settings.docutilsWritersHtml4Css1Writer;
         if(myConfig !== undefined) {
+            this.cloakEmailAddresses = myConfig.cloakEmailAddresses || true;
             if(myConfig.attribution !== undefined) {
                 this.attribution = myConfig.attribution;
             }
@@ -167,7 +171,8 @@ class HTMLTranslator extends nodes.NodeVisitor {
             text = '';
         }
         let encoded = this.encode(text.replace(whitespace, ' '));
-        if (this.inMailto && this.settings.docutilsWritersHtml4Css1Writer!.cloakEmailAddresses) {
+        if (this.inMailto && this.cloakEmailAddresses)
+        {
             // Cloak at-signs ("%40") and periods with HTML entities.
             encoded = encoded.replace('%40', '&#37;&#52;&#48;');
             encoded = encoded.replace('.', '&#46;');
@@ -309,7 +314,7 @@ class HTMLTranslator extends nodes.NodeVisitor {
     public visit_Text(node: NodeInterface) {
         const text = node.astext();
         let encoded = this.encode(text);
-        if (this.inMailto && this.settings.docutilsWritersHtml4Css1Writer!.cloakEmailAddresses) {
+        if (this.inMailto && this.cloakEmailAddresses) {
             encoded = this.cloakEmail(encoded);
         }
         this.body.push(encoded);
@@ -465,13 +470,13 @@ class HTMLTranslator extends nodes.NodeVisitor {
         // check config setting:
         if ((node instanceof nodes.field_list
              || node instanceof nodes.definition_list)
-            && !this.settings.docutilsWritersHtml4Css1Writer!.compactFieldLists) {
+            && !this.compactFieldLists) {
             // print "`compact-field-lists` is false"
             return false;
         }
         if ((node instanceof nodes.enumerated_list
              || node instanceof nodes.bullet_list)
-            && !this.settings.docutilsWritersHtml4Css1Writer!.compactLists) {
+            && !this.compactLists) {
             // print "`compact-lists` is false"
             return false;
         }

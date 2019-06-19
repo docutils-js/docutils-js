@@ -97,4 +97,5 @@ export interface StatemachineConstructor<T> {
 
 export interface Rststatemachine extends Statemachine {
     run(args: RstStateMachineRunArgs): (string|{})[];
-}
+
+    }

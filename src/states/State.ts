@@ -11,7 +11,7 @@ import {
     TransitionsArray
 } from "../types";
 import { StateMachine } from "../StateMachine";
-import { RSTStateArgs, StatemachineConstructor } from "../parsers/rst/types";
+import { RSTStateArgs, Rststatemachine, StatemachineConstructor } from "../parsers/rst/types";
 
 class State implements StateInterface {
     /**

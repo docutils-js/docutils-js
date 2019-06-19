@@ -1,4 +1,3 @@
-import { StringInput, StringOutput } from "./io";
 import { ApplicationError, InvalidStateError } from "./Exceptions";
 import * as readers from './Readers';
 import * as writers from './Writers';
@@ -44,7 +43,8 @@ class Publisher {
         return this._document;
     }
     private settings: Settings;
-    private debugFn: DebugFunction = (msg) => {};
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    private debugFn: DebugFunction = (msg: string): void => {};
     private reader?: Reader;
     private _document: Document | undefined;
     private parser?: Parser;
@@ -75,9 +75,6 @@ class Publisher {
             reader, parser, writer, source, sourceClass, destination,
             destinationClass, settings, debugFn,
         } = args;
-        /* Terrible defaults ! */
-        const sourceClass2 = sourceClass;
-        const destinationClass2 = destinationClass;
 
         if(debugFn !== undefined) {
             this.debugFn = debugFn;
@@ -157,6 +154,7 @@ class Publisher {
     }
 */
     public processCommandLine(
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
         args: {
             argv: string[]; usage: string; description: string; settingsSpec: SettingsSpec; configSection: string;
             settingsOverrides: {};

@@ -12,9 +12,6 @@ import * as directives from "../directives";
 import UnexpectedIndentationError from "../../../error/UnexpectedIndentationError";
 import RSTStateMachine from "../RSTStateMachine";
 import { NodeInterface } from "../../../types";
-import { line_block } from "../../../nodes";
-import { DirectiveInterface, RSTStateArgs } from "../types";
-import Directive from "../Directive";
 
 const fullyNormalizeName = nodes.fullyNormalizeName;
 

@@ -50,7 +50,18 @@ export class TransitionMethodNotFound extends StateMachineError { }
  * results of processing in a list.
  */
 class StateMachine implements Statemachine {
-    states: States = {};
+    public hasState(stateName: string): boolean {
+        return stateName in this.states;
+    }
+
+    public getState2(stateName: string): StateInterface {
+        if (!this.hasState(stateName)) {
+            throw new InvalidStateError(`Invalid state ${stateName}`);
+        }
+        return this.states[stateName];
+    }
+
+    private states: States = {};
 
     public inputLines: StringList = new StringList([]);
 
@@ -133,7 +144,8 @@ class StateMachine implements Statemachine {
     }
 
     public createStateMachine(): Statemachine {
-        return this.constructor({ debug: this.debug, dbeugFn: this.debugFn });
+        // @ts-ignore
+        return new this.constructor({ debug: this.debug, debugFn: this.debugFn });
     }
 
     public forEachState(cb: (state: State) => void): void {
@@ -143,6 +155,7 @@ class StateMachine implements Statemachine {
 
     public unlink(): void {
         this.forEachState((s): void =>s.unlink());
+        console.log('unlinking');
         this.states = {};
     }
 
@@ -517,7 +530,7 @@ class StateMachine implements Statemachine {
         }
         // console.log(`adding state ${stateName}`);
 
-        if (Object.prototype.hasOwnProperty.call(this.states, stateName)) {
+        if(this.hasState(stateName)) {
             throw new DuplicateStateError(stateName);
         }
         if (!stateName) {
@@ -527,7 +540,7 @@ class StateMachine implements Statemachine {
         if(this.stateFactory === undefined) {
             throw new InvalidStateError('stateFacory');
         }
-        const r = this.stateFactory.createState(stateName, this);
+        const r = this.stateFactory.createState(stateName, this as Statemachine);
         this.states[stateName] = r;
     }
 
