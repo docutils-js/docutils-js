@@ -4,12 +4,13 @@ import {Settings} from "../gen/Settings";
 import {getDefaultSettings} from "./settingsHelper";
 import { Document } from "./types";
 
+/**
+ * Parse a REST document. This function uses getDefaualtSettings if settings parameter
+ * is undefined.
+ */
 function parse(docSource: string, settings?: Settings): Document {
     const lSettings: Settings = settings || getDefaultSettings();
     const document = newDocument({ sourcePath: '' }, lSettings);
-    if (!document.reporter) {
-        throw new Error('need document reporter');
-    }
     return restParse(docSource, document);
 }
 
