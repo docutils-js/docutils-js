@@ -808,10 +808,12 @@ class HTMLTranslator extends nodes.NodeVisitor {
         if (node.parent!.parent instanceof nodes.thead) {
             atts.class.push('head');
         }
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         const ggParent = node.parent!.parent!.parent!;
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         // @ts-ignore
         let stubs: any[] = ggParent.getCustomAttr('stubs');
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         // @ts-ignore
         if(stubs[node.parent!.getCustomAttr('column')]) {
             // "stubs" list is an attribute of the tgroup element
@@ -826,13 +828,16 @@ class HTMLTranslator extends nodes.NodeVisitor {
             delete atts.class;
         }
 
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         // @ts-ignore
+
         node.parent!.column += 1;
         if ('morerows' in node.attributes) {
             atts.rowspan = node.attributes.morerows + 1;
         }
         if ('morecols' in node.attributes) {
             atts.colspan = node.attributes.morecols + 1;
+            // eslint-disable-next-line @typescript-eslint/no-angle-bracket-type-assertion
             (<row>node.parent!).column += node.attributes.morecols;
         }
         this.body.push(this.starttag(node, tagname, '', false, atts));
@@ -844,6 +849,7 @@ class HTMLTranslator extends nodes.NodeVisitor {
 
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,@typescript-eslint/no-unused-vars,no-unused-vars */
     public depart_entry(node: NodeInterface) {
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         this.body.push(this.context.pop()!);
     }
 
@@ -893,6 +899,7 @@ class HTMLTranslator extends nodes.NodeVisitor {
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
     public visit_field_name(node: NodeInterface) {
         this.body.push(this.starttag(node, 'dt', '', false,
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             { CLASS: node.parent!.attributes.classes.join(' ') }));
     }
 
@@ -903,6 +910,7 @@ class HTMLTranslator extends nodes.NodeVisitor {
 
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
     public visit_field_body(node: NodeInterface) {
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         this.body.push(this.starttag(node, 'dd', '', false,
             { CLASS: node.parent!.attributes.classes.join(' ') }));
 
@@ -957,6 +965,7 @@ class HTMLTranslator extends nodes.NodeVisitor {
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,@typescript-eslint/no-unused-vars,no-unused-vars */
     public visit_footnote(node: NodeInterface) {
         if (!this.inFootnoteList) {
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             const classes = `footnote ${this.settings.docutilsWritersHtml4Css1Writer!.footnoteReferences}`;
             this.body.push(`<dl class="${classes}">\n`);
             this.inFootnoteList = true;
@@ -980,6 +989,7 @@ class HTMLTranslator extends nodes.NodeVisitor {
             console.log('warning, no refid ( implement transforms )');
         }
         const href = `#${node.attributes.refid || ''}`;
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         const classes = `footnote-reference ${this.settings.docutilsWritersHtml4Css1Writer!.footnoteReferences}`;
         this.body.push(this.starttag(node, 'a', '', // suffix,
             false,
@@ -1103,14 +1113,17 @@ class HTMLTranslator extends nodes.NodeVisitor {
     public visit_label(node: NodeInterface) {
         let classes;
         if (node.parent instanceof nodes.footnote) {
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             classes = this.settings.docutilsWritersHtml4Css1Writer!.footnoteReferences;
         } else {
             classes = 'brackets';
         }
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         // pass parent node to get id into starttag:
         this.body.push(this.starttag(node.parent!, 'dt', '', false, { CLASS: 'label' }));
         this.body.push(this.starttag(node, 'span', '', false, { CLASS: classes }));
         // footnote/citation backrefs:
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion,@typescript-eslint/no-non-null-assertion
         if (this.settings.docutilsCoreOptionParser!.footnoteBacklinks) {
             const backrefs = node.parent!.attributes.backrefs;
             if (backrefs.length === 1) {

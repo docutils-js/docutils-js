@@ -72,8 +72,8 @@ class Publisher {
      */
     public constructor(args: PublisherArgs) {
         const {
-            reader, parser, writer, source, sourceClass, destination,
-            destinationClass, settings, debugFn,
+            reader, parser, writer, source, destination,
+            settings, debugFn,
         } = args;
 
         if(debugFn !== undefined) {
@@ -154,7 +154,7 @@ class Publisher {
     }
 */
     public processCommandLine(
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         args: {
             argv: string[]; usage: string; description: string; settingsSpec: SettingsSpec; configSection: string;
             settingsOverrides: {};

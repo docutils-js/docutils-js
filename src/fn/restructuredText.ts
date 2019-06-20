@@ -27,10 +27,7 @@ function parse(inputstring: string, document: Document): Document {
             convertWhitespace: true,
         },
     );
-    stateMachine.run({
-        inputOffset: 0,
-        inputLines, document,
-        /* inliner: this.inliner */ });
+    stateMachine.run(inputLines, 0, undefined, undefined, undefined, document);
     return document;
 }
 export default parse;

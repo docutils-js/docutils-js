@@ -126,7 +126,7 @@ class StateWS extends State {
             throw new InvalidStateError('createIndentStateMachine');
         }
         const sm = this.createIndentStateMachine();
-        const results = sm.run({ inputLines: indented, inputOffset: lineOffset });
+        const results = sm.run( indented, lineOffset );
         return [context, nextState, results];
     }
 
@@ -142,7 +142,7 @@ class StateWS extends State {
         }
 
         const sm = this.createKnownIndentStateMachine();
-        const results = sm.run({ inputLines: indented, inputOffset: lineOffset });
+        const results = sm.run(indented, lineOffset );
         return [context, nextState, results];
     }
     /**
@@ -166,7 +166,7 @@ class StateWS extends State {
         if(this.createKnownIndentStateMachine !== undefined) {
             sm = this.createKnownIndentStateMachine();
 
-            const results = sm.run({ inputLines: indented, inputOffset: lineOffset });
+            const results = sm.run(indented, lineOffset );
             return [context, nextState, results];
         } else {
             throw new InvalidStateError('createKnownIndentStateMAchine');

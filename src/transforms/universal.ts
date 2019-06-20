@@ -81,7 +81,7 @@ class Messages extends Transform {
         const messages = unfiltered.filter((msg: NodeInterface): boolean => msg.attributes.level
                                            >= threshold && msg.parent == null);
         if (messages.length) {
-            const section = new nodes.section('', '', [], { classes: 'system-messages' });
+            const section = new nodes.section('', [], { classes: 'system-messages' });
             // @@@ get this from the language module?
             section.children.push(new nodes.title('', 'Docutils System Messages'),
                 ...messages);

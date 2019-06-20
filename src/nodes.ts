@@ -1553,6 +1553,7 @@ class document extends Element implements Document {
     private symbolFootnoteStart: number;
     private idPrefix: string = "";
     private autoIdPrefix: string = "";
+    public uuid?: string;
 
     /** Private constructor */
     public constructor(

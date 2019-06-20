@@ -11,6 +11,7 @@ import StringList from "./StringList";
 import { InlinerInterface } from "./parsers/rst/types";
 import Parser from "./Parser";
 import Output from "./io/Output";
+import RSTStateMachine from "./parsers/rst/RSTStateMachine";
 
 export interface ParserArgs
 {
@@ -171,7 +172,7 @@ export interface Document extends ElementInterface {
 
     reporter: ReporterInterface;
     settings: Settings;
-
+    uuid?: string;
     // eslint-disable-next-line @typescript-eslint/camelcase,camelcase
     transformer: Transformer;
 
@@ -296,7 +297,7 @@ export interface ReporterInterface {
 
 export interface Statefactory {
 
-    withStateClasses(strings: (StateType|string)[]): Statefactory;
+    withStateClasses(stateClasses: (StateType|string)[]): Statefactory;
 
     createState(stateName: string, stateMachine: Statemachine): StateInterface;
 
@@ -308,13 +309,19 @@ export interface States {
 }
 
 export interface Statemachine {
-    createStateMachine(): Statemachine;
+    stateFactory?: Statefactory;
+
+    createStateMachine(rstStateMachine: RSTStateMachine, initialState?: string, stateFactory: Statefactory): Statemachine;
     runtimeInit(): void;
     addState(stateClass: StateInterface): void;
     addStates(stateClasses: StateInterface[]): void;
     unlink(): void;
-    run(args: StateMachineRunArgs): (string|{})[];
-
+    run(inputLines: StringList,
+        inputOffset?: number,
+        runContext?: ContextKind,
+        inputSource?: {},
+        initialState?: string|StateInterface, ...rest: any[]):
+    (string|{})[];
     /**
      *         Return current state object; set it first if
      *         `next_state` given.  Parameter `next_state`: a string,
@@ -560,3 +567,5 @@ export interface CreateStateMachineFunction<T> {
 export interface StateMachineFactoryFunction<T> {
     (): T;
 }
+
+export type ContextKind = string[] | {}[];

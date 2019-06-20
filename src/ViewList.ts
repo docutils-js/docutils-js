@@ -18,9 +18,15 @@ class ViewList extends Array {
         parent?: ViewList,
         parentOffset?: number
     ) {
-        // @ts-ignore
-        super(...initlist);
+
+        try {
+            // @ts-ignore
+            super(...initlist);
+        } catch(error) {
+            console.log(error);
+        }
         this.items = [];
+
         this.parent = parent;
         this.parentOffset = parentOffset || 0;
 

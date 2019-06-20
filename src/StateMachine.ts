@@ -9,6 +9,7 @@ import {
 import StateCorrection from "./StateCorrection";
 import StringList from "./StringList";
 import {
+    ContextKind,
     CoreLanguage,
     DebugFunction,
     NodeInterface,
@@ -18,7 +19,6 @@ import {
     StateInterface,
     Statemachine,
     StateMachineConstructorArgs,
-    StateMachineRunArgs,
     States,
     StateType,
     TransitionsArray
@@ -27,6 +27,7 @@ import State from "./states/State";
 import TransitionCorrection from "./TransitionCorrection";
 import UnexpectedIndentationError from "./error/UnexpectedIndentationError";
 import { name } from "ejs";
+import RSTStateMachine from "./parsers/rst/RSTStateMachine";
 
 export class StateMachineError extends Error { }
 export class UnknownStateError extends StateMachineError { }
@@ -143,9 +144,17 @@ class StateMachine implements Statemachine {
         // do-nothing
     }
 
-    public createStateMachine(): Statemachine {
+    public createStateMachine(rstStateMachine: RSTStateMachine, initialState?: string, stateFactory: Statefactory|undefined=rstStateMachine.stateFactory): Statemachine {
+
+        console.log(Object.keys(this));
         // @ts-ignore
-        return new this.constructor({ debug: this.debug, debugFn: this.debugFn });
+        let stateMachine = new this.constructor(
+            {
+                initialState,
+                stateFactory: this.stateFactory,
+                debug: this.debug, debugFn: this.debugFn });
+        console.log(`stateMachine is ${stateMachine}`);
+        return stateMachine;
     }
 
     public forEachState(cb: (state: State) => void): void {
@@ -180,23 +189,29 @@ class StateMachine implements Statemachine {
      * - `input_source`: name or path of source of `input_lines`.
      * - `initial_state`: name of initial state.
      */
-    public run(args: StateMachineRunArgs): (string|{})[] {
-        const cArgs: StateMachineRunArgs = { ...args };
+    public run(inputLines: StringList|string|string[],
+        inputOffset: number,
+        runContext?: ContextKind,
+        inputSource?: {},
+        initialState?: string, ...rest: any[]):
+        (string|{})[] {
         // RUNTIMEINIT
+        let lines: string | string[] | StringList = inputLines;
         this.runtimeInit();
-        if (cArgs.inputLines instanceof StringList) {
-            this.inputLines = cArgs.inputLines;
-        } else if (cArgs.inputLines == null) {
+        if (lines instanceof StringList) {
+            this.inputLines = lines;
+        } else if (lines == null) {
             throw new InvalidArgumentsError('inputLines should not be null or undefined');
         } else {
-            if (!Array.isArray(cArgs.inputLines)) {
-                cArgs.inputLines = [cArgs.inputLines];
+            if (!Array.isArray(lines)) {
+                lines = [lines];
             }
-            this.inputLines = new StringList(cArgs.inputLines, cArgs.inputSource || '');
+            // @ts-ignore
+            this.inputLines = new StringList(inputLines, inputSource || '');
         }
-        this.inputOffset = cArgs.inputOffset;
+        this.inputOffset = inputOffset;
         this.lineOffset = -1;
-        this.currentState = cArgs.initialState || this.initialState;
+        this.currentState = initialState || this.initialState;
         if (this.debug && this.debugFn !== undefined) {
             this.debugFn(`\nStateMachine.run: input_lines (line_offset=${this.lineOffset}):\n| ${this.inputLines.join('\n| ')}`);
         }

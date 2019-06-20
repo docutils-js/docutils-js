@@ -1,5 +1,6 @@
 import Inliner from "./Inliner";
 import {
+    ContextKind,
     Document,
     ElementInterface,
     LogLevel,
@@ -13,9 +14,18 @@ import {
 import StringList from "../../StringList";
 import { Settings } from "../../../gen/Settings";
 
+interface Patterns {
+    [patternName: string]: RegExp;
+}
+interface ConstructCallback {
+    (match: RegExpMatchArray, ...rest: any[]): [NodeInterface[], boolean];
+}
+type ConstructKind = [ConstructCallback, RegExp]
+type ConstructsKind = ConstructKind[]
+
 export interface Explicit {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    [patternName: string]: any;
+    patterns: Patterns;
+    constructs: ConstructsKind;
 }
 
 export interface RstStateMachineRunArgs extends StateMachineRunArgs {
@@ -39,7 +49,7 @@ export interface RSTParseArgs extends CommonParseArgs {
 }
 
 export interface NestedParseArgs extends CommonParseArgs {
-    createStateMachine?: StateMachineFactoryFunction<Rststatemachine>,
+    createStateMachine?: StateMachineFactoryFunction<Rststatemachine>;
     stateMachineArgs?: StateMachineConstructorArgs;
     initialState: string;
     blankFinish?: boolean;
@@ -96,6 +106,24 @@ export interface StatemachineConstructor<T> {
 }
 
 export interface Rststatemachine extends Statemachine {
-    run(args: RstStateMachineRunArgs): (string|{})[];
+    run(
+        inputLines: StringList|string|string[],
+        inputOffset?: number,
+        runContext?: ContextKind,
+        inputSource?: {},
+        initialState?: string,
+        document?: Document,
+        matchTitles?: boolean,
+        inliner?: InlinerInterface, ...rest: any[]): (string|{})[];
+}
 
-    }
+export interface Nestedstatemachine extends Statemachine {
+    run(inputLines: StringList | string | string[],
+        inputOffset: number,
+        runContext?: ContextKind,
+        inputSource?: {},
+        initialState?: string,
+        node?: NodeInterface,
+        matchTitles?: boolean,
+        memo?: RstMemo, ...rest: any[]): (string | {})[];
+}

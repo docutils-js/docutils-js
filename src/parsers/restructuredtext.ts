@@ -56,9 +56,8 @@ class Parser extends BaseParser {
         if(this.stateMachine.debug) {
             console.log('fo')
         }
-        this.stateMachine.run({ inputLines, document,
-            inputOffset: 0,
-            inliner: this.inliner });
+        this.stateMachine.run( inputLines, 0, undefined,
+            undefined, undefined, document, true,this.inliner);
         this.finishParse();
     }
 

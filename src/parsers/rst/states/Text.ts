@@ -10,6 +10,7 @@ import {NodeInterface} from "../../../types";
 import State from "../../../states/State";
 import RSTStateMachine from "../RSTStateMachine";
 import {RSTStateArgs} from "../types";
+import NestedStateMachine from "../NestedStateMachine";
 
 class Text extends RSTState {
     public _init(stateMachine: RSTStateMachine, debug: boolean = false) {
@@ -52,16 +53,7 @@ class Text extends RSTState {
         definitionlist.add(definitionlistitem);
         this.parent!.add(definitionlist);
         const offset = this.rstStateMachine.lineOffset + 1;
-        const [newlineOffset, blankFinish2] = this.nestedListParse(
-            this.rstStateMachine.inputLines.slice(offset),
-            {
-                inputOffset: this.rstStateMachine.absLineOffset() + 1,
-                node: definitionlist as NodeInterface,
-                initialState: 'DefinitionList',
-                blankFinish,
-                blankFinishState: 'Definition',
-            },
-        );
+        const [newlineOffset, blankFinish2] = this.nestedListParse( this.rstStateMachine.inputLines.slice(offset), { inputOffset: this.rstStateMachine.absLineOffset() + 1, node: definitionlist as NodeInterface, initialState: 'DefinitionList', blankFinish, blankFinishState: 'Definition', }, );
         blankFinish = blankFinish2;
         this.gotoLine(newlineOffset);
         if (!blankFinish) {
@@ -189,18 +181,14 @@ class Text extends RSTState {
         const parentNode = new nodes.Element();
         // @ts-ignore
         const newAbsOffset = this.nestedParse(
-            {
-                inputLines: this.rstStateMachine.inputLines.slice(offset),
-                inputOffset: absLineOffset,
-                node: parentNode,
-                matchTitles: false,
-                // stateMachineKwargs: {
-                //     //@ts-ignore
-                //     stateFactory: this.rstStateMachine.stateFactory!.withStateClasses(['QuotedLiteralBlock']),
-                //     initialState: 'QuotedLiteralBlock',
-                // },
-            },
-        );
+
+              this.rstStateMachine.inputLines.slice(offset),
+              absLineOffset,
+               parentNode,
+                false,
+          () => NestedStateMachine.createStateMachine(this.rstStateMachine, 'QuotedLiteralBlock', this.rstStateMachine.stateFactory!.withStateClasses(['QuotedLiteralBlock'])));
+
+
         if(newAbsOffset !== undefined) {
             this.gotoLine(newAbsOffset);
         }

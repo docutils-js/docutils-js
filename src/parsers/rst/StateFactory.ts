@@ -1,5 +1,6 @@
 import * as RSTStates from './RSTStates';
 import { Statefactory, StateInterface, Statemachine, StateType } from "../../types";
+import uuidv1 from 'uuid/v1';
 
 class StateFactory implements Statefactory {
     private stateClasses: StateType[]= [];
@@ -114,7 +115,10 @@ class StateFactory implements Statefactory {
         }
         // @ts-ignore
         const StateClass = RSTStates[stateName];
-        return new StateClass(stateMachine, { });
+        const uuid = uuidv1();
+        let state = new StateClass(stateMachine, { });
+        state.uuid = uuid;
+        return state;
     }
 
     public getStateClasses(): StateType[] {

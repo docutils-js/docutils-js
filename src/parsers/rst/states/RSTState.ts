@@ -16,7 +16,7 @@ import RSTStateMachine from "../RSTStateMachine";
 import {
     Explicit,
     InlinerInterface,
-    NestedParseArgs,
+    NestedParseArgs, Nestedstatemachine,
     RstMemo,
     RSTStateArgs,
     Rststatemachine,
@@ -24,13 +24,21 @@ import {
 } from "../types";
 
 abstract class RSTState extends StateWS {
+    public get explicit(): Explicit | undefined {
+        return this._explicit;
+    }
+
+    public set explicit(value: Explicit| undefined) {
+        console.log(`explicit ${JSON.stringify(value)}`)
+        this._explicit = value;
+    }
     // added for us
     public static stateName: string;
 
     //    protected nestedSm?: StatemachineConstructor<Statemachine> = NestedStateMachine;
     //    private nestedSmCache: Statemachine[] = [];
 
-    public explicit: Explicit = {};
+    private _explicit?: Explicit;
     public memo?: RstMemo;
     public inliner?: InlinerInterface;
     protected parent?: ElementInterface;
@@ -52,6 +60,9 @@ abstract class RSTState extends StateWS {
     // fixme this whole thing needs rework
     public _init(stateMachine: RSTStateMachine, debug: boolean = false) {
         super._init(stateMachine, debug);
+        this.createNestedStateMachine = () => NestedStateMachine.createStateMachine(this.rstStateMachine);
+        //, undefined, this.rstStateMachine.stateFactory!.withStateClasses(["QuotedLiteralBlock"]));
+        this.createIndentedStateMachine = this.createNestedStateMachine;
         this.rstStateMachine = stateMachine;
         //this.nestedSm = NestedStateMachine;
         //this.nestedSmCache = [];
@@ -112,16 +123,16 @@ abstract class RSTState extends StateWS {
         inputOffset: number,
         node: NodeInterface,
         matchTitles: boolean = false,
-        factoryFunction?: StateMachineFactoryFunction<Rststatemachine>) {
+        factoryFunction?: StateMachineFactoryFunction<Nestedstatemachine>) {
         /* istanbul ignore if */
         if (!this.memo || !this.memo.document) {
             throw new Error('need memo');
         }
-        let fn: undefined|StateMachineFactoryFunction<Rststatemachine> ;
+        let fn: undefined|StateMachineFactoryFunction<Nestedstatemachine> ;
         if(factoryFunction !== undefined) {
             fn = factoryFunction;
         } else if(this.createNestedStateMachine !== undefined) {
-            fn = this.createNestedStateMachine.bind(this);
+            fn = this.createNestedStateMachine;
 
         }
         /* istanbul ignore if */
@@ -154,13 +165,9 @@ abstract class RSTState extends StateWS {
         if(stateMachine.run === undefined) {
             throw new InvalidStateError(`stateMachine.run`);
         }
-        stateMachine.run({
-            inputLines: block,
-            inputOffset: inputOffset,
-            memo: this.memo,
-            node: node,
-            matchTitles: matchTitles,
-        });
+        stateMachine.run(block, inputOffset, undefined,
+            undefined, undefined, node, matchTitles, this.memo);
+
         /*
         if (useDefault === 2) {
             this.nestedSmCache.push(stateMachine);
@@ -176,10 +183,14 @@ abstract class RSTState extends StateWS {
 
     public nestedListParse(block: StringList, args: NestedParseArgs): [ number, boolean ] {
         const myargs: NestedParseArgs = {...args};
+        if(myargs.createStateMachine !== undefined) {
+            throw Error('not expecing that');
+        }
         /* istanbul ignore next */
         if (myargs.extraSettings == null) {
             myargs.extraSettings = {};
         }
+
         // if (!myargs.stateMachineClass) {
         //     myargs.stateMachineClass = this.nestedSm;
         // }
@@ -188,15 +199,15 @@ abstract class RSTState extends StateWS {
         // }
         // Copy the initial state
         if(myargs.createStateMachine === undefined && this.createIndentedStateMachine !== undefined) {
-            myargs.createStateMachine = this.createIndentedStateMachine.bind(this);
+            myargs.createStateMachine = this.createIndentedStateMachine;
         }
         if(myargs.createStateMachine === undefined) {
             throw new InvalidStateError('createStateMachine');
         }
-        const stateMachine = myargs.createStateMachine();
+        const stateMachine = myargs.createStateMachine() as Nestedstatemachine;
 
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        myargs.stateMachineArgs!.initialState = myargs.initialState;
+        //myargs.stateMachineArgs!.initialState = myargs.initialState;
 
         if (!myargs.blankFinishState) {
             myargs.blankFinishState = myargs.initialState;
@@ -212,13 +223,10 @@ abstract class RSTState extends StateWS {
         // Object.keys(myargs.extraSettings).forEach((key) => {
         //     stateMachine.states[myargs.initialState][key] = myargs.extraSettings[key];
         // });
-        stateMachine.run({
-            inputLines: block,
-            inputOffset: myargs.inputOffset || 0,
-            memo: this.memo,
-            node: myargs.node,
-            matchTitles: myargs.matchTitles,
-        });
+        stateMachine.run(block, myargs.inputOffset || 0,
+            undefined, undefined, undefined, myargs.node, myargs.matchTitles,
+            this.memo);
+
         const {blankFinish} = stateMachine.getState2(myargs.blankFinishState);
         stateMachine.unlink();
         return [stateMachine.absLineOffset() || 0, blankFinish || false];

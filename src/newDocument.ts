@@ -2,6 +2,7 @@ import { document } from './nodes';
 import newReporter from './newReporter';
 import {Settings} from "../gen/Settings";
 import { Document } from "./types";
+import uuidv1 from 'uuid/v1';
 
 /* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */
 const __docformat__ = 'reStructuredText';
@@ -37,6 +38,9 @@ function newDocument(args: { sourcePath: string }, settings: Settings): Document
     // eslint-disable-next-line new-cap
     const myDocument = new document(settings, reporter, '', [], attrs);
     myDocument.noteSource(sourcePath, -1);
+    const id = uuidv1();
+    console.log(`Returning new document ${id}`);
+    myDocument.uuid = id;
     return myDocument;
 }
 
