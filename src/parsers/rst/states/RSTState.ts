@@ -29,7 +29,7 @@ abstract class RSTState extends StateWS {
     }
 
     public set explicit(value: Explicit| undefined) {
-        console.log(`explicit ${JSON.stringify(value)}`)
+//        console.log(`explicit ${JSON.stringify(value)}`)
         this._explicit = value;
     }
     // added for us

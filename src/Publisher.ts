@@ -59,7 +59,7 @@ class Publisher {
     /**
      * Create a publisher instance.
      * @param {Object} args - arguments
-     * @param {Reader} args.reader - instance of Reader
+     * @param {Reader} args.reader - instance of StandaloneReader
      * @param {Parser} args.parser - instance of Parser
      * @param {Writer} args.writer - instance of Writer
      * @param {Source} args.source - instance of Source

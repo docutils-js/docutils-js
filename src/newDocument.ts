@@ -39,7 +39,6 @@ function newDocument(args: { sourcePath: string }, settings: Settings): Document
     const myDocument = new document(settings, reporter, '', [], attrs);
     myDocument.noteSource(sourcePath, -1);
     const id = uuidv1();
-    console.log(`Returning new document ${id}`);
     myDocument.uuid = id;
     return myDocument;
 }

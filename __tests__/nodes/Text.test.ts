@@ -6,5 +6,5 @@ test('Text.constructor', () => {
 });
 
 test('Text.constructor no text', () => {
-    expect(() => new Text('')).toThrow();
+    expect(() => new Text('')).toBeDefined();
 });

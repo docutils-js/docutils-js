@@ -20,7 +20,7 @@ function getTransforms(): TransformType[] {
         frontmatter.DocInfo];
     return r;
     /*
-        return readers.Reader.get_transforms(self) + [
+        return readers.StandaloneReader.get_transforms(self) + [
             references.Substitutions,
             references.PropagateTargets,
             frontmatter.DocTitle,

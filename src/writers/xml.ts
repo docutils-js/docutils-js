@@ -130,7 +130,7 @@ class XMLTranslator extends nodes.GenericNodeVisitor {
 }
 
 
-export default class Writer extends BaseWriter {
+export default class XMLWriter extends BaseWriter {
     private visitor?: XMLTranslator;
     private translatorClass: typeof XMLTranslator = XMLTranslator;
 
@@ -179,4 +179,4 @@ validator: 'frontend.validate_boolean',
 
  */
 
-export { Writer as XMLWriter };
+export {  XMLWriter };

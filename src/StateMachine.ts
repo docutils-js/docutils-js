@@ -32,8 +32,8 @@ import RSTStateMachine from "./parsers/rst/RSTStateMachine";
 export class StateMachineError extends Error { }
 export class UnknownStateError extends StateMachineError { }
 export class DuplicateStateError extends StateMachineError { }
-export class UnknownTransitionError extends StateMachineError { }
-export class DuplicateTransitionError extends StateMachineError { }
+//export class UnknownTransitionError extends StateMachineError { }
+//export class DuplicateTransitionError extends StateMachineError { }
 export class TransitionPatternNotFound extends StateMachineError { }
 export class TransitionMethodNotFound extends StateMachineError { }
 //export class UnexpectedIndentationError extends StateMachineError { }
@@ -146,14 +146,12 @@ class StateMachine implements Statemachine {
 
     public createStateMachine(rstStateMachine: RSTStateMachine, initialState?: string, stateFactory: Statefactory|undefined=rstStateMachine.stateFactory): Statemachine {
 
-        console.log(Object.keys(this));
         // @ts-ignore
         let stateMachine = new this.constructor(
             {
                 initialState,
                 stateFactory: this.stateFactory,
                 debug: this.debug, debugFn: this.debugFn });
-        console.log(`stateMachine is ${stateMachine}`);
         return stateMachine;
     }
 
@@ -164,7 +162,6 @@ class StateMachine implements Statemachine {
 
     public unlink(): void {
         this.forEachState((s): void =>s.unlink());
-        console.log('unlinking');
         this.states = {};
     }
 
@@ -347,7 +344,6 @@ class StateMachine implements Statemachine {
         if (this.states[this.currentState] === undefined) {
             throw new UnknownStateError(this.currentState);
         }
-        console.log(this.currentState);
         return this.states[this.currentState];
     }
 
@@ -568,7 +564,6 @@ class StateMachine implements Statemachine {
 
     public runtimeInit(): void {
         // @ts-ignore
-        console.log('runtime init');
         Object.values(this.states).forEach((s: StateInterface): void => s.runtimeInit());
     }
 

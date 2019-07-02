@@ -311,7 +311,7 @@ export interface States {
 export interface Statemachine {
     stateFactory?: Statefactory;
 
-    createStateMachine(rstStateMachine: RSTStateMachine, initialState?: string, stateFactory: Statefactory): Statemachine;
+    createStateMachine(rstStateMachine: RSTStateMachine, initialState?: string, stateFactory?: Statefactory): Statemachine;
     runtimeInit(): void;
     addState(stateClass: StateInterface): void;
     addStates(stateClasses: StateInterface[]): void;

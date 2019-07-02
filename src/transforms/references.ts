@@ -3,11 +3,33 @@ import * as nodes from '../nodes';
 
 export const __docformat__ = 'reStructuredText';
 
+/**
+Propagate empty internal targets to the next element.
+
+    Given the following nodes::
+
+        <target ids="internal1" names="internal1">
+        <target anonymous="1" ids="id1">
+        <target ids="internal2" names="internal2">
+        <paragraph>
+            This is a test.
+
+    PropagateTargets propagates the ids and names of the internal
+    targets preceding the paragraph to the paragraph itself::
+
+        <target refid="internal1">
+        <target anonymous="1" refid="id1">
+        <target refid="internal2">
+        <paragraph ids="internal2 id1 internal1" names="internal2 internal1">
+            This is a test.
+*/
 export class PropagateTargets extends Transform {
 
     public apply() {
         /* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */
         this.document.traverse({ condition: nodes.target }).forEach((target) => {
+/*        if(target.parent instanceof nodes.TextElement ||
+        (target*/
             // console.log(`target is ${target}`);
         });
     }

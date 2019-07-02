@@ -2973,5 +2973,6 @@ export {
     StopTraversal,
     SkipNode,
     SkipDeparture,
-    SkipSiblings
+    SkipSiblings,
+FixedTextElement,
 };

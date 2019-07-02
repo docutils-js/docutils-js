@@ -53,9 +53,6 @@ class Parser extends BaseParser {
         );
 
         //      console.log(`initial state is ${this.initialState}`);
-        if(this.stateMachine.debug) {
-            console.log('fo')
-        }
         this.stateMachine.run( inputLines, 0, undefined,
             undefined, undefined, document, true,this.inliner);
         this.finishParse();

@@ -210,6 +210,7 @@ class Text extends RSTState {
         const definition = new nodes.definition('', messages);
         itemnode.add(definition);
         if (termline[0].endsWith('::')) {
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             definition.add(this.reporter!.info(
                 'Blank line missing before literal block (after the "::")? '
                     + 'Interpreted as a definition list item.', [],

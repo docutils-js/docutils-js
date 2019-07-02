@@ -9,11 +9,11 @@ import * as frontmatter from '../transforms/frontmatter';
 
    Copyright: This file licensed under the MIT license.
 
-   Standalone file Reader for the reStructuredText markup syntax.
+   Standalone file StandaloneReader for the reStructuredText markup syntax.
 */
 
 export const __docformat__ = 'reStructuredText';
-export default class Reader extends BaseReader {
+export default class StandaloneReader extends BaseReader {
     public constructor(args: any) {
         super(args);
 
@@ -36,7 +36,7 @@ export default class Reader extends BaseReader {
         return r;
     }
     /*
-        return readers.Reader.get_transforms(self) + [
+        return readers.StandaloneReader.get_transforms(self) + [
             references.Substitutions,
             references.PropagateTargets,
             frontmatter.DocTitle,
@@ -53,4 +53,4 @@ export default class Reader extends BaseReader {
 */
 }
 
-export { Reader as StandaloneReader };
+export { StandaloneReader };
