@@ -364,7 +364,7 @@ class StateMachine implements Statemachine {
     }
 
     public isNextLineBlank(): boolean {
-        return !(this.inputLines[this.lineOffset + 1].trim());
+        return this.inputLines.length > this.lineOffset + 1 ? !this.inputLines[this.lineOffset + 1].trim() : true;
     }
 
     public atEof(): boolean {

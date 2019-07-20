@@ -14,7 +14,7 @@ class NestedStateMachine extends StateMachineWS implements Nestedstatemachine{
         initialState?: string,
         node?: NodeInterface,
         matchTitles: boolean = true,
-               memo?: RstMemo, ...rest: any[]): (string|{})[] {
+        memo?: RstMemo, ...rest: any[]): (string|{})[] {
 
         /* istanbul ignore if */
         if (matchTitles === undefined) {
@@ -45,7 +45,7 @@ class NestedStateMachine extends StateMachineWS implements Nestedstatemachine{
     }
 
     public static createStateMachine(stateMachine: Statemachine, initialState: string = 'Body',
-                                     stateFactory: Statefactory|undefined = stateMachine.stateFactory) {
+        stateFactory: Statefactory|undefined = stateMachine.stateFactory) {
         return new NestedStateMachine({stateFactory,
             initialState,
         });

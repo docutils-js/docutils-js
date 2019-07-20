@@ -296,11 +296,8 @@ export interface ReporterInterface {
 }
 
 export interface Statefactory {
-
     withStateClasses(stateClasses: (StateType|string)[]): Statefactory;
-
     createState(stateName: string, stateMachine: Statemachine): StateInterface;
-
     getStateClasses(): StateType[];
 }
 
