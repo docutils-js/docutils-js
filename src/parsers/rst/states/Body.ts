@@ -51,9 +51,58 @@ parens?: string;
 period?: string;
 }
 
+export interface EnumFormatInfo {
+prefix: string;
+suffix: string;
+start: number;
+end: number;
+}
+
+export interface EnumFormatInfos {
+parens: EnumFormatInfo;
+rparen:EnumFormatInfo;
+period:EnumFormatInfo;
+[name: string]: EnumFormatInfo;
+}
+export interface EnumSequencePats {
+arabic: string;
+loweralpha:string;
+upperalpha: string;
+lowerroman: string;
+upperroman: string;
+}
+export interface EnumConverters {
+arabic: (input: string) => number;
+loweralpha: (input: string) => number;
+upperalpha: (input: string) =>number;
+lowerroman: (input: string) => number;
+upperroman: (input: string) => number;
+}
+
+export interface SequenceRegexps {
+arabic: (input: string) => RegExp;
+loweralpha: (input: string) => RegExp;
+upperalpha: (input: string) => RegExp;
+lowerroman: (input: string) => RegExp;
+upperroman: (input: string) => RegExp;
+};
+
+export interface EnumParseInfo {
+formatinfo?: EnumFormatInfos;
+formats?: string[];
+sequences?: string[];
+sequencepats?: EnumSequencePats;
+converters?: EnumConverters;
+sequenceregexps?: SequenceRegexps;
+}
+
+/**
+ * Generic classifier of the first line of a block.
+ */
 class Body extends RSTState {
     private gridTableTopPat?: RegExp;
-    private enum: any;
+    /** Enumerated list parsing information. */
+    private enum?: EnumParseInfo;
     private attribution_pattern: any;
     private simpleTableTopPat?: RegExp;
     private pats: any;
@@ -74,7 +123,7 @@ class Body extends RSTState {
         super._init(stateMachine, debug);
         //      this.doubleWidthPadChar = tableparser.TableParser.doubleWidthPadChar
 
-        const enum_ = {};
+        const enum_: EnumParseInfo = {};
         // @ts-ignore
         enum_.formatinfo = {
             parens: {
@@ -882,7 +931,7 @@ class Body extends RSTState {
     /** Enumerated List Item */
     public enumerator(match: any, context: any[], nextState: any) {
         // @ts-ignore
-        const [format, sequence, text, ordinal] = this.parseEnumerator(match);
+        const [format, sequence, text, ordinal]:[string, any, any, any] = this.parseEnumerator(match);
         // @ts-ignore
         if (!this.isEnumeratedListItem(ordinal, sequence, format)) {
             throw new TransitionCorrection("text");
@@ -895,8 +944,8 @@ class Body extends RSTState {
         } else {
             enumlist.enumtype = sequence;
         }
-        enumlist.prefix = this.enum.formatinfo[format].prefix;
-        enumlist.suffix = this.enum.formatinfo[format].suffix;
+        enumlist.prefix = this.enum!.formatinfo![format].prefix;
+        enumlist.suffix = this.enum!.formatinfo![format].suffix;
         if (ordinal !== 1) {
             enumlist.start = ordinal;
             // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -1370,7 +1419,7 @@ class Body extends RSTState {
 
         block.disconnect();
         // for East Asian chars:
-        block.padDoubleWidth(this.doubleWidthPadChar);
+        block.padDoubleWidth(this.doubleWidthPadChar!);
         const width = block[0].trim().length;
         for (let i = 0; i < block.length; i += 1) {
             block[i] = block[i].trim();
@@ -1463,7 +1512,7 @@ class Body extends RSTState {
         this.rstStateMachine.nextLine(end! - start);
         block = lines.slice(start, end! + 1) as StringList;
         // for East Asian chars:
-        block.padDoubleWidth(this.doubleWidthPadChar);
+        block.padDoubleWidth(this.doubleWidthPadChar!);
         return [block, [], end === limit || !lines[end! + 1].trim()];
     }
 
@@ -1586,8 +1635,26 @@ class Body extends RSTState {
         return false;
     }
 
-    private parseEnumerator(match: any): any[] {
-        return [];
+/**
+ *         Analyze an enumerator and return the results.
+
+        :Return:
+            - the enumerator format ('period', 'parens', or 'rparen'),
+            - the sequence used ('arabic', 'loweralpha', 'upperroman', etc.),
+            - the text of the enumerator, stripped of formatting, and
+            - the ordinal value of the enumerator ('a' -> 1, 'ii' -> 2, etc.;
+              ``None`` is returned for invalid enumerator text).
+
+        The enumerator format has already been determined by the regular
+        expression match. If `expected_sequence` is given, that sequence is
+        tried first. If not, we check for Roman numeral 1. This way,
+        single-character Roman numerals (which are also alphabetical) can be
+        matched. If no sequence has been matched, all sequences are checked in
+        order.
+ */
+    private parseEnumerator(match: any): [string, string, string, number] {
+    
+        return ['','','', 0];
     }
 
     private parseDirectiveBlock(indented: StringList,

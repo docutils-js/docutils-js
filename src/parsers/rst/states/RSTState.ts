@@ -43,6 +43,7 @@ abstract class RSTState extends StateWS {
 
     public blankFinish?: boolean;
 
+    /** Padding character for East Asian double-width text. */
     public doubleWidthPadChar: string = '';
 
     public constructor(stateMachine: RSTStateMachine, debug: boolean = false) {
