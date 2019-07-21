@@ -18,7 +18,7 @@ interface Patterns {
     [patternName: string]: RegExp;
 }
 interface ConstructCallback {
-    (match: RegExpMatchArray, ...rest: any[]): [NodeInterface[], boolean];
+    (match: RegExpExecArray, ...rest: any[]): [NodeInterface[], boolean];
 }
 type ConstructKind = [ConstructCallback, RegExp]
 type ConstructsKind = ConstructKind[]
