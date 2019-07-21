@@ -14,9 +14,7 @@ import UnexpectedIndentationError from "../../../error/UnexpectedIndentationErro
 import RSTStateMachine from "../RSTStateMachine";
 import { NodeInterface } from "../../../types";
 import { Explicit } from "../types";
-import { fullyNormalizeName as fullyNormalizeName1 } from "../../../nodeUtils";
-
-const fullyNormalizeName = fullyNormalizeName1;
+import { fullyNormalizeName } from "../../../nodeUtils";
 
 const nonWhitespaceEscapeBefore = RegExps.nonWhitespaceEscapeBefore;
 const simplename = RegExps.simplename;
