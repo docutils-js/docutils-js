@@ -47,7 +47,7 @@ function process(doclet) {
                 }
                 doclet[tag] = r;//'<p>' + doclet.longname + '</p><div style="border: 1px solid black">' + r + '</div>';
             } catch(e) {
-                throw e;
+                //throw e;
 //                StackTrace.fromError(e).then(x => doclet[tag] = x.map((sf) => sf.toString()).join('<br>\n')).catch(e => undefined);
                 doclet[tag] = StackTrace.getSync().map((sf) => sf.toString()).join('<br>\n');
 

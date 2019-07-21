@@ -101,7 +101,7 @@ class StringList extends ViewList {
         }
 
         const block = this.slice(cArgs.start, end) as StringList;
-        if (firstIndent != null && block) {
+        if (firstIndent != null && block && block.length) {
             block[0] = block[0].substring(firstIndent);
         }
         if (indent && cArgs.stripIndent) {

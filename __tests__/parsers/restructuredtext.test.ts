@@ -1,9 +1,9 @@
-import * as fs from 'fs';
-import * as path from 'path';
-import Parser from '../../src/parsers/restructuredtext';
-import newDocument from '../../src/newDocument';
-import * as nodes from '../../src/nodes';
+import * as fs from "fs";
+import * as path from "path";
+import Parser from "../../src/parsers/restructuredtext";
+import newDocument from "../../src/newDocument";
 import { defaults } from "../../gen/defaults";
+import {nodeToXml} from "../../src/nodeUtils";
 
 defaults.docutilsCoreOptionParser!.debug = true;
 
@@ -14,7 +14,7 @@ test.only('1', () => {
     const p = new Parser({});
     const document = newDocument({ sourcePath: '' }, defaults);
     p.parse('* a bullet point', document);
-    expect(nodes.nodeToXml(document)).toMatchSnapshot();
+    expect(nodeToXml(document)).toMatchSnapshot();
 });
 
 test('rst parser no input', () => {
@@ -27,5 +27,5 @@ test('readme rst', () => {
     const p = new Parser({});
     const document = newDocument({ sourcePath: '' }, defaults);
     p.parse(ReadmeRst, document);
-    expect(nodes.nodeToXml(document)).toMatchSnapshot();
+    expect(nodeToXml(document)).toMatchSnapshot();
 });

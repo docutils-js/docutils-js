@@ -7,21 +7,14 @@ import {
     ElementInterface,
     NodeInterface,
     StateInterface,
-    Statemachine, StateMachineFactoryFunction,
+    StateMachineFactoryFunction,
     Systemmessage,
     TransitionsArray
 } from "../../../types";
 import StringList from "../../../StringList";
 import RSTStateMachine from "../RSTStateMachine";
-import {
-    Explicit,
-    InlinerInterface,
-    NestedParseArgs, Nestedstatemachine,
-    RstMemo,
-    RSTStateArgs,
-    Rststatemachine,
-    StatemachineConstructor
-} from "../types";
+import { Explicit, InlinerInterface, NestedParseArgs, Nestedstatemachine, RstMemo } from "../types";
+import { fullyNormalizeName } from "../../../nodeUtils";
 
 abstract class RSTState extends StateWS {
     public get explicit(): Explicit | undefined {
@@ -297,7 +290,7 @@ abstract class RSTState extends StateWS {
         this.parent!.add(sectionNode);
         const [textNodes, titleMessages] = this.inline_text(title, lineno);
         const titleNode = new nodes.title(title, '', textNodes);
-        const name = nodes.fullyNormalizeName(titleNode.astext());
+        const name = fullyNormalizeName(titleNode.astext());
         sectionNode.attributes.names.push(name);
         sectionNode.add(titleNode);
         sectionNode.add(messages);

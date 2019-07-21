@@ -1,6 +1,8 @@
 import * as nodes from './nodes';
 import { NodeInterface,Attributes } from './types';
 
+/* Primarily generated !! woot */
+
 export default {
     math_block: (
         rawsource?: string,

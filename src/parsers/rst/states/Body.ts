@@ -1,20 +1,22 @@
 import RSTState from "./RSTState";
 import * as RegExps from "../RegExps";
+import nodesFactory from '../../../nodesFactory';
 import * as nodes from "../../../nodes";
 import MarkupError from "../MarkupError";
 import { escape2null, extractExtensionOptions, isIterable, pySplit, splitEscapedWhitespace } from "../../../utils";
 import StringList from "../../../StringList";
 import * as tableparser from "../tableparser";
 /* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */
-import { ApplicationError, InvalidStateError, UnimplementedError as Unimp } from "../../../Exceptions";
+import { ApplicationError, InvalidStateError } from "../../../Exceptions";
 import TransitionCorrection from "../../../TransitionCorrection";
 import * as directives from "../directives";
 import UnexpectedIndentationError from "../../../error/UnexpectedIndentationError";
 import RSTStateMachine from "../RSTStateMachine";
 import { NodeInterface } from "../../../types";
 import { Explicit } from "../types";
+import { fullyNormalizeName as fullyNormalizeName1 } from "../../../nodeUtils";
 
-const fullyNormalizeName = nodes.fullyNormalizeName;
+const fullyNormalizeName = fullyNormalizeName1;
 
 const nonWhitespaceEscapeBefore = RegExps.nonWhitespaceEscapeBefore;
 const simplename = RegExps.simplename;
@@ -33,6 +35,22 @@ function _LowerromanToInt() {
 
 /* istanbul ignore next */
 function _UpperromanToInt() {
+}
+
+export interface BodyPats {
+nonalphanum7bit?: string;
+alpha?: string;
+alphanum?: string;
+alphanumplus?: string;
+enum?: string;
+optname?: string;
+optarg?: string;
+shortopt?: string;
+longopt?: string;
+option?: string;
+rparen?: string;
+parens?: string;
+period?: string;
 }
 
 class Body extends RSTState {
@@ -106,7 +124,7 @@ class Body extends RSTState {
         this.gridTableTopPat = new RegExp("\\+-[-+]+-\\+ *$");
         this.simpleTableTopPat = new RegExp("=+( +=+)+ *$");
 
-        const pats: any = {};
+        const pats: BodyPats = { }
         pats.nonalphanum7bit = "[!-/:-@[-`{-~]";
         pats.alpha = "[a-zA-Z]";
         pats.alphanum = "[a-zA-Z0-9]";
@@ -227,7 +245,7 @@ class Body extends RSTState {
         });
         const label = match[1];
         const name = fullyNormalizeName(label);
-        const citation = new nodes.citation(indented.join("\n"));
+        const citation = nodesFactory.citation(indented.join("\n"));
 
         citation.source = src;
         if(srcline !== undefined) {

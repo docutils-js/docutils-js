@@ -1,5 +1,7 @@
 import * as nodes from "../../nodes";
-import { escape2null, getTrimFootnoteRefSpace, isIterable, splitEscapedWhitespace } from "../../utils";
+import { escape2null,
+    getTrimFootnoteRefSpace,
+    isIterable, splitEscapedWhitespace } from "../../utils";
 import { matchChars } from "../../utils/punctuationChars";
 import roleInterface from "./Roles";
 import { ApplicationError } from "../../Exceptions";
@@ -7,6 +9,7 @@ import unescape from "../../utils/unescape";
 import { Document, ElementInterface, NodeInterface, ReporterInterface } from "../../types";
 import { Settings } from "../../../gen/Settings";
 import { InlinerInterface } from "./types";
+import { fullyNormalizeName } from "../../nodeUtils";
 
 /* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */
 const __docformat__ = 'reStructuredText';
@@ -149,7 +152,7 @@ this.implicitDispatch = [];
         if (inlines && inlines.length && inlines[0] instanceof nodes.target) {
             // assert len(inlines) == 1
             const target = inlines[0];
-            const name = nodes.fullyNormalizeName(target.astext());
+            const name = fullyNormalizeName(target.astext());
             target.attributes.names.push(name);
             this.document.noteExplicitTarget(target, this.parent);
         }
@@ -174,7 +177,7 @@ this.implicitDispatch = [];
                     if (endstring.endsWith('__')) {
                         referenceNode.attributes.anonymous = 1;
                     } else {
-                        referenceNode.attributes.refname = nodes.fullyNormalizeName(subrefText);
+                        referenceNode.attributes.refname = fullyNormalizeName(subrefText);
                         this.document!.noteRefname(referenceNode);
                     }
                     referenceNode.add(subrefNode);
@@ -188,7 +191,7 @@ this.implicitDispatch = [];
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,@typescript-eslint/no-unused-vars,no-unused-vars */
     public footnote_reference(match: any, lineno: number) {
         const label = match.groups.footnotelabel;
-        let refname = nodes.fullyNormalizeName(label);
+        let refname = fullyNormalizeName(label);
         const string = match.result.input;
         let before = string.substring(0, match.result.index);
         const remaining = string.substring(match.result.index + match.result[0].length);
@@ -226,7 +229,7 @@ this.implicitDispatch = [];
 
     public reference(match: any, lineno: number, anonymous = false) {
         const referencename = match.groups.refname;
-        const refname = nodes.fullyNormalizeName(referencename);
+        const refname = fullyNormalizeName(referencename);
         const referencenode = new nodes.reference(
             referencename + match.groups.refend, referencename,
             [],
@@ -367,7 +370,7 @@ this.implicitDispatch = [];
             if (aliastext.endsWith('_') && !(underscoreEscaped
                                              || this.patterns.uri.exec(aliastext))) {
                 aliastype = 'name';
-                alias = nodes.fullyNormalizeName(aliastext.substring(0, aliastext.length - 1));
+                alias = fullyNormalizeName(aliastext.substring(0, aliastext.length - 1));
                 target = new nodes.target(match[1], '', [], { refname: alias });
                 target.indirectReferenceName = aliastext.substring(0, aliastext.length - 1);
             } else {
@@ -395,7 +398,7 @@ this.implicitDispatch = [];
             rawtext = unescape(escaped, true);
         }
 
-        const refname = nodes.fullyNormalizeName(text);
+        const refname = fullyNormalizeName(text);
         const reference = new nodes.reference(rawsource, text, [],
             { name: nodes.whitespaceNormalizeName(text) });
         reference.children[0].rawsource = rawtext;

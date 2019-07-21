@@ -3,9 +3,9 @@ import formatXml from 'xml-formatter';
 import Inliner from '../../../src/parsers/rst/Inliner';
 import newReporter from '../../../src/newReporter';
 import newDocument from '../../../src/newDocument';
-import { nodeToXml } from '../../../src/nodes';
 import { defaults } from "../../../gen/defaults";
 import{ NodeInterface} from "../../../src/types";
+import { nodeToXml } from "../../../src/nodeUtils";
 
 const currentLogLines: string[] = [];
 

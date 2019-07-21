@@ -6,9 +6,9 @@ import SubstitutionDef from "../states/SubstitutionDef";
 import { escape2null } from "../../../utils";
 import Body from "../states/Body";
 import StringList from "../../../StringList";
-import { fullyNormalizeName, whitespaceNormalizeName } from "../../../nodes";
 import { setClasses } from "../Roles";
 import { uri } from "../directives";
+import { fullyNormalizeName, whitespaceNormalizeName } from "../../../nodeUtils";
 
 /* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */
 const __docformat__ = 'reStructuredText';

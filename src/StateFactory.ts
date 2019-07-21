@@ -21,7 +21,7 @@ class StateFactory implements Statefactory {
         if (typeof stateMachine === 'undefined') {
             throw new Error('Need argument stateMAchine');
         }
-	throw new Error('unimpp');
+        throw new Error('unimpp');
     }
 
     public getStateClasses(): StateType[] {

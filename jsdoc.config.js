@@ -1,12 +1,12 @@
 
 
 module.exports = {
-    plugins: ['plugins/restructuredtext'],
-    "source": {
-        "includePattern": "\.ts",
-//        "excludePattern": ".?"
-    },    
-    "templates": {
+//    plugins: ['plugins/restructuredtext'],
+  "source": {
+        "includePattern": ".+\\.[jt]s(doc|x)?$",
+        "excludePattern": "(^|\\/|\\\\)_"
+    },
+/*    "templates": {
         "default": {
             "outputSourceFiles": false,
             "staticFiles": {
@@ -14,5 +14,5 @@ module.exports = {
             },
             "layoutFile": 'templates/layout.tmpl'
         }
-    },
+    },*/
 };

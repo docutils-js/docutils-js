@@ -28,7 +28,7 @@ export class PropagateTargets extends Transform {
     public apply() {
         /* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */
         this.document.traverse({ condition: nodes.target }).forEach((target) => {
-/*        if(target.parent instanceof nodes.TextElement ||
+            /*        if(target.parent instanceof nodes.TextElement ||
         (target*/
             // console.log(`target is ${target}`);
         });

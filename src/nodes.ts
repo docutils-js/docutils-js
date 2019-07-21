@@ -38,6 +38,7 @@ import {
     Visitor
 } from "./types";
 import { Settings } from "../gen/Settings";
+import { fullyNormalizeName, whitespaceNormalizeName } from "./nodeUtils";
 
 /* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */
 const __docformat__ = "reStructuredText";
@@ -120,17 +121,6 @@ function serialEscape(value: string): string {
 /* We don't do 'psuedo-xml' but perhaps we should */
 function pseudoQuoteattr(value: string): string {
     return `"${xmlescape(value)}"`;
-}
-
-/**
- * Return a whitespace-normalized name.
- */
-function whitespaceNormalizeName(name: string): string {
-    return name.replace(/\s+/, " ");
-}
-
-export function fullyNormalizeName(name: string): string {
-    return name.toLowerCase().replace(/\s+/, " ");
 }
 
 function setupBacklinkable(o: NodeInterface): void {
@@ -2503,6 +2493,7 @@ class target extends TextElement {
     }
 }
 
+// eslint-disable-next-line @typescript-eslint/class-name-casing
 class footnote extends Element {
     public constructor(rawsource?: string, children?: NodeInterface[], attributes?: Attributes) {
         super(rawsource, children, attributes);
@@ -2915,24 +2906,10 @@ class generated extends TextElement {
 
 // ========================================
 //  Auxiliary Classes, Functions, and Data
-// ========================================
-/**
- * convert a node to XML
- */
-function nodeToXml(node: NodeInterface): string {
-    if (node instanceof Text) {
-        const text = xmlescape(node.astext());
-        return text;
-    }
-    if (node.children.length) {
-        return [node.starttag(), ...node.children.map((c: NodeInterface): string => nodeToXml(c)), node.endtag()].join("");
-    }
-    return node.emptytag();
-}
 
 export {
     Node, whitespaceNormalizeName, NodeVisitor, GenericNodeVisitor,
-    SparseNodeVisitor, nodeToXml, Element, TextElement,
+    SparseNodeVisitor, Element, TextElement,
     Text, abbreviation, acronym, address, admonition, attention,
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
     attribution, author, authors, block_quote, bullet_list, caption,
@@ -2974,5 +2951,5 @@ export {
     SkipNode,
     SkipDeparture,
     SkipSiblings,
-FixedTextElement,
+    FixedTextElement,
 };

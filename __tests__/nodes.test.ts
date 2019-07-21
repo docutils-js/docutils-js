@@ -1,6 +1,7 @@
-import * as nodes from '../src/nodes';
-import newDocument from '../src/newDocument';
-import{ defaults} from "../gen/defaults";
+import * as nodes from "../src/nodes";
+import newDocument from "../src/newDocument";
+import { defaults } from "../gen/defaults";
+import { nodeToXml } from "../src/nodeUtils";
 
 function createNodeVisitor() {
     let document = newDocument({sourcePath: ""}, defaults);
@@ -15,7 +16,7 @@ test('paragraph with text', () => {
     expect(p.children).toHaveLength(1);
     expect(p.children[0]).toBeDefined();
     expect(p.children[0].astext()).toEqual(paraText);
-    expect(nodes.nodeToXml(p)).toMatchSnapshot();
+    expect(nodeToXml(p)).toMatchSnapshot();
     expect(p).toMatchSnapshot();
 });
 
@@ -31,7 +32,7 @@ test('setId', () => {
 test('paragraph text unescaped', () => {
     const text = 'escape <me>';
     const p = new nodes.paragraph(text, text, [], {});
-    expect(nodes.nodeToXml(p)).toEqual(expect.stringContaining('<'));
+    expect(nodeToXml(p)).toEqual(expect.stringContaining('<'));
 });
 
 test('NodeVisitor.constructor', () => {
