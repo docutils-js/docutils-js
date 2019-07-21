@@ -484,12 +484,12 @@ class StateMachine implements Statemachine {
         if (!Array.isArray(context)) {
             throw new Error('context should be array');
         }
+        if (transitions === undefined) {
+            transitions = state.transitionOrder;
+        }
         if (this.debug) {
             this.debugFn(`\nStateMachine.check_line: ` +
               `state="${state.constructor.name}", transitions=${transitions}.`);
-        }
-        if (transitions === undefined) {
-            transitions = state.transitionOrder;
         }
         /* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */
         const stateCorrection = true;

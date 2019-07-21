@@ -24,6 +24,7 @@
     "@types/ejs": "^2.6.3",
     "@types/jest": "^24.0.13",
     "@types/sinon": "^7.0.13",
+    "@types/winston": "^2.4.4",
     "@typescript-eslint/eslint-plugin": "^1.10.2",
     "@typescript-eslint/parser": "^1.9.0",
     "ast-types": "^0.13.1",
@@ -54,6 +55,7 @@
     "ts-morph": "^2.3.0",
     "tslint": "^5.17.0",
     "typescript": "^3.5.1",
+    "winston": "^3.2.1",
     "xpath": "^0.0.27"
   },
   "jest": {
