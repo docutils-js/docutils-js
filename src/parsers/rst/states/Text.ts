@@ -6,7 +6,7 @@ import * as RegExps from '../RegExps';
 import TransitionCorrection from '../../../TransitionCorrection';
 import UnexpectedIndentationError from '../../../error/UnexpectedIndentationError';
 import {EOFError} from '../../../Exceptions';
-import {NodeInterface} from "../../../types";
+import {NodeInterface,RegexpResult, ContextArray, StateType, StateInterface,ParseMethodReturnType} from '../../../types';
 import State from "../../../states/State";
 import RSTStateMachine from "../RSTStateMachine";
 import {RSTStateArgs} from "../types";
@@ -46,7 +46,7 @@ class Text extends RSTState {
 
     /** Definition list item. */
     /* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */
-    public indent(match: any, context: any[], nextState: any) {
+    public indent(match: RegexpResult, context: ContextArray, nextState: StateInterface): ParseMethodReturnType {
         const definitionlist = new nodes.definition_list();
         const [definitionlistitem, blankFinish1] = this.definition_list_item(context);
         let blankFinish = blankFinish1;
@@ -182,11 +182,11 @@ class Text extends RSTState {
         // @ts-ignore
         const newAbsOffset = this.nestedParse(
 
-              this.rstStateMachine.inputLines.slice(offset),
-              absLineOffset,
-               parentNode,
-                false,
-          () => NestedStateMachine.createStateMachine(this.rstStateMachine, 'QuotedLiteralBlock', this.rstStateMachine.stateFactory!.withStateClasses(['QuotedLiteralBlock'])));
+            this.rstStateMachine.inputLines.slice(offset),
+            absLineOffset,
+            parentNode,
+            false,
+            () => NestedStateMachine.createStateMachine(this.rstStateMachine, 'QuotedLiteralBlock', this.rstStateMachine.stateFactory!.withStateClasses(['QuotedLiteralBlock'])));
 
 
         if(newAbsOffset !== undefined) {

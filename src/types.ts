@@ -15,13 +15,13 @@ import RSTStateMachine from "./parsers/rst/RSTStateMachine";
 
 export type StateType = StateInterface | string;
 export interface OptionSpec {
- [optionName: string]: (arg: string) => string;
- }
+    [optionName: string]: (arg: string) => string;
+}
 
 export interface Options {
- [optionName: string]: any;
- }
- 
+    [optionName: string]: any;
+}
+
 export interface ParserArgs
 {
     inliner?: InlinerInterface;
@@ -29,11 +29,6 @@ export interface ParserArgs
     debug?: boolean;
     debugFn?: DebugFunction;
 }
-
-export interface SettingsInterface {
-    getSettings(name: string): {};
-}
-
 export interface WritableStream {
     write: (data: string) => void;
 }
@@ -305,9 +300,9 @@ export interface ReporterInterface {
 }
 
 export interface Statefactory {
-    withStateClasses(stateClasses: (StateType|string)[]): Statefactory;
+    withStateClasses(stateClasses: (StateConstructor|string)[]): this;
     createState(stateName: string, stateMachine: Statemachine): StateInterface;
-    getStateClasses(): StateType[];
+    getStateClasses(): StateConstructor[];
 }
 
 export interface States {
@@ -481,10 +476,6 @@ export interface CoreLanguage {
     bibliographicFields: {};
     authorSeparators: string[];
 }
-
-export interface ApplyFunction {
-    (): void;
-}
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface Systemmessage extends NodeInterface {
 }
@@ -576,14 +567,19 @@ export type ParseResult2 = any[];
 export type ParseMethodReturnType = [ContextArray, StateType, ParseResult2]
 export type ParseResult  = [NodeInterface[], boolean];
 export type IsolateTableResult= [StringList, NodeInterface[], boolean]
-o
-export type ParseResultWithErrors  = [NodeInterface[], NodeInterface[], boolean];
-
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface StateConstructor {
+stateName?: string;
+}
 
 export interface RegexpResult {
-  pattern: RegExp;
-  result: RegExpExecArray;
-  input: string;
+    pattern: RegExp;
+    result: RegExpExecArray;
+    input: string;
 }
 
 export type ContextArray = string[];
+
+export interface Patterns {
+    [patternName: string]: RegExp;
+}

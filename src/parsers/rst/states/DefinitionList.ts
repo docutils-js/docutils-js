@@ -1,12 +1,11 @@
 import SpecializedBody from './SpecializedBody';
+import {RegexpResult, ContextArray, StateType, StateInterface,ParseMethodReturnType} from '../../../types';
 
 class DefinitionList extends SpecializedBody {
     /* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */
-    // @ts-ignore
-    public text(match, context, nextState) {
+    public text(match: RegexpResult, context: ContextArray, nextState: StateInterface): ParseMethodReturnType {
         return [[match.result.input], 'Definition', []];
     }
 }
 DefinitionList.stateName = 'DefinitionList';
-//DefinitionList.constructor.stateName = 'DefinitionList';
 export default DefinitionList;

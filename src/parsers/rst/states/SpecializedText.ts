@@ -3,6 +3,7 @@ import { EOFError } from '../../../Exceptions';
 import State from "../../../states/State";
 import RSTStateMachine from "../RSTStateMachine";
 import {RSTStateArgs} from "../types";
+import {RegexpResult, ContextArray, StateInterface, ParseMethodReturnType } from "../../../types";
 
 class SpecializedText extends Text {
 
@@ -19,14 +20,16 @@ class SpecializedText extends Text {
     }
 
     /* istanbul ignore next */
-    indent(match: any, context: string[], nextState: State): any[] {
+    public indent(match: RegexpResult, context: ContextArray, nextState: StateInterface): ParseMethodReturnType {
         this.invalidInput();
-        return [];
+	// @ts-ignore
+	return [];
     }
 
     /* istanbul ignore next */
-    text(match: any, context: string[], nextState: State): any[] {
+    public text(match: RegexpResult, context: ContextArray, nextState: StateInterface): ParseMethodReturnType {
         this.invalidInput();
+	// @ts-ignore
         return [];
     }
 
@@ -36,7 +39,7 @@ class SpecializedText extends Text {
     }
 
     /* istanbul ignore next */
-    invalidInput() {
+    public invalidInput(): never {
         throw new EOFError();
     }
 }

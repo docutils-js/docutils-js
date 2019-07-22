@@ -1,6 +1,6 @@
 import * as nodes from '../../../nodes';
 import Directive from '../Directive';
-import {NodeInterface} from "../../../types";
+import {NodeInterface,Statemachine,Options} from "../../../types";
 import { lengthOrPercentageOrUnitless, lengthOrUnitless, unchanged } from "../directiveConversions";
 import SubstitutionDef from "../states/SubstitutionDef";
 import { escape2null } from "../../../utils";
@@ -22,12 +22,10 @@ class Image extends Directive {
     ;
 
     private alignValues: string[] = [...this.alignHValues, ...this.alignVValues];
-
-
-    public constructor(args: { name: string; args: any; options: any; content: any; lineno: number; contentOffset: number; blockText: StringList; state: Body; stateMachine: any }) {
+/*    public constructor(args: { name: string; args: string[]; options: Options; content: any; lineno: number; contentOffset: number; blockText: StringList; state: Body; stateMachine: Statemachine }) {
         super(args);
     }
-
+*/
     public align(argument: {}): {} | {}[] {
     // @ts-ignore
         return directives.choice(argument);
@@ -66,7 +64,7 @@ class Image extends Directive {
                 .split(/\n/));
             let block = blockStr.split(/\n/);
             const [targetType, data] = this.state.parse_target(
-                block, this.blockText, this.lineno);
+                new StringList(block), this.blockText, this.lineno);
             let referenceNode;
             if (targetType === 'refuri') {
                 referenceNode = new nodes.reference('', '', [], { refuri: data });
@@ -82,7 +80,7 @@ class Image extends Directive {
             }
             delete this.options.target;
             setClasses(this.options)
-            const imageNode = new nodes.image('', this.blockText, this.options);
+            const imageNode = new nodes.image(this.blockText, [], this.options);
             this.addName(imageNode)
             if (referenceNode) {
                 referenceNode.children.push(imageNode);

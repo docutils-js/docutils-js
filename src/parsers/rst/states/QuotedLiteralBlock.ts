@@ -5,6 +5,7 @@ import * as nodes from '../../../nodes';
 import { EOFError } from '../../../Exceptions';
 import RSTStateMachine from "../RSTStateMachine";
 import {RSTStateArgs} from "../types";
+import {RegexpResult, ContextArray, StateInterface, ParseMethodReturnType } from "../../../types";
 
 /**
  *  Nested parse handler for quoted (unindented) literal blocks.
@@ -58,9 +59,9 @@ class QuotedLiteralBlock extends RSTState {
     }
 
     /* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */
-    public indent(match: any, context: any[], nextState: any): any[] {
-        //        assert context, ('QuotedLiteralBlock.indent: context should not '
-        //                         'be empty!')
+    public indent(match: RegexpResult, context: ContextArray, nextState: StateInterface): ParseMethodReturnType {
+        // assert context, ('QuotedLiteralBlock.indent: context should not '
+        // 'be empty!')
         this.messages.push(
             this.reporter!.error('Unexpected indentation.', [],
                 { line: this.rstStateMachine.absLineNumber() }),

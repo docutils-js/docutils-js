@@ -1,11 +1,11 @@
 import * as RSTStates from './RSTStates';
-import { Statefactory, StateInterface, Statemachine, StateType } from "../../types";
+import { Statefactory, StateInterface, Statemachine, StateType, StateConstructor } from "../../types";
 import uuidv1 from 'uuid/v1';
 
 class StateFactory implements Statefactory {
-    private stateClasses: StateType[]= [];
+    private stateClasses: StateConstructor[]= [];
     private args: any | undefined;
-    public constructor(args?: { stateClasses?: StateType[] }) {
+    public constructor(args?: { stateClasses?: StateConstructor[] }) {
         this.args = args;
         if (args && args.stateClasses && args.stateClasses.length) {
             this.stateClasses = args.stateClasses;
@@ -121,11 +121,12 @@ class StateFactory implements Statefactory {
         return state;
     }
 
-    public getStateClasses(): StateType[] {
+    public getStateClasses(): StateConstructor[] {
         return this.stateClasses;
     }
 
-    public withStateClasses(stateClasses: StateType[]): Statefactory {
+    public withStateClasses(stateClasses: StateConstructor[]): this{
+    // @ts-ignore
         return new StateFactory({ stateClasses });
     }
 }

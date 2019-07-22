@@ -1,0 +1,33 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`rst2pojo pipeline 1`] = `
+Array [
+  "document",
+  Object {
+    "ids": Array [
+      "random-te-t",
+    ],
+    "names": Array [
+      "random test",
+    ],
+    "source": "<string>",
+    "title": "Random test",
+  },
+  Array [
+    Array [
+      "title",
+      Object {},
+      Array [
+        "Random test",
+      ],
+    ],
+    Array [
+      "paragraph",
+      Object {},
+      Array [
+        "I like food.",
+      ],
+    ],
+  ],
+]
+`;

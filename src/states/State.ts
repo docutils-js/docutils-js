@@ -79,7 +79,7 @@ class State implements StateInterface {
     public transitionOrder: string[] = [];
     public transitions: Transitions = { };
     protected reporter?: ReporterInterface;
-    private stateMachine?: StateMachine;
+    protected stateMachine?: StateMachine;
 
     public constructor(stateMachine: StateMachine, debug: boolean = false) {
         this.stateMachine = stateMachine;

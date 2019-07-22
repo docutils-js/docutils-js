@@ -5,27 +5,36 @@ import {
     ElementInterface,
     LogLevel,
     NodeInterface,
+    Options,
+    Patterns,
     ReporterInterface,
     Statemachine,
     StateMachineConstructorArgs,
     StateMachineFactoryFunction,
-    StateMachineRunArgs,
-    StateType,
+    StateMachineRunArgs
 } from "../../types";
 import StringList from "../../StringList";
 import { Settings } from "../../../gen/Settings";
+
+export interface BodyState {
+    footnote: (match: RegExpExecArray) => [NodeInterface[], boolean];
+    citation: (match: RegExpExecArray) => [NodeInterface[], boolean];
+    hyperlink_target: (match: RegExpExecArray) => [NodeInterface[], boolean];
+    substitution_def: (match: RegExpExecArray) => [NodeInterface[], boolean];
+    directive: (match: RegExpExecArray, optionPresets: Options) => [NodeInterface[], boolean];
+}
 
 export type RowData = TableEntryData[];
 export type CellData = [number, number, number,number, StringList];
 export type TableEntryData = [number, number, number, StringList];
 export type TableData = [number[], RowData[], RowData[]]
 export interface ParserConstructor {
-new ();
+new (): any;
 }
 
 export interface DirectiveConstructor {
 new (typeName: string, args: string[], options: Options, content: StringList, lineno: number,
-            contentOffset: number, blockText: string, u: any, stateMachine: Rststatemachine);
+            contentOffset: number, blockText: string, u: any, stateMachine: Rststatemachine): any;
 
 optionalArguments:any;
 requiredArguments: any;
@@ -34,9 +43,6 @@ hasContent: boolean;
 finalArgumentWhitespace:boolean;
 }
 
-interface Patterns {
-    [patternName: string]: RegExp;
-}
 interface ConstructCallback {
     (match: RegExpExecArray, ...rest: any[]): [NodeInterface[], boolean];
 }

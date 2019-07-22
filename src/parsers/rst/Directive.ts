@@ -1,5 +1,5 @@
 import { DirectiveError, DirectiveInterface } from "./types";
-import { Statemachine, LogLevel } from "../../types";
+import { Statemachine, LogLevel, OptionSpec, Options } from "../../types";
 import StringList from "../../StringList";
 import Body from "./states/Body";
 
@@ -91,18 +91,18 @@ import Body from "./states/Body";
  *
  */
 class Directive implements DirectiveInterface {
-    public static optionSpec: any;
+    public static optionSpec: OptionSpec;
     public static hasContent: boolean;
     public name: string;
-    public arguments: any;
-    public options: any;
+    public arguments: string[];
+    public options: Options;
     public content: any;
     public lineno: number;
     public contentOffset: number;
-    public blockText: StringList;
+    public blockText: string;
     public state: Body;
     public stateMachine: Statemachine;
-    public constructor(args: { name: string; args: any; options: any; content: any; lineno: number; contentOffset: number; blockText: StringList; state: Body; stateMachine: any } ) {
+    public constructor(args: { name: string; args: string[]; options: Options; content: any; lineno: number; contentOffset: number; blockText: string; state: Body; stateMachine: Statemachine } ) {
         this.name = args.name;
         this.arguments = args.args;
         this.options = args.options;

@@ -21,7 +21,8 @@ import {
     StateMachineConstructorArgs,
     States,
     StateType,
-    TransitionsArray
+    TransitionsArray,
+    StateConstructor,
 } from "./types";
 import State from "./states/State";
 import TransitionCorrection from "./TransitionCorrection";
@@ -144,6 +145,7 @@ class StateMachine implements Statemachine {
         // do-nothing
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     public createStateMachine(rstStateMachine: RSTStateMachine, initialState?: string, stateFactory: Statefactory|undefined=rstStateMachine.stateFactory): Statemachine {
 
         // @ts-ignore
@@ -190,6 +192,7 @@ class StateMachine implements Statemachine {
         inputOffset: number,
         runContext?: ContextKind,
         inputSource?: {},
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars,@typescript-eslint/no-explicit-any
         initialState?: string, ...rest: any[]):
         (string|{})[] {
         // RUNTIMEINIT
@@ -528,7 +531,7 @@ class StateMachine implements Statemachine {
         return state.noMatch(context, transitions);
     }
 
-    public addState(stateClass: StateType): void {
+    public addState(stateClass: StateConstructor): void {
         if (typeof stateClass === 'undefined') {
         // throw new InvalidArgumentsError('stateClass should be a class');
             return;
@@ -541,7 +544,7 @@ class StateMachine implements Statemachine {
         }
         // console.log(`adding state ${stateName}`);
 
-        if(this.hasState(stateName)) {
+        if(this.hasState(stateName!)) {
             throw new DuplicateStateError(stateName);
         }
         if (!stateName) {
@@ -555,7 +558,7 @@ class StateMachine implements Statemachine {
         this.states[stateName] = r;
     }
 
-    public addStates(stateClasses: StateType[]): void {
+    public addStates(stateClasses: StateConstructor[]): void {
         if (!stateClasses) {
             throw new Error('');
         }

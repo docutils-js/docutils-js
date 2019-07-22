@@ -4,7 +4,7 @@ import * as nodes from '../../../nodes';
 import * as RegExps from '../RegExps';
 import RSTStateMachine from "../RSTStateMachine";
 import {RSTStateArgs} from "../types";
-import { NodeInterface, StateInterface } from "../../../types";
+import { NodeInterface, StateInterface, RegexpResult, ContextArray, ParseMethodReturnType } from "../../../types";
 import StringList from "../../../StringList";
 
 /** Parser for the contents of a substitution_definition element. */
@@ -82,7 +82,7 @@ class SubstitutionDef extends Body {
     }
 
     /* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */
-    public text(match: {}, context: string[], nextState: string): any[] {
+    public text(match: RegexpResult, context: ContextArray, nextState: StateInterface): ParseMethodReturnType {
         if (!this.rstStateMachine.atEof()) {
             this.blankFinish = this.rstStateMachine.isNextLineBlank();
         }

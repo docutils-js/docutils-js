@@ -18,9 +18,9 @@ class Line extends SpecializedText {
 
     // @ts-ignore
     public eof(context) {
-      if(this.memo === undefined) {
-        throw new InvalidStateError();
-      }
+        if(this.memo === undefined) {
+            throw new InvalidStateError();
+        }
         const marker = context[0].trim();
         if (this.memo.sectionBubbleUpKludge) {
             this.memo.sectionBubbleUpKludge = false;
@@ -73,7 +73,7 @@ class Line extends SpecializedText {
                         'Incomplete section title.',
                         [new nodes.literal_block(blocktext, blocktext)],
                         { line: lineno },
-);
+                    );
                     this.parent!.add(msg);
                     return [[], 'Body', []];
                 }
@@ -83,8 +83,8 @@ class Line extends SpecializedText {
         }
         const source = [overline, title, underline].join('\n');
         overline = overline.trimRight();
-      underline = underline || '';
-      underline = underline.trimRight();
+        underline = underline || '';
+        underline = underline.trimRight();
 
         if (!this.transitions.underline[0].test(underline)) {
             const blocktext = `${overline}\n${title}\n${underline}`;
@@ -95,7 +95,7 @@ class Line extends SpecializedText {
                     'Missing matching underline for section title overline.',
                     [new nodes.literal_block(source, source)],
                     { line: lineno },
-);
+                );
                 this.parent!.add(msg);
                 return [[], 'Body', []];
             }
@@ -108,7 +108,7 @@ class Line extends SpecializedText {
                     'Title overline & underline mismatch.',
                     [new nodes.literal_block(source, source)],
                     { line: lineno },
-);
+                );
                 this.parent!.add(msg);
                 return [[], 'Body', []];
             }
@@ -124,15 +124,15 @@ class Line extends SpecializedText {
                     'Title overline too short.',
                     [new nodes.literal_block(source, source)],
                     { line: lineno },
-);
+                );
                 messages.push(msg);
             }
         }
         const style = [overline[0], underline[0]];
         this.eofcheck = false; // @@@ not sure this is correct
         this.section({
- title: title.trimStart(), source, style, lineno: lineno + 1, messages,
-});
+            title: title.trimStart(), source, style, lineno: lineno + 1, messages,
+        });
         this.eofcheck = true;
         return [[], 'Body', []];
     }
@@ -150,7 +150,7 @@ class Line extends SpecializedText {
             'Invalid section title or transition marker.',
             [new nodes.literal_block(blocktext, blocktext)],
             { line: lineno },
-);
+        );
         this.parent!.add(msg);
         return [[], 'Body', []];
     }
@@ -160,7 +160,7 @@ class Line extends SpecializedText {
             'Possible incomplete section title.\nTreating the overline as '
             + "ordinary text because it's so short.", [],
             { line: lineno },
-);
+        );
         this.parent!.add(msg);
         this.stateCorrection(context, lines);
     }

@@ -190,6 +190,7 @@ class Publisher {
 
     public setSource(args: { source?: {}; sourcePath?: string }): void {
         let sourcePath = args.sourcePath;
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         let source = args.source;
         if (typeof sourcePath === 'undefined') {
             sourcePath = this.settings._source;
@@ -217,6 +218,7 @@ class Publisher {
 
     public setDestination(args: { destination?: Output<{}>; destinationPath?: string }): void {
         let destinationPath = args.destinationPath;
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         let destination = args.destination;
         if (destinationPath === undefined) {
             destinationPath = this.settings._destination;
@@ -224,7 +226,9 @@ class Publisher {
             this.settings._destination = destinationPath;
         }
         //const DestinationClass = this.destinationClass;
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const outputEncoding = this.settings.docutilsCoreOptionParser.outputEncoding;
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         let outputEncodingErrorHandler = this.settings.docutilsCoreOptionParser.outputEncodingErrorHandler;
         // this.destination = new DestinationClass(
         //     {
@@ -263,7 +267,6 @@ class Publisher {
             argv, usage, description, settingsSpec, settingsOverrides, configSection, enableExitStatus,
         } = args;
         /* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */
-        let exit;
         try {
             if (this.settings === undefined) {
                 this.processCommandLine({

@@ -1,5 +1,4 @@
 import RSTState from "./RSTState";
-import {BodyState} from './types';
 import * as RegExps from "../RegExps";
 import nodesFactory from '../../../nodesFactory';
 import * as nodes from "../../../nodes";
@@ -25,7 +24,8 @@ import {
     StateType,
     IsolateTableResult,
 } from "../../../types";
-import { ParserConstructor, DirectiveConstructor, TableData} from '../types';
+import {     BodyState,
+ParserConstructor, DirectiveConstructor, TableData} from '../types';
 import { fullyNormalizeName } from "../../../nodeUtils";
 
 const nonWhitespaceEscapeBefore = RegExps.nonWhitespaceEscapeBefore;
@@ -360,7 +360,7 @@ class Body extends RSTState implements BodyState {
             }
         );
         const blocktext = match.input.substring(0, match.index + match[0].length) + block.join("\n");
-        const block2: string[] = [];
+        const block2 = new StringList([]);
         block.forEach((line: string): void => {
             block2.push(escape2null(line));
         });
@@ -390,7 +390,7 @@ class Body extends RSTState implements BodyState {
     }
 
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
-    public make_target(block: string[], blockText: string, lineno: number, target_name: string): NodeInterface|undefined {
+    public make_target(block: StringList, blockText: string, lineno: number, target_name: string): NodeInterface|undefined {
         const [targetType, data, node] = this.parse_target(block, blockText, lineno);
         // console.log(`target type if ${targetType} and data is ${data}`);
         if (targetType === "refname") {
@@ -420,20 +420,16 @@ class Body extends RSTState implements BodyState {
    */
 
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,@typescript-eslint/no-unused-vars,no-unused-vars */
-    public parse_target(block: string[], blockText: string, lineno: number): [string, string, NodeInterface?] {
+    public parse_target(block: StringList, blockText: string, lineno: number): [string, string, NodeInterface?] {
         if (block.length && block[block.length - 1].trim().endsWith("_")) {
-            const lines: string[] = [];
-            block.forEach((line): void => {
-	    lines.push(line.trim());
-	    });
-            const reference = lines.join(" ");
+	    const reference = splitEscapedWhitespace(block.join(' ')).map((part): string => pySplit(unescape(part)).join('')).join(' ');
             const refname = this.is_reference(reference);
             if (refname) {
                 return ["refname", refname];
             }
         }
         const refParts = splitEscapedWhitespace(block.join(" "));
-        const reference = refParts.map((part): string => unescape(part).split(/\s+/).join("")).join(" ");
+        const reference = refParts.map((part): string => pySplit(unescape(part)).join("")).join(" ");
         return ["refuri", reference];
     }
 
@@ -677,7 +673,7 @@ class Body extends RSTState implements BodyState {
         const blockText = this.rstStateMachine.inputLines.slice(
             initialLineOffset, this.rstStateMachine.lineOffset + 1
         ).join('\n');
-        let args:string[] = [];
+        let args: string[] = [];
         let options: Options|undefined;
         let content: StringList|undefined;
         let
@@ -701,7 +697,8 @@ class Body extends RSTState implements BodyState {
             }
             */
         const directiveInstance = new directiveClass(
-            typeName, args, options, content!, lineno,
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            typeName!, args, options!, content!, lineno,
             contentOffset, blockText, this, this.rstStateMachine
         );
         let result;
@@ -1105,6 +1102,49 @@ class Body extends RSTState implements BodyState {
         return [listitem, blankFinish];
     }
 
+/**         Construct and return the next enumerated list item marker, and an
+        auto-enumerator ("#" instead of the regular enumerator).
+
+        Return ``None`` for invalid (out of range) ordinals.
+*/
+    public make_enumerator(ordinal: number, sequence: string, format: string): [string, string]|undefined {
+    /*
+    let enumerator: string|undefined;
+        if(sequence === '#') {
+            enumerator = '#'
+        else if(sequence === 'arabic') {
+            enumerator = ordinal.toString();
+	    }else {
+            if(sequence.endsWith('alpha')) {
+                if(ordinal > 26) {
+		return undefined;
+		}
+//                enumerator = chr(ordinal + ord('a') - 1)
+} else if(sequence.endsWith('roman')) {
+try {
+                try:
+                    enumerator = roman.toRoman(ordinal)
+                except roman.RomanError:
+                    return None
+            else:                       # shouldn't happen
+                raise ParserError('unknown enumerator sequence: "%s"'
+                                  % sequence)
+            if sequence.startswith('lower'):
+                enumerator = enumerator.lower()
+            elif sequence.startswith('upper'):
+                enumerator = enumerator.upper()
+            else:                       # shouldn't happen
+                raise ParserError('unknown enumerator sequence: "%s"'
+                                  % sequence)
+        formatinfo = self.enum.formatinfo[format]
+        next_enumerator = (formatinfo.prefix + enumerator + formatinfo.suffix
+                           + ' ')
+        auto_enumerator = formatinfo.prefix + '#' + formatinfo.suffix + ' '
+        return next_enumerator, auto_enumerator
+	*/
+	return undefined;
+	}
+
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
     public field_marker(match: RegexpResult, context: ContextArray, nextState: StateInterface): ParseMethodReturnType {
         const fieldList = nodesFactory.field_list();
@@ -1455,7 +1495,7 @@ class Body extends RSTState implements BodyState {
         if (!isIterable(r)) {
             throw new Error();
         }
-        const [block, messages, blankFinish]:IsolateTableResult = r;
+        const [block, messages, blankFinish]: IsolateTableResult = r;
         let nodelist;
         if (block && block.length) {
             try {
@@ -1631,6 +1671,7 @@ class Body extends RSTState implements BodyState {
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
     public build_table(tabledata: TableData, tableline: number, stubColumns: number = 0, widths?: string): nodes.table {
         const [colwidths, headRows, bodyrows] = tabledata;
+	console.log(headRows);
         const table = nodesFactory.table();
         if (widths === "auto") {
             table.attributes.classes.push("colwidths-auto");
@@ -1647,15 +1688,23 @@ class Body extends RSTState implements BodyState {
             }
             tgroup.add(colspec);
         });
-        if (headRows) {
+        if (headRows && headRows.length) {
             const thead = nodesFactory.thead("", [], {});
             tgroup.add(thead);
+	    //@ts-ignore
             headRows.map((row: RowData): nodes.row => this.buildTableRow(row, tableline))
+	    //@ts-ignore
                 .forEach((row: nodes.row): void => thead.add(row));
         }
         const tbody = nodesFactory.tbody();
         tgroup.add(tbody);
+	// @ts-ignore
+	bodyrows.forEach((row: RowData): void => {
+	console.log(row);
+	});
+	// @ts-ignore
         bodyrows.map((row: RowData): nodes.row => this.buildTableRow(row, tableline))
+	// @ts-ignore
             .forEach((row: nodes.row): void => tbody.add(row));
         return table;
     }
@@ -1811,6 +1860,7 @@ class Body extends RSTState implements BodyState {
             throw new MarkupError('no content permitted');
         }
 
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         return [args, options!, content, contentOffset];
     }
 
@@ -1866,6 +1916,7 @@ class Body extends RSTState implements BodyState {
         } catch (error) {
         }
 
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         return [true, options!];
         /*          return 0, 'option data incompletely parsed'
 
@@ -1891,6 +1942,8 @@ class Body extends RSTState implements BodyState {
         }
         return args;
     }
+
+
 
 }
 
