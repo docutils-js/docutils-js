@@ -7,7 +7,11 @@ import {
     DebugFunction,
     Statemachine,
     StateMachineConstructorArgs,
-    StateMachineFactoryFunction
+    StateMachineFactoryFunction,
+    RegexpResult,
+    ContextArray,
+    StateInterface,
+    ParseMethodReturnType,
 } from "../types";
 
 /**
@@ -119,7 +123,7 @@ class StateWS extends State {
         return this.nop(match, context, nextState);
     }
 
-    public indent(match: any, context: any[], nextState: any) {
+    public indent(match: RegexpResult, context: ContextArray, nextState: StateInterface): ParseMethodReturnType {
         /* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */
         const [indented, indent, lineOffset, blankFinish] = this.wsStateMachine.getIndented({});
         if(!this.createIndentStateMachine) {

@@ -14,6 +14,22 @@ import {
 import StringList from "../../StringList";
 import { Settings } from "../../../gen/Settings";
 
+
+export interface ParserConstructor {
+new ();
+}
+
+export interface DirectiveConstructor {
+new (typeName: string, args: any, options: any, content: any, lineno: number,
+            contentOffset: number, blockText: string, any, Rststatemachine);
+
+optionalArguments:any;
+requiredArguments: any;
+optionSpec:any;
+hasContent: boolean;
+finalArgumentWhitespace:boolean;
+}
+
 interface Patterns {
     [patternName: string]: RegExp;
 }
@@ -85,6 +101,10 @@ export interface DirectiveInterface {
 export interface DirectivesInterface {
     [directiveName: string]: any;
 };
+
+export interface DirectiveOptions {
+    [optionName: string]: any;
+}
 
 export interface RSTLanguage {
     directives: DirectivesInterface;

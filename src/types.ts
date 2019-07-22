@@ -13,6 +13,8 @@ import Parser from "./Parser";
 import Output from "./io/Output";
 import RSTStateMachine from "./parsers/rst/RSTStateMachine";
 
+export type StateType = StateInterface | string;
+
 export interface ParserArgs
 {
     inliner?: InlinerInterface;
@@ -566,3 +568,19 @@ export interface StateMachineFactoryFunction<T> {
 }
 
 export type ContextKind = string[] | {}[];
+
+export type ParseResult2 = any[];
+export type ParseMethodReturnType = [ContextArray, StateType, ParseResult2]
+export type ParseResult  = [NodeInterface[], boolean];
+
+
+export type ParseResultWithErrors  = [NodeInterface[], NodeInterface[], boolean];
+
+
+export interface RegexpResult {
+  pattern: RegExp;
+  result: RegExpExecArray;
+  input: string;
+}
+
+export type ContextArray = string[];
