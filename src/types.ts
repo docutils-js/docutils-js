@@ -14,7 +14,14 @@ import Output from "./io/Output";
 import RSTStateMachine from "./parsers/rst/RSTStateMachine";
 
 export type StateType = StateInterface | string;
+export interface OptionSpec {
+ [optionName: string]: (arg: string) => string;
+ }
 
+export interface Options {
+ [optionName: string]: any;
+ }
+ 
 export interface ParserArgs
 {
     inliner?: InlinerInterface;
@@ -350,10 +357,6 @@ export interface Statemachine {
     getState2(stateName: string): StateInterface;
 }
 
-export interface StateType {
-    stateName: string;
-
-}
 export interface StateInterface {
     stateName: string;
     blankFinish?: boolean;
@@ -572,8 +575,8 @@ export type ContextKind = string[] | {}[];
 export type ParseResult2 = any[];
 export type ParseMethodReturnType = [ContextArray, StateType, ParseResult2]
 export type ParseResult  = [NodeInterface[], boolean];
-
-
+export type IsolateTableResult= [StringList, NodeInterface[], boolean]
+o
 export type ParseResultWithErrors  = [NodeInterface[], NodeInterface[], boolean];
 
 

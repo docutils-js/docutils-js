@@ -14,19 +14,24 @@ import * as directives from "../directives";
 import UnexpectedIndentationError from "../../../error/UnexpectedIndentationError";
 import RSTStateMachine from "../RSTStateMachine";
 import {
+    Options,
+    OptionSpec,
     ContextArray,
     NodeInterface,
     ParseMethodReturnType,
     ParseResult,
-    ParseResultWithErrors,
     RegexpResult,
-    StateInterface
+    StateInterface,
+    StateType,
+    IsolateTableResult,
 } from "../../../types";
-import { ParserConstructor, DirectiveConstructor} from '../types';
+import { ParserConstructor, DirectiveConstructor, TableData} from '../types';
 import { fullyNormalizeName } from "../../../nodeUtils";
 
 const nonWhitespaceEscapeBefore = RegExps.nonWhitespaceEscapeBefore;
 const simplename = RegExps.simplename;
+
+export type RowData = [number, number, number, number, StringList];
 
 function _LoweralphaToInt(input: string): number {
 // @ts-ignore
@@ -581,6 +586,7 @@ class Body extends RSTState implements BodyState {
             return undefined;
         }).filter((x: ParseResult|undefined): boolean => x !== undefined);
         if (result.length) {
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             return result[0]!;
         }
         if (substitutionNode.children.length === 0) {
@@ -671,11 +677,11 @@ class Body extends RSTState implements BodyState {
         const blockText = this.rstStateMachine.inputLines.slice(
             initialLineOffset, this.rstStateMachine.lineOffset + 1
         ).join('\n');
-        let args;
-        let options;
-        let content;
+        let args:string[] = [];
+        let options: Options|undefined;
+        let content: StringList|undefined;
         let
-            contentOffset;
+            contentOffset: number;
         /*        try {*/
         // @ts-ignore
         [args, options, content, contentOffset] = this.parseDirectiveBlock(
@@ -695,7 +701,7 @@ class Body extends RSTState implements BodyState {
             }
             */
         const directiveInstance = new directiveClass(
-            typeName, args, options, content, lineno,
+            typeName, args, options, content!, lineno,
             contentOffset, blockText, this, this.rstStateMachine
         );
         let result;
@@ -901,17 +907,21 @@ class Body extends RSTState implements BodyState {
                 outIndented,
                 newLineOffset] = this.split_attribution(indented, lineOffset);
             const blockquote = nodesFactory.block_quote();
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             indented = outIndented!;
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             this.nestedParse(blockquoteLines!, lineOffset, blockquote );
             elements.push(blockquote);
             if (attributionLines) { // fixme
                 // @ts-ignore
                 const [attribution, messages] = this.parse_attribution(attributionLines,
+                    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
                     attributionOffset!);
                 blockquote.add(attribution);
                 // @ts-ignore
                 elements.push(...messages);
             }
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             lineOffset = newLineOffset!;
             while (indented && indented.length && !indented[0]) {
                 indented = indented.slice(1) as StringList;
@@ -1358,7 +1368,7 @@ class Body extends RSTState implements BodyState {
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
     public nest_line_block_segment(block: NodeInterface): void {
         const indents: number[] = [];
-        let least:number|undefined;
+        let least: number|undefined;
         for (let i = 0; i < block.children.length; i += 1) {
             const indent = (block.children[i] as nodes.line).indent;
             if (least === undefined || indent < least) {
@@ -1370,6 +1380,7 @@ class Body extends RSTState implements BodyState {
         let newBlock = nodesFactory.line_block();
         for (let i = 0; i < block.children.length; i += 1) {
             const item = block.children[i] as nodes.line;
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             if (item.indent > least!) {
                 newBlock.add(item);
             } else {
@@ -1413,7 +1424,15 @@ class Body extends RSTState implements BodyState {
     /* Top border of a generic table. */
 
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
-    public table_top(match: RegexpResult, context: ContextArray, nextState: StateInterface, isolate_function: any, parser_class: ParserConstructor): ParseMethodReturnType {
+    public table_top(
+        match: RegexpResult,
+        context: ContextArray,
+        nextState: StateType,
+        /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
+        isolate_function: () => IsolateTableResult,
+        /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
+        parser_class: ParserConstructor
+    ): ParseMethodReturnType {
         const [nodelist, blankFinish] = this.table(isolate_function, parser_class);
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         this.parent!.add(nodelist);
@@ -1430,12 +1449,13 @@ class Body extends RSTState implements BodyState {
     }
 
     /** Parse a table. */
-    public table(isolateFunction: any, parserClass: ParserConstructor): any[] {
+    public table(isolateFunction: () => IsolateTableResult,
+        parserClass: ParserConstructor): ParseResult {
         const r = isolateFunction();
         if (!isIterable(r)) {
             throw new Error();
         }
-        const [block, messages, blankFinish] = r;
+        const [block, messages, blankFinish]:IsolateTableResult = r;
         let nodelist;
         if (block && block.length) {
             try {
@@ -1459,7 +1479,7 @@ class Body extends RSTState implements BodyState {
     }
 
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
-    public isolate_grid_table(): BlockMessagesBlankFinish {
+    public isolate_grid_table(): IsolateTableResult {
         const messages = [];
         let block;
         let blankFinish = 1;
@@ -1467,7 +1487,7 @@ class Body extends RSTState implements BodyState {
             block = this.rstStateMachine.getTextBlock(true);
         } catch (error) {
             if (error instanceof UnexpectedIndentationError) {
-                const block2 = error.block;
+                //                const block2 = error.block;
                 const src = error.source;
                 const srcline = error.lineno;
                 // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -1513,21 +1533,21 @@ class Body extends RSTState implements BodyState {
             }
             if (!myBreak) {
                 messages.push(...this.malformed_table(block));
-                return [[], messages, blankFinish? true : false];
+                return [new StringList([]), messages, blankFinish? true : false];
             }
         }
 
         for (let i = 0; i < block.length; i += 1) { // check right edge
             if (block[i].length !== width || !/[+|]/.test(block[i][block[i].length - 1])) {
                 messages.push(...this.malformed_table(block));
-                return [[], messages, blankFinish? true :false];
+                return [new StringList([]), messages, blankFinish? true :false];
             }
         }
         return [block, messages, blankFinish? true : false];
     }
 
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
-    public isolate_simple_table() {
+    public isolate_simple_table(): IsolateTableResult {
         const start = this.rstStateMachine.lineOffset;
         const lines = this.rstStateMachine.inputLines;
         const limit = lines.length - 1;
@@ -1548,7 +1568,7 @@ class Body extends RSTState implements BodyState {
                         lines.slice(start, i + 1),
                         "Bottom/header table border does not match top border."
                     );
-                    return [[], messages, i === limit || !lines[i + 1].trim()];
+                    return [new StringList([]), messages, i === limit || !lines[i + 1].trim()];
                 }
                 found += 1;
                 foundAt = i;
@@ -1577,7 +1597,7 @@ class Body extends RSTState implements BodyState {
             const messages = this.malformed_table(
                 block, `No bottom table border found${extra}`
             );
-            return [[], messages, !extra];
+            return [new StringList([]), messages, !extra];
         }
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         this.rstStateMachine.nextLine(end! - start);
@@ -1591,8 +1611,7 @@ class Body extends RSTState implements BodyState {
     }
 
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
-    public malformed_table(block: any, detail = "", offset = 0) {
-        //        throw new Error(detail);
+    public malformed_table(block: StringList, detail: string = "", offset: number  = 0): NodeInterface[] {
         block.replace(this.doubleWidthPadChar, "");
         const data = block.join("\n");
         let message = "Malformed table.";
@@ -1610,7 +1629,7 @@ class Body extends RSTState implements BodyState {
     }
 
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
-    public build_table(tabledata: any[], tableline: any[] | any, stubColumns = 0, widths?: string) {
+    public build_table(tabledata: TableData, tableline: number, stubColumns: number = 0, widths?: string): nodes.table {
         const [colwidths, headRows, bodyrows] = tabledata;
         const table = nodesFactory.table();
         if (widths === "auto") {
@@ -1620,7 +1639,7 @@ class Body extends RSTState implements BodyState {
         }
         const tgroup = nodesFactory.tgroup("", [], { cols: colwidths.length });
         table.add(tgroup);
-        colwidths.forEach((colwidth: string) => {
+        colwidths.forEach((colwidth: number): void => {
             const colspec = nodesFactory.colspec("", [], { colwidth });
             if (stubColumns) {
                 colspec.attributes.stub = 1;
@@ -1631,20 +1650,20 @@ class Body extends RSTState implements BodyState {
         if (headRows) {
             const thead = nodesFactory.thead("", [], {});
             tgroup.add(thead);
-            headRows.map((row: any) => this.buildTableRow(row, tableline))
-                .forEach((row: any) => thead.add(row));
+            headRows.map((row: RowData): nodes.row => this.buildTableRow(row, tableline))
+                .forEach((row: nodes.row): void => thead.add(row));
         }
         const tbody = nodesFactory.tbody();
         tgroup.add(tbody);
-        bodyrows.map((row: any) => this.buildTableRow(row, tableline))
-            .forEach((row: any) => tbody.add(row));
+        bodyrows.map((row: RowData): nodes.row => this.buildTableRow(row, tableline))
+            .forEach((row: nodes.row): void => tbody.add(row));
         return table;
     }
 
-    public buildTableRow(rowdata: any[][], tableline: any[]) {
+    public buildTableRow(rowdata: RowData, tableline: number): nodes.row {
         const row = nodesFactory.row("", [], {});
         // @ts-ignore
-        rowdata.filter(x => x).forEach(([morerows, morecols, offset, cellblock]) => {
+        rowdata.filter((x): boolean => x !== undefined).forEach(([morerows, morecols, offset, cellblock]): void => {
             const attributes = {};
             if (morerows) {
                 // @ts-ignore
@@ -1709,7 +1728,7 @@ class Body extends RSTState implements BodyState {
     }
 
     /* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */
-    private isEnumeratedListItem(ordinal: any, sequence: any, format: any) {
+    private isEnumeratedListItem(ordinal: number, sequence: string, format: string): boolean {
         return false;
     }
 
@@ -1731,7 +1750,7 @@ class Body extends RSTState implements BodyState {
         order.
  */
     /* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */
-    private parseEnumerator(match: any): [string, string, string, number] {
+    private parseEnumerator(match: RegexpResult): [string, string, string, number] {
 
         return ['','','', 0];
     }
@@ -1740,7 +1759,7 @@ class Body extends RSTState implements BodyState {
         lineOffset: number,
         directive: DirectiveConstructor,
         // eslint-disable-next-line @typescript-eslint/camelcase
-        option_presets: any): [any, any, StringList, number] | undefined {
+        option_presets: Options): [string[], Options, StringList, number] | undefined {
         const optionSpec = directive.optionSpec;
         const hasContent = directive.hasContent;
         if (indented && indented.length && !indented[0].trim()) {
@@ -1767,7 +1786,7 @@ class Body extends RSTState implements BodyState {
             content = indented;
             contentOffset = lineOffset;
         }
-        let options: any;
+        let options: Options|undefined;
         if (optionSpec && Object.keys(optionSpec).length) {
             [options, argBlock] = this.parseDirectiveOptions(option_presets,
                 optionSpec, argBlock);
@@ -1784,7 +1803,7 @@ class Body extends RSTState implements BodyState {
             contentOffset += 1;
         }
 
-        let args: any[] = [];
+        let args: string[] = [];
         if(directive.requiredArguments || directive.optionalArguments) {
             args = this.parseDirectiveArguments(directive, argBlock);
         }
@@ -1792,16 +1811,16 @@ class Body extends RSTState implements BodyState {
             throw new MarkupError('no content permitted');
         }
 
-        return [args, options, content, contentOffset];
+        return [args, options!, content, contentOffset];
     }
 
     // eslint-disable-next-line @typescript-eslint/camelcase
-    private parseDirectiveOptions(option_presets: any, optionSpec: any, argBlock: StringList): [any | null, StringList] {
+    private parseDirectiveOptions(option_presets: Options, optionSpec: OptionSpec, argBlock: StringList): [Options|undefined, StringList] {
     // eslint-disable-next-line @typescript-eslint/camelcase
-        let options: any = { ...option_presets };
+        let options: Options = { ...option_presets };
         let optBlock: StringList;
         // @ts-ignore
-        let i = argBlock.findIndex(line => this.patterns.field_marker.test(line));
+        let i = argBlock.findIndex((line): boolean => this.patterns.field_marker.test(line));
         if (i !== -1) {
             optBlock = argBlock.slice(i) as StringList;
             argBlock = argBlock.slice(0) as StringList;
@@ -1814,7 +1833,7 @@ class Body extends RSTState implements BodyState {
             if (success) {
                 options = { ...options, data };
             } else {
-                throw new MarkupError(data);
+                throw new MarkupError(data.toString());
             }
             return [options, argBlock];
         }
@@ -1834,25 +1853,25 @@ class Body extends RSTState implements BodyState {
    - Success value, 1 or 0.
    - An option dictionary on success, an error string on failure.
    */
-    private parseExtensionOptions(optionSpec: any, datalines: StringList): [boolean, any] {
+    private parseExtensionOptions(optionSpec: OptionSpec, datalines: StringList): [boolean, Options|string] {
         const node = nodesFactory.field_list();
         /* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */
         const [newlineOffset, blankFinish] = this.nestedListParse(datalines, { inputOffset: 0, node, initialState: "ExtensionOptions", blankFinish: true });
         if (newlineOffset !== datalines.length) { // incomplete parse of block
             return [false, "invalid option block"];
         }
-        let options;
+        let options: Options|undefined;
         try {
             options = extractExtensionOptions(node, optionSpec);
         } catch (error) {
         }
 
-        return [true, options];
+        return [true, options!];
         /*          return 0, 'option data incompletely parsed'
 
    */
 
-        return [false, undefined];
+        return [false, {}];
     }
 
     private parseDirectiveArguments(directive: DirectiveConstructor, argBlock: StringList): string[] {
