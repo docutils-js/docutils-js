@@ -35,7 +35,13 @@ import {
     Systemmessage,
     TextElementInterface,
     TraverseArgs,
-    Visitor
+    Visitor,
+    SubstitutionNames,
+    SubstitutionDefs,
+    RefNames,
+    RefIds,
+    NameTypes,
+    Ids,
 } from "./types";
 import { Settings } from "../gen/Settings";
 import { fullyNormalizeName, whitespaceNormalizeName } from "./nodeUtils";
@@ -276,7 +282,7 @@ class NodeVisitor {
     public document: Document;
 
     public optional: string[];
-    private strictVisitor: boolean | undefined;
+    protected strictVisitor: boolean | undefined;
 
     /**
    * Create a NodeVisitor.
@@ -700,6 +706,7 @@ abstract class Node implements NodeInterface {
                 for (const child of [...children]) {
                     // console.log(typeof child);
                     // console.log(Object.keys(child));
+		    console.log(`calling walkabout on ${child.tagname}`);
                     if (child.walkabout(visitor)) {
                         stop = true;
                         break;
@@ -1458,31 +1465,6 @@ export interface TransformerInterface {
     addPending(pending: NodeInterface, priority: number): void;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-interface NameTypes {
-    [name: string]: boolean;
-}
-
-interface Ids {
-    [id: string]: NodeInterface ;
-}
-
-interface RefNames {
-    [refName: string]: NodeInterface[];
-}
-
-interface RefIds {
-    [refId: string]: NodeInterface[];
-}
-
-interface SubstitutionNames {
-    [name: string]: string;
-}
-
-interface SubstitutionDefs {
-    // eslint-disable-next-line @typescript-eslint/camelcase
-    [name: string]: substitution_definition;
-}
 
 /**
  * Document class
@@ -1504,11 +1486,11 @@ class document extends Element implements Document {
 
     public transformer: Transformer;
 
-    private substitutionDefs: SubstitutionDefs;
+public substitutionDefs: SubstitutionDefs;
 
-    private substitutionNames: SubstitutionNames;
+public substitutionNames: SubstitutionNames;
 
-    private citationRefs: RefNames;
+public citationRefs: RefNames;
 
     private citations: NodeInterface[];
 
@@ -2952,4 +2934,5 @@ export {
     SkipDeparture,
     SkipSiblings,
     FixedTextElement,
+
 };

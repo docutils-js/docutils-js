@@ -46,7 +46,7 @@ class HTMLTranslator extends nodes.NodeVisitor {
     private headPrefix: string[];
     private htmlProlog: string[];
     private compactSimple: boolean;
-    private context: string[] = [];
+    private context: (string|[boolean,boolean])[] = [];
     private compactParagraph?: boolean;
     private bodyPreDocinfo: string[];
     private inDocumentTitle: number;
@@ -135,10 +135,9 @@ class HTMLTranslator extends nodes.NodeVisitor {
             const mathOutput = utils.pySplit(myConfig.mathOutput || '');
 
             this.mathOutputOptions = mathOutput.slice(1, this.mathOutput.length - 1);
-            this.mathOutput = this.mathOutput[0].toLowerCase();
-        }this.context = [];
-
-
+            this.mathOutput = mathOutput[0].toLowerCase();
+        }
+	this.context = [];
         this.topicClasses = [];
         this.colspecs = [];
         this.compactParagraph = true;
@@ -726,6 +725,7 @@ class HTMLTranslator extends nodes.NodeVisitor {
     public depart_docinfo(node: NodeInterface) {
         this.body.push('</dl>\n');
         const start = this.context.pop()!;
+	// @ts-ignore
         this.docinfo = this.body.slice(parseInt(start, 10));
         this.body = [];
     }
@@ -850,6 +850,7 @@ class HTMLTranslator extends nodes.NodeVisitor {
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,@typescript-eslint/no-unused-vars,no-unused-vars */
     public depart_entry(node: NodeInterface) {
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+// @ts-ignore
         this.body.push(this.context.pop()!);
     }
 
@@ -1483,6 +1484,7 @@ class HTMLTranslator extends nodes.NodeVisitor {
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,@typescript-eslint/no-unused-vars,no-unused-vars */
     public depart_problematic(node: NodeInterface) {
         this.body.push('</span>');
+// @ts-ignore
         this.body.push(this.context.pop()!);
     }
 
@@ -1706,21 +1708,22 @@ class HTMLTranslator extends nodes.NodeVisitor {
         this.body.push('</table>\n');
     }
 
-    /*
-      visit_target(node: NodeInterface) {
-      if not ('refuri' in node or 'refid' in node
-      or 'refname' in node):
-      this.body.push(this.starttag(node, 'span', '', { CLASS: 'target' }))
-      this.context.push('</span>')
-      else:
-      this.context.push('')
+    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
+public visit_target(node: NodeInterface) {
+      if(!(('refuri' in node.attributes) || ('refid' in node.attributes) || ('refname' in node.attributes))) {
+      this.body.push(this.starttag(node, 'span', '', false, { CLASS: 'target' }));
+      this.context.push('</span>');
+} else {
+      this.context.push('');
+}
+}
+
+    /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,@typescript-eslint/no-unused-vars,no-unused-vars */
+      public depart_target(node: NodeInterface) {
+// @ts-ignore
+        this.body.push(this.context.pop()!);
       }
 
-      depart_target(node: NodeInterface) {
-      this.body.push(this.context.pop())
-      }
-
-    */
     // no hard-coded vertical alignment in table body
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
     public visit_tbody(node: NodeInterface) {
@@ -1871,6 +1874,7 @@ class HTMLTranslator extends nodes.NodeVisitor {
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,@typescript-eslint/no-unused-vars,no-unused-vars */
     public depart_title(node: NodeInterface) {
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+//@ts-ignore
         this.body.push(this.context.pop()!);
         if (this.inDocumentTitle) {
             this.title = this.body.slice(this.inDocumentTitle, this.body.length - 2);
@@ -1883,8 +1887,10 @@ class HTMLTranslator extends nodes.NodeVisitor {
 
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
     public visit_bullet_list(node: NodeInterface) {
-        const atts: any = {};
+        const atts:  Attributes = {};
         const oldCompactSimple = this.compactSimple;
+//@ts-ignore
+	this.context.push([this.compactSimple, this.compactParagraph]);
         this.compactParagraph = undefined;
         this.compactSimple = this.isCompactable(node);
         if (this.compactSimple && !oldCompactSimple) {
@@ -1896,8 +1902,8 @@ class HTMLTranslator extends nodes.NodeVisitor {
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,@typescript-eslint/no-unused-vars,no-unused-vars */
     public depart_bullet_list(node: NodeInterface) {
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        this.compactSimple = this.context.pop()!.length > 0;
-        this.compactParagraph = this.compactSimple;
+//@ts-ignore
+	[ this.compactSimple, this.compactParagraph ] = this.context.pop()!;
         this.body.push('</ul>\n');
     }
 

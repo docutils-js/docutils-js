@@ -6,6 +6,8 @@
 // eslint-disable-next-line @typescript-eslint/camelcase
 import { citation, decoration, Element, footnote, reference, substitution_definition } from "./nodes";
 import { Settings } from "../gen/Settings";
+export { Settings };
+
 import Transformer from "./Transformer";
 import StringList from "./StringList";
 import { InlinerInterface } from "./parsers/rst/types";
@@ -170,9 +172,40 @@ export interface ElementInterface extends NodeInterface {
 export interface TextElementInterface extends ElementInterface {
 }
 
+export interface SubstitutionNames {
+    [name: string]: string;
+}
+
+export interface SubstitutionDefs {
+    // eslint-disable-next-line @typescript-eslint/camelcase
+    [name: string]: substitution_definition;
+}
+
+export interface RefNames {
+    [refName: string]: NodeInterface[];
+}
+
+export interface RefIds {
+    [refId: string]: NodeInterface[];
+}
+
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface NameTypes {
+    [name: string]: boolean;
+}
+
+export interface Ids {
+    [id: string]: NodeInterface ;
+}
+
 export interface Document extends ElementInterface {
     transformMessages: Systemmessage[];
     nameIds: NameIds;
+parseMessages: Systemmessage[];
+substitutionDefs: SubstitutionDefs;
+
+substitutionNames: SubstitutionNames;
 
     reporter: ReporterInterface;
     settings: Settings;

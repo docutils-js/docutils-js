@@ -56,7 +56,7 @@ test('Body constructor',
 // new RegExp(`^(_|(?!_)(\`?)(?![ \`])(.+?)${nonWhitespaceEscapeBefore})
 // (?<!(?<!\\x00):)${nonWhitespaceEscapeBefore}[ ]?:([ ]+|$)`),
 test('hyperlink_target, no args', () => {
-    const body = createBody();
+0    const body = createBody();
     expect(() => body.hyperlink_target({})).toThrow();
 });
 

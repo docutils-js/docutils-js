@@ -1,5 +1,6 @@
 /* eslint-disable-next-line import/prefer-default-export */
 export { parse } from './parse';
+export {NodeInterface, Settings,Document} from './types';
 export { StringOutput, StringInput } from './io';
 export { StandaloneReader } from './readers/standalone';
 export { newDocument } from './newDocument';

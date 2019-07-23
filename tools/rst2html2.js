@@ -8,11 +8,11 @@ const fs = require('fs');
 //logSocket.write('test');
 
 const path = require('path');
-const baseSettings = require('../lib/baseSettings').default;
-const parse = require('../lib/index').parse;
-const StringOutput = require('../lib/index').StringOutput;
-const Writer = require('../lib/writers/HtmlBase.js').default;
-const Reader = require('../lib/index').StandaloneReader;
+const baseSettings = require('../lib/src').defaults;
+const parse = require('../lib/src/index').parse;
+const StringOutput = require('../lib/src/index').StringOutput;
+const Writer = require('../lib/src/writers/HtmlBase.js').default;
+const Reader = require('../lib/src/index').StandaloneReader;
 
 const argv = process.argv.slice(2);
 const settings = { ...baseSettings };
