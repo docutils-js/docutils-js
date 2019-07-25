@@ -3,6 +3,8 @@ const camelcase = require('camelcase');
 const spec = require('../gen/settingsSpec');
 const specOut: any = {};
 const componentMap: any = {};
+
+/* Not sure if this is out of date or not?? */
 Object.keys(spec).forEach(key => {
     const outKey = camelcase(key, { pascalCase: true });
 

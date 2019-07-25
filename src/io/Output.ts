@@ -1,10 +1,10 @@
 import TransformSpec from '../TransformSpec';
 
-class Output<T> extends TransformSpec {
+abstract class Output<T> extends TransformSpec {
     public componentType: string = 'output';
     public supported: string[] = [];
     protected defaultDestinationPath?: string;
-    private destinationPath?: string;
+    public destinationPath?: string;
     private encoding?: string;
     public destination?: T;
     private errorHandler: string;
@@ -23,8 +23,7 @@ class Output<T> extends TransformSpec {
 
     /* istanbul ignore method */
     /* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */
-    public write(data: string): void {
-    }
+public abstract write(data: string): void;
 
     /* istanbul ignore method */
     public encode(data: string): string {

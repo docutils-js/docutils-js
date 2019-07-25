@@ -15,6 +15,10 @@ import Parser from "./Parser";
 import Output from "./io/Output";
 import RSTStateMachine from "./parsers/rst/RSTStateMachine";
 
+export interface ConfigSettings{
+    [name: string]: any;
+}
+
 export type SettingsSpecType = [string|undefined, string|undefined|null, [string, string[], { [name:string]: any }][]];
 
 export type StateType = StateInterface | string;
@@ -618,3 +622,13 @@ export type ContextArray = string[];
 export interface Patterns {
     [patternName: string]: RegExp;
 }
+export interface InputArgs {
+            source?: {};
+	    sourcePath?: string;
+	    encoding?: string;
+	    errorHandler?: string;
+	    }
+export interface InputConstructor {
+  new (args: InputArgs);
+}
+

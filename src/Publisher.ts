@@ -11,19 +11,21 @@ import Parser from "./Parser";
 import Writer from "./Writer";
 import Reader from "./Reader";
 import Output from "./io/Output";
+import FileInput from "./io/FileInput";
+import FileOutput from "./io/FileOutput";
 import Input from "./io/Input";
-import { DebugFunction, Document } from "./types";
+import { DebugFunction, Document, InputConstructor } from "./types";
 
 export interface PublisherArgs {
     reader?: Reader;
     parser?: Parser;
     writer?: Writer;
     source?: Input;
-    sourceClass?: Input;
+    sourceClass?: InputConstructor;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     destination?: Output<any>;
-    destinationClass?: {};
-    settings: Settings;
+    destinationClass?: OutputConstructor<any>;
+    settings?: Settings;
     debugFn?: DebugFunction;
     debug?: boolean;
 }
@@ -32,9 +34,10 @@ interface OutputConstructor<T> {
     new (): Output<T>;
 }
 
-interface InputConstructor {
+/*interface InputConstructor {
     new (): Input;
 }
+*/
 
 /**
  * A facade encapsulating the high-level logic of a Docutils system.
@@ -44,7 +47,8 @@ export class Publisher {
     public get document(): Document | undefined {
         return this._document;
     }
-    private settings: Settings;
+    private sourceClass?: InputConstructor;
+    private settings?: Settings;
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     private debugFn: DebugFunction = (msg: string): void => {};
     private reader?: Reader;
@@ -55,7 +59,7 @@ export class Publisher {
     //KM1 private sourceClass?: InputConstructor;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     private destination?: Output<string>;
-    //KM1 private destinationClass?: OutputConstructor<{}>;
+    private destinationClass?: OutputConstructor<any>;
     private debug: boolean = false;
 
     /**
@@ -73,14 +77,14 @@ export class Publisher {
      * @param {function} args.debugFn - Debug function.
      */
 
-/* reader=None, parser=None, writer=None, source=None,
+    /* reader=None, parser=None, writer=None, source=None,
    source_class=io.FileInput, destination=None,
    destination_class=io.FileOutput, settings=None */
 
     public constructor(args: PublisherArgs) {
         const {
             reader, parser, writer, source, destination,
-            settings, debugFn,
+            settings, debugFn, sourceClass, destinationClass,
         } = args;
 
         if(debugFn !== undefined) {
@@ -92,12 +96,17 @@ export class Publisher {
         this.writer = writer;
         this.source = source;
         this.destination = destination;
-        //KM1 this.sourceClass = sourceClass2;
-        //KM1 this.destinationClass = destinationClass2;
+        // @ts-ignore
+        this.sourceClass = sourceClass || FileInput;
+        // @ts-ignore
+        this.destinationClass = destinationClass || FileOutput;
         this.settings = settings;
     }
 
-    public setReader(readerName: string, parser?: Parser, parserName?: string): void {
+    public setReader(readerName: string|undefined, parser?: Parser, parserName?: string): void {
+        if(readerName === undefined) {
+            return;
+        }
         const ReaderClass = readers.getReaderClass(readerName);
         // @ts-ignore
         this.reader = new ReaderClass({
@@ -108,7 +117,10 @@ export class Publisher {
         }
     }
 
-    public setWriter(writerName: string): void {
+    public setWriter(writerName: string|undefined): void {
+        if(writerName === undefined) {
+            return;
+        }
         const writerClass = writers.getWriterClass(writerName);
         /* not setting document here, the write method takes it, which
          * is confusing */
@@ -116,12 +128,12 @@ export class Publisher {
         this.writer = new writerClass();
     }
 
-    public setComponents(readerName: string, parserName: string, writerName: string): void {
+    public setComponents(readerName: string|undefined, parserName: string|undefined, writerName: string|undefined): void {
         if (!this.reader) {
             this.setReader(readerName, this.parser, parserName);
         }
         if (!this.parser && this.reader !== undefined) {
-            if(!this.reader.parser) {
+            if(!this.reader.parser && parserName !== undefined) {
                 this.reader.setParser(parserName);
             }
             this.parser = this.reader.parser;
@@ -150,8 +162,8 @@ export class Publisher {
                 settingsSpec2.configSectionDependencies = ['applications'];
             }
         }
-	settingsSpec2 = settingsSpec2!;
-	const optionParser = new OptionParser({components: [this.parser, this.reader,this.writer, settingsSpec2], defaults, readConfigFiles:true, usage,description});
+        settingsSpec2 = settingsSpec2!;
+        const optionParser = new OptionParser({components: [this.parser, this.reader,this.writer, settingsSpec2], defaults, readConfigFiles:true, usage,description});
         return optionParser;
     }
 
@@ -163,24 +175,23 @@ export class Publisher {
         }
     ): void {
         console.log('processCommandLine');
-	try {
-        const argParser: ArgumentParser = this.setupOptionParser({
-            usage: args.usage,
-            description: args.description,
+        try {
+            const argParser: ArgumentParser = this.setupOptionParser({
+                usage: args.usage,
+                description: args.description,
 	    });
-        let argv = args.argv;
-        if (argv === undefined) {
-            argv = process.argv.slice(2);
+            let argv = args.argv;
+            if (argv === undefined) {
+                argv = process.argv.slice(2);
+            }
+            const [settings, restArgs] = argParser.parseKnownArgs(argv);
+            // @ts-ignore
+            this.settings! = argParser.checkValues(settings, restArgs);
+        } catch(error) {
+            console.log(error.stack);
+            console.log(error.message);
+            throw error;
         }
-        const settings = argParser.parseArgs(argv);
-	console.log(settings);
-        // @ts-ignore
-        this.settings = settings;
-	} catch(error) {
-	console.log(error.stack);
-	console.log(error.message);
-	throw error;
-	}
     }
 
     public setIO(sourcePath?: string, destinationPath?: string): void {
@@ -197,14 +208,16 @@ export class Publisher {
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         let source = args.source;
         if (typeof sourcePath === 'undefined') {
-            sourcePath = this.settings._source;
+            sourcePath = this.settings!._source;
         } else {
-            this.settings._source = sourcePath;
+            this.settings!._source = sourcePath;
         }
-        /*//KM1
+        console.log(sourcePath);
+
         try {
-            const SourceClass = this.sourceClass;
-            let inputEncoding: string | undefined = this.settings.inputEncoding;
+            const SourceClass: InputConstructor = this.sourceClass!;
+	    console.log(`${SourceClass} sourceClass`);
+            let inputEncoding: string | undefined = this.settings!.inputEncoding;
 
             if(SourceClass !== undefined) {
                 this.source = new SourceClass({
@@ -215,9 +228,9 @@ export class Publisher {
                 });
             }
         } catch (error) {
-            throw new ApplicationError(`Unable to instantiate Source class ${this.sourceClass.constructor.name}: ${error.message}`, { error });
+            console.log(error);
+            throw new ApplicationError(`Unable to instantiate Source class ${this.sourceClass!.constructor.name}: ${error.message}`, { error });
         }
-        */
     }
 
     public setDestination(args: { destination?: Output<{}>; destinationPath?: string }): void {
@@ -225,15 +238,15 @@ export class Publisher {
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         let destination = args.destination;
         if (destinationPath === undefined) {
-            destinationPath = this.settings._destination;
+            destinationPath = this.settings!._destination;
         } else {
-            this.settings._destination = destinationPath;
+            this.settings!._destination = destinationPath;
         }
         //const DestinationClass = this.destinationClass;
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const outputEncoding = this.settings.outputEncoding;
+        const outputEncoding = this.settings!.outputEncoding;
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        let outputEncodingErrorHandler = this.settings.outputEncodingErrorHandler;
+        let outputEncodingErrorHandler = this.settings!.outputEncodingErrorHandler;
         // this.destination = new DestinationClass(
         //     {
         //         destination,
@@ -272,7 +285,7 @@ export class Publisher {
         } = args;
         /* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */
         try {
-            if (this.settings === undefined) {
+            if (this.settings! === undefined) {
                 this.processCommandLine({
                     argv, usage, description, settingsSpec, configSection, settingsOverrides,
                 });
@@ -291,11 +304,11 @@ export class Publisher {
                 throw new InvalidStateError('need Writer and source');
             }
             const writer = this.writer;
-            if(this.settings === undefined) {
+            if(this.settings! === undefined) {
                 throw new InvalidStateError('need serttings');
             }
             this.reader.read(
-                this.source, this.parser, this.settings,
+                this.source, this.parser, this.settings!,
                 ((error: Error | {} | undefined, document: Document|undefined): void => {
                     if (error) {
                         cb(error, undefined);
@@ -320,9 +333,9 @@ export class Publisher {
         }
     }
 
-public debuggingDumps() {
-  if(this.settings.dumpSettings) {
- process.stderr.write(JSON.stringify(this.settings, null, 4));
- }
-}
+    public debuggingDumps() {
+        if(this.settings!.dumpSettings) {
+            process.stderr.write(JSON.stringify(this.settings!, null, 4));
+        }
+    }
 }

@@ -23,15 +23,13 @@ Also exports the following functions:
 * `make_paths_absolute`.
 * SettingSpec manipulation: `filter_settings_spec`.
 */
+import camelcase from 'camelcase';
 import {ArgumentParser} from 'argparse';
 export const __docformat__ = 'reStructuredText';
 import Component from'./Component';
 import SettingsSpec from'./SettingsSpec';
-import { SettingsSpecType } from './types';
+import { SettingsSpecType, ConfigSettings } from './types';
 
-export interface ConfigSettings{
-    [name: string]: any;
-}
 
 /**     Store multiple values in `parser.values`.  (Option callback.)
     Store `None` for each attribute named in `args`, and store the value for
@@ -964,7 +962,7 @@ export class OptionParser extends ArgumentParser {
         '~/.docutils'];                  // user-specific
     /** Possible inputs for for --report and --halt threshold values. */
     thresholdChoices: string[] = ['info', '1', 'warning', '2','error', '3', 'severe', '4', 'none', '5'];
-    
+
     /**Lookup table for --report and --halt threshold values.*/
     thresholds: { info: number; warning: number;error: number; severe: number; none: number }= {'info': 1, 'warning': 2, 'error': 3, 'severe': 4, 'none': 5}
 
@@ -977,7 +975,7 @@ export class OptionParser extends ArgumentParser {
 
     defaultErrorEncodingErrorHandler = 'backslashreplace'
 
-    
+
     /**
     Defaults for settings that don't have command-line option equivalents. */
     settingsDefaults: { [propName: string]: any|undefined } =
@@ -1053,7 +1051,41 @@ export class OptionParser extends ArgumentParser {
 		} else {
 //		console.log(`addArgument ${optionStrings}`);
                 const help = helpText.replace(/%/g, '%%');
-		this.addArgument(optionStrings, { help });
+		let action;
+		let newArgs: {[name: string]: any} = { help };
+		if(Object.prototype.hasOwnProperty.call(optionArgs, 'dest')) {
+		  let dest = camelcase(optionArgs.dest, { pascalCase: false });
+		  newArgs.dest = dest;
+		  } else {
+		  newArgs.dest= camelcase(optionStrings[0], { pascalCase: false });}
+		  
+		if(Object.prototype.hasOwnProperty.call(optionArgs, 'default')) {
+		  newArgs.defaultValue = optionArgs['default'];
+		  }
+		  if(Object.prototype.hasOwnProperty.call(optionArgs, 'action')) {
+		const a = optionArgs.action;
+		  if(a === 'store_const') {
+		   action = 'storeConst';
+		   newArgs.constant = optionArgs.const;
+		   } else if(a === 'store_true') {
+		   action = 'storeTrue';
+//		   newArgs.nargs = 0;
+		   } else if(a === 'append') {
+		   } else if(a === 'store_false') {
+		   action = 'storeFalse';
+//		   newArgs.nargs = 0;
+		   } else if(a === 'append') {
+		   action = a;
+		   } else if(a === 'callback') {
+		   action = 'store';
+		   } else if(a === 'version') {
+		   action = 'version';
+		   } else {
+		   throw new Error(a);
+		   }
+		   newArgs.action = action;
+		   this.addArgument(optionStrings, newArgs);
+		}
 		}
                 });
 		});
@@ -1062,8 +1094,8 @@ export class OptionParser extends ArgumentParser {
 		    }
         });
     }
-		    
-    /*		    
+
+    /*
         for component in components:
             if component and component.settings_default_overrides:
                 self.defaults.update(component.settings_default_overrides)*/
@@ -1101,7 +1133,7 @@ except KeyError:
 	*/
         return {}
     }
-	
+
     //        """Returns a dictionary containing appropriate config file settings."""
     public  getConfigFileSettings(configFile: string) {
         /*        parser = ConfigParser()
@@ -1125,40 +1157,44 @@ except KeyError:
 	*/
     }
 
-    //        """Store positional arguments as runtime settings."""
-    public checkValues(values: any, args: any) {
-        /*        values._source, values._destination = self.check_args(args)
-        make_paths_absolute(values.__dict__, self.relative_path_settings)
-        values._config_files = self.config_files
-        return values
-	*/
+    /** Store positional arguments as runtime settings. */
+    public checkValues(values: ConfigSettings, args: string[]): ConfigSettings {
+    [ values._source, values._destination ] = this.checkArgs(args);
+        //makePathsAbsolute(values, this.relativePathSettings);
+        values._configFiles = this.configFiles;
+        return values;
     }
-	
-    public checkArgs(args: any) {
-    /*
-        source = destination = None
-        if args:
-            source = args.pop(0)
-            if source == '-':           # means stdin
-                source = None
-        if args:
-            destination = args.pop(0)
-            if destination == '-':      # means stdout
-                destination = None
-        if args:
-            self.error('Maximum 2 arguments allowed.')
-        if source and source == destination:
-            self.error('Do not specify the same file for both source and '
-                       'destination.  It will clobber the source file.')
-        return source, destination
-	*/
+
+    public checkArgs(args: string[]): [string?, string?] {
+    let source;
+    let destination;
+        if(args.length) {
+            source = args.shift();
+            if(source === '-') { // means stdin
+                source = undefined;
+	    }
+        }	    
+        if(args.length) {
+            destination = args.shift()
+            if(destination === '-') { //  means stdout
+                destination = undefined;
+		}
+		}
+        if(args.length) {
+            this.error('Maximum 2 arguments allowed.');
+	    }
+        if(source && source === destination) {
+            this.error('Do not specify the same file for both source and '+
+                       'destination.  It will clobber the source file.');
+		       }
+        return [source, destination];
     }
     public setDefaultsFromDict(defaults: {}) {
         //self.defaults.update(defaults)
     }
 
     public  getDefaultValues(){
-    
+
         //        """Needed to get custom `Values` instances."""
         //        defaults = Values(self.defaults)
         //        defaults._config_files = self.config_files

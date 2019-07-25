@@ -36,7 +36,7 @@ export default abstract class Writer extends Component {
         this.document = document;
         if(document !== undefined) {
             // @ts-ignore
-            this.language = getLanguage(document.settings.docutilsCoreOptionParser.languageCode,
+            this.language = getLanguage(document.settings.languageCode,
                 document.reporter);
         }
         this.destination = destination;

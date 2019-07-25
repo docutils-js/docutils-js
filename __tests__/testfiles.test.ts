@@ -13,7 +13,7 @@ const testFilesRoot = path.join(__dirname, '../testfiles/forms/');
 // for files we want to return the files
 // dor directories we want to return the directories
 
-fs.readdirSync(testFilesRoot, { withFileTypes: true }).filter((e: any) => e.isDirectory)
+const table = fs.readdirSync(testFilesRoot, { withFileTypes: true }).filter((e: any) => !e.isDirectory()).map((e: any) => [e.name, fs.readFileSync(path.join(testFilesRoot, e.name), 'utf-8')]);
 
 //const files = micromatch([glob]);
 //const table = files.map(file => ([file, fs.readFileSync(file, 'utf-8')]));
@@ -29,7 +29,6 @@ const defaultArgs = {
 
 const defaultSettings = { ...defaults };
 
-const table: any[][] = [];
 test.each(table)('%s', (file, input) => {
     const myOpts: any = {};
 

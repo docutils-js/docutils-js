@@ -9,11 +9,12 @@ beforeAll(() => {
 
 test('StateFactory.constructor', () => {
 const stateFactory = new StateFactory({});
+const sfSpy = sinon.spy(stateFactory);
 const initialState = 'NoState';
-  const args: StateMachineConstructorArgs = { stateFactory, initialState};
+// @ts-ignore
+  const args: StateMachineConstructorArgs = { stateFactory: sfSpy, initialState};
   const sm = new StateMachine(args);
   expect(sm).toBeDefined();
-  expect(
 //@ts-ignore
 expect(StateFactory.constructor.calledOnce).toBeTruthy();
 });
