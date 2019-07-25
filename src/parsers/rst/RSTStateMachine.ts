@@ -46,7 +46,7 @@ class RSTStateMachine extends StateMachineWS implements Rststatemachine {
 if(document.settings === undefined) {
     throw new Error('unexpected');
 }
-        const languageCode = document.settings.docutilsCoreOptionParser.languageCode;
+        const languageCode = document.settings.languageCode;
         if (languageCode !== undefined) {
             this.rstLanguage = getLanguage(languageCode);
         }

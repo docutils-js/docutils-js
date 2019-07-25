@@ -518,7 +518,7 @@ this.implicitDispatch = [];
         let
             /* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */
             esn;
-        if (settings.docutilsParsersRstParser!.characterLevelInlineMarkup) {
+        if (settings.characterLevelInlineMarkup) {
             startStringPrefix = "(^|(?<!\\x00))";
             ssn = [null, null];
             endStringSuffix = "";

@@ -1,4 +1,6 @@
 import { ApplicationError, InvalidStateError } from "./Exceptions";
+import { ArgumentParser } from 'argparse';
+import { OptionParser } from './Frontend';
 import * as readers from './Readers';
 import * as writers from './Writers';
 import SettingsSpec from './SettingsSpec';
@@ -12,7 +14,7 @@ import Output from "./io/Output";
 import Input from "./io/Input";
 import { DebugFunction, Document } from "./types";
 
-interface PublisherArgs {
+export interface PublisherArgs {
     reader?: Reader;
     parser?: Parser;
     writer?: Writer;
@@ -35,10 +37,10 @@ interface InputConstructor {
 }
 
 /**
- * Publisher class.
+ * A facade encapsulating the high-level logic of a Docutils system.
  */
 
-class Publisher {
+export class Publisher {
     public get document(): Document | undefined {
         return this._document;
     }
@@ -70,6 +72,11 @@ class Publisher {
      * @param {object} args.settings - Settings for docutils engine.
      * @param {function} args.debugFn - Debug function.
      */
+
+/* reader=None, parser=None, writer=None, source=None,
+   source_class=io.FileInput, destination=None,
+   destination_class=io.FileOutput, settings=None */
+
     public constructor(args: PublisherArgs) {
         const {
             reader, parser, writer, source, destination,
@@ -123,13 +130,14 @@ class Publisher {
             this.setWriter(writerName);
         }
     }
-    /*
+
     public setupOptionParser(
         args: {
-            usage: string; description: string; settingsSpec: SettingsSpec;
-            configSection: string; defaults: {};
+            usage: string; description: string; settingsSpec?: SettingsSpec;
+            configSection?: string; defaults?: {};
         }
-    ): OptionParser {
+    ): ArgumentParser {
+        console.log('setupOptionParser');
         const { usage, description, settingsSpec, configSection, defaults } = args;
         let settingsSpec2 = settingsSpec;
         if (configSection) {
@@ -142,17 +150,11 @@ class Publisher {
                 settingsSpec2.configSectionDependencies = ['applications'];
             }
         }
-        const optionParser = new OptionParser({
-            components: [this.parser, this.reader, this.writer, settingsSpec2],
-            defaults,
-            readConfigFiles: true,
-            usage,
-            description,
-        });
-        //      console.log(JSON.stringify(optionParser.settingsSpec));
+	settingsSpec2 = settingsSpec2!;
+	const optionParser = new OptionParser({components: [this.parser, this.reader,this.writer, settingsSpec2], defaults, readConfigFiles:true, usage,description});
         return optionParser;
     }
-*/
+
     public processCommandLine(
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         args: {
@@ -160,23 +162,25 @@ class Publisher {
             settingsOverrides: {};
         }
     ): void {
-        /*
-        const optionParser: OptionParser= this.setupOptionParser({
+        console.log('processCommandLine');
+	try {
+        const argParser: ArgumentParser = this.setupOptionParser({
             usage: args.usage,
             description: args.description,
-            settingsSpec: args.settingsSpec,
-            configSection: args.configSection,
-            defaults: args.settingsOverrides,
-        });
+	    });
         let argv = args.argv;
         if (argv === undefined) {
             argv = process.argv.slice(2);
         }
-        const settings = optionParser.parseArgs(argv);
+        const settings = argParser.parseArgs(argv);
+	console.log(settings);
         // @ts-ignore
         this.settings = settings;
-
-         */
+	} catch(error) {
+	console.log(error.stack);
+	console.log(error.message);
+	throw error;
+	}
     }
 
     public setIO(sourcePath?: string, destinationPath?: string): void {
@@ -200,7 +204,7 @@ class Publisher {
         /*//KM1
         try {
             const SourceClass = this.sourceClass;
-            let inputEncoding: string | undefined = this.settings.docutilsCoreOptionParser.inputEncoding;
+            let inputEncoding: string | undefined = this.settings.inputEncoding;
 
             if(SourceClass !== undefined) {
                 this.source = new SourceClass({
@@ -227,9 +231,9 @@ class Publisher {
         }
         //const DestinationClass = this.destinationClass;
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const outputEncoding = this.settings.docutilsCoreOptionParser.outputEncoding;
+        const outputEncoding = this.settings.outputEncoding;
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        let outputEncodingErrorHandler = this.settings.docutilsCoreOptionParser.outputEncodingErrorHandler;
+        let outputEncodingErrorHandler = this.settings.outputEncodingErrorHandler;
         // this.destination = new DestinationClass(
         //     {
         //         destination,
@@ -306,6 +310,7 @@ class Publisher {
                     // @ts-ignore
                     const output = writer.write(document, this.destination);
                     writer.assembleParts();
+		    this.debuggingDumps();
                     // @ts-ignore
                     cb(undefined, output);
                 }),
@@ -314,6 +319,10 @@ class Publisher {
             cb(error, undefined);
         }
     }
+
+public debuggingDumps() {
+  if(this.settings.dumpSettings) {
+ process.stderr.write(JSON.stringify(this.settings, null, 4));
+ }
 }
-export { Publisher };
-export default Publisher;
+}

@@ -78,7 +78,7 @@ export class DocTitle extends TitlePromoter {
 
     public setMetadata() {
         if (!('title' in this.document.attributes)) {
-            let title = this.document.settings.docutilsCoreOptionParser!.title;
+            let title = this.document.settings.title;
             if (title != null) {
                 this.document.attributes.title = title;
             } else if (this.document.children.length && this.document.children[0] instanceof nodes.title) {
@@ -88,7 +88,7 @@ export class DocTitle extends TitlePromoter {
     }
 
     public apply() {
-        if (this.document.settings.docutilsReadersStandaloneReader!.doctitleXform || typeof this.document.settings.docutilsReadersStandaloneReader!.doctitleXform === 'undefined') {
+        if (this.document.settings.doctitleXform || typeof this.document.settings.doctitleXform === 'undefined') {
             if (this.promoteTitle(this.document)) {
                 this.promoteSubtitle(this.document);
             }
@@ -101,7 +101,7 @@ DocTitle.defaultPriority = 320;
 export class SectionSubTitle extends TitlePromoter {
 
     public apply() {
-        let reader = this.document.settings.docutilsWritersOdfOdtReader;
+        let reader = this.document.settings;
         if (!reader || (reader.sectsubtitleXform || typeof reader.sectsubtitleXform === 'undefined')) {
             this.document.traverse({ condition: nodes.section }).forEach((section) => {
             // On our way through the node tree, we are deleting

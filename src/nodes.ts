@@ -293,7 +293,7 @@ class NodeVisitor {
             throw new Error(`Invalid document arg: ${document}`);
         }
         this.document = document;
-        const core = document.settings.docutilsCoreOptionParser;
+        const core = document.settings;
         this.strictVisitor = core.strictVisitor;
         this.optional = [];
     }

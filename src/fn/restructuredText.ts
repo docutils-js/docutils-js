@@ -18,8 +18,8 @@ function parse(inputstring: string, document: Document): Document {
         debug: document.reporter.debugFlag, */ // fixme
     });
     let tabWidth;
-    if(document.settings.docutilsParsersRstParser !== undefined) {
-        tabWidth = document.settings.docutilsParsersRstParser.tabWidth;
+    if(document.settings !== undefined) {
+        tabWidth = document.settings.tabWidth;
     }
     const inputLines = statemachine.string2lines(
         inputstring, {

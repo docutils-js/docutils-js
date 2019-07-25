@@ -90,7 +90,7 @@ class HTMLTranslator extends nodes.NodeVisitor {
         super(document);
         this.settings = document.settings;
         const settings = this.settings;
-        const langCode = settings.docutilsCoreOptionParser.languageCode;
+        const langCode = settings.languageCode;
         if(langCode !== undefined) {
             this.language = getLanguage(langCode);
         }
@@ -98,7 +98,7 @@ class HTMLTranslator extends nodes.NodeVisitor {
         this.headPrefix = [];
         this.htmlProlog = [];
 
-        let myConfig = settings.docutilsWritersHtml4Css1Writer;
+        let myConfig = settings;
         if(myConfig !== undefined) {
             this.cloakEmailAddresses = myConfig.cloakEmailAddresses || true;
             if(myConfig.attribution !== undefined) {
@@ -130,7 +130,7 @@ class HTMLTranslator extends nodes.NodeVisitor {
         this.sectionLevel = 0;
         if(myConfig) {
             if(myConfig.initialHeaderLevel !== undefined) {
-                this.initialHeaderLevel = myConfig.initialHeaderLevel;
+                this.initialHeaderLevel = myConfig.initialHeaderLevel!;
             }
             const mathOutput = utils.pySplit(myConfig.mathOutput || '');
 
@@ -573,7 +573,7 @@ class HTMLTranslator extends nodes.NodeVisitor {
         if ('colwidths-auto' in node.parent!.parent!.attributes.classes
           // @ts-ignore
           // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-          || ('colwidths-auto' in this.settings.docutilsWritersHtml4Css1Writer!.tableStyle
+          || ('colwidths-auto' in this.settings.tableStyle
             // @ts-ignore
             // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             && (!('colwidths-given' in node.parent!.parent!.attributes.classes)))) {
@@ -967,7 +967,7 @@ class HTMLTranslator extends nodes.NodeVisitor {
     public visit_footnote(node: NodeInterface) {
         if (!this.inFootnoteList) {
             // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-            const classes = `footnote ${this.settings.docutilsWritersHtml4Css1Writer!.footnoteReferences}`;
+            const classes = `footnote ${this.settings.footnoteReferences}`;
             this.body.push(`<dl class="${classes}">\n`);
             this.inFootnoteList = true;
         }
@@ -991,7 +991,7 @@ class HTMLTranslator extends nodes.NodeVisitor {
         }
         const href = `#${node.attributes.refid || ''}`;
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        const classes = `footnote-reference ${this.settings.docutilsWritersHtml4Css1Writer!.footnoteReferences}`;
+        const classes = `footnote-reference ${this.settings.footnoteReferences}`;
         this.body.push(this.starttag(node, 'a', '', // suffix,
             false,
             { CLASS: classes, href }));
@@ -1115,7 +1115,7 @@ class HTMLTranslator extends nodes.NodeVisitor {
         let classes;
         if (node.parent instanceof nodes.footnote) {
             // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-            classes = this.settings.docutilsWritersHtml4Css1Writer!.footnoteReferences;
+            classes = this.settings.footnoteReferences;
         } else {
             classes = 'brackets';
         }
@@ -1125,7 +1125,7 @@ class HTMLTranslator extends nodes.NodeVisitor {
         this.body.push(this.starttag(node, 'span', '', false, { CLASS: classes }));
         // footnote/citation backrefs:
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion,@typescript-eslint/no-non-null-assertion
-        if (this.settings.docutilsCoreOptionParser!.footnoteBacklinks) {
+        if (this.settings.footnoteBacklinks) {
             const backrefs = node.parent!.attributes.backrefs;
             if (backrefs.length === 1) {
                 this.body.push(`<a class="fn-backref" href="//${backrefs[0]}">`);
@@ -1136,14 +1136,14 @@ class HTMLTranslator extends nodes.NodeVisitor {
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
     public depart_label(node: NodeInterface) {
         let backrefs = [];
-        if (this.settings.docutilsCoreOptionParser!.footnoteBacklinks) {
+        if (this.settings.footnoteBacklinks) {
             backrefs = node.parent!.attributes.backrefs;
             if (backrefs.length === 1) {
                 this.body.push('</a>');
             }
         }
         this.body.push('</span>');
-        if (this.settings.docutilsCoreOptionParser!.footnoteBacklinks && backrefs.length > 1) {
+        if (this.settings.footnoteBacklinks && backrefs.length > 1) {
             const backlinks = backrefs.map((ref: string, i: number) => `<a href="//${ref}">${i + 1}</a>`);
             this.body.push(`<span class="fn-backref">(${backlinks.join(',')})</span>`);
         }
@@ -1506,7 +1506,7 @@ class HTMLTranslator extends nodes.NodeVisitor {
         const atts: any = { class: 'reference' };
         if ('refuri' in node.attributes) {
             atts.href = node.attributes.refuri;
-            if (this.settings.docutilsWritersHtml4Css1Writer!.cloakEmailAddresses
+            if (this.settings.cloakEmailAddresses
                 && atts.href.substring(0, 6) === 'mailto:') {
                 atts.href = this.cloakMailto(atts.href);
                 this.inMailto = true;
@@ -2040,7 +2040,7 @@ class HTMLBaseWriter extends BaseWriter {
             // @ts-ignore
             vars[attr] = (this[attr] || [].join('').trim());
         });
-        vars.encoding = settings.docutilsFrontendOptionParser!.outputEncoding;
+        vars.encoding = settings.outputEncoding;
         vars.version = __version__;
         return vars;
     }

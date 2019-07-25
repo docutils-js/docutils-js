@@ -8,23 +8,23 @@ export default function newReporter(labeled: { sourcePath: string }, settings: S
     const keys = ['reportLevel', 'haltLevel', //'warningStream',
         'debug',
         'errorEncoding', 'errorEncodingErrorHandler'];
-    const core: DocutilsCoreOptionParser = settings.docutilsCoreOptionParser || {};
+    const core: DocutilsCoreOptionParser = settings || {};
     if(typeof core !== 'undefined') {
         if (typeof core.reportLevel === 'undefined') {
-            core.reportLevel = defaults.docutilsCoreOptionParser.reportLevel;
+            core.reportLevel = defaults.reportLevel;
         }
         if(typeof core.haltLevel === 'undefined') {
-            core.haltLevel = defaults.docutilsCoreOptionParser.haltLevel;
+            core.haltLevel = defaults.haltLevel;
         }
         if(typeof core.debug === 'undefined') {
-            core.debug = defaults.docutilsCoreOptionParser.debug;
+            core.debug = defaults.debug;
         }
         if(typeof core.errorEncoding === 'undefined') {
-            core.errorEncoding = defaults.docutilsCoreOptionParser.errorEncoding;
+            core.errorEncoding = defaults.errorEncoding;
 
         }
         if(typeof core.errorEncodingErrorHandler === 'undefined') {
-            core.errorEncodingErrorHandler = defaults.docutilsCoreOptionParser.errorEncodingErrorHandler;
+            core.errorEncodingErrorHandler = defaults.errorEncodingErrorHandler;
         }
 
     }

@@ -37,7 +37,7 @@ class Decorations extends Transform {
         // See https://sourceforge.net/p/docutils/patches/132/
         // and https://reproducible-builds.org/specs/source-date-epoch/
         const settings = this.document.settings;
-        let core = settings.docutilsCoreOptionParser!;
+        let core = settings;
         if (core.generator || core.datestamp || core.sourceLink || core.sourceUrl) {
             const text = [];
             if ((core.sourceLink && settings._source) || core.sourceUrl) {

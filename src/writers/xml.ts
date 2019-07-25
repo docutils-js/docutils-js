@@ -49,9 +49,9 @@ class XMLTranslator extends nodes.GenericNodeVisitor {
         const settings: Settings = this.settings;
         this.newline = '';
         this.indent = '';
-        const core = this.settings.docutilsCoreOptionParser;
+        const core = this.settings;
         const outputEncoding = core.outputEncoding;
-        let xmlWriter = settings.docutilsWritersDocutilsXmlWriter;
+        let xmlWriter = settings;
         if(xmlWriter !== undefined) {
             if (xmlWriter.newlines) {
                 this.newline = '\n';

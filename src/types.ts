@@ -15,6 +15,8 @@ import Parser from "./Parser";
 import Output from "./io/Output";
 import RSTStateMachine from "./parsers/rst/RSTStateMachine";
 
+export type SettingsSpecType = [string|undefined, string|undefined|null, [string, string[], { [name:string]: any }][]];
+
 export type StateType = StateInterface | string;
 export interface OptionSpec {
     [optionName: string]: (arg: string) => string;

@@ -491,22 +491,7 @@ export interface DocutilsReadersStandaloneReader {
     sectsubtitleXform?: boolean;
 }
 
-export interface Settings {
+export type Settings = {
     _source?: string;
     _destination?: string;
-    docutilsCoreOptionParser: DocutilsCoreOptionParser;
-    docutilsFrontendOptionParser?: DocutilsFrontendOptionParser;
-    docutilsParsersRstParser?: DocutilsParsersRstParser;
-    docutilsWritersDocutilsXmlWriter?: DocutilsWritersDocutilsXmlWriter;
-    docutilsWritersPepHtmlWriter?: DocutilsWritersPepHtmlWriter;
-    docutilsWritersLatex2EWriter?: DocutilsWritersLatex2EWriter;
-    docutilsWritersOdfOdtWriter?: DocutilsWritersOdfOdtWriter;
-    docutilsWritersOdfOdtReader?: DocutilsWritersOdfOdtReader;
-    docutilsWritersHtml4Css1Writer?: DocutilsWritersHtml4Css1Writer;
-    docutilsWritersXetexWriter?: DocutilsWritersXetexWriter;
-    docutilsWritersHtml5PolyglotWriter?: DocutilsWritersHtml5PolyglotWriter;
-    docutilsWritersS5HtmlWriter?: DocutilsWritersS5HtmlWriter;
-    docutilsReadersPepReader?: DocutilsReadersPepReader;
-    docutilsReadersStandaloneReader?: DocutilsReadersStandaloneReader;
-
-}
+    } & DocutilsCoreOptionParser & DocutilsFrontendOptionParser & DocutilsParsersRstParser & DocutilsWritersDocutilsXmlWriter & DocutilsWritersPepHtmlWriter & DocutilsWritersLatex2EWriter & DocutilsWritersOdfOdtWriter & DocutilsWritersOdfOdtReader & DocutilsWritersHtml4Css1Writer & DocutilsWritersXetexWriter & DocutilsWritersHtml5PolyglotWriter & DocutilsWritersS5HtmlWriter & DocutilsReadersPepReader & DocutilsReadersStandaloneReader;

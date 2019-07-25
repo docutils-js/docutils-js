@@ -10,7 +10,7 @@ export default abstract class Transform implements TransformInterface {
     public constructor(document: Document, startNode?: NodeInterface) {
         this.document = document;
         this.startNode = startNode;
-        let languageCode = document.settings.docutilsCoreOptionParser.languageCode;
+        let languageCode = document.settings.languageCode;
         if(languageCode !== undefined) {
             this.language = getLanguage(languageCode,
                 document.reporter);

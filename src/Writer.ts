@@ -65,7 +65,7 @@ export default abstract class Writer extends Component {
         }
         // @ts-ignore
         this.parts.whole = this.output;
-        this.parts.encoding = this.document.settings.docutilsCoreOptionParser.outputEncoding;
+        this.parts.encoding = this.document.settings.outputEncoding;
         this.parts.version = __version__;
     }
 }

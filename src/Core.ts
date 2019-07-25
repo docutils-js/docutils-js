@@ -1,9 +1,9 @@
-import Publisher from './Publisher';
+import {Publisher} from './Publisher';
 import * as defaults from './defaults';
 
 export { Publisher };
 
-export const defaultUsage = '%prog [options] [<source> [<destination>]]';
+export const defaultUsage = '%%prog [options] [<source> [<destination>]]';
 export const defaultDescription = ('Reads from <source> (default is stdin) and writes to <destination> (default is stdout).  See <http://docutils.sf.net/docs/user/config.html> for the full reference.');
 
 /* We need a non command-line parsing based function */
