@@ -5,6 +5,7 @@ import Writer from './Writer';
 import Parser from './Parser';
 import Reader from './Reader';
 import { Settings } from '../gen/Settings';
+import { logger } from './logger';
 export { Publisher };
 
 export const defaultUsage = '%%prog [options] [<source> [<destination>]]';
@@ -38,20 +39,20 @@ export function publish(args: any): void {
 
 
 export interface PublishCmdLineArgs {
-reader?: Reader;
-readerName?: string;
-parser?: Parser;
-parserName?: string;
-writer?: Writer;
-writerName?: string;
-settings?: Settings;
-settingsSpec?: SettingsSpecType[];
-settingsOverrides?: ConfigSettings;
-configSection?: string;
-enableExitStatus?: boolean;
-argv?: string[];
-usage?: string,
-description?: string;
+    reader?: Reader;
+    readerName?: string;
+    parser?: Parser;
+    parserName?: string;
+    writer?: Writer;
+    writerName?: string;
+    settings?: Settings;
+    settingsSpec?: SettingsSpecType[];
+    settingsOverrides?: ConfigSettings;
+    configSection?: string;
+    enableExitStatus?: boolean;
+    argv?: string[];
+    usage?: string;
+    description?: string;
 }
 
 /**
@@ -67,7 +68,7 @@ description?: string;
     - `description`: Program description, output for the "--help" option
       (along with command-line option descriptions).
 */
-/// eslint-disable-next-line @typescript-eslint/no-explicit-any
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function publishCmdLine(args: PublishCmdLineArgs, cb: any): void {
     const _defaults = {
         readerName: 'standalone',
@@ -77,6 +78,7 @@ export function publishCmdLine(args: PublishCmdLineArgs, cb: any): void {
         enableExitStatus: true,
     };
     args = { ..._defaults, ...args };
+    logger.silly('publishCmdLine');
     const {
         reader, readerName, parser, parserName, writer, writerName,
         settings, settingsSpec, settingsOverrides, configSection,

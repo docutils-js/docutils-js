@@ -5,7 +5,7 @@ abstract class Output<T> extends TransformSpec {
     public supported: string[] = [];
     protected defaultDestinationPath?: string;
     public destinationPath?: string;
-    private encoding?: string;
+    public encoding?: string;
     public destination?: T;
     private errorHandler: string;
     public constructor(destination?: T, destinationPath?: string, encoding?: string, errorHandler?: string) {
@@ -23,7 +23,7 @@ abstract class Output<T> extends TransformSpec {
 
     /* istanbul ignore method */
     /* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */
-public abstract write(data: string): void;
+    public abstract write(data: string): void;
 
     /* istanbul ignore method */
     public encode(data: string): string {

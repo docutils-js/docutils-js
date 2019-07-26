@@ -14,6 +14,7 @@ import { InlinerInterface } from "./parsers/rst/types";
 import Parser from "./Parser";
 import Output from "./io/Output";
 import RSTStateMachine from "./parsers/rst/RSTStateMachine";
+import Input from './io/Input';
 
 export interface ConfigSettings{
     [name: string]: any;
@@ -629,6 +630,6 @@ export interface InputArgs {
 	    errorHandler?: string;
 	    }
 export interface InputConstructor {
-  new (args: InputArgs);
+  new (args: InputArgs): Input;
 }
 

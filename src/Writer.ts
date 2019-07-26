@@ -32,7 +32,7 @@ export default abstract class Writer extends Component {
         this.parts = {};
     }
 
-    public write(document: Document, destination: Destination|undefined): string|{}|undefined {
+    public write(document: Document, destination: Output<string>|undefined): string|{}|undefined {
         this.document = document;
         if(document !== undefined) {
             // @ts-ignore

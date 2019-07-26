@@ -1,4 +1,6 @@
 import { isIterable } from "./utils";
+import { defaultDebugFlag } from './constants';
+
 import {
     ApplicationError,
     EOFError,
@@ -29,6 +31,7 @@ import TransitionCorrection from "./TransitionCorrection";
 import UnexpectedIndentationError from "./error/UnexpectedIndentationError";
 import { name } from "ejs";
 import RSTStateMachine from "./parsers/rst/RSTStateMachine";
+import { logger } from './logger';
 
 export class StateMachineError extends Error { }
 export class UnknownStateError extends StateMachineError { }
@@ -102,21 +105,23 @@ class StateMachine implements Statemachine {
 
     private initialState?: string;
 
+/*    def __init__(self, state_classes, initial_state, debug=False): */
+/* export interface StateMachineConstructorArgs { stateFactory?: Statefactory; initialState?: string; debug?: boolean; debugFn?: DebugFunction; } */
+
     public constructor(
         args: StateMachineConstructorArgs
     ) {
         const cArgs = { ... args };
         /* Initialize instance junk that we can't do except through
            this method. */
-        this._init();
-        if (!cArgs.debug) {
-            cArgs.debug = false;
+        if (cArgs.debug === undefined) {
+            cArgs.debug = defaultDebugFlag;
         }
         if (cArgs.debug && !cArgs.debugFn) {
             // make this unexpected error?
             // throw new Error("unexpected lack of debug function");
             /* eslint-disable-next-line no-console */
-            cArgs.debugFn = console.log;
+            cArgs.debugFn = logger.debug.bind(logger);
         }
         if(cArgs.stateFactory !== undefined) {
             this.stateFactory = cArgs.stateFactory;
@@ -141,9 +146,6 @@ class StateMachine implements Statemachine {
         this.observers = [];
     }
 
-    public _init(): void {
-        // do-nothing
-    }
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     public createStateMachine(rstStateMachine: RSTStateMachine, initialState?: string, stateFactory: Statefactory|undefined=rstStateMachine.stateFactory): Statemachine {
@@ -513,7 +515,7 @@ class StateMachine implements Statemachine {
             if (result) {
                 if (this.debug) {
                     this.debugFn(`\nStateMachine.checkLine: `
-                      + `Matched transition '"${name}"`
+                      + `Matched transition '"${t}"`
                       + `in state "${state.constructor.name}`);
                 }
                 const r = method.bind(state)({ pattern, result, input: this.line },

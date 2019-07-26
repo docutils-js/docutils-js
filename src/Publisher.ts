@@ -15,6 +15,7 @@ import FileInput from "./io/FileInput";
 import FileOutput from "./io/FileOutput";
 import Input from "./io/Input";
 import { DebugFunction, Document, InputConstructor } from "./types";
+import { logger } from './logger';
 
 export interface PublisherArgs {
     reader?: Reader;
@@ -31,7 +32,7 @@ export interface PublisherArgs {
 }
 
 interface OutputConstructor<T> {
-    new (): Output<T>;
+    new (destination?: T, destinationPath?: string, encoding?: string, errorHandler?: string): Output<T>;
 }
 
 /*interface InputConstructor {
@@ -87,6 +88,8 @@ export class Publisher {
             settings, debugFn, sourceClass, destinationClass,
         } = args;
 
+        logger.silly('Publisher.constructor', args);
+
         if(debugFn !== undefined) {
             this.debugFn = debugFn;
         }
@@ -95,6 +98,7 @@ export class Publisher {
         this.parser = parser;
         this.writer = writer;
         this.source = source;
+        logger.silly('setting destination to', { destination });
         this.destination = destination;
         // @ts-ignore
         this.sourceClass = sourceClass || FileInput;
@@ -129,6 +133,7 @@ export class Publisher {
     }
 
     public setComponents(readerName: string|undefined, parserName: string|undefined, writerName: string|undefined): void {
+        logger.silly('setComponents', { readerName, parserName, writerName });
         if (!this.reader) {
             this.setReader(readerName, this.parser, parserName);
         }
@@ -174,7 +179,7 @@ export class Publisher {
             settingsOverrides: {};
         }
     ): void {
-        console.log('processCommandLine');
+        logger.silly('processCommandLine', { args: args.argv });
         try {
             const argParser: ArgumentParser = this.setupOptionParser({
                 usage: args.usage,
@@ -184,9 +189,10 @@ export class Publisher {
             if (argv === undefined) {
                 argv = process.argv.slice(2);
             }
+	    logger.silly('calling argParser.parseKnownArgs', { argv });
             const [settings, restArgs] = argParser.parseKnownArgs(argv);
             // @ts-ignore
-            this.settings! = argParser.checkValues(settings, restArgs);
+            this.settings = argParser.checkValues(settings, restArgs);
         } catch(error) {
             console.log(error.stack);
             console.log(error.message);
@@ -195,7 +201,8 @@ export class Publisher {
     }
 
     public setIO(sourcePath?: string, destinationPath?: string): void {
-        if (typeof this.source === 'undefined') {
+        logger.silly('setIO', { sourcePath, destinationPath });
+        if (this.source === undefined) {
             this.setSource({ sourcePath });
         }
         if (this.destination === undefined) {
@@ -204,6 +211,7 @@ export class Publisher {
     }
 
     public setSource(args: { source?: {}; sourcePath?: string }): void {
+        logger.silly('setSource');
         let sourcePath = args.sourcePath;
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         let source = args.source;
@@ -212,11 +220,9 @@ export class Publisher {
         } else {
             this.settings!._source = sourcePath;
         }
-        console.log(sourcePath);
 
         try {
             const SourceClass: InputConstructor = this.sourceClass!;
-	    console.log(`${SourceClass} sourceClass`);
             let inputEncoding: string | undefined = this.settings!.inputEncoding;
 
             if(SourceClass !== undefined) {
@@ -228,12 +234,13 @@ export class Publisher {
                 });
             }
         } catch (error) {
-            console.log(error);
+            logger.error(error);
             throw new ApplicationError(`Unable to instantiate Source class ${this.sourceClass!.constructor.name}: ${error.message}`, { error });
         }
     }
 
     public setDestination(args: { destination?: Output<{}>; destinationPath?: string }): void {
+        logger.silly('setDestination', args);
         let destinationPath = args.destinationPath;
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         let destination = args.destination;
@@ -242,22 +249,21 @@ export class Publisher {
         } else {
             this.settings!._destination = destinationPath;
         }
-        //const DestinationClass = this.destinationClass;
+        const DestinationClass = this.destinationClass!;
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const outputEncoding = this.settings!.outputEncoding;
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         let outputEncodingErrorHandler = this.settings!.outputEncodingErrorHandler;
-        // this.destination = new DestinationClass(
-        //     {
-        //         destination,
-        //         destinationPath,
-        //         encoding: outputEncoding,
-        //         errorHandler: outputEncodingErrorHandler,
-        //     },
-        // );
+         this.destination = new DestinationClass(
+                 destination,
+                 destinationPath,
+                 outputEncoding,
+                 outputEncodingErrorHandler,
+         );
     }
 
     public applyTransforms(): void {
+        logger.silly('applyTransforms');
         const document1 = this.document;
         if(document1 === undefined) {
             throw new InvalidStateError('Document undefined');
@@ -278,6 +284,7 @@ export class Publisher {
     /* This doesnt seem to return anything ? */
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     public publish(args: any, cb: (error: Error | undefined | {}, output: undefined | {}) => void): void {
+        logger.silly('publish');
 
         const {
             /* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */
@@ -285,19 +292,14 @@ export class Publisher {
         } = args;
         /* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */
         try {
-            if (this.settings! === undefined) {
+            if (this.settings === undefined) {
                 this.processCommandLine({
                     argv, usage, description, settingsSpec, configSection, settingsOverrides,
                 });
             }
-            // console.log(this.source);
             this.setIO();
 
-            // KM
-            //          console.log('*** about to call read');
-            /* we may need to change semantics here !! */
-
-            if (typeof this.reader === 'undefined') {
+            if (this.reader === undefined) {
                 throw new ApplicationError('Need defined reader with "read" method');
             }
             if(this.writer === undefined || this.source === undefined || this.parser === undefined) {
@@ -307,6 +309,7 @@ export class Publisher {
             if(this.settings! === undefined) {
                 throw new InvalidStateError('need serttings');
             }
+	    logger.silly('calling reader.read', { reader: this.reader});
             this.reader.read(
                 this.source, this.parser, this.settings!,
                 ((error: Error | {} | undefined, document: Document|undefined): void => {
@@ -315,12 +318,14 @@ export class Publisher {
                         return;
                     }
                     this._document = document;
-                    if (document === undefined || this.destination === undefined) {
-                        throw new InvalidStateError('need document and destination');
+                    if (document === undefined) {
+		    throw new InvalidStateError('need document');
+		    }
+		    if(this.destination === undefined) {
+		    throw new InvalidStateError('need destination');
                     }
                     this.applyTransforms();
 
-                    // @ts-ignore
                     const output = writer.write(document, this.destination);
                     writer.assembleParts();
 		    this.debuggingDumps();
