@@ -15,7 +15,7 @@ import { logger } from '../logger';
 /* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */
 const __docformat__ = 'reStructuredText';
 export interface TemplateVars {
-    [varName: string]: string|(() => string);
+    [varName: string]: string|(() => string)|undefined;
 }
 
 interface AttributionFormats {
@@ -23,6 +23,7 @@ interface AttributionFormats {
     parentheses: string[];
     parens: string[];
     none: string[];
+    [name: string]: string[];
 }
 
 /* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */
@@ -143,8 +144,8 @@ class HTMLTranslator extends nodes.NodeVisitor {
     private meta: string[];
     private headPrefix: string[];
     private htmlProlog: string[];
-    private compactSimple: boolean;
-    private context: (string|[boolean,boolean])[] = [];
+    private compactSimple?: boolean;
+    private context: Array<any> = [];
     private compactParagraph?: boolean;
     private bodyPreDocinfo: string[];
     private inDocumentTitle: number;
@@ -158,7 +159,7 @@ class HTMLTranslator extends nodes.NodeVisitor {
     private inFootnoteList: boolean;
     private head: string[];
     private docinfo: string[];
-    private attributionFormats: AttributionFormats;
+    private attributionFormats?: AttributionFormats;
     private mathHeader: string[];
     private authorInAuthors: boolean;
     private htmlBody: string[];
@@ -492,7 +493,7 @@ class HTMLTranslator extends nodes.NodeVisitor {
 
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
     public visit_attribution(node: NodeInterface): void {
-        const [prefix, suffix] = this.attributionFormats[this.attribution];
+        const [prefix, suffix] = this.attributionFormats![this.attribution];
         this.context.push(suffix);
         this.body.push(
             this.starttag(node, 'p', prefix, false, { CLASS: 'attribution' }),
@@ -925,7 +926,7 @@ class HTMLTranslator extends nodes.NodeVisitor {
     }
 
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
-    public visit_entry(node: NodeInterface): void {
+    public visit_entry(node: nodes.entry): void {
         const atts: Attributes = { class: [] };
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         if (node.parent!.parent instanceof nodes.thead) {
@@ -934,12 +935,13 @@ class HTMLTranslator extends nodes.NodeVisitor {
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         const ggParent = node.parent!.parent!.parent!;
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        let stubs: any[] = ggParent.getCustomAttr('stubs');
+//        let stubs: any[] = ggParent.getCustomAttr('stubs');
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        if(stubs[node.parent!.getCustomAttr('column')]) {
+
+/*        if(stubs[node.parent!.getCustomAttr('column')]) {
             // "stubs" list is an attribute of the tgroup element
             atts.class.push('stub');
-        }
+        }*/
         let tagname;
         if (atts.class.length) {
             tagname = 'th';
@@ -950,7 +952,7 @@ class HTMLTranslator extends nodes.NodeVisitor {
         }
 
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        node.parent!.column += 1;
+        (node.parent! as nodes.row).column! += 1;
         if ('morerows' in node.attributes) {
             atts.rowspan = node.attributes.morerows + 1;
         }
@@ -1317,7 +1319,8 @@ class HTMLTranslator extends nodes.NodeVisitor {
         if (classes.indexOf('code') !== -1) {
             // filter 'code' from class arguments
             // fixme //node.attributes['classes'] = [cls for cls in classes if cls != 'code']
-            return this.body.push(this.starttag(node, 'span', '', false, { CLASS: 'docutils literal' }));
+            this.body.push(this.starttag(node, 'span', '', false, { CLASS: 'docutils literal' }));
+return;
         }
         /* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */
         let text = node.astext();
@@ -2000,7 +2003,7 @@ class HTMLTranslator extends nodes.NodeVisitor {
 
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,@typescript-eslint/no-unused-vars,no-unused-vars */
     public depart_title(node: NodeInterface): void {
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        // @ts-ignore
         this.body.push(this.context.pop()!);
         if (this.inDocumentTitle) {
             this.title = this.body.slice(this.inDocumentTitle, this.body.length - 2);
@@ -2027,7 +2030,7 @@ class HTMLTranslator extends nodes.NodeVisitor {
 
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,@typescript-eslint/no-unused-vars,no-unused-vars */
     public depart_bullet_list(node: NodeInterface): void {
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion @ts-ignore
         [ this.compactSimple, this.compactParagraph ] = this.context.pop()!;
         this.body.push('</ul>\n');
     }
@@ -2096,7 +2099,7 @@ class HTMLBaseWriter extends BaseWriter {
         'bodySuffix', 'title',' subtitle', 'header', 'footer', 'meta', 'fragment', 'htmlProlog', 'htmlHead', 'htmlTitle', 'htmlSubtitle',
         'htmlBody'];
     /*    private defaultTemplateContent: any;*/
-    private visitor: HTMLTranslator;
+    private visitor?: HTMLTranslator;
     /*    private attr: any;*/
     private translatorClass: typeof HTMLTranslator;
     private template: TemplateFunction;
@@ -2339,14 +2342,15 @@ class HTMLBaseWriter extends BaseWriter {
      */
     public constructor() {
         super();
-        this.attr = {};
+//        this.attr = {};
         this.translatorClass = HTMLTranslator;
         // this.defaultTemplateContent = defaultTemplate;
         this.template = template;
     }
 
     public translate(): void {
-        this.visitor = new this.translatorClass(this.document);
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        this.visitor = new this.translatorClass(this.document!);
         const visitor = this.visitor;
         if (!visitor) {
             throw new Error();
@@ -2368,7 +2372,7 @@ class HTMLBaseWriter extends BaseWriter {
         this.output = this.template!(o);
     }
 
-    public applyTemplate(): void {
+    public applyTemplate(): string {
         /* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */
         /*        const templateContent = this.defaultTemplateContent;*/
         /*        template_file = open(this.document.settings.template, 'rb')

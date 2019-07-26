@@ -251,6 +251,9 @@ const SkipDeparture = class {
 };
 const SkipSiblings = class {
 };
+const NodeFound = class {
+};
+
 
 /**
  *  "Visitor" pattern [GoF95]_ abstract superclass implementation for
@@ -2934,5 +2937,6 @@ export {
     SkipDeparture,
     SkipSiblings,
     FixedTextElement,
+NodeFound,
 
 };
