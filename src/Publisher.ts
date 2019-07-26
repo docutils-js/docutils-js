@@ -25,6 +25,7 @@ export interface PublisherArgs {
     sourceClass?: InputConstructor;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     destination?: Output<any>;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     destinationClass?: OutputConstructor<any>;
     settings?: Settings;
     debugFn?: DebugFunction;
@@ -60,6 +61,7 @@ export class Publisher {
     //KM1 private sourceClass?: InputConstructor;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     private destination?: Output<string>;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     private destinationClass?: OutputConstructor<any>;
     private debug: boolean = false;
 
@@ -254,12 +256,12 @@ export class Publisher {
         const outputEncoding = this.settings!.outputEncoding;
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         let outputEncodingErrorHandler = this.settings!.outputEncodingErrorHandler;
-         this.destination = new DestinationClass(
-                 destination,
-                 destinationPath,
-                 outputEncoding,
-                 outputEncodingErrorHandler,
-         );
+        this.destination = new DestinationClass(
+            destination,
+            destinationPath,
+            outputEncoding,
+            outputEncodingErrorHandler,
+        );
     }
 
     public applyTransforms(): void {
@@ -338,7 +340,7 @@ export class Publisher {
         }
     }
 
-    public debuggingDumps() {
+    public debuggingDumps(): void {
         if(this.settings!.dumpSettings) {
             process.stderr.write(JSON.stringify(this.settings!, null, 4));
         }
