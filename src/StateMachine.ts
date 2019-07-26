@@ -105,8 +105,8 @@ class StateMachine implements Statemachine {
 
     private initialState?: string;
 
-/*    def __init__(self, state_classes, initial_state, debug=False): */
-/* export interface StateMachineConstructorArgs { stateFactory?: Statefactory; initialState?: string; debug?: boolean; debugFn?: DebugFunction; } */
+    /*    def __init__(self, state_classes, initial_state, debug=False): */
+    /* export interface StateMachineConstructorArgs { stateFactory?: Statefactory; initialState?: string; debug?: boolean; debugFn?: DebugFunction; } */
 
     public constructor(
         args: StateMachineConstructorArgs

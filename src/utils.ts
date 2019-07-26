@@ -360,14 +360,14 @@ function toRoman(input: number): string {
     let s: string|undefined;
     let i = 0;
     let v = [1000, 900, 500, 400, 100, 90, 50, 40, 10, 9, 5, 4, 1];
-let r: string[] = ['M', 'CM', 'D', 'CD', 'C', 'XC', 'L', 'XL', 'X', 'IX', 'V', 'IV', 'I'];
+    let r: string[] = ['M', 'CM', 'D', 'CD', 'C', 'XC', 'L', 'XL', 'X', 'IX', 'V', 'IV', 'I'];
 
-    function toBigRoman(n:number): string {
-    let n1:number|undefined;
+    function toBigRoman(n: number): string {
+        let n1: number|undefined;
         let ret = '', rem = n;
         while (rem > 1000) {
 	 let is: number|undefined = rem;
-           let prefix = '', suffix = '', n = rem, magnitude = 1;
+            let prefix = '', suffix = '', n = rem, magnitude = 1;
             while (n > 1000) {
                 n /= 1000;
                 magnitude *= 1000;

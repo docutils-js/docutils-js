@@ -1486,11 +1486,11 @@ class document extends Element implements Document {
 
     public transformer: Transformer;
 
-public substitutionDefs: SubstitutionDefs;
+    public substitutionDefs: SubstitutionDefs;
 
-public substitutionNames: SubstitutionNames;
+    public substitutionNames: SubstitutionNames;
 
-public citationRefs: RefNames;
+    public citationRefs: RefNames;
 
     private citations: NodeInterface[];
 

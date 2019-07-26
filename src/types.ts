@@ -20,7 +20,7 @@ export interface ConfigSettings{
     [name: string]: any;
 }
 
-export type SettingsSpecType = [string|undefined, string|undefined|null, [string, string[], { [name:string]: any }][]];
+export type SettingsSpecType = [string|undefined, string|undefined|null, [string, string[], { [name: string]: any }][]];
 
 export type StateType = StateInterface | string;
 export interface OptionSpec {
@@ -209,10 +209,10 @@ export interface Ids {
 export interface Document extends ElementInterface {
     transformMessages: Systemmessage[];
     nameIds: NameIds;
-parseMessages: Systemmessage[];
-substitutionDefs: SubstitutionDefs;
+    parseMessages: Systemmessage[];
+    substitutionDefs: SubstitutionDefs;
 
-substitutionNames: SubstitutionNames;
+    substitutionNames: SubstitutionNames;
 
     reporter: ReporterInterface;
     settings: Settings;
@@ -609,7 +609,7 @@ export type ParseResult  = [NodeInterface[], boolean];
 export type IsolateTableResult= [StringList, NodeInterface[], boolean]
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface StateConstructor {
-stateName?: string;
+    stateName?: string;
 }
 
 export interface RegexpResult {
@@ -624,12 +624,12 @@ export interface Patterns {
     [patternName: string]: RegExp;
 }
 export interface InputArgs {
-            source?: {};
+    source?: {};
 	    sourcePath?: string;
 	    encoding?: string;
 	    errorHandler?: string;
 	    }
 export interface InputConstructor {
-  new (args: InputArgs): Input;
+    new (args: InputArgs): Input;
 }
 
