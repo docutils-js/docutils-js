@@ -145,7 +145,7 @@ class HTMLTranslator extends nodes.NodeVisitor {
     private headPrefix: string[];
     private htmlProlog: string[];
     private compactSimple?: boolean;
-    private context: Array<any> = [];
+    private context: any[] = [];
     private compactParagraph?: boolean;
     private bodyPreDocinfo: string[];
     private inDocumentTitle: number;
@@ -935,10 +935,10 @@ class HTMLTranslator extends nodes.NodeVisitor {
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         const ggParent = node.parent!.parent!.parent!;
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-//        let stubs: any[] = ggParent.getCustomAttr('stubs');
+        //        let stubs: any[] = ggParent.getCustomAttr('stubs');
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 
-/*        if(stubs[node.parent!.getCustomAttr('column')]) {
+        /*        if(stubs[node.parent!.getCustomAttr('column')]) {
             // "stubs" list is an attribute of the tgroup element
             atts.class.push('stub');
         }*/
@@ -958,7 +958,6 @@ class HTMLTranslator extends nodes.NodeVisitor {
         }
         if ('morecols' in node.attributes) {
             atts.colspan = node.attributes.morecols + 1;
-            // eslint-disable-next-line @typescript-eslint/no-angle-bracket-type-assertion
             // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             (node.parent! as row).column += node.attributes.morecols;
         }
@@ -1320,7 +1319,7 @@ class HTMLTranslator extends nodes.NodeVisitor {
             // filter 'code' from class arguments
             // fixme //node.attributes['classes'] = [cls for cls in classes if cls != 'code']
             this.body.push(this.starttag(node, 'span', '', false, { CLASS: 'docutils literal' }));
-return;
+            return;
         }
         /* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */
         let text = node.astext();
@@ -2342,7 +2341,7 @@ class HTMLBaseWriter extends BaseWriter {
      */
     public constructor() {
         super();
-//        this.attr = {};
+        //        this.attr = {};
         this.translatorClass = HTMLTranslator;
         // this.defaultTemplateContent = defaultTemplate;
         this.template = template;

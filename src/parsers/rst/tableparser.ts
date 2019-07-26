@@ -414,11 +414,11 @@ class GridTableParser extends TableParser {
             colspecs.push(colseps[i] - colseps[i - 1] - 1);
         }
         // prepare an empty table with the correct number of rows & columns
-	// untyped ..
+        // untyped ..
         const onerow = new Array(colseps.length - 1).fill(undefined);
         const rows: TableEntryData[][] = [];
         for (let i = 0; i < rowseps.length - 1; i += 1) {
-	// @ts-ignore
+            // @ts-ignore
             rows.push(onerow.slice());
         }
         // keep track of # of cells remaining; should reduce to zero
@@ -442,7 +442,7 @@ class GridTableParser extends TableParser {
             throw new Error('Unused cells remaining.');
         }
         let numheadrows;
-        let bodyrows:RowData[];
+        let bodyrows: RowData[];
         let headrows: RowData[] = [];
         if (this.headBodySep) { // :          # separate head rows from body rows
             numheadrows = rowindex[this.headBodySep];

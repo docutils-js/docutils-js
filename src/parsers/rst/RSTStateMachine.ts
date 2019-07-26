@@ -43,14 +43,14 @@ class RSTStateMachine extends StateMachineWS implements Rststatemachine {
         this.inputLines = inputLines;
         this.inputOffset = inputOffset;
         try {
-if(document.settings === undefined) {
-    throw new Error('unexpected');
-}
-        const languageCode = document.settings.languageCode;
-        if (languageCode !== undefined) {
-            this.rstLanguage = getLanguage(languageCode);
-        }
-    } catch(error) {
+            if(document.settings === undefined) {
+                throw new Error('unexpected');
+            }
+            const languageCode = document.settings.languageCode;
+            if (languageCode !== undefined) {
+                this.rstLanguage = getLanguage(languageCode);
+            }
+        } catch(error) {
             console.log(error);
             throw error;
         }

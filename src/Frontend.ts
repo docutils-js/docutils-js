@@ -26,23 +26,9 @@ Also exports the following functions:
 import camelcase from 'camelcase';
 import {ArgumentParser} from 'argparse';
 export const __docformat__ = 'reStructuredText';
-import Component from'./Component';
 import SettingsSpec from'./SettingsSpec';
 import { SettingsSpecType, ConfigSettings } from './types';
 import { logger } from './logger';
-
-/**     Store multiple values in `parser.values`.  (Option callback.)
-    Store `None` for each attribute named in `args`, and store the value for
-    each key (attribute name) in `kwargs`.
-*/
-export function storeMultiple() {//option, opt, value, parser): void {//, *args, **kwargs):
-/*
-    for attribute in args:
-        setattr(parser.values, attribute, None)
-    for key, value in kwargs.items():
-        setattr(parser.values, key, value)
-	*/
-}
 
 /**     Read a configuration file during option processing.  (Option callback.) */
 function readConfigFile(){//option, opt, value, parser) {
@@ -956,24 +942,24 @@ export class OptionParser extends ArgumentParser {
     public defaults: ConfigSettings = {};
     /** Docutils configuration files, using ConfigParser syntax.  Filenames
     will be tilde-expanded later.  Later files override earlier ones. */
-    standardConfigFiles: string[] = [
+    public standardConfigFiles: string[] = [
         '/etc/docutils.conf',           // system-wide
         './docutils.conf',              // project-specific
         '~/.docutils'];                  // user-specific
     /** Possible inputs for for --report and --halt threshold values. */
-    thresholdChoices: string[] = ['info', '1', 'warning', '2','error', '3', 'severe', '4', 'none', '5'];
+    public thresholdChoices: string[] = ['info', '1', 'warning', '2','error', '3', 'severe', '4', 'none', '5'];
 
     /**Lookup table for --report and --halt threshold values.*/
-    thresholds: { info: number; warning: number;error: number; severe: number; none: number }= {'info': 1, 'warning': 2, 'error': 3, 'severe': 4, 'none': 5}
+    public thresholds: { info: number; warning: number;error: number; severe: number; none: number }= {'info': 1, 'warning': 2, 'error': 3, 'severe': 4, 'none': 5}
 
     /**Lookup table for boolean configuration file settings.*/
-    booleans: { [val: string]: boolean } = {'1': true, 'on': true,
+    public booleans: { [val: string]: boolean } = {'1': true, 'on': true,
         'yes': true, 'true': true, '0': false, 'off': false, 'no':
     false, 'false': false, '': false};
 
-    defaultErrorEncoding = '';/*getattr(sys.stderr, 'encoding', None) or locale_encoding or 'ascii'*/
+    public defaultErrorEncoding = '';/*getattr(sys.stderr, 'encoding', None) or locale_encoding or 'ascii'*/
 
-    defaultErrorEncodingErrorHandler = 'backslashreplace'
+    public defaultErrorEncodingErrorHandler = 'backslashreplace'
 
 
     /**
@@ -986,12 +972,12 @@ export class OptionParser extends ArgumentParser {
 
     public relativePathSettings: string[] = ['warning_stream'];
 
-    configSection = 'general'
+    public configSection = 'general'
 
     public components: (SettingsSpec|undefined)[] = [];
 
     /** Default version message. */
-    versionTemplate = '';
+    public versionTemplate = '';
 
     public constructor(args: OptionParserArgs) {
         super({usage: args.usage, description: args.description});

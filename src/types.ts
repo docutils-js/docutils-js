@@ -16,7 +16,7 @@ import Output from "./io/Output";
 import RSTStateMachine from "./parsers/rst/RSTStateMachine";
 import Input from './io/Input';
 
-export interface ConfigSettings{
+export interface ConfigSettings {
     [name: string]: any;
 }
 

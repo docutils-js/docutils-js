@@ -25,7 +25,7 @@ import {
     IsolateTableResult,
 } from "../../../types";
 import {     BodyState,
-ParserConstructor, DirectiveConstructor, TableData} from '../types';
+    ParserConstructor, DirectiveConstructor, TableData} from '../types';
 import { fullyNormalizeName } from "../../../nodeUtils";
 
 const nonWhitespaceEscapeBefore = RegExps.nonWhitespaceEscapeBefore;
@@ -1102,7 +1102,7 @@ class Body extends RSTState implements BodyState {
         return [listitem, blankFinish];
     }
 
-/**         Construct and return the next enumerated list item marker, and an
+    /**         Construct and return the next enumerated list item marker, and an
         auto-enumerator ("#" instead of the regular enumerator).
 
         Return ``None`` for invalid (out of range) ordinals.
@@ -1142,8 +1142,8 @@ try {
         auto_enumerator = formatinfo.prefix + '#' + formatinfo.suffix + ' '
         return next_enumerator, auto_enumerator
 	*/
-	return undefined;
-	}
+        return undefined;
+    }
 
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
     public field_marker(match: RegexpResult, context: ContextArray, nextState: StateInterface): ParseMethodReturnType {
@@ -1671,7 +1671,7 @@ try {
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
     public build_table(tabledata: TableData, tableline: number, stubColumns: number = 0, widths?: string): nodes.table {
         const [colwidths, headRows, bodyrows] = tabledata;
-	console.log(headRows);
+        console.log(headRows);
         const table = nodesFactory.table();
         if (widths === "auto") {
             table.attributes.classes.push("colwidths-auto");
@@ -1698,13 +1698,13 @@ try {
         }
         const tbody = nodesFactory.tbody();
         tgroup.add(tbody);
-	// @ts-ignore
-	bodyrows.forEach((row: RowData): void => {
-	console.log(row);
-	});
-	// @ts-ignore
+        // @ts-ignore
+        bodyrows.forEach((row: RowData): void => {
+            console.log(row);
+        });
+        // @ts-ignore
         bodyrows.map((row: RowData): nodes.row => this.buildTableRow(row, tableline))
-	// @ts-ignore
+        // @ts-ignore
             .forEach((row: nodes.row): void => tbody.add(row));
         return table;
     }

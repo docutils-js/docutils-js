@@ -29,18 +29,18 @@ export type CellData = [number, number, number,number, StringList];
 export type TableEntryData = [number, number, number, StringList];
 export type TableData = [number[], RowData[], RowData[]]
 export interface ParserConstructor {
-new (): any;
+    new (): any;
 }
 
 export interface DirectiveConstructor {
-new (typeName: string, args: string[], options: Options, content: StringList, lineno: number,
-            contentOffset: number, blockText: string, u: any, stateMachine: Rststatemachine): any;
+    new (typeName: string, args: string[], options: Options, content: StringList, lineno: number,
+        contentOffset: number, blockText: string, u: any, stateMachine: Rststatemachine): any;
 
-optionalArguments:any;
-requiredArguments: any;
-optionSpec:any;
-hasContent: boolean;
-finalArgumentWhitespace:boolean;
+    optionalArguments: any;
+    requiredArguments: any;
+    optionSpec: any;
+    hasContent: boolean;
+    finalArgumentWhitespace: boolean;
 }
 
 interface ConstructCallback {

@@ -56,25 +56,25 @@ class EnumeratedList extends SpecializedBody {
                 return true;
             }
 	    }
-            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-            this.stateMachine!.previousLine();
-            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-            if(!nextLine!.substring(0, 1).trim()) {
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        this.stateMachine!.previousLine();
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        if(!nextLine!.substring(0, 1).trim()) {
+            return true;
+        }
+        const result = this.make_enumerator(ordinal + 1, sequence, format);
+        if(result) {
+            const [ nextEnumerator, autoEnumerator] = result;
+            if(nextLine!.startsWith(nextEnumerator)
+  || nextLine!.startsWith(autoEnumerator)) {
                 return true;
             }
-            const result = this.make_enumerator(ordinal + 1, sequence, format);
-            if(result) {
-                const [ nextEnumerator, autoEnumerator] = result;
-                if(nextLine!.startsWith(nextEnumerator)
-  || nextLine!.startsWith(autoEnumerator)) {
-                    return true;
-                }
-                return false;
-            }
+            return false;
+        }
 	    return false;
     }
   
-/**
+    /**
         Analyze an enumerator and return the results.
 
         :Return:
@@ -91,9 +91,9 @@ class EnumeratedList extends SpecializedBody {
         matched. If no sequence has been matched, all sequences are checked in
         order.
 */
-private parse_enumerator(match: RegexpResult, enumtype: string): any[] {
+    private parse_enumerator(match: RegexpResult, enumtype: string): any[] {
 
-    // fixme implement
+        // fixme implement
         return [];
     }
 }

@@ -22,7 +22,7 @@ class Image extends Directive {
     ;
 
     private alignValues: string[] = [...this.alignHValues, ...this.alignVValues];
-/*    public constructor(args: { name: string; args: string[]; options: Options; content: any; lineno: number; contentOffset: number; blockText: StringList; state: Body; stateMachine: Statemachine }) {
+    /*    public constructor(args: { name: string; args: string[]; options: Options; content: any; lineno: number; contentOffset: number; blockText: StringList; state: Body; stateMachine: Statemachine }) {
         super(args);
     }
 */
@@ -31,7 +31,7 @@ class Image extends Directive {
         return directives.choice(argument);
     }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     private addName(imageNode: NodeInterface) {
 
     }

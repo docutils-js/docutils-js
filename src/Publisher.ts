@@ -169,6 +169,7 @@ export class Publisher {
                 settingsSpec2.configSectionDependencies = ['applications'];
             }
         }
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         settingsSpec2 = settingsSpec2!;
         const optionParser = new OptionParser({components: [this.parser, this.reader,this.writer, settingsSpec2], defaults, readConfigFiles:true, usage,description});
         return optionParser;
@@ -218,13 +219,17 @@ export class Publisher {
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         let source = args.source;
         if (typeof sourcePath === 'undefined') {
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             sourcePath = this.settings!._source;
         } else {
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             this.settings!._source = sourcePath;
         }
 
         try {
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             const SourceClass: InputConstructor = this.sourceClass!;
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             let inputEncoding: string | undefined = this.settings!.inputEncoding;
 
             if(SourceClass !== undefined) {
@@ -237,6 +242,7 @@ export class Publisher {
             }
         } catch (error) {
             logger.error(error);
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             throw new ApplicationError(`Unable to instantiate Source class ${this.sourceClass!.constructor.name}: ${error.message}`, { error });
         }
     }
@@ -247,14 +253,17 @@ export class Publisher {
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         let destination = args.destination;
         if (destinationPath === undefined) {
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             destinationPath = this.settings!._destination;
         } else {
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             this.settings!._destination = destinationPath;
         }
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         const DestinationClass = this.destinationClass!;
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion,@typescript-eslint/no-unused-vars
         const outputEncoding = this.settings!.outputEncoding;
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion,@typescript-eslint/no-unused-vars
         let outputEncodingErrorHandler = this.settings!.outputEncodingErrorHandler;
         this.destination = new DestinationClass(
             destination,
@@ -308,11 +317,13 @@ export class Publisher {
                 throw new InvalidStateError('need Writer and source');
             }
             const writer = this.writer;
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             if(this.settings! === undefined) {
                 throw new InvalidStateError('need serttings');
             }
 	    logger.silly('calling reader.read', { reader: this.reader});
             this.reader.read(
+                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
                 this.source, this.parser, this.settings!,
                 ((error: Error | {} | undefined, document: Document|undefined): void => {
                     if (error) {
@@ -341,6 +352,7 @@ export class Publisher {
     }
 
     public debuggingDumps(): void {
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         if(this.settings!.dumpSettings) {
             process.stderr.write(JSON.stringify(this.settings!, null, 4));
         }

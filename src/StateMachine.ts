@@ -22,14 +22,12 @@ import {
     Statemachine,
     StateMachineConstructorArgs,
     States,
-    StateType,
     TransitionsArray,
     StateConstructor,
 } from "./types";
 import State from "./states/State";
 import TransitionCorrection from "./TransitionCorrection";
 import UnexpectedIndentationError from "./error/UnexpectedIndentationError";
-import { name } from "ejs";
 import RSTStateMachine from "./parsers/rst/RSTStateMachine";
 import { logger } from './logger';
 
@@ -534,17 +532,13 @@ class StateMachine implements Statemachine {
     }
 
     public addState(stateClass: StateConstructor): void {
-        if (typeof stateClass === 'undefined') {
-        // throw new InvalidArgumentsError('stateClass should be a class');
-            return;
-        }
         let stateName;
         if (typeof stateClass === 'string') {
             stateName = stateClass;
         } else {
             stateName = stateClass.stateName;
         }
-        // console.log(`adding state ${stateName}`);
+        logger.silly(`adding state ${stateName}`, { stateName });
 
         if(this.hasState(stateName!)) {
             throw new DuplicateStateError(stateName);

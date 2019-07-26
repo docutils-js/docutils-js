@@ -2937,6 +2937,6 @@ export {
     SkipDeparture,
     SkipSiblings,
     FixedTextElement,
-NodeFound,
+    NodeFound,
 
 };

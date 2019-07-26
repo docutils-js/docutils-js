@@ -1,6 +1,6 @@
 import Component from "./Component";
 import { getLanguage } from "./languages";
-import { Destination, Document, WriterParts } from "./types";
+import { Document, WriterParts } from "./types";
 import Output from "./io/Output";
 import { InvalidStateError } from "./Exceptions";
 

@@ -22,14 +22,14 @@ class SpecializedText extends Text {
     /* istanbul ignore next */
     public indent(match: RegexpResult, context: ContextArray, nextState: StateInterface): ParseMethodReturnType {
         this.invalidInput();
-	// @ts-ignore
-	return [];
+        // @ts-ignore
+        return [];
     }
 
     /* istanbul ignore next */
     public text(match: RegexpResult, context: ContextArray, nextState: StateInterface): ParseMethodReturnType {
         this.invalidInput();
-	// @ts-ignore
+        // @ts-ignore
         return [];
     }
 

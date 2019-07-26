@@ -132,8 +132,8 @@ class Inliner implements InlinerInterface {
         };
         this.document = document;
 
-this.reporter = document.reporter;
-this.implicitDispatch = [];
+        this.reporter = document.reporter;
+        this.implicitDispatch = [];
         this.nonWhitespaceAfter = '';
         this.nonWhitespaceBefore = '(?<!\\s)';
         this.nonWhitespaceEscapeBefore = '(?<![\\s\\x00])';
