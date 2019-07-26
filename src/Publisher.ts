@@ -17,6 +17,24 @@ import Input from "./io/Input";
 import { DebugFunction, Document, InputConstructor } from "./types";
 import { logger } from './logger';
 
+export interface SetupOptionParserArgs
+{
+    usage?: string;
+    description?: string;
+    settingsSpec?: SettingsSpec;
+    configSection?: string;
+    defaults?: {};
+}
+
+export interface ProcessCommandLineArgs {
+    argv: string[];
+    usage?: string;
+    description?: string;
+    settingsSpec?: SettingsSpec;
+    configSection?: string;
+    settingsOverrides?: {};
+}
+
 export interface PublisherArgs {
     reader?: Reader;
     parser?: Parser;
@@ -50,7 +68,7 @@ export class Publisher {
         return this._document;
     }
     private sourceClass?: InputConstructor;
-    private settings?: Settings;
+    public settings?: Settings;
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     private debugFn: DebugFunction = (msg: string): void => {};
     private reader?: Reader;
@@ -151,12 +169,9 @@ export class Publisher {
     }
 
     public setupOptionParser(
-        args: {
-            usage: string; description: string; settingsSpec?: SettingsSpec;
-            configSection?: string; defaults?: {};
-        }
+        args: SetupOptionParserArgs,
     ): ArgumentParser {
-        console.log('setupOptionParser');
+        logger.silly('setupOptionParser');
         const { usage, description, settingsSpec, configSection, defaults } = args;
         let settingsSpec2 = settingsSpec;
         if (configSection) {
@@ -177,10 +192,7 @@ export class Publisher {
 
     public processCommandLine(
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        args: {
-            argv: string[]; usage: string; description: string; settingsSpec: SettingsSpec; configSection: string;
-            settingsOverrides: {};
-        }
+        args: ProcessCommandLineArgs,
     ): void {
         logger.silly('processCommandLine', { args: args.argv });
         try {

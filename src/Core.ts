@@ -56,18 +56,19 @@ export interface PublishCmdLineArgs {
 }
 
 /**
-    Set up & run a `Publisher` for command-line-based file I/O (input and
-    output file paths taken automatically from the command line).  Return the
-    encoded string output also.
-
-    Parameters: see `publish_programmatically` for the remainder.
-
-    - `argv`: Command-line argument list to use instead of ``sys.argv[1:]``.
-    - `usage`: Usage string, output if there's a problem parsing the command
-      line.
-    - `description`: Program description, output for the "--help" option
-      (along with command-line option descriptions).
-*/
+ *  Set up & run a `Publisher` for command-line-based file I/O (input and
+ *  output file paths taken automatically from the command line).  Return the
+ *  encoded string output also.
+ *
+ *  Parameters: see `publish_programmatically` for the remainder.
+ *
+ *  - `argv`: Command-line argument list to use instead of ``sys.argv[1:]``.
+ *  - `usage`: Usage string, output if there's a problem parsing the command
+ *    line.
+ *  - `description`: Program description, output for the "--help" option
+ *    (along with command-line option descriptions).
+ *
+ */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function publishCmdLine(args: PublishCmdLineArgs, cb: any): void {
     const _defaults = {

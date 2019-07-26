@@ -29,7 +29,8 @@ import State from "./states/State";
 import TransitionCorrection from "./TransitionCorrection";
 import UnexpectedIndentationError from "./error/UnexpectedIndentationError";
 import RSTStateMachine from "./parsers/rst/RSTStateMachine";
-import { logger } from './logger';
+import { child } from './logger';
+const logger = child({'class': 'StateMachine'});
 
 export class StateMachineError extends Error { }
 export class UnknownStateError extends StateMachineError { }
@@ -483,6 +484,7 @@ class StateMachine implements Statemachine {
      */
     public checkLine(context: {}[], state: StateInterface,
         transitions?: TransitionsArray):  [{}[], (string | StateInterface | undefined), {}[]] {
+	logger.silly({kind: 'enterFunction', function: 'checkLine'});
         /* istanbul ignore if */
         if (!Array.isArray(context)) {
             throw new Error('context should be array');
@@ -509,6 +511,7 @@ class StateMachine implements Statemachine {
             if(!pattern.exec){
                 throw new InvalidStateError(`unexpected pattern ${v}`);
             }
+	    logger.silly(`executing pattern ${pattern} on line ${this.line}`,{ pattern, line: this.line });
             const result = pattern.exec(this.line);
             if (result) {
                 if (this.debug) {

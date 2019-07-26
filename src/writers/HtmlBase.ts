@@ -10,8 +10,9 @@ import {Document, Attributes, NodeInterface, SettingsSpecType} from "../types";
 import {row, tgroup} from "../nodes";
 import { RSTLanguage } from "../parsers/rst/types";
 import { getLanguage } from "../parsers/rst/languages";
-import { logger } from '../logger';
+import { logger as baseLogger } from '../logger';
 
+const logger = baseLogger.child({'class': 'HtmlBase'});
 /* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */
 const __docformat__ = 'reStructuredText';
 export interface TemplateVars {

@@ -77,6 +77,7 @@
     "stacktrace-js": "^2.0.0",
     "ts-node": "^8.2.0",
     "tsdoc": "^0.0.4",
+    "upath": "^1.1.2",
     "uuid": "^3.3.2",
     "xml-escape": "^1.1.0",
     "xml-formatter": "^1.1.0",

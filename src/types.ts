@@ -16,6 +16,8 @@ import Output from "./io/Output";
 import RSTStateMachine from "./parsers/rst/RSTStateMachine";
 import Input from './io/Input';
 
+export type Omit<T, K> = Pick<T, Exclude<keyof T, K>>;
+
 export interface ConfigSettings {
     [name: string]: any;
 }
@@ -623,13 +625,13 @@ export type ContextArray = string[];
 export interface Patterns {
     [patternName: string]: RegExp;
 }
-export interface InputArgs {
+export interface InputConstructorArgs {
     source?: {};
 	    sourcePath?: string;
 	    encoding?: string;
 	    errorHandler?: string;
 	    }
 export interface InputConstructor {
-    new (args: InputArgs): Input;
+    new (args: InputConstructorArgs): Input;
 }
 

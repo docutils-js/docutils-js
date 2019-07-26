@@ -1,12 +1,12 @@
 import Input from './Input';
 import fs from 'fs';
-import { ReadInputCallback, InputArgs } from '../types';
+import { ReadInputCallback, InputConstructorArgs } from '../types';
 export default class FileInput extends Input {
     public finished: boolean = false;
     public data: string = '';
-    constructor(args: InputArgs) {
+    public constructor(args: InputConstructorArgs) {
         super(args);
-        this.source = fs.createReadStream(args.sourcePath!, { encoding: 'utf-8' });
+        this.source = fs.createReadStream(args.sourcePath!, { fd: args.sourcePath ? undefined : 0, encoding: 'utf-8' });
         this.source.on('data', (chunk: string) => {
             this.data += chunk;
         });

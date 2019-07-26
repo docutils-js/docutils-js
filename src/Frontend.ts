@@ -24,20 +24,46 @@ Also exports the following functions:
 * SettingSpec manipulation: `filter_settings_spec`.
 */
 import camelcase from 'camelcase';
-import {ArgumentParser} from 'argparse';
+import {ArgumentParser,ArgumentOptions,Namespace} from 'argparse';
 export const __docformat__ = 'reStructuredText';
 import SettingsSpec from'./SettingsSpec';
 import { SettingsSpecType, ConfigSettings } from './types';
 import { logger } from './logger';
+import path from 'path';
+import { ActionCallback } from './callback';
+import {  dateDatestampFormat, timeAndDateDatestampFormat } from './constants';
+/**
+    Store multiple values in `parser.values`.  (Option callback.)
+
+    Store `None` for each attribute named in `args`, and store the value for
+    each key (attribute name) in `kwargs`.
+*/
+function storeMultiple(parser: ArgumentParser, namespace: Namespace, values:any[], optionString: string|null, args: any[] = [], kwargs: { [name: string]: any }  = {}) {
+    args.forEach((arg: string) => {
+    // @ts-ignore
+      namespace[arg] = undefined;
+      });
+   Object.keys(kwargs).forEach((key): void => {
+    // @ts-ignore
+   namespace[key] = kwargs[key];
+   });
+   }
 
 /**     Read a configuration file during option processing.  (Option callback.) */
-function readConfigFile(){//option, opt, value, parser) {
+function readConfigFile(): void{//option, opt, value, parser) {
 /*    try:
         new_settings = parser.get_config_file_settings(value)
     except ValueError, error:
         parser.error(error)
     parser.values.update(new_settings, parser)
 */
+}
+interface Thresholds {
+    info: number;
+    warning: number;
+    error: number;
+    severe: number;
+    none: number;
 }
 
 function validateEncoding(){//setting, value, optionParser, configParser?: any, configSection?: any) {
@@ -102,8 +128,8 @@ if isinstance(value, bool):
     except KeyError:
         raise (LookupError('unknown boolean value: "%s"' % value),
                None, sys.exc_info()[2])
-	       */
-	       }
+               */
+}
 /**
 Check/normalize three-value settings:
     True:  '1', 'on', 'yes', 'true'
@@ -138,7 +164,7 @@ function validateThreshold() {/*
         except (KeyError, AttributeError):
             raise (LookupError('unknown threshold: %r.' % value),
                    None, sys.exc_info[2])*/
-		   }
+}
 /*
 function validateColonSeparatedStringList(
     setting, value, option_parser, config_parser=None, config_section=None):
@@ -227,30 +253,37 @@ def validate_smartquotes_locales(setting, value, option_parser,
                              % item.encode('ascii', 'backslashreplace'))
         lc_quotes.append((lang,quotes))
     return lc_quotes
+*/
 
-def make_paths_absolute(pathdict, keys, base_path=None):
-    """
+/**
     Interpret filesystem path settings relative to the `base_path` given.
 
     Paths are values in `pathdict` whose keys are in `keys`.  Get `keys` from
     `OptionParser.relative_path_settings`.
-    """
-    if base_path is None:
-        base_path = os.getcwdu() # type(base_path) == unicode
-        # to allow combining non-ASCII cwd with unicode values in `pathdict`
-    for key in keys:
-        if key in pathdict:
-            value = pathdict[key]
-            if isinstance(value, list):
-                value = [make_one_path_absolute(base_path, path)
-                         for path in value]
-            elif value:
-                value = make_one_path_absolute(base_path, value)
+*/
+function makePathsAbsolute(pathdict: { [name: string]: any }, keys: string[], basePath?: string) {
+
+    let bp = basePath!;
+    if(basePath === undefined) {
+        bp = process.cwd()!;
+    }
+    keys.forEach((key: string): void => {
+        if(key in pathdict) {
+            let value = pathdict[key];
+            if(Array.isArray(value)) {
+                value = value.map((path: string): string => makeOnePathAbsolute(bp, path));
+            } else if(value !== undefined) {
+                value = makeOnePathAbsolute(bp, value);
+            }
             pathdict[key] = value
-
-def make_one_path_absolute(base_path, path):
-    return os.path.abspath(os.path.join(base_path, path))
-
+        }
+    });
+}
+            
+function makeOnePathAbsolute(basePath: string, pathArg: string) {
+    return path.resolve(basePath, pathArg);
+}
+/*
 def filter_settings_spec(settings_spec, *exclude, **replace):
     """Return a copy of `settings_spec` excluding/replacing some settings.
 
@@ -397,7 +430,7 @@ export class OptionParser extends ArgumentParser {
                     ],
                     {
                         "action": "store_const",
-                        "const": "%Y-%m-%d",
+                        "const": dateDatestampFormat,
                         "dest": "datestamp"
                     }
                 ],
@@ -409,7 +442,7 @@ export class OptionParser extends ArgumentParser {
                     ],
                     {
                         "action": "store_const",
-                        "const": "%Y-%m-%d %H:%M UTC",
+                        "const": timeAndDateDatestampFormat,
                         "dest": "datestamp"
                     }
                 ],
@@ -451,8 +484,8 @@ export class OptionParser extends ArgumentParser {
                     ],
                     {
                         "action": "callback",
-                        "callback": "store_multiple",
-                        "callback_args": [
+                        "callback": storeMultiple,
+                        "callbackArgs": [
                             "source_link",
                             "source_url"
                         ]
@@ -941,16 +974,28 @@ export class OptionParser extends ArgumentParser {
     public lists: {};
     public defaults: ConfigSettings = {};
     /** Docutils configuration files, using ConfigParser syntax.  Filenames
-    will be tilde-expanded later.  Later files override earlier ones. */
+     * will be tilde-expanded later.  Later files override earlier ones.
+     */
     public standardConfigFiles: string[] = [
         '/etc/docutils.conf',           // system-wide
         './docutils.conf',              // project-specific
         '~/.docutils'];                  // user-specific
+        
     /** Possible inputs for for --report and --halt threshold values. */
-    public thresholdChoices: string[] = ['info', '1', 'warning', '2','error', '3', 'severe', '4', 'none', '5'];
+    public thresholdChoices: string[] = ['info', '1',
+        'warning', '2',
+        'error', '3',
+        'severe', '4',
+        'none', '5'];
 
     /**Lookup table for --report and --halt threshold values.*/
-    public thresholds: { info: number; warning: number;error: number; severe: number; none: number }= {'info': 1, 'warning': 2, 'error': 3, 'severe': 4, 'none': 5}
+    public thresholds: Thresholds = {
+        'info': 1,
+        'warning': 2,
+        'error': 3,
+        'severe': 4,
+        'none': 5,
+    }
 
     /**Lookup table for boolean configuration file settings.*/
     public booleans: { [val: string]: boolean } = {'1': true, 'on': true,
@@ -981,18 +1026,14 @@ export class OptionParser extends ArgumentParser {
 
     public constructor(args: OptionParserArgs) {
         super({usage: args.usage, description: args.description});
-        /*    def __init__(self, components=(), defaults=None, read_config_files=None, *args, **kwargs): */
-        /*        """
-        `components` is a list of Docutils components each containing a
-        ``.settings_spec`` attribute.  `defaults` is a mapping of setting
-        default overrides.
-        """*/
+        // @ts-ignore
+        this.register('action', 'callback', ActionCallback);
 
+        /** Set of list-type settings. */
         this.lists = {}
-        //        """Set of list-type settings."""
 
+        /** List of paths of applied configuration files. */
         this.configFiles = []
-        //        """List of paths of applied configuration files."""
 
         const argParser= new ArgumentParser({description: args.description});
         if(!this.version) {
@@ -1000,7 +1041,8 @@ export class OptionParser extends ArgumentParser {
         }
         // Make an instance copy (it will be modified): ??
         this.relativePathSettings = [...this.relativePathSettings];
-        this.components = [this, ...(args && args.components ? args.components: [])];
+        this.components = [this, ...(args && args.components ?
+            args.components: [])];
 
         this.populateFromComponents(this.components)
         this.setDefaultsFromDict(args.defaults || {})
@@ -1012,72 +1054,78 @@ export class OptionParser extends ArgumentParser {
                 throw error; //except ValueError, error: self.error(SafeString(error))
             }
             this.setDefaultsFromDict(configSettings);
-	    }
-	    }
+        }
+    }
 
-    /*
-        For each component, first populate from the `SettingsSpec.settings_spec`
-        structure, then from the `SettingsSpec.settings_defaults` dictionary.
-        After all components have been processed, check for and populate from
-        each component's `SettingsSpec.settings_default_overrides` dictionary.
-*/
+    /**
+     *  For each component, first populate from the `SettingsSpec.settings_spec`
+     *  structure, then from the `SettingsSpec.settings_defaults` dictionary.
+     *  After all components have been processed, check for and populate from
+     *  each component's `SettingsSpec.settings_default_overrides` dictionary.
+     */
     public populateFromComponents(components: (SettingsSpec|undefined)[]) {
+        logger.silly('Frontend.populateFromComponents');
         components.forEach((component) => {
             if(!component || !component.settingsSpec) {
+                logger.silly('component undefined');
                 return;
             }
             const settingsSpec = component.settingsSpec!;
-            //	    console.log(settingsSpec);
-
+            logger.silly('settingsSpec', { settingsSpec});
             this.relativePathSettings.push(...component.relativePathSettings);
-	    settingsSpec.forEach((spec: SettingsSpecType) => {
-	      const [ title, description, optionSpec ] = spec;
+            settingsSpec.forEach((spec: SettingsSpecType) => {
+                const [ title, description, optionSpec ] = spec;
                 optionSpec.forEach(([helpText, optionStrings, optionArgs]) => {
                     if(optionStrings.indexOf('--help') !== -1) {
                     } else {
-                        //		console.log(`addArgument ${optionStrings}`);
                         const help = helpText.replace(/%/g, '%%');
                         let action;
                         let newArgs: {[name: string]: any} = { help };
                         if(Object.prototype.hasOwnProperty.call(optionArgs, 'dest')) {
-		  let dest = camelcase(optionArgs.dest, { pascalCase: false });
-		  newArgs.dest = dest;
-		  } else {
-		  newArgs.dest= camelcase(optionStrings[0], { pascalCase: false });}
-		  
+                            let dest = camelcase(optionArgs.dest, { pascalCase: false });
+                            newArgs.dest = dest;
+                        } else {
+                            newArgs.dest= camelcase(optionStrings[0], { pascalCase: false });}
+                  
                         if(Object.prototype.hasOwnProperty.call(optionArgs, 'default')) {
-		  newArgs.defaultValue = optionArgs['default'];
-		  }
-		  if(Object.prototype.hasOwnProperty.call(optionArgs, 'action')) {
-                            const a = optionArgs.action;
-		  if(a === 'store_const') {
-		   action = 'storeConst';
-		   newArgs.constant = optionArgs.const;
-		   } else if(a === 'store_true') {
-		   action = 'storeTrue';
-                                //		   newArgs.nargs = 0;
-		   } else if(a === 'append') {
-		   } else if(a === 'store_false') {
-		   action = 'storeFalse';
-                                //		   newArgs.nargs = 0;
-		   } else if(a === 'append') {
-		   action = a;
-		   } else if(a === 'callback') {
-		   action = 'store';
-		   } else if(a === 'version') {
-		   action = 'version';
-		   } else {
-		   throw new Error(a);
-		   }
-		   newArgs.action = action;
-		   this.addArgument(optionStrings, newArgs);
+                            newArgs.defaultValue = optionArgs['default'];
                         }
+                        let a = '';
+                        if(Object.prototype.hasOwnProperty.call(optionArgs, 'action')) {
+                            a = optionArgs.action;
+                        }
+                        if(a === 'store_const') {
+                            action = 'storeConst';
+                            newArgs.constant = optionArgs.const;
+                        } else if(a === 'store_true') {
+                            action = 'storeTrue';
+                            //             newArgs.nargs = 0;
+                        } else if(a === 'append') {
+                            action = 'append';
+                        } else if(a === 'store_false') {
+                            action = 'storeFalse';
+                            //             newArgs.nargs = 0;
+                        } else if(a === 'append') {
+                            action = a;
+                        } else if(a === 'callback') {
+                            action = 'callback';
+                            newArgs.callback = optionArgs.callback;
+                            newArgs.callbackArgs = optionArgs.callbackArgs;
+                            newArgs.nargs = 0;
+                        } else if(a === 'version') {
+                            action = 'version';
+                        } else {
+                            action = 'store';
+                        }
+                        newArgs.action = action;
+                        logger.silly('addArgument', { optionStrings, args: newArgs});
+                        this.addArgument(optionStrings, newArgs);
                     }
                 });
             });
             if(component.settingsDefaults) {
                 //self.defaults.update(component.settings_defaults)
-		    }
+            }
         });
     }
 
@@ -1107,7 +1155,7 @@ except KeyError:
             except ImportError:
                 expand = lambda x: x
         return [expand(f) for f in config_files if f.strip()]
-	*/
+        */
     }
 
     public getStandardConfigSettings(): ConfigSettings {
@@ -1116,7 +1164,7 @@ except KeyError:
         for filename in self.get_standard_config_files():
             settings.update(self.get_config_file_settings(filename), self)
         return settings
-	*/
+        */
         return {}
     }
 
@@ -1140,7 +1188,7 @@ except KeyError:
         make_paths_absolute(
             settings.__dict__, self.relative_path_settings, base_path)
         return settings.__dict__
-	*/
+        */
     }
 
     /** Store positional arguments as runtime settings. */
@@ -1161,8 +1209,8 @@ except KeyError:
             source = args.shift();
             if(source === '-') { // means stdin
                 source = undefined;
-	    }
-        }	    
+            }
+        }           
         if(args.length) {
             destination = args.shift()
             if(destination === '-') { //  means stdout
@@ -1171,11 +1219,11 @@ except KeyError:
         }
         if(args.length) {
             this.error('Maximum 2 arguments allowed.');
-	    }
+        }
         if(source && source === destination) {
             this.error('Do not specify the same file for both source and '+
                        'destination.  It will clobber the source file.');
-		       }
+        }
         return [source, destination];
     }
     public setDefaultsFromDict(defaults: {}) {
@@ -1191,20 +1239,21 @@ except KeyError:
     }
 
     /**
-        Get an option by its dest.
-
-        If you're supplying a dest which is shared by several options,
-        it is undefined which option of those is returned.
-
-        A KeyError is raised if there is no option with the supplied
-        dest.
-*/
-    public getOptionByDest(dest: string) {
+      * Get an option by its dest.
+      *
+      * If you're supplying a dest which is shared by several options,
+      * it is undefined which option of those is returned.
+      *
+      * A KeyError is raised if there is no option with the supplied
+      * dest.
+      **/
+    public getOptionByDest(dest: string): ArgumentOptions {
+        throw new Error('unimplemented');
         /*        for group in self.optionGroups + [self]:
             for option in group.option_list:
                 if option.dest == dest:
                     return option
         raise KeyError('No option with dest == %r.' % dest)
-	*/
+        */
     }
 }

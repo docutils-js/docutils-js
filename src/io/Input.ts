@@ -1,5 +1,5 @@
 import TransformSpec from '../TransformSpec';
-import { ReadCallback, ReadInputCallback, InputArgs } from "../types";
+import { ReadCallback, ReadInputCallback, InputConstructorArgs } from "../types";
 
 abstract class Input extends TransformSpec {
     public componentType: string = "input";
@@ -11,7 +11,7 @@ abstract class Input extends TransformSpec {
     public sourcePath?: string;
     protected source?: any;
     public constructor(
-        args: InputArgs) {
+        args: InputConstructorArgs) {
         super();
         const { source, sourcePath, encoding, errorHandler } = args;
         this.encoding = encoding;

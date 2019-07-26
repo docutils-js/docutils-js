@@ -13,7 +13,7 @@ export default function newReporter(labeled: { sourcePath: string }, settings: S
         if (typeof core.reportLevel === 'undefined') {
             core.reportLevel = defaults.reportLevel;
         }
-        if(typeof core.haltLevel === 'undefined') {
+        if(core.haltLevel === undefined) {
             core.haltLevel = defaults.haltLevel;
         }
         if(typeof core.debug === 'undefined') {
