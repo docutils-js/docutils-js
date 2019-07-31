@@ -4,20 +4,23 @@ import * as nodes from '../../../nodes';
 import * as RegExps from '../RegExps';
 import RSTStateMachine from "../RSTStateMachine";
 import {RSTStateArgs} from "../types";
-import { NodeInterface, StateInterface, RegexpResult, ContextArray, ParseMethodReturnType } from "../../../types";
+import {
+    NodeInterface,
+    StateInterface,
+    RegexpResult,
+    ContextArray,
+    ParseMethodReturnType,
+    Patterns,
+} from "../../../types";
 import StringList from "../../../StringList";
 
 /** Parser for the contents of a substitution_definition element. */
 class SubstitutionDef extends Body {
-    public _init(stateMachine: RSTStateMachine, debug: boolean = false) {
-        super._init(stateMachine, debug);
-        this.patterns = {
-            // eslint-disable-next-line @typescript-eslint/camelcase
-            embedded_directive: new RegExp(`(${RegExps.simplename})::( +|$)`),
-            text: '',
-        };
-        this.initialTransitions = ['embedded_directive', 'text'];
-    }
+    protected initialTransitions?: (string | string[])[] = ['embedded_directive', 'text'];;
+    public patterns: Patterns = {
+        embedded_directive: new RegExp(`(${RegExps.simplename})::( +|$)`),
+        text: new RegExp(''),
+	    };
 
     /** Return a list of nodes. */
     // eslint-disable-next-line @typescript-eslint/explicit-function-return-type,@typescript-eslint/no-unused-vars,@typescript-eslint/camelcase
@@ -64,7 +67,7 @@ class SubstitutionDef extends Body {
 
         //@ts-ignore
         this.gotoLine(newAbsOffset!);
-        return parentNode.children;
+        return parentNode.getChildren();
     }
 
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,@typescript-eslint/no-unused-vars,no-unused-vars */

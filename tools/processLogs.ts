@@ -6,7 +6,6 @@ export interface EnterFunctionLogEntry extends Omit<LogEntry, 'kind'> {
   kind: typeof EnterFunction;
   function: string;
 }
-
 export type LogEntryTypes = EnterFunctionLogEntry;
 
 export interface LogEntry {
@@ -22,14 +21,16 @@ parser.addArgument('input');
 const args = parser.parseArgs();
 console.log(args);
 
+if(args.filter) {
 args.filter.map((f: string): (a: LogEntry) => boolean => {
 const [k, v] = f.split(/=/, 2);
 return (a) => a[k] === v;
 });
+}
 
 const fields: string[] = [];
 const fieldMap: { [fieldName: string]: number } = {};
-
+const logEntries: Array<LogEntry> = [];
 const input = fs.createReadStream(args.input, { encoding: 'utf-8' });
 let lastLine = '';
 input.on('data', (chunk: string) => {
@@ -46,7 +47,7 @@ input.on('data', (chunk: string) => {
                     fieldMap[k] = fields.length - 1;
                 }
             });
-            console.log(fields.map(field => logEntry[field] ? logEntry[field].toString().substring(0, 80): '').join('\t'));
+            logEntries.push(logEntry);
         } catch(error) {
             throw error;
             throw new Error(e);
@@ -55,4 +56,10 @@ input.on('data', (chunk: string) => {
     }
     lastLine = data;
 });
-input.on('end', () => {});
+input.on('end', () => {
+console.log(fields.map(field => field.padStart(24, ' ')).join(' | '));
+logEntries.forEach((logEntry): void => {
+// @ts-ignore
+console.log(fields.map(field => (logEntry[field] ? logEntry[field].toString().substring(0, 24): '').padStart(24, ' ')).join(' | '));
+});
+});

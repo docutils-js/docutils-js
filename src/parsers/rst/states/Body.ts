@@ -96,6 +96,7 @@ export interface EnumSequencePats {
     upperalpha: string;
     lowerroman: string;
     upperroman: string;
+    [name:string]: string;
 }
 export interface EnumConverters {
     arabic: (input: string) => number;
@@ -132,22 +133,12 @@ class Body extends RSTState implements BodyState {
     private attribution_pattern?: RegExp;
     private simpleTableTopPat?: RegExp;
     private pats: BodyPats;
+    protected initialTransitions?: (string | string[])[] = ["bullet", "enumerator", "field_marker", "option_marker", "doctest", "line_block", "grid_table_top", "simple_table_top", "explicit_markup", "anonymous", "line", "text"];
 
     public constructor(stateMachine: RSTStateMachine, debug: boolean = false) {
         super(stateMachine, debug);
-        const pats: BodyPats = {};
 
-        pats.nonalphanum7bit = "[!-/:-@[-`{-~]";
-        pats.alpha = "[a-zA-Z]";
-        pats.alphanum = "[a-zA-Z0-9]";
-        pats.alphanumplus = "[a-zA-Z0-9_-]";
-
-        this.pats = pats;
-    }
-
-    public _init(stateMachine: RSTStateMachine, debug: boolean): void {
-        super._init(stateMachine, debug);
-        //      this.doubleWidthPadChar = tableparser.TableParser.doubleWidthPadChar
+        // this.doubleWidthPadChar = tableparser.TableParser.doubleWidthPadChar
 
         const enum_: EnumParseInfo = {};
         // @ts-ignore
@@ -202,12 +193,13 @@ class Body extends RSTState implements BodyState {
         pats.alpha = "[a-zA-Z]";
         pats.alphanum = "[a-zA-Z0-9]";
         pats.alphanumplus = "[a-zA-Z0-9_-]";
-        pats.enum = "";// ('(%(arabic)s|%(loweralpha)s|%(upperalpha)s|%(lowerroman)s' +'|%(upperroman)s|#)' % enum.sequencepats)
+        pats.enum = `^(${enum_.sequences.map(name => enum_.sequencepats![name!]).join('|')}|#)`;
         pats.optname = `${pats.alphanum}${pats.alphanumplus}*`;
         pats.optarg = `(${pats.alpha}${pats.alphanumplus}*|<[^<>]+>)`;
         pats.shortopt = `(-|\\+)${pats.alphanum}( ?${pats.optarg})?`;
         pats.longopt = `(--|/)${pats.optname}([ =]${pats.optarg})?`;
         pats.option = `(${pats.shortopt}|${pats.longopt})`;
+	this.pats = pats;
 
         // @ts-ignore
         enum_.formats.forEach((format): void => {
@@ -223,29 +215,27 @@ class Body extends RSTState implements BodyState {
         });
 
         this.patterns = {
-            bullet: "[-+*\\u2022\\u2023\\u2043]( +|$)",
-            enumerator: `(${pats.parens}|${pats.rparen}|${pats.period})( +|$)`,
+            bullet: new RegExp("^[-+*\\u2022\\u2023\\u2043]( +|$)"),
+            enumerator: new RegExp(`^(${pats.parens}|${pats.rparen}|${pats.period})( +|$)`),
             // eslint-disable-next-line @typescript-eslint/camelcase
-            field_marker: ":(?![: ])([^:\\\\]|\\\\.|:(?!([ `]|$)))*(?<! ):( +|$)",
+            field_marker: new RegExp("^:(?![: ])([^:\\\\]|\\\\.|:(?!([ `]|$)))*(?<! ):( +|$)"),
             // eslint-disable-next-line @typescript-eslint/camelcase
             grid_table_top: this.gridTableTopPat,
             // eslint-disable-next-line @typescript-eslint/camelcase
-            option_marker: `${pats.option}(, ${pats.option})*(  +| ?$)`,
+            option_marker: new RegExp(`^${pats.option}(, ${pats.option})*(  +| ?$)`),
             // eslint-disable-next-line @typescript-eslint/camelcase
-            doctest: ">>>( +|$)",
+            doctest: new RegExp("^>>>( +|$)"),
             // eslint-disable-next-line @typescript-eslint/camelcase
-            line_block: "\\|( +|$)",
+            line_block: new RegExp("^\\|( +|$)"),
             // eslint-disable-next-line @typescript-eslint/camelcase
             simple_table_top: this.simpleTableTopPat,
             // eslint-disable-next-line @typescript-eslint/camelcase
-            explicit_markup: "\\.\\.( +|$)",
+            explicit_markup: new RegExp("^\\.\\.( +|$)"),
             // eslint-disable-next-line @typescript-eslint/camelcase
-            anonymous: "__( +|)",
-            line: `(${pats.nonalphanum7bit})\\1* *$`,
-            text: ""
+            anonymous: new RegExp("^__( +|)"),
+            line: new RegExp(`^(${pats.nonalphanum7bit})\\1* *$`),
+            text: new RegExp(""),
         };
-
-        this.initialTransitions = ["bullet", "enumerator", "field_marker", "option_marker", "doctest", "line_block", "grid_table_top", "simple_table_top", "explicit_markup", "anonymous", "line", "text"];
 
         this.explicit = { patterns: {
             target: new RegExp(`^(_|(?!_)(\`?)(?![ \`])(.+?)${nonWhitespaceEscapeBefore})(?<!(?<!\\x00):)${nonWhitespaceEscapeBefore}[ ]?:([ ]+|$)`),
@@ -556,13 +546,13 @@ class Body extends RSTState implements BodyState {
         const [newAbsOffset, blankFinish2] = this.nestedListParse(block, { inputOffset: myOffset, node: substitutionNode, initialState: "SubstitutionDef", blankFinish: myBlankFinish });
         myBlankFinish = blankFinish2;
         let i = 0;
-        substitutionNode.children.slice().forEach((node): void => {
+        substitutionNode.getChildren().slice().forEach((node): void => {
             // this is a mixin check!!
             if (!(node.isInline()
         || node instanceof nodes.Text)) {
                 // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-                this.parent!.add(substitutionNode.children[i]);
-                substitutionNode.children.splice(i, 1);
+                this.parent!.add(substitutionNode.getChild(0));
+                substitutionNode.removeChild(i);
             } else {
                 i += 1;
             }
@@ -585,7 +575,7 @@ class Body extends RSTState implements BodyState {
             // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             return result[0]!;
         }
-        if (substitutionNode.children.length === 0) {
+        if (!substitutionNode.hasChildren()) {
             // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             const msg = this.reporter!.warning(
                 `Substitution definition "${subname}" empty or invalid.`,
@@ -787,7 +777,7 @@ class Body extends RSTState implements BodyState {
         }
         const errors = [];
         if(Object.keys(this.explicit).length === 0) {
-            throw new Error(`invalid state! ${this.uuid}`);
+            throw new Error(`invalid state!`);
         }
         if(this.explicit.constructs === undefined
 	|| this.explicit.constructs.map === undefined) {
@@ -1145,6 +1135,9 @@ try {
         return undefined;
     }
 
+    /**
+     * Transition function for field_maker. Performs a nested list parse.
+     */
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
     public field_marker(match: RegexpResult, context: ContextArray, nextState: StateInterface): ParseMethodReturnType {
         const fieldList = nodesFactory.field_list();
@@ -1154,7 +1147,13 @@ try {
         let blankFinish = blankFinish1;
         fieldList.add(field);
         const offset = this.rstStateMachine.lineOffset + 1;
-        const [newlineOffset, blankFinish2] = this.nestedListParse( this.rstStateMachine.inputLines.slice(offset), { inputOffset: this.rstStateMachine.absLineOffset() + 1, node: fieldList, initialState: "FieldList", blankFinish } );
+        const [newlineOffset, blankFinish2] = this.nestedListParse(
+            this.rstStateMachine.inputLines.slice(offset),
+            { inputOffset: this.rstStateMachine.absLineOffset() + 1,
+                node: fieldList,
+                initialState: "FieldList",
+                blankFinish,
+            } );
         blankFinish = blankFinish2;
         this.gotoLine(newlineOffset);
         if (!blankFinish) {
@@ -1364,9 +1363,11 @@ try {
                 { line: lineno + 1 }
             ));
         }
-        if (block.children.length) {
-            if (block.children[0].attributes.indent == null) {
-                block.children[0].attributes.indent = 0;
+        if (block.hasChildren()) {
+        const child = block.getChild(0);
+            // is null something we'll get here?? fixme
+            if (child.attributes.indent == null) {
+                child.attributes.indent = 0;
             }
             this.nest_line_block_lines(block);
         }
@@ -1397,9 +1398,10 @@ try {
 
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
     public nest_line_block_lines(block: NodeInterface): void {
-        for (let i = 1; i < block.children.length; i += 1) {
-            if ((block.children[i] as nodes.line).indent === undefined) {
-                (block.children[i] as nodes.line).indent = (block.children[i - 1] as nodes.line).indent;
+        for (let i = 1; i < block.getNumChildren(); i += 1) {
+        const child = block.getChild(i) as nodes.line;
+            if (child.indent === undefined && i !== 0) {
+                child.indent = (block.getChild(i - 1) as nodes.line).indent;
             }
         }
         this.nest_line_block_segment(block);
@@ -1409,22 +1411,23 @@ try {
     public nest_line_block_segment(block: NodeInterface): void {
         const indents: number[] = [];
         let least: number|undefined;
-        for (let i = 0; i < block.children.length; i += 1) {
-            const indent = (block.children[i] as nodes.line).indent;
+        for (let i = 0; i < block.getNumChildren(); i += 1) {
+            const child = block.getChild(i) as nodes.line;
+            const indent = child.indent;
             if (least === undefined || indent < least) {
                 least = indent;
             }
-            indents.push((block.children[i] as nodes.line).indent);
+            indents.push(child.indent);
         }
         const newItems: NodeInterface[] = [];
         let newBlock = nodesFactory.line_block();
-        for (let i = 0; i < block.children.length; i += 1) {
-            const item = block.children[i] as nodes.line;
+        for (let i = 0; i < block.getNumChildren(); i += 1) {
+            const item = block.getChild(i) as nodes.line;
             // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             if (item.indent > least!) {
                 newBlock.add(item);
             } else {
-                if (newBlock.children.length) {
+                if (newBlock.hasChildren()) {
                     this.nest_line_block_segment(newBlock);
                     newItems.push(newBlock);
                     newBlock = nodesFactory.line_block();
@@ -1432,15 +1435,14 @@ try {
                 newItems.push(item);
             }
         }
-        if (newBlock.children.length) {
+        if (newBlock.hasChildren()) {
             this.nest_line_block_segment(newBlock);
             newItems.push(newBlock);
         }
-        // fixme does this detach?
+
         for (let i = 0; i < newItems.length; i += 1) {
-            block.children[i] = newItems[i];
+        block.append(newItems[i]);
         }
-        block.children.length = newItems.length;
     }
 
     /** Top border of a full table. */

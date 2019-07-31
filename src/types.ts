@@ -5,6 +5,7 @@
  */
 // eslint-disable-next-line @typescript-eslint/camelcase
 import { citation, decoration, Element, footnote, reference, substitution_definition } from "./nodes";
+import { Logger } from 'winston';
 import { Settings } from "../gen/Settings";
 export { Settings };
 
@@ -15,9 +16,12 @@ import Parser from "./Parser";
 import Output from "./io/Output";
 import RSTStateMachine from "./parsers/rst/RSTStateMachine";
 import Input from './io/Input';
+import Writer from "./Writer";
+import Reader from "./Reader";
 
 export type Omit<T, K> = Pick<T, Exclude<keyof T, K>>;
 
+export type LoggerType = Logger;
 export interface ConfigSettings {
     [name: string]: any;
 }
@@ -39,9 +43,14 @@ export interface ParserArgs
     rfc2822?: boolean;
     debug?: boolean;
     debugFn?: DebugFunction;
+    logger: LoggerType;
 }
 export interface WritableStream {
     write: (data: string) => void;
+}
+
+export interface GenericSettings {
+    [settingName: string]: any;
 }
 
 export interface SourceLocation {
@@ -116,7 +125,13 @@ export interface NodeInterface extends SourceLocation {
 
     tagname: string;
     classTypes: {}[];
-    children: NodeInterface[];
+    getChild(index: number): NodeInterface;
+    hasChildren(): boolean;
+    getNumChildren(): number;
+    clearChildren(): void;
+    getChildren(): NodeInterface[];
+    append(item: NodeInterface): void;
+    removeChild(index: number): void;
 
     // eslint-disable-next-line max-len
     traverse(args: TraverseArgs): NodeInterface[];
@@ -162,6 +177,7 @@ export interface NodeInterface extends SourceLocation {
     getCustomAttr(attrName: string): undefined;
 
     isAdmonition(): boolean;
+    isSetup: boolean;
 }
 
 export interface Attributes {
@@ -209,6 +225,7 @@ export interface Ids {
 }
 
 export interface Document extends ElementInterface {
+    logger: LoggerType;
     transformMessages: Systemmessage[];
     nameIds: NameIds;
     parseMessages: Systemmessage[];
@@ -352,6 +369,7 @@ export interface States {
 }
 
 export interface Statemachine {
+    logger: LoggerType;
     stateFactory?: Statefactory;
 
     createStateMachine(rstStateMachine: RSTStateMachine, initialState?: string, stateFactory?: Statefactory): Statemachine;
@@ -592,6 +610,7 @@ export interface StateMachineConstructorArgs {
     initialState?: string;
     debug?: boolean;
     debugFn?: DebugFunction;
+    logger: LoggerType;
 }
 
 export interface CreateStateMachineFunction<T> {
@@ -630,8 +649,30 @@ export interface InputConstructorArgs {
 	    sourcePath?: string;
 	    encoding?: string;
 	    errorHandler?: string;
+	   logger: LoggerType;
 	    }
 export interface InputConstructor {
     new (args: InputConstructorArgs): Input;
+}
+
+export interface WriterConstructor {
+    new (args: { logger: LoggerType}): Writer;
+}
+
+export interface ReaderConstructorArgs {
+    parser?: Parser;
+    parseFn?: ParseFunction;
+    parserName?: string;
+    debugFn?: DebugFunction;
+    debug?: boolean;
+    logger: LoggerType;
+}
+
+export interface ReaderConstructor {
+    new (args: ReaderConstructorArgs): Reader;
+
+}
+export interface ParseFunction {
+    (source: string, settings?: Settings): Document;
 }
 

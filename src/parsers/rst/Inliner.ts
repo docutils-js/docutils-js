@@ -6,7 +6,13 @@ import { matchChars } from "../../utils/punctuationChars";
 import roleInterface from "./Roles";
 import { ApplicationError } from "../../Exceptions";
 import unescape from "../../utils/unescape";
-import { Document, ElementInterface, NodeInterface, ReporterInterface } from "../../types";
+import {
+Document,
+ElementInterface,
+NodeInterface,
+ReporterInterface,
+LoggerType,
+} from "../../types";
 import { Settings } from "../../../gen/Settings";
 import { InlinerInterface } from "./types";
 import { fullyNormalizeName } from "../../nodeUtils";
@@ -115,10 +121,12 @@ class Inliner implements InlinerInterface {
     private parts: any[] = [];
     private startStringPrefix: string = '';
     private endStringSuffix: string = '';
+    private logger: LoggerType;
     /**
      * Create Inliner instance
      */
-    public constructor(document: Document) {
+    public constructor(document: Document, logger:LoggerType) {
+    this.logger = logger;
         this.dispatch = {
             '*': this.emphasis.bind(this),
             '**': this.strong.bind(this),
@@ -235,7 +243,7 @@ class Inliner implements InlinerInterface {
             [],
             { name: nodes.whitespaceNormalizeName(referencename) },
         );
-        referencenode.children[0].rawsource = referencename;
+        referencenode.getChild(0).rawsource = referencename;
         if (anonymous) {
             referencenode.attributes.anonymous = 1;
         } else {
@@ -401,7 +409,7 @@ class Inliner implements InlinerInterface {
         const refname = fullyNormalizeName(text);
         const reference = new nodes.reference(rawsource, text, [],
             { name: nodes.whitespaceNormalizeName(text) });
-        reference.children[0].rawsource = rawtext;
+        reference.getChild(0).rawsource = rawtext;
         const nodeList = [reference];
 
         if (rawsource.endsWith('__')) {
@@ -496,7 +504,7 @@ class Inliner implements InlinerInterface {
             const textend = matchend + endmatch.index + endmatch[0].length;
             rawsource = unescape(string.substring(matchstart, textend), true);
             const node = new nodeclass(rawsource, text);
-            node.children[0].rawsource = unescape(_text, true);
+            node.getChild(0).rawsource = unescape(_text, true);
             return [string.substr(0, matchstart), [node],
                 string.substr(textend), [], endmatch[1]];
         }
@@ -598,24 +606,40 @@ class Inliner implements InlinerInterface {
                 endStringSuffix}`),
             email: new RegExp(emailPattern), // fixme % args + '$',
             // re.VERBOSE | re.UNICODE),
-            uri: new RegExp(`${startStringPrefix}((([a-zA-Z][a-zA-Z0-9.+-]*):(((//?)?${uric}*${uriEnd})(\\?${uric}*${uriEnd})?(\\#${uriEnd})?))|(${emailPattern}))${endStringSuffix}`)
+            uri: new RegExp(`${startStringPrefix}((([a-zA-Z][a-zA-Z0-9.+-]*):(((//?)?${uric}*${uriEnd})(\\?${uric}*${uriEnd})?(\\#${uriEnd})?))|(${emailPattern}))${endStringSuffix}`),
+	    // need pep
+	    // need rfc
+	    
         };
+
+	this.implicitDispatch.push(this.patterns.uri);//, this.standaloneUri);
+	/*        if settings.pep_references:
+            self.implicit_dispatch.append((self.patterns.pep,
+                                           self.pep_reference))
+        if settings.rfc_references:
+            self.implicit_dispatch.append((self.patterns.rfc,
+                                           self.rfc_reference))
+         */
     }
 
     parse(text: string, args: { lineno: number; memo: any; parent: ElementInterface }) {
+    this.logger.silly('parse');
         const { lineno, memo, parent } = args;
         this.reporter = memo.reporter;
         this.document = memo.document;
         this.language = memo.language;
         this.parent = parent;
         let remaining = escape2null(text);
+	this.logger.silly('remaining', { value: remaining });
         const processed = [];
         let unprocessed = [];
         const messages = [];
         while (remaining) {
+	    this.logger.silly(`checking pattern ${this.patterns.initial[0]}`);
             const match = this.patterns.initial[0].exec(remaining);
             //          console.log(match);
             if (match) {
+  	      this.logger.silly('matched',{ value:match});
                 const rr: any = {};
 
                 this.patterns.initial[1].forEach((x: any, index: number) => {
@@ -651,24 +675,27 @@ class Inliner implements InlinerInterface {
                     unprocessed = [];
                 }
             } else {
+	    this.logger.silly('break');
                 break;
             }
         }
         if (remaining) {
+	this.logger.silly('have remaining', { value: remaining });
             processed.push(...this.implicit_inline(remaining, lineno));
         }
         //      console.log(processed);
         return [processed, messages];
     }
 
+    /*
+     * Check each of the patterns in `self.implicit_dispatch` for a match,
+     * and dispatch to the stored method for the pattern.  Recursively check
+     * the text before and after the match.  Return a list of `nodes.Text`
+     * and inline element nodes.
+     */
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,@typescript-eslint/no-unused-vars,no-unused-vars */
     implicit_inline(text: string, lineno: number) {
-        /*
-          Check each of the patterns in `self.implicit_dispatch` for a match,
-          and dispatch to the stored method for the pattern.  Recursively check
-          the text before and after the match.  Return a list of `nodes.Text`
-          and inline element nodes.
-        */
+    this.logger.silly('implicit_inline', {value:text});
         if (!text) {
             return [];
         }
@@ -707,7 +734,7 @@ class Inliner implements InlinerInterface {
         if (roleFn) {
             const [theNodes, messages2] = roleFn.invoke(role, rawsource, text, lineno, this);
             try {
-                theNodes[0].children[0].rawsource = unescape(text, true);
+                theNodes[0].getChild(0).rawsource = unescape(text, true);
             } catch (error) {
                 /* istanbul ignore if */
                 if (!(error instanceof TypeError)) {

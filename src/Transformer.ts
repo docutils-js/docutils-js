@@ -1,5 +1,13 @@
 import { document } from "./nodes";
-import { ComponentInterface, Components, Document, NodeInterface, TransformerInterface, TransformType } from "./types";
+import {
+    ComponentInterface,
+    Components,
+    Document,
+    NodeInterface,
+    TransformerInterface,
+    TransformType,
+    LoggerType,
+} from "./types";
 import { ApplicationError } from "./Exceptions";
 
 function leftPad(num: number, len: number, pad: string): string {
@@ -15,6 +23,7 @@ interface ReferenceResolver {
  * Transformer class responsible for transforming document output
  */
 class Transformer implements TransformerInterface {
+    private logger: LoggerType;
     public transforms: {}[];
     public unknownReferenceResolvers: ReferenceResolver[];
     public document: Document;
@@ -29,7 +38,8 @@ class Transformer implements TransformerInterface {
      * Create transformer class
      * @param {nodes.myDoc} myDoc - document to transform
      */
-    public constructor(myDoc: document) {
+    public constructor(myDoc: document, logger: LoggerType) {
+        this.logger = logger;
         this.transforms = [];
         this.unknownReferenceResolvers = [];
         this.document = myDoc;
@@ -44,13 +54,15 @@ class Transformer implements TransformerInterface {
      *
      */
     public populateFromComponents(...components: ComponentInterface[]): void {
+        this.logger.silly('populateFromComponents');
         /* eslint-disable-next-line no-restricted-syntax */
         for (const component of components) {
             if (!component) {
+                this.logger.warn('component is undefined');
                 /* eslint-disable-next-line no-continue */
                 continue;
             }
-            //          console.log(`processing ${component.toString()} ${component.componentType}`);
+            this.logger.silly(`processing ${component.toString()} ${component.componentType}`);
             const transforms = component.getTransforms() || [];
             transforms.forEach((t): void => {
                 if (typeof t === 'undefined') {
@@ -62,15 +74,17 @@ class Transformer implements TransformerInterface {
                 throw new Error(`got invalid transform from ${component}`);
             }
 
+            this.logger.silly('adding transforms for component');
             this.addTransforms(transforms);
+            // check for existing key?
             this.components[component.componentType] = component;
         }
         this.sorted = 0;
         const urr: ReferenceResolver[] = [];
         /* eslint-disable-next-line no-restricted-syntax */
         for (const i of components) {
-            if (typeof i !== 'undefined') {
-                //              console.log(`collecting unknownReferenceResolver from component ${i}`);
+            if (i !== undefined) {
+                this.logger.silly(`collecting unknownReferenceResolver from component ${i}`);
                 if (i.unknownReferenceResolvers) {
                     // @ts-ignore
                     urr.push(...i.unknownReferenceResolvers);
@@ -115,11 +129,11 @@ class Transformer implements TransformerInterface {
                 this.sorted = 1;
             }
             const t = this.transforms.pop();
-            //          console.log(t);
             // @ts-ignore
             const [priority, TransformClass, pending, kwargs] = t;
             try {
                 const transform = new TransformClass(this.document, {startnode: pending});
+                this.logger.info('applying transfomer class', { value: typeof TransformClass });
                 transform.apply(kwargs);
             } catch (error) {
                 throw error;

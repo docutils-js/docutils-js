@@ -2,12 +2,12 @@ import * as utils from '../src/utils';
 import unescape from '../src/utils/unescape';
 import Reporter from '../src/Reporter';
 import newReporter from '../src/newReporter';
-import { defaults } from "../gen/defaults";
+import { getDefaultSettings } from "../src/settingsHelper";
 import { LogLevel } from "../src/types";
 
 
 test('1', () => {
-    const r = newReporter({sourcePath:''}, { ...defaults });
+    const r = newReporter({sourcePath:''}, { ...getDefaultSettings() });
 
     //    r.attachObserver(node => {
     //      console.log(node.children[0].children[0].astext());
@@ -31,6 +31,6 @@ test('isIterable with null or undefined value', () => {
 });
 
 test('Reporter.systemMessage with Error/Exception', () => {
-    const reporter = newReporter({sourcePath:''}, defaults);
+    const reporter = newReporter({sourcePath:''}, getDefaultSettings());
     reporter.systemMessage(LogLevel.WarningLevel, new Error('my error'), [], {});
 });

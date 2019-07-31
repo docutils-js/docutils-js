@@ -18,7 +18,7 @@
 import xmlescape from "xml-escape";
 import Transformer from "./Transformer";
 /* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */
-import { InvalidArgumentsError, InvalidStateError, UnimplementedError } from "./Exceptions";
+import { ApplicationError, InvalidArgumentsError, InvalidStateError, UnimplementedError } from "./Exceptions";
 import unescape from "./utils/unescape";
 import { checkDocumentArg, isIterable, pySplit } from "./utils";
 import {
@@ -42,9 +42,11 @@ import {
     RefIds,
     NameTypes,
     Ids,
+    LoggerType,
 } from "./types";
 import { Settings } from "../gen/Settings";
 import { fullyNormalizeName, whitespaceNormalizeName } from "./nodeUtils";
+import { nodeBasicAttributes } from './constants';
 
 /* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */
 const __docformat__ = "reStructuredText";
@@ -285,7 +287,9 @@ class NodeVisitor {
     public document: Document;
 
     public optional: string[];
-    protected strictVisitor: boolean | undefined;
+    protected strictVisitor: boolean | undefined|null;
+
+    [name: string]: any;
 
     /**
    * Create a NodeVisitor.
@@ -309,7 +313,7 @@ class NodeVisitor {
     public dispatchVisit(node: NodeInterface): {} | undefined | void {
         const nodeName = node.tagname;
         const methodName = `visit_${nodeName}`;
-        // @ts-ignore
+
         let method = (this)[methodName];
         if (!method) {
             method = this.unknownVisit;
@@ -496,14 +500,48 @@ class Labeled {
  *
  * The base class for all docutils nodes.
  */
-
-
 abstract class Node implements NodeInterface {
+    public removeChild(index: number): void{
+        this._children.splice(index, 1);
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    public append(item: NodeInterface): void {
+        throw new Error('Cant append to underived Node');
+    }
+
+    public getChild(index: number): NodeInterface {
+        if(index < 0 || index >= this._children.length) {
+            throw new ApplicationError('index out of range');
+        }
+        return this._children[index];
+    }
+    public hasChildren(): boolean {
+        return this._children.length > 0;
+    }
+    public getNumChildren(): number {
+        return this._children.length;
+    }
+    public clearChildren(): void {
+        this._children.length = 0;
+    }
+    public getChildren(): NodeInterface[] {
+        return [ ...this._children ];
+    }
+
+    protected get children(): NodeInterface[] {
+        return this._children;
+    }
+
+    protected set children(value: NodeInterface[]) {
+        this._children = value;
+    }
+    public isSetup: boolean = false;
     /**
    * List attributes which are defined for every Element-derived class
    * instance and can be safely transferred to a different node.
    */
-    public basicAttributes: string[] = ["ids", "classes", "names", "dupnames"];
+    public basicAttributes: string[] = nodeBasicAttributes;
 
     /**
    * List attributes, automatically initialized to empty lists for
@@ -522,6 +560,9 @@ abstract class Node implements NodeInterface {
 
     public names: string[] = [];
 
+    /* This is confusing because some portions of the application
+       appear to reference 'refname' in the attributes.
+     */
     public refname?: string;
 
     public refid?: string;
@@ -534,7 +575,14 @@ abstract class Node implements NodeInterface {
 
     public tagname: string;
 
-    public parent?: NodeInterface;
+    public get parent(): ElementInterface {
+        if(this._parent === undefined) {
+            throw new ApplicationError('Attempt to access parent property of node without parent.');
+        }
+        return this._parent as ElementInterface;
+    }
+
+    public _parent?: NodeInterface;
 
     public document?: Document;
 
@@ -545,7 +593,7 @@ abstract class Node implements NodeInterface {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     public classTypes: any[] = [];
 
-    public children: NodeInterface[] = [];
+    private _children: NodeInterface[] = [];
 
     public attributes: Attributes = {};
 
@@ -610,7 +658,7 @@ abstract class Node implements NodeInterface {
     abstract _domNode(domroot: {}): {};
 
     public setupChild(child: NodeInterface): void {
-        child.parent = this;
+        (child as Node)._parent = this;
         if (this.document) {
             child.document = this.document;
             if (child.source == null) {
@@ -620,6 +668,7 @@ abstract class Node implements NodeInterface {
                 child.line = this.document.currentLine;
             }
         }
+        child.isSetup = true;
     }
 
     /**
@@ -659,7 +708,7 @@ abstract class Node implements NodeInterface {
                 }
                 throw error;
             }
-            const children = [...this.children];
+            const children = [...this._children];
             let skipSiblings = false;
             children.forEach((child): void => {
                 try {
@@ -703,13 +752,12 @@ abstract class Node implements NodeInterface {
                 }
             }
 
-            const { children } = this;
             try {
                 /* eslint-disable-next-line no-restricted-syntax */
-                for (const child of [...children]) {
+                for (const child of [...this.children]) {
                     // console.log(typeof child);
                     // console.log(Object.keys(child));
-		    console.log(`calling walkabout on ${child.tagname}`);
+		    //console.log(`calling walkabout on ${child.tagname}`);
                     if (child.walkabout(visitor)) {
                         stop = true;
                         break;
@@ -743,7 +791,7 @@ abstract class Node implements NodeInterface {
             result.push(this);
         }
         const myNode = this;
-        myNode.children.forEach((child): void => {
+        myNode._children.forEach((child): void => {
             if (typeof child === "undefined") {
                 throw new Error("child is undefined");
             }
@@ -762,7 +810,7 @@ abstract class Node implements NodeInterface {
     // Specialized traverse() that doesn't check for a condition.
         const result: NodeInterface[] = [];
         result.push(this);
-        this.children.forEach((child): void => {
+        this._children.forEach((child): void => {
             // @ts-ignore
             // eslint-disable-next-line no-underscore-dangle
             result.push(...child._allTraverse());
@@ -806,8 +854,8 @@ abstract class Node implements NodeInterface {
         if (includeSelf && (condition == null || condition(this))) {
             r.push(this);
         }
-        if (descend && this.children.length) {
-            this.children.forEach((child): void => {
+        if (descend && this._children.length) {
+            this._children.forEach((child): void => {
                 r.push(...child.traverse({
                     includeSelf: true,
                     descend: true,
@@ -820,8 +868,8 @@ abstract class Node implements NodeInterface {
         if (siblings || ascend) {
             let node: NodeInterface | undefined = (this as NodeInterface);
             while (node != null && node.parent != null) {
-                const index = node.parent.children.indexOf(node);
-                node.parent.children.slice(index + 1).forEach((sibling): void => {
+                const index = node.parent.getChildren().indexOf(node);
+                node.parent.getChildren().slice(index + 1).forEach((sibling): void => {
                     r.push(...sibling.traverse({
                         includeSelf: true,
                         descend,
@@ -1048,7 +1096,7 @@ class Element extends Node implements ElementInterface {
     public constructor(rawsource?: string, children: NodeInterface[] = [], attributes: Attributes = {}) {
         super();
         this.nodeName = Symbol.for("Element");
-        this.children = children; // we want to do this, imo
+        children.forEach((child): void => this.append(child));
         this.attributes = {};
         this.listAttributes.forEach((x): void => {
             this.attributes[x] = [];
@@ -1165,7 +1213,7 @@ class Element extends Node implements ElementInterface {
             throw new InvalidArgumentsError("need child");
         }
 
-        child.parent = this;
+        child._parent = this;
         if (this.document) {
             child.document = this.document;
             if (typeof child.source === "undefined") {
@@ -1439,7 +1487,7 @@ class Text extends Node {
     }
 
     public document?: Document;
-    public parent?: NodeInterface;
+    public _parent?: NodeInterface;
     public refid?: string;
     public refname?: string;
 
@@ -1470,10 +1518,12 @@ export interface TransformerInterface {
 
 
 /**
- * Document class
+ * Document class. Do not call the constructor, rather call
+ * {@link newDocument} to obtain a new document instance
  *
- * To create a document, call {@link newDocument}.
+ * Implements {@link Document}
  * @extends Element
+ * @implements Document
  */
 // eslint-disable-next-line @typescript-eslint/class-name-casing
 class document extends Element implements Document {
@@ -1528,18 +1578,20 @@ class document extends Element implements Document {
     private symbolFootnoteStart: number;
     private idPrefix: string = "";
     private autoIdPrefix: string = "";
-    public uuid?: string;
+    public logger: LoggerType;
 
     /** Private constructor */
     public constructor(
         settings: Settings,
         reporter: ReporterInterface,
+        logger: LoggerType,
         rawsource?: string,
         children?: NodeInterface[],
-        attributes?: Attributes
+        attributes?: Attributes,
     ) {
         super(rawsource, children, attributes);
         this.classTypes = [Root, Structural];
+        this.logger = logger;
         this.tagname = "document";
         this.settings = settings;
         this.reporter = reporter;
@@ -1564,7 +1616,7 @@ class document extends Element implements Document {
         this.idStart = 1;
         this.parseMessages = [];
         this.transformMessages = [];
-        this.transformer = new Transformer(this);
+        this.transformer = new Transformer(this, logger);
         this.decoration = undefined;
         this.document = this;
     }

@@ -1,6 +1,7 @@
 /* eslint-disable-next-line import/prefer-default-export */
 export { parse } from './parse';
 export {NodeInterface, Settings,Document} from './types';
+export { getDefaultSettings } from './settingsHelper';
 export { StringOutput, StringInput } from './io';
 export { StandaloneReader } from './readers/standalone';
 export { newDocument } from './newDocument';
@@ -9,7 +10,6 @@ import Writer from './Writer';
 import Transform from './Transform';
 export { Reader } from './Reader';
 export { Publisher } from './Publisher'
-export { defaults } from '../gen/defaults';
 export { pojoTranslate } from './fn/pojoTranslate';
 export { htmlTranslate } from './fn/htmlTranslate';
 export { RSTParser } from './parsers/restructuredtext';

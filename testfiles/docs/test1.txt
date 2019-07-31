@@ -1,0 +1,15 @@
+1. End-users: users of reStructuredText and the Docutils tools.
+   Although some are developers (e.g. Python developers utilizing
+   reStructuredText for docstrings in their source), many are not.
+
+2. Client-developers: developers using Docutils as a library,
+   programmers developing *with* Docutils.
+
+3. Component-developers: those who implement application-specific
+   components, directives, and/or roles, separately from Docutils.
+
+4. Core-developers: developers of the Docutils codebase and
+   participants in the Docutils project community.
+
+5. Re-implementers: developers of alternate implementations of
+   Docutils.

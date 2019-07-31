@@ -1,11 +1,20 @@
 import * as RSTStates from './RSTStates';
-import { Statefactory, StateInterface, Statemachine, StateType, StateConstructor } from "../../types";
-import uuidv1 from 'uuid/v1';
+import {
+    Statefactory,
+    StateInterface,
+    Statemachine,
+    StateType,
+    StateConstructor,
+    LoggerType,
+} from "../../types";
 
 class StateFactory implements Statefactory {
     private stateClasses: StateConstructor[]= [];
     private args: any | undefined;
-    public constructor(args?: { stateClasses?: StateConstructor[] }) {
+    private logger: LoggerType;
+    public constructor(args: { logger: LoggerType; stateClasses?: StateConstructor[] }) {
+        this.logger = args.logger;
+        this.logger.silly('constructor');
         this.args = args;
         if (args && args.stateClasses && args.stateClasses.length) {
             this.stateClasses = args.stateClasses;
@@ -102,6 +111,7 @@ class StateFactory implements Statefactory {
     }
 
     public createState(stateName: string, stateMachine?: Statemachine) {
+        //this.logger.silly('createState', { value:stateName});
         if (typeof stateName === 'undefined') {
             throw new Error('Need argument stateName');
         }
@@ -115,9 +125,11 @@ class StateFactory implements Statefactory {
         }
         // @ts-ignore
         const StateClass = RSTStates[stateName];
-        const uuid = uuidv1();
         let state = new StateClass(stateMachine, { });
-        state.uuid = uuid;
+        /* This has to be done post-construction due to how instance
+	   property initiailization order */
+        state.addInitialTransitions();
+        // this.logger.silly('createState finish', { value:stateName});
         return state;
     }
 

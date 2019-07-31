@@ -6,21 +6,26 @@ import * as RegExps from '../RegExps';
 import TransitionCorrection from '../../../TransitionCorrection';
 import UnexpectedIndentationError from '../../../error/UnexpectedIndentationError';
 import {EOFError} from '../../../Exceptions';
-import {NodeInterface,RegexpResult, ContextArray, StateType, StateInterface,ParseMethodReturnType} from '../../../types';
+import {
+    NodeInterface,
+    RegexpResult,
+    ContextArray,
+    StateType,
+    StateInterface,
+    ParseMethodReturnType,
+    Patterns,
+} from '../../../types';
 import State from "../../../states/State";
 import RSTStateMachine from "../RSTStateMachine";
 import {RSTStateArgs} from "../types";
 import NestedStateMachine from "../NestedStateMachine";
 
 class Text extends RSTState {
-    public _init(stateMachine: RSTStateMachine, debug: boolean = false) {
-        super._init(stateMachine, debug);
-        this.patterns = {
-            underline: '([!-/:-@[-`{-~])\\1* *$',
-            text: '',
-        };
-        this.initialTransitions = [['underline', 'Body'], ['text', 'Body']];
-    }
+    protected initialTransitions?: (string | string[])[] = [['underline', 'Body'], ['text', 'Body']];
+    public patterns: Patterns = {
+        underline: new RegExp('([!-/:-@[-`{-~])\\1* *$'),
+        text: new RegExp(''),
+    };
 
     /* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */
     public blank(match: any, context: any[], nextState: any) {
@@ -192,7 +197,7 @@ class Text extends RSTState {
         if(newAbsOffset !== undefined) {
             this.gotoLine(newAbsOffset);
         }
-        return parentNode.children;
+        return parentNode.getChildren();
     }
 
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */

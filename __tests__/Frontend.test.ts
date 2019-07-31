@@ -1,11 +1,8 @@
 import { OptionParser, OptionParserArgs } from '../src/Frontend';
 import { Publisher } from '../src/Publisher';
 import { defaultPublisherOptions } from '../src/constants';
-function createPublisher() {
-    const publisher = new Publisher(defaultPublisherOptions);
-    publisher.setComponents(defaultPublisherOptions.readerName, defaultPublisherOptions.parserName, 'xml');
-    return publisher;
-}
+import { createLogger, createPublisher } from '../src/testUtils';
+
 
 test('1', (): void => {
     const p = createPublisher();
@@ -477,6 +474,22 @@ test('--smartquotes-locales', (): void => {
     const p = createPublisher();
     const argv = ['--smartquotes-locales', 'a:b,c:d'];
     p.processCommandLine({ argv });
-
-//expect(p.settings!.syntaxHighlight).toBe("short");
+   expect(p.settings!.smartquotesLocales).toBe("a:b,c:d");
 });
+
+
+
+test('--word-level-inline-markup', (): void => {
+    const p = createPublisher();
+    const argv = ['--word-level-inline-markup'];
+    p.processCommandLine({ argv });
+   expect(p.settings!.characterLevelInlineMarkup).toBe(false);
+});
+
+test('--character-level-inline-markup', (): void => {
+    const p = createPublisher();
+    const argv = ['--character-level-inline-markup'];
+    p.processCommandLine({ argv });
+   expect(p.settings!.characterLevelInlineMarkup).toBe(true);
+});
+/* end of restructuredtext options */

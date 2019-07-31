@@ -3,12 +3,12 @@ import { Settings } from "../gen/Settings";
 import { Document, NodeInterface } from "./types";
 import * as nodes from './nodes';
 /** Return indices of all combining chars in  Unicode string `text`.
-
  >>> from docutils.utils import find_combining_chars
  >>> find_combining_chars(u'A t ab le ')
  [3, 6, 9]
-
  */
+import CallSite = NodeJS.CallSite;
+
 function findCombiningChars(text: string): number[] {
     return [];
     /*
@@ -302,24 +302,24 @@ class BadOptionDataError implements Error {
 */
 function extractOptions(fieldList: NodeInterface): [string, string | undefined][] {
     const  optionList: [string, string | undefined][] = [];
-    for(let i = 0; i < fieldList.children.length; i += 1) {
-        const field = fieldList.children[i];
-        if(pySplit(field.children[0].astext()).length !== 1) {
+    for(let i = 0; i < fieldList.getNumChildren(); i += 1) {
+        const field = fieldList.getChild(i);
+        if(pySplit(field.getChild(0).astext()).length !== 1) {
             throw new BadOptionError(
                 'extension option field name may not contain multiple words');
         }
-        const name = field.children[0].astext().toLowerCase();
-        const body = field.children[1];
+        const name = field.getChild(0).astext().toLowerCase();
+        const body = field.getChild(1);
         let data: string | undefined;
-        if(body.children.length === 0) {
+        if(!body.hasChildren()) {
             data = undefined;
-        } else if(body.children.length > 1 || !(body.children[0] instanceof nodes.paragraph)
-           || body.children[0].children.length !== -1 || !(body.children[0].children[0] instanceof nodes.Text)) {
+        } else if(body.getNumChildren() > 1 || !(body.getChild(0) instanceof nodes.paragraph)
+           || body.getChild(0).getNumChildren() !== -1 || !(body.getChild(0).getChild(0) instanceof nodes.Text)) {
             throw new BadOptionDataError(
                 `extension option field body may contain\n` +
                     `a single paragraph only (option "${name}")`);
         } else {
-            data = body.children[0].children[0].astext();
+            data = body.getChild(0).getChild(0).astext();
         }
         optionList.push([name, data]);
     }
@@ -396,8 +396,8 @@ function toRoman(input: number): string {
 };
 
 export function fromRoman (roman: string, accept: boolean): number {
-    let s = roman.toUpperCase().replace(/ +/g, ''), 
-        L = s.length, sum = 0, i = 0, next, val, 
+    let s = roman.toUpperCase().replace(/ +/g, ''),
+        L = s.length, sum = 0, i = 0, next, val,
         R: { [char: string]: number } = { M: 1000, D: 500, C: 100, L: 50, X: 10, V: 5, I: 1 };
 
     function fromBigRoman(rn: string): number {
@@ -426,6 +426,42 @@ export function fromRoman (roman: string, accept: boolean): number {
     }
     return NaN;
 };
+
+export function _getCallerFileAndLine() {
+    const originalFunc = Error.prepareStackTrace;
+    let callerfile;
+    let callerlineno;
+    try {
+        const err = new Error();
+
+        Error.prepareStackTrace = (myErr, stack) => stack;
+        if(!err.stack) {
+            return [undefined, undefined];
+        }
+
+        const stack: CallSite[] = err.stack as unknown as CallSite[];
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        const x = stack.shift()!;
+        const currentfile = x.getFileName();
+
+        while ( stack.length) {
+        // @ts-ignore
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            const x2 = stack.shift()!;
+            callerfile = x2.getFileName();
+            callerlineno = x2.getLineNumber();
+
+            if (currentfile !== callerfile) break;
+        }
+    } catch (e) {
+        console.log(e);
+    }
+
+    Error.prepareStackTrace = originalFunc;
+
+    return [callerfile, callerlineno];
+}
+
 
 export {
     findCombiningChars, columnWidth, escape2null, splitEscapedWhitespace, columnIndicies,

@@ -1,6 +1,6 @@
-import { Settings } from '../gen/Settings';
-import{ defaults} from '../gen/defaults';
+import baseSettings from './baseSettings';
+import { Settings } from './';
 
 export function getDefaultSettings(): Settings {
-    return defaults;
+    return { ... baseSettings };
 }

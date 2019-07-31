@@ -57,7 +57,8 @@ class RSTStateMachine extends StateMachineWS implements Rststatemachine {
         this.matchTitles = matchTitles;
         /* istanbul ignore next */
         if (inliner === undefined) {
-            this.inliner = new Inliner(document);
+	    this.logger.silly('creating new inliner');
+            this.inliner = new Inliner(document, this.logger);
         } else {
             this.inliner = inliner;
         }

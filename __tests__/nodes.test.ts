@@ -1,10 +1,11 @@
 import * as nodes from "../src/nodes";
 import newDocument from "../src/newDocument";
-import { defaults } from "../gen/defaults";
 import { nodeToXml } from "../src/nodeUtils";
+import { getDefaultSettings } from'../src/';
+import { createNewDocument }from '../src/testUtils';
 
 function createNodeVisitor() {
-    let document = newDocument({sourcePath: ""}, defaults);
+    let document = createNewDocument();
     return new nodes.NodeVisitor(document);
 }
 
@@ -13,9 +14,9 @@ test('paragraph with text', () => {
     const paraText = 'This is my paragraph text.';
     const p = new nodes.paragraph(paraText, paraText, [], {});
     expect(p.tagname).toBe('paragraph');
-    expect(p.children).toHaveLength(1);
-    expect(p.children[0]).toBeDefined();
-    expect(p.children[0].astext()).toEqual(paraText);
+    expect(p.getChildren()).toHaveLength(1);
+    expect(p.getChild(0)).toBeDefined();
+    expect(p.getChild(0).astext()).toEqual(paraText);
     expect(nodeToXml(p)).toMatchSnapshot();
     expect(p).toMatchSnapshot();
 });
@@ -25,7 +26,7 @@ test('problematic', () => {
     expect(p.attributes.refid).toBe('auto1');
 });
 test('setId', () => {
-    const d = newDocument({ sourcePath: ''}, defaults );
+    let d = createNewDocument();
     const p = new nodes.paragraph('test', 'test', [], {});
     d.setId(p);
 });
@@ -45,15 +46,15 @@ test('_domNode', () => {
 });
 
 test('firstChildNotMatchingClass', () => {
-    const node = newDocument({ sourcePath: ''}, defaults)
-    node.children.push(new nodes.section());
+    const node = createNewDocument();
+    node.add(new nodes.section());
     const index = node.firstChildNotMatchingClass(nodes.Titular);
     expect(index).toEqual(0);
 });
 
 test('firstChildNotMatchingClass 2', () => {
-    const node = newDocument({ sourcePath: ''}, defaults)
-    node.children.push(new nodes.Text('hello'));
+    const node = createNewDocument();
+    node.add(new nodes.Text('hello'));
     const index = node.firstChildNotMatchingClass(nodes.Titular);
     expect(index).toEqual(0);
 });

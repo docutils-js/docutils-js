@@ -14,7 +14,7 @@ export interface DocutilsCoreOptionParser {
     /** DocutilsCoreOptionParser: Disable backlinks to the table of contents. */
     tocBacklinks?: string;
     /** DocutilsCoreOptionParser: Disable backlinks from footnotes and citations. */
-    footnoteBacklinks?: number;
+    footnoteBacklinks?: boolean;
     /** DocutilsCoreOptionParser: Disable section numbering by Docutils. */
     sectnumXform?: number;
     /** DocutilsCoreOptionParser: Leave comment elements in the document tree. (default) */
@@ -32,9 +32,9 @@ export interface DocutilsCoreOptionParser {
     /** DocutilsCoreOptionParser: Disable debug output.  (default) */
     debug?: boolean;
     /** DocutilsCoreOptionParser: Send the output of system messages to <file>. */
-    warningStream?: string;
+    warningStream?: string|null;
     /** DocutilsCoreOptionParser: Disable Python tracebacks.  (default) */
-    traceback?: string;
+    traceback?: boolean|null;
     /** DocutilsCoreOptionParser: Specify the encoding and optionally the error handler of input text.  Default: <locale-dependent>:strict. */
     inputEncoding?: string;
     /** DocutilsCoreOptionParser: Specify the error handler for undecodable characters.  Choices: "strict" (default), "ignore", and "replace". */
@@ -50,7 +50,7 @@ export interface DocutilsCoreOptionParser {
     /** DocutilsCoreOptionParser: Specify the language (as BCP 47 language tag).  Default: en. */
     languageCode?: string;
     /** DocutilsCoreOptionParser: Write output file dependencies to <file>. */
-    recordDependencies?: string;
+    recordDependencies?: string|null;
     /** DocutilsCoreOptionParser: Read configuration settings from <file>, if it exists. */
     config?: string;
     /** DocutilsCoreOptionParser: Show this program's version number and exit. */
@@ -62,17 +62,17 @@ export interface DocutilsCoreOptionParser {
     /** DocutilsCoreOptionParser: SUPPRESSHELP */
     autoIdPrefix?: string;
     /** DocutilsCoreOptionParser: SUPPRESSHELP */
-    dumpSettings?: string;
+    dumpSettings?: string|null;
     /** DocutilsCoreOptionParser: SUPPRESSHELP */
-    dumpInternals?: string;
+    dumpInternals?: string|null;
     /** DocutilsCoreOptionParser: SUPPRESSHELP */
-    dumpTransforms?: string;
+    dumpTransforms?: string|null;
     /** DocutilsCoreOptionParser: SUPPRESSHELP */
     dumpPseudoXml?: string;
     /** DocutilsCoreOptionParser: SUPPRESSHELP */
     exposeInternals?: string;
     /** DocutilsCoreOptionParser: SUPPRESSHELP */
-    strictVisitor?: boolean;
+    strictVisitor?: boolean|null;
 }
 
 export interface DocutilsFrontendOptionParser {
@@ -91,7 +91,7 @@ export interface DocutilsFrontendOptionParser {
     /** DocutilsFrontendOptionParser: Disable backlinks to the table of contents. */
     tocBacklinks?: string;
     /** DocutilsFrontendOptionParser: Disable backlinks from footnotes and citations. */
-    footnoteBacklinks?: number;
+    footnoteBacklinks?: boolean;
     /** DocutilsFrontendOptionParser: Disable section numbering by Docutils. */
     sectnumXform?: number;
     /** DocutilsFrontendOptionParser: Leave comment elements in the document tree. (default) */
@@ -107,11 +107,11 @@ export interface DocutilsFrontendOptionParser {
     /** DocutilsFrontendOptionParser: Enable a non-zero exit status for non-halting system messages at or above <level>.  Default: 5 (disabled). */
     exitStatusLevel?: number;
     /** DocutilsFrontendOptionParser: Disable debug output.  (default) */
-    debug?: string;
+    debug?: boolean;
     /** DocutilsFrontendOptionParser: Send the output of system messages to <file>. */
-    warningStream?: string;
+    warningStream?: string|null;
     /** DocutilsFrontendOptionParser: Disable Python tracebacks.  (default) */
-    traceback?: string;
+    traceback?: boolean|null;
     /** DocutilsFrontendOptionParser: Specify the encoding and optionally the error handler of input text.  Default: <locale-dependent>:strict. */
     inputEncoding?: string;
     /** DocutilsFrontendOptionParser: Specify the error handler for undecodable characters.  Choices: "strict" (default), "ignore", and "replace". */
@@ -127,7 +127,7 @@ export interface DocutilsFrontendOptionParser {
     /** DocutilsFrontendOptionParser: Specify the language (as BCP 47 language tag).  Default: en. */
     languageCode?: string;
     /** DocutilsFrontendOptionParser: Write output file dependencies to <file>. */
-    recordDependencies?: string;
+    recordDependencies?: string|null;
     /** DocutilsFrontendOptionParser: Read configuration settings from <file>, if it exists. */
     config?: string;
     /** DocutilsFrontendOptionParser: Show this program's version number and exit. */
@@ -139,17 +139,17 @@ export interface DocutilsFrontendOptionParser {
     /** DocutilsFrontendOptionParser: SUPPRESSHELP */
     autoIdPrefix?: string;
     /** DocutilsFrontendOptionParser: SUPPRESSHELP */
-    dumpSettings?: string;
+    dumpSettings?: string|null;
     /** DocutilsFrontendOptionParser: SUPPRESSHELP */
-    dumpInternals?: string;
+    dumpInternals?: string|null;
     /** DocutilsFrontendOptionParser: SUPPRESSHELP */
-    dumpTransforms?: string;
+    dumpTransforms?: string|null;
     /** DocutilsFrontendOptionParser: SUPPRESSHELP */
     dumpPseudoXml?: string;
     /** DocutilsFrontendOptionParser: SUPPRESSHELP */
     exposeInternals?: string;
     /** DocutilsFrontendOptionParser: SUPPRESSHELP */
-    strictVisitor?: string;
+    strictVisitor?: boolean|null;
 }
 
 export interface DocutilsParsersRstParser {
@@ -204,7 +204,7 @@ export interface DocutilsWritersPepHtmlWriter {
     /** DocutilsWritersPepHtmlWriter: Comma-separated list of directories where stylesheets are found. Used by --stylesheet-path when expanding relative path arguments. Default: "['.', '/usr/share/docutils/writers/html4css1', '/usr/share/docutils/writers/html5_polyglot']" */
     stylesheetDirs?: string[];
     /** DocutilsWritersPepHtmlWriter: Specify the initial header level.  Default is 1 for "<h1>".  Does not affect document title & subtitle (see --no-doc-title). */
-    initialHeaderLevel?: string;
+    initialHeaderLevel?: number;
     /** DocutilsWritersPepHtmlWriter: Specify the maximum width (in characters) for one-column field names.  Longer field names will span an entire row of the table used to render the field list.  Default is 14 characters.  Use 0 for "no limit". */
     fieldNameLimit?: number;
     /** DocutilsWritersPepHtmlWriter: Specify the maximum width (in characters) for options in option lists.  Longer options will span an entire row of the table used to render the option list.  Default is 14 characters.  Use 0 for "no limit". */
@@ -218,7 +218,7 @@ export interface DocutilsWritersPepHtmlWriter {
     /** DocutilsWritersPepHtmlWriter: Disable compact simple field lists. */
     compactFieldLists?: number;
     /** DocutilsWritersPepHtmlWriter: Added to standard table classes. Defined styles: "borderless". Default: "" */
-    tableStyle?: string;
+    tableStyle?: string[]|string;
     /** DocutilsWritersPepHtmlWriter: Math output format, one of "MathML", "HTML", "MathJax" or "LaTeX". Default: "HTML math.css" */
     mathOutput?: string;
     /** DocutilsWritersPepHtmlWriter: Omit the XML declaration.  Use with caution. */
@@ -275,7 +275,7 @@ export interface DocutilsWritersLatex2EWriter {
     /** DocutilsWritersLatex2EWriter: When possible, use verbatim for literal-blocks. Compatibility alias for "--literal-block-env=verbatim". */
     useVerbatimWhenPossible?: boolean;
     /** DocutilsWritersLatex2EWriter: Table style. "standard" with horizontal and vertical lines, "booktabs" (LaTeX booktabs style) only horizontal lines above and below the table and below the header or "borderless".  Default: "standard" */
-    tableStyle?: string[];
+    tableStyle?: string[]|string;
     /** DocutilsWritersLatex2EWriter: LaTeX graphicx package option. Possible values are "dvips", "pdftex". "auto" includes LaTeX code to use "pdftex" if processing with pdf(la)tex and dvips otherwise. Default is no option. */
     graphicxOption?: string;
     /** DocutilsWritersLatex2EWriter: LaTeX font encoding. Possible values are "", "T1" (default), "OT1", "LGR,T1" or any other combination of options to the `fontenc` package.  */
@@ -346,7 +346,7 @@ export interface DocutilsWritersHtml4Css1Writer {
     /** DocutilsWritersHtml4Css1Writer: Disable compact simple field lists. */
     compactFieldLists?: number;
     /** DocutilsWritersHtml4Css1Writer: Added to standard table classes. Defined styles: "borderless". Default: "" */
-    tableStyle?: string;
+    tableStyle?: string|string[];
     /** DocutilsWritersHtml4Css1Writer: Math output format, one of "MathML", "HTML", "MathJax" or "LaTeX". Default: "HTML math.css" */
     mathOutput?: string;
     /** DocutilsWritersHtml4Css1Writer: Omit the XML declaration.  Use with caution. */
@@ -403,7 +403,7 @@ export interface DocutilsWritersXetexWriter {
     /** DocutilsWritersXetexWriter: When possible, use verbatim for literal-blocks. Compatibility alias for "--literal-block-env=verbatim". */
     useVerbatimWhenPossible?: boolean;
     /** DocutilsWritersXetexWriter: Table style. "standard" with horizontal and vertical lines, "booktabs" (LaTeX booktabs style) only horizontal lines above and below the table and below the header or "borderless".  Default: "standard" */
-    tableStyle?: string;
+    tableStyle?: string|string[];
     /** DocutilsWritersXetexWriter: LaTeX graphicx package option. Possible values are "dvips", "pdftex". "auto" includes LaTeX code to use "pdftex" if processing with pdf(la)tex and dvips otherwise. Default is no option. */
     graphicxOption?: string;
     /** DocutilsWritersXetexWriter: Per default the latex-writer puts the reference title into hyperreferences. Specify "ref*" or "pageref*" to get the section number or the page number. */
@@ -424,7 +424,7 @@ export interface DocutilsWritersHtml5PolyglotWriter {
     /** DocutilsWritersHtml5PolyglotWriter: Comma-separated list of directories where stylesheets are found. Used by --stylesheet-path when expanding relative path arguments. Default: "['.', '/usr/share/docutils/writers/html5_polyglot']" */
     stylesheetDirs?: string;
     /** DocutilsWritersHtml5PolyglotWriter: Specify the initial header level.  Default is 1 for "<h1>".  Does not affect document title & subtitle (see --no-doc-title). */
-    initialHeaderLevel?: string;
+    initialHeaderLevel?: number;
     /** DocutilsWritersHtml5PolyglotWriter: Format for footnote references: one of "superscript" or "brackets".  Default is "brackets". */
     footnoteReferences?: string;
     /** DocutilsWritersHtml5PolyglotWriter: Format for block quote attributions: one of "dash" (em-dash prefix), "parentheses"/"parens", or "none".  Default is "dash". */
@@ -455,7 +455,7 @@ export interface DocutilsWritersS5HtmlWriter {
     /** DocutilsWritersS5HtmlWriter: Comma-separated list of directories where stylesheets are found. Used by --stylesheet-path when expanding relative path arguments. Default: "['.', '/usr/share/docutils/writers/html4css1', '/usr/share/docutils/writers/html5_polyglot']" */
     stylesheetDirs?: string;
     /** DocutilsWritersS5HtmlWriter: Specify the initial header level.  Default is 1 for "<h1>".  Does not affect document title & subtitle (see --no-doc-title). */
-    initialHeaderLevel?: string;
+    initialHeaderLevel?: number;
     /** DocutilsWritersS5HtmlWriter: Specify the maximum width (in characters) for one-column field names.  Longer field names will span an entire row of the table used to render the field list.  Default is 14 characters.  Use 0 for "no limit". */
     fieldNameLimit?: string;
     /** DocutilsWritersS5HtmlWriter: Specify the maximum width (in characters) for options in option lists.  Longer options will span an entire row of the table used to render the option list.  Default is 14 characters.  Use 0 for "no limit". */
@@ -469,7 +469,7 @@ export interface DocutilsWritersS5HtmlWriter {
     /** DocutilsWritersS5HtmlWriter: Disable compact simple field lists. */
     compactFieldLists?: string;
     /** DocutilsWritersS5HtmlWriter: Added to standard table classes. Defined styles: "borderless". Default: "" */
-    tableStyle?: string;
+    tableStyle?: string|string[];
     /** DocutilsWritersS5HtmlWriter: Math output format, one of "MathML", "HTML", "MathJax" or "LaTeX". Default: "HTML math.css" */
     mathOutput?: string;
     /** DocutilsWritersS5HtmlWriter: Omit the XML declaration.  Use with caution. */

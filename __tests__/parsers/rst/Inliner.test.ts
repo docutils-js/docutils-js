@@ -3,9 +3,11 @@ import formatXml from 'xml-formatter';
 import Inliner from '../../../src/parsers/rst/Inliner';
 import newReporter from '../../../src/newReporter';
 import newDocument from '../../../src/newDocument';
-import { defaults } from "../../../gen/defaults";
+
 import{ NodeInterface} from "../../../src/types";
 import { nodeToXml } from "../../../src/nodeUtils";
+import { createNewDocument, createLogger } from '../../../src/testUtils';
+import { getDefaultSettings } from '../../../src/';
 
 const currentLogLines: string[] = [];
 
@@ -18,10 +20,10 @@ afterEach(() => {
 });
 
 test('inliner 1', () => {
-    const document = newDocument({ sourcePath: ''}, { ...defaults});
-    const inliner = new Inliner(document);
-    inliner.initCustomizations({...defaults});
-    const reporter = newReporter({ sourcePath: ''}, { ...defaults});
+    const document = createNewDocument();
+    const inliner = new Inliner(document, document.logger);
+    inliner.initCustomizations({...getDefaultSettings()});
+    const reporter = newReporter({ sourcePath: ''}, { ...getDefaultSettings()});
     let language;
     const memo = {
         document,
@@ -42,10 +44,10 @@ test.each([['Interpreted text', '`test`:foo:'],
            ['Not sure', '_`hello`'],
            ['Interpreted text, no specified role', '`test`'],
           ])('%s', (testName, a) => {
-              const document = newDocument({sourcePath:''}, { ...defaults });
-    const inliner = new Inliner(document);
-    inliner.initCustomizations({...defaults});
-              const reporter = newReporter({ sourcePath:''}, { ...defaults});
+              const document = createNewDocument();
+    const inliner = new Inliner(document,document.logger);
+    inliner.initCustomizations({...getDefaultSettings()});
+              const reporter = newReporter({ sourcePath:''}, { ...getDefaultSettings()});
     let language;
     const memo = {
  document,

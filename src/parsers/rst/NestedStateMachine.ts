@@ -16,6 +16,7 @@ class NestedStateMachine extends StateMachineWS implements Nestedstatemachine{
         matchTitles: boolean = true,
         memo?: RstMemo, ...rest: any[]): (string|{})[] {
 
+        this.logger.debug('run');
         /* istanbul ignore if */
         if (matchTitles === undefined) {
             this.matchTitles = true;
@@ -47,6 +48,7 @@ class NestedStateMachine extends StateMachineWS implements Nestedstatemachine{
     public static createStateMachine(stateMachine: Statemachine, initialState: string = 'Body',
         stateFactory: Statefactory|undefined = stateMachine.stateFactory) {
         return new NestedStateMachine({stateFactory,
+	    logger: stateMachine.logger,
             initialState,
         });
     }

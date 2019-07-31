@@ -1,4 +1,5 @@
 import TransformSpec from '../TransformSpec';
+import { LoggerType } from '../types';
 
 abstract class Output<T> extends TransformSpec {
     public componentType: string = 'output';
@@ -8,8 +9,8 @@ abstract class Output<T> extends TransformSpec {
     public encoding?: string;
     public destination?: T;
     private errorHandler: string;
-    public constructor(destination?: T, destinationPath?: string, encoding?: string, errorHandler?: string) {
-        super();
+    public constructor(logger: LoggerType, destination?: T, destinationPath?: string, encoding?: string, errorHandler?: string) {
+        super({logger});
         if(encoding !== undefined) {
             this.encoding = encoding;
         }

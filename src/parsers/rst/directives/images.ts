@@ -83,7 +83,7 @@ class Image extends Directive {
             const imageNode = new nodes.image(this.blockText, [], this.options);
             this.addName(imageNode)
             if (referenceNode) {
-                referenceNode.children.push(imageNode);
+                referenceNode.append(imageNode);
 
                 return [...messages, referenceNode];
             } else {

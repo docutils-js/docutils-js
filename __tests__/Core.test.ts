@@ -1,8 +1,8 @@
-import { Publisher } from '../src/Core';
+import { Publisher, publishCmdLine } from '../src/Core';
 import { StringInput, StringOutput } from '../src/io';
 import * as nodes from '../src/nodes';
-import { defaults as def } from "../gen/defaults";
 import {NodeInterface} from "../src/types";
+import { createLogger } from '../src/testUtils';
 
 const currentLogLines = [];
 
@@ -22,47 +22,28 @@ const defaultArgs = {
     writerName: 'xml',
 };
 
-const defaultSettings = { ...def };
-
-test('full rst2xml pipeline with specific input', () => {
-    const settings = { ...defaultSettings };
-    const args = { ...defaultArgs };
-
-    /* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */
-    const debugFn = (msg: string) => {
-
-        //        console.log(msg);
-        //      currentLogLines.push(msg);
-    };
-
-    const { readerName, parserName, writerName } = args;
+test.only('full rst2xml pipeline with specific input', (done) => {
+    const logger = createLogger();
     const source = new StringInput(
         `.. _A ReStructuredText Primer: ../../user/rst/quickstart.html
 .. _Quick reStructuredText: ../../user/rst/quickref.html
-`
+`,
+        logger
     );
-    const destination = new StringOutput();
-    if(def === undefined) {
-        throw new Error('no defaults');
-    }
-    const pub = new Publisher({
-        source, destination, settings: def, debug: true, debugFn,
-    });
-    pub.setComponents(readerName, parserName, writerName);
-    return new Promise((resolve, reject) => {
-        pub.publish({}, (error: Error | any) => {
-            if (error) {
-                reject(error);
-                return;
-            }
-            // @ts-ignore
-            expect(destination.destination).toMatchSnapshot();
-            currentLogLines.length = 0;
-            resolve();
-        });
+    const destination = new StringOutput(logger);
+
+    publishCmdLine({logger, writerName: 'xml', argv: ['input.txt', 'output.txt']}, (error: Error, output: any): void => {
+        if(error){
+            throw error;
+        }
+	
+        expect(destination.destination).toMatchSnapshot();
+
+        done();
     });
 });
 
+/*
 test.each([
     ['Title', 'Title\n=====\nParagraph.', { check: () => true }],
     ['program lang', `Want to learn about \`my favorite programming language\`_?
@@ -299,7 +280,7 @@ footnote 2.
     ['escaping 2', '\\*escape* \\``with`` "\\\\"'],
 
 ])('%s', (...inputAry) => {
-    /* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars
     const [a, raw, opts] = inputAry;
     const myOpts: any = opts || {};
 
@@ -319,8 +300,6 @@ footnote 2.
     });
     pub.setComponents(readerName, parserName, writerName);
     return new Promise((resolve, reject) => {
-        /* {argv, usage, description, settingsSpec,
-settingsOverrides, configSection, enableExitStatus } */
         const fn = () => pub.publish({}, (error: any) => {
             if (error) {
                 if (myOpts.expectError) {
@@ -333,12 +312,11 @@ settingsOverrides, configSection, enableExitStatus } */
             const document = pub.document!;
 
             const Visitor = class extends nodes.GenericNodeVisitor {
-                /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,@typescript-eslint/no-unused-vars,no-unused-vars */
+                //eslint-disable-next-line @typescript-eslint/camelcase,camelcase,@typescript-eslint/no-unused-vars,no-unused-vars
                 default_departure(node: NodeInterface) {
-                    /**/
                 }
 
-                /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
+                // eslint-disable-next-line @typescript-eslint/camelcase,camelcase
                 default_visit(node: NodeInterface) {
                     if (node.attributes && node.attributes.refuri) {
                         //                                console.log(node.attributes.refuri);
@@ -359,3 +337,4 @@ settingsOverrides, configSection, enableExitStatus } */
         fn();
     });
 });
+*/

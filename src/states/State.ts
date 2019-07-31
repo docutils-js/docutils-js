@@ -8,11 +8,14 @@ import {
     Statemachine, StateMachineFactoryFunction,
     TransitionFunction,
     Transitions,
-    TransitionsArray
+    TransitionsArray,
+    Patterns,
+    LoggerType,
 } from "../types";
 import { StateMachine } from "../StateMachine";
 import { RSTStateArgs, Rststatemachine, StatemachineConstructor } from "../parsers/rst/types";
 import NestedStateMachine from "../parsers/rst/NestedStateMachine";
+
 /**
  * State superclass. Contains a list of transitions, and transition methods.
  *
@@ -52,12 +55,11 @@ import NestedStateMachine from "../parsers/rst/NestedStateMachine";
  * take care of constructing the list of transitions.
  */
 class State implements StateInterface {
-    public uuid?: string;
     /**
       * {Name: pattern} mapping, used by `make_transition()`. Each pattern may
       * be a string or a compiled `re` pattern. Override in subclasses.
      */
-    public patterns: {} = {};
+    public patterns: Patterns = {};
     /**
      * A list of transitions to initialize when a `State` is instantiated.
      * Each entry is either a transition name string, or a (transition name, next
@@ -80,31 +82,18 @@ class State implements StateInterface {
     public transitions: Transitions = { };
     protected reporter?: ReporterInterface;
     protected stateMachine?: StateMachine;
+    protected logger: LoggerType;
 
     public constructor(stateMachine: StateMachine, debug: boolean = false) {
         this.stateMachine = stateMachine;
+	this.logger = stateMachine.logger;
         this.debug = debug;
-        this._init(stateMachine, debug);
-
-        this.addInitialTransitions();
-        /* istanbul ignore if */
-        if (!stateMachine) {
-            throw new Error('Need state machine');
-        }
 
         if(this.createNestedStateMachine === undefined) {
             // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             this.createNestedStateMachine = () => NestedStateMachine.createStateMachine(this.stateMachine!, undefined, this.stateMachine!.stateFactory!.withStateClasses(["QuotedLiteralBlock"]));
         }
 
-    }
-
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars
-    public _init(stateMachine: StateMachine, debug: boolean): void {
-        /* empty */
-        this.patterns = {};
-        this.initialTransitions = undefined;
-        //this.nestedSm = undefined;
     }
 
     public runtimeInit(): void {
@@ -116,13 +105,16 @@ class State implements StateInterface {
     }
 
     public addInitialTransitions(): void {
+        //this.logger.silly('addInitialTransitions');
         if (this.initialTransitions) {
+            //this.logger.silly('got initial transitions', { value: this.initialTransitions});
             const [names, transitions] = this.makeTransitions(this.initialTransitions);
             this.addTransitions(names as string[], transitions);
         }
     }
 
     public addTransitions(names: string[], transitions: Transitions): void {
+        //this.logger.silly('addTransitions', { value: {names,transitions}});
         names.forEach(((name) => {
             if (name in this.transitions) {
                 throw new DuplicateTransitionError(name);
@@ -131,10 +123,12 @@ class State implements StateInterface {
                 throw new UnknownTransitionError(name);
             }
         }));
-        this.transitionOrder.splice(0, 0, ...names);
+        this.transitionOrder.push(...names);
         Object.keys(transitions).forEach((key: string): void => {
+            //this.logger.silly('addTransition', { value:key});
             this.transitions[key] = transitions[key];
         });
+        //this.logger.silly('done addTransitions');
     }
 
     public addTransition(name: string, transition: any) {

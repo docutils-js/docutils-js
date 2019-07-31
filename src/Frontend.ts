@@ -25,39 +25,74 @@ Also exports the following functions:
 */
 import camelcase from 'camelcase';
 import {ArgumentParser,ArgumentOptions,Namespace} from 'argparse';
-export const __docformat__ = 'reStructuredText';
 import SettingsSpec from'./SettingsSpec';
-import { SettingsSpecType, ConfigSettings } from './types';
-import { logger } from './logger';
+import { SettingsSpecType, ConfigSettings, LoggerType } from './types';
 import path from 'path';
 import { ActionCallback } from './callback';
+import { ActionValidating } from './validating';
 import {  dateDatestampFormat, timeAndDateDatestampFormat } from './constants';
-/**
+import { _getCallerFileAndLine } from './utils';
+import { Settings } from './';
+import { InvalidStateError} from './Exceptions';
+
+export const __docformat__ = 'reStructuredText';
+
+/*
+    """Check/normalize boolean settings:
+         True:  '1', 'on', 'yes', 'true'
+         False: '0', 'off', 'no','false', ''
+    """
+*/
+/**Lookup table for boolean configuration file settings.*/
+const booleans: { [val: string]: boolean } = {'1': true, 'on': true,
+    'yes': true, 'true': true, '0': false, 'off': false, 'no':
+    false, 'false': false, '': false};
+
+export function validateBoolean(parser: ArgumentParser, namespace: Namespace, values: any[],
+    optionString: (string|null)): boolean {
+    return false;
+}
+/*
+    if isinstance(value, bool):
+        return value
+    try:
+        return option_parser.booleans[value.strip().lower()]
+    except KeyError:
+        raise (LookupError('unknown boolean value: "%s"' % value),
+               None, sys.exc_info()[2])
+*//**
     Store multiple values in `parser.values`.  (Option callback.)
 
     Store `None` for each attribute named in `args`, and store the value for
     each key (attribute name) in `kwargs`.
 */
-function storeMultiple(parser: ArgumentParser, namespace: Namespace, values:any[], optionString: string|null, args: any[] = [], kwargs: { [name: string]: any }  = {}) {
+function storeMultiple(parser: ArgumentParser, namespace: Namespace, values: any[], optionString: string|null, args: any[] = [], kwargs: { [name: string]: any }  = {}) {
     args.forEach((arg: string) => {
     // @ts-ignore
-      namespace[arg] = undefined;
-      });
-   Object.keys(kwargs).forEach((key): void => {
+        namespace[arg] = undefined;
+    });
+    Object.keys(kwargs).forEach((key): void => {
     // @ts-ignore
-   namespace[key] = kwargs[key];
-   });
-   }
+        namespace[key] = kwargs[key];
+    });
+}
 
 /**     Read a configuration file during option processing.  (Option callback.) */
-function readConfigFile(): void{//option, opt, value, parser) {
-/*    try:
-        new_settings = parser.get_config_file_settings(value)
-    except ValueError, error:
-        parser.error(error)
-    parser.values.update(new_settings, parser)
-*/
+function readConfigFile(parser: OptionParser, namespace: Namespace, values: any[], optionString: string|null, args: any[] = [], kwargs: { [name: string]: any }  = {}) {
+    let newSettings: {} | undefined;
+    try {
+        newSettings = parser.getConfigFileSettings(values[0]);
+    } catch(error) {
+        parser.error(error);
+    }
+    if(newSettings !== undefined) {
+        Object.keys(newSettings).forEach((key): void => {
+        // @ts-ignore
+            namespace[key] = newSettings[key];
+        });
+    }
 }
+
 interface Thresholds {
     info: number;
     warning: number;
@@ -115,35 +150,21 @@ function validateEncodingAndErrorHandler() {
 
 
 /**
-Check/normalize boolean settings:
-  True:  '1', 'on', 'yes', 'true'
-  False: '0', 'off', 'no','false', ''
-*/
-function validateBoolean() {
-/*
-if isinstance(value, bool):
-        return value
-    try:
-        return option_parser.booleans[value.strip().lower()]
-    except KeyError:
-        raise (LookupError('unknown boolean value: "%s"' % value),
-               None, sys.exc_info()[2])
-               */
-}
-/**
 Check/normalize three-value settings:
     True:  '1', 'on', 'yes', 'true'
     False: '0', 'off', 'no','false', ''
     any other value: returned as-is.
 */
-function validateTernary() {
-/*    if isinstance(value, bool) or value is None:
-        return value
-    try:
-        return option_parser.booleans[value.strip().lower()]
-    except KeyError:
-        return value
-*/
+export function validateTernary(parser: ArgumentParser, namespace: Namespace, values: any[],
+    optionString: (string|null)): boolean|any {
+    if(typeof values[0] === 'boolean'|| values[0] === undefined) {
+        return values[0];
+    }
+    const v = values[0].trim().toLowerCase();
+    if(v in booleans) {
+        return booleans[v];
+    }
+    return values[0];
 }
 
 function validateNonnegativeInt() { //
@@ -279,7 +300,7 @@ function makePathsAbsolute(pathdict: { [name: string]: any }, keys: string[], ba
         }
     });
 }
-            
+
 function makeOnePathAbsolute(basePath: string, pathArg: string) {
     return path.resolve(basePath, pathArg);
 }
@@ -384,8 +405,10 @@ export interface OptionParserArgs {
     description?: string;
     usage?: string;
     readConfigFiles?: boolean;
-    components: (SettingsSpec|undefined)[];
+    components?: (SettingsSpec|undefined)[];
+    settingsSpecs?: SettingsSpecType[];
     defaults?: ConfigSettings;
+    logger: LoggerType;
 }
 
 export class OptionParser extends ArgumentParser {
@@ -750,7 +773,7 @@ export class OptionParser extends ArgumentParser {
                     }
                 ],
                 [
-                    "Enable Python tracebacks when Docutils is halted.",
+                    "Enable Javascript tracebacks when Docutils is halted.",
                     [
                         "--traceback"
                     ],
@@ -858,6 +881,7 @@ export class OptionParser extends ArgumentParser {
                         "default": null
                     }
                 ],
+                /*
                 [
                     "Read configuration settings from <file>, if it exists.",
                     [
@@ -867,9 +891,10 @@ export class OptionParser extends ArgumentParser {
                         "metavar": "<file>",
                         "type": "string",
                         "action": "callback",
-                        "callback": "read_config_file"
+                        "callback": readConfigFile
                     }
                 ],
+                */
                 [
                     "Show this program's version number and exit.",
                     [
@@ -980,7 +1005,7 @@ export class OptionParser extends ArgumentParser {
         '/etc/docutils.conf',           // system-wide
         './docutils.conf',              // project-specific
         '~/.docutils'];                  // user-specific
-        
+
     /** Possible inputs for for --report and --halt threshold values. */
     public thresholdChoices: string[] = ['info', '1',
         'warning', '2',
@@ -997,11 +1022,6 @@ export class OptionParser extends ArgumentParser {
         'none': 5,
     }
 
-    /**Lookup table for boolean configuration file settings.*/
-    public booleans: { [val: string]: boolean } = {'1': true, 'on': true,
-        'yes': true, 'true': true, '0': false, 'off': false, 'no':
-    false, 'false': false, '': false};
-
     public defaultErrorEncoding = '';/*getattr(sys.stderr, 'encoding', None) or locale_encoding or 'ascii'*/
 
     public defaultErrorEncodingErrorHandler = 'backslashreplace'
@@ -1013,7 +1033,7 @@ export class OptionParser extends ArgumentParser {
     {'_disableConfig': undefined,
         '_source': undefined,
         '_destination': undefined,
-        '_config_files': undefined}
+        '_configFiles': undefined}
 
     public relativePathSettings: string[] = ['warning_stream'];
 
@@ -1023,11 +1043,15 @@ export class OptionParser extends ArgumentParser {
 
     /** Default version message. */
     public versionTemplate = '';
+    private logger: LoggerType;
 
     public constructor(args: OptionParserArgs) {
         super({usage: args.usage, description: args.description});
+        this.logger = args.logger;
         // @ts-ignore
         this.register('action', 'callback', ActionCallback);
+        // @ts-ignore
+        this.register('action', 'validating', ActionValidating);
 
         /** Set of list-type settings. */
         this.lists = {}
@@ -1037,12 +1061,22 @@ export class OptionParser extends ArgumentParser {
 
         const argParser= new ArgumentParser({description: args.description});
         if(!this.version) {
+            // is this correct?
             this.version = this.versionTemplate;
         }
         // Make an instance copy (it will be modified): ??
         this.relativePathSettings = [...this.relativePathSettings];
-        this.components = [this, ...(args && args.components ?
-            args.components: [])];
+        this.logger.silly('constructing component list');
+        this.logger.silly(`adding 'this' to component list`);
+        this.components = [this];
+        if(args && args.components) {
+	  this.logger.silly(`tacking on supplied components: ${args.components.map(c=>c !== undefined ? c.toString() : 'undefined').join(', ')}`);
+ if(args.components.indexOf(undefined) !== -1) {
+ throw new InvalidStateError('received undefined component');
+ }
+
+	  this.components.push(...args.components);
+	  }
 
         this.populateFromComponents(this.components)
         this.setDefaultsFromDict(args.defaults || {})
@@ -1059,19 +1093,19 @@ export class OptionParser extends ArgumentParser {
 
     /**
      *  For each component, first populate from the `SettingsSpec.settings_spec`
-     *  structure, then from the `SettingsSpec.settings_defaults` dictionary.
+     *  structure, then from the `SettingsSpec.settingsDefaults` dictionary.
      *  After all components have been processed, check for and populate from
-     *  each component's `SettingsSpec.settings_default_overrides` dictionary.
+     *  each component's `SettingsSpec.settingsDefaultOverrides` dictionary.
      */
     public populateFromComponents(components: (SettingsSpec|undefined)[]) {
-        logger.silly('Frontend.populateFromComponents');
+        this.logger.silly('Frontend.populateFromComponents', { callerInfo: _getCallerFileAndLine() });
         components.forEach((component) => {
             if(!component || !component.settingsSpec) {
-                logger.silly('component undefined');
+                this.logger.silly('component undefined');
                 return;
             }
+	    this.logger.silly(`component is ${component.toString()} ${component.constructor.name}`);
             const settingsSpec = component.settingsSpec!;
-            logger.silly('settingsSpec', { settingsSpec});
             this.relativePathSettings.push(...component.relativePathSettings);
             settingsSpec.forEach((spec: SettingsSpecType) => {
                 const [ title, description, optionSpec ] = spec;
@@ -1086,7 +1120,7 @@ export class OptionParser extends ArgumentParser {
                             newArgs.dest = dest;
                         } else {
                             newArgs.dest= camelcase(optionStrings[0], { pascalCase: false });}
-                  
+
                         if(Object.prototype.hasOwnProperty.call(optionArgs, 'default')) {
                             newArgs.defaultValue = optionArgs['default'];
                         }
@@ -1107,6 +1141,8 @@ export class OptionParser extends ArgumentParser {
                             //             newArgs.nargs = 0;
                         } else if(a === 'append') {
                             action = a;
+                        } else if(a === 'version') {
+                            action = a;
                         } else if(a === 'callback') {
                             action = 'callback';
                             newArgs.callback = optionArgs.callback;
@@ -1114,17 +1150,26 @@ export class OptionParser extends ArgumentParser {
                             newArgs.nargs = 0;
                         } else if(a === 'version') {
                             action = 'version';
+			    } else if(a === 'validating') {
+			    action = 'validating';
+			    newArgs.nargs = optionArgs.nargs,
+			    newArgs.validator = optionArgs.validator;
+			    newArgs.delegatedAction = optionArgs.delegatedAction;
                         } else {
                             action = 'store';
                         }
                         newArgs.action = action;
-                        logger.silly('addArgument', { optionStrings, args: newArgs});
                         this.addArgument(optionStrings, newArgs);
                     }
                 });
             });
             if(component.settingsDefaults) {
-                //self.defaults.update(component.settings_defaults)
+	        this.logger.silly('updating defaults from component.settingsDefaults');
+
+	        Object.keys(component.settingsDefaults).forEach((key): void => {
+		   this.logger.silly(`setting default for ${key} is ${component.settingsDefaults[key]}`);
+                    this.defaults[key] = component.settingsDefaults[key];
+                });
             }
         });
     }
@@ -1136,26 +1181,9 @@ export class OptionParser extends ArgumentParser {
 
 
     /** Return list of config files, from environment or standard. */
-    public getStandardConfigFiles() {
-        /*try {
-config_files = os.environ['DOCUTILSCONFIG'].split(os.pathsep)
-
-except KeyError:
-            config_files = self.standard_config_files
-
-        # If 'HOME' is not set, expandvars() requires the 'pwd' module which is
-        # not available under certain environments, for example, within
-        # mod_python.  The publisher ends up in here, and we need to publish
-        # from within mod_python.  Therefore we need to avoid expanding when we
-        # are in those environments.
-        expand = os.path.expanduser
-        if 'HOME' not in os.environ:
-            try:
-                import pwd
-            except ImportError:
-                expand = lambda x: x
-        return [expand(f) for f in config_files if f.strip()]
-        */
+    public getStandardConfigFiles(): string[] {
+        const configFiles = this.standardConfigFiles;
+        return configFiles;
     }
 
     public getStandardConfigSettings(): ConfigSettings {
@@ -1168,11 +1196,12 @@ except KeyError:
         return {}
     }
 
-    //        """Returns a dictionary containing appropriate config file settings."""
-    public  getConfigFileSettings(configFile: string) {
+    /** Returns a dictionary containing appropriate config file settings. */
+    public getConfigFileSettings(configFile: string): {} {
+        return {};
         /*        parser = ConfigParser()
         parser.read(config_file, self)
-        self.config_files.extend(parser._files)
+        self.configFiles.extend(parser._files)
         base_path = os.path.dirname(config_file)
         applied = {}
         settings = Values()
@@ -1193,10 +1222,10 @@ except KeyError:
 
     /** Store positional arguments as runtime settings. */
     public checkValues(values: ConfigSettings, args: string[]): ConfigSettings {
-        logger.silly('checkValues', { values, args });
+        this.logger.silly('checkValues');
         [ values._source, values._destination ] = this.checkArgs(args);
-        logger.silly('source and dest', { source: values._source, destination: values._destination });
-    
+        this.logger.silly('source and dest', { source: values._source, destination: values._destination });
+
         //makePathsAbsolute(values, this.relativePathSettings);
         values._configFiles = this.configFiles;
         return values;
@@ -1210,7 +1239,7 @@ except KeyError:
             if(source === '-') { // means stdin
                 source = undefined;
             }
-        }           
+        }
         if(args.length) {
             destination = args.shift()
             if(destination === '-') { //  means stdout
@@ -1226,16 +1255,16 @@ except KeyError:
         }
         return [source, destination];
     }
-    public setDefaultsFromDict(defaults: {}) {
-        //self.defaults.update(defaults)
+    public setDefaultsFromDict(defaults: ConfigSettings) {
+        Object.keys(defaults).forEach((key): void => {
+            this.defaults[key] = defaults[key];
+        });
     }
 
-    public  getDefaultValues(){
-
-        //        """Needed to get custom `Values` instances."""
-        //        defaults = Values(self.defaults)
-        //        defaults._config_files = self.config_files
-        //        return defaults
+    public  getDefaultValues(): Settings{
+        const defaults = this.defaults;
+        defaults._configFiles = this.configFiles;
+        return defaults;
     }
 
     /**
@@ -1255,5 +1284,9 @@ except KeyError:
                     return option
         raise KeyError('No option with dest == %r.' % dest)
         */
+    }
+
+    public toString(): string {
+        return '<Frontend.OptionParser>';
     }
 }

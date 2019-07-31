@@ -1,0 +1,8 @@
+.. _README.txt: ../README.html
+.. _BUGS.txt: ../BUGS.html
+.. _COPYING.txt: ../COPYING.html
+.. _Docutils FAQ:
+.. _FAQ.txt: ../FAQ.html
+.. _RELEASE-NOTES.txt: ../RELEASE-NOTES.html
+.. _HISTORY.txt: ../HISTORY.html
+.. _THANKS.txt: ../THANKS.html

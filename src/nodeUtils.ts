@@ -11,8 +11,8 @@ export function nodeToXml(node: NodeInterface): string {
         const text = xmlescape(node.astext());
         return text;
     }
-    if (node.children.length) {
-        return [node.starttag(), ...node.children.map((c: NodeInterface): string => nodeToXml(c)), node.endtag()].join("");
+    if (node.hasChildren()) {
+        return [node.starttag(), ...node.getChildren().map((c: NodeInterface): string => nodeToXml(c)), node.endtag()].join("");
     }
     return node.emptytag();
 }

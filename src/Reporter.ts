@@ -15,7 +15,10 @@ function getSourceLine(node: NodeInterface): [string | undefined, number | undef
         if (myNode.source || myNode.line) {
             return [myNode.source, myNode.line];
         }
-        myNode = myNode.parent;
+        try {
+            myNode = myNode.parent;
+        } catch(error) {
+        }
     }
     return [undefined, undefined];
 }
@@ -50,7 +53,7 @@ class Reporter implements ReporterInterface {
         errorHandler: string = 'backslashreplace'
     ) {
         if (haltLevel === undefined || haltLevel == null) {
-	throw new Error('haltLevel undefined');
+            throw new Error('haltLevel undefined');
             haltLevel = 4;
         }
         this.DEBUG_LEVEL = 0;

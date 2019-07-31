@@ -30,6 +30,7 @@
     "ast-types": "^0.13.1",
     "babel-jest": "^24.7.1",
     "babel-register": "^6.26.0",
+    "color": "^3.1.2",
     "eslint": "^5.16.0",
     "eslint-config-airbnb-base": "^13.1.0",
     "eslint-plugin-import": "^2.16.0",
@@ -59,7 +60,7 @@
     "xpath": "^0.0.27"
   },
   "jest": {
-    "preset": "ts-jest"
+      "preset": "ts-jest"
   },
   "dependencies": {
     "@babel/polyfill": "^7.4.0",

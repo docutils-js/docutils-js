@@ -1,0 +1,6 @@
+:Author: David Goodger
+:Contact: docutils-develop@lists.sourceforge.net
+:Date: $Date: 2016-01-13 21:09:13 +0000 (Wed, 13 Jan 2016) $
+:Revision: $Revision: 7933 $
+:Copyright: This document has been placed in the public domain.
+

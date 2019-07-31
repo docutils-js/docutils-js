@@ -26,6 +26,8 @@ Propagate empty internal targets to the next element.
 export class PropagateTargets extends Transform {
 
     public apply() {
+        this.logger.silly('apply PropogateTargets');
+    
         /* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */
         this.document.traverse({ condition: nodes.target }).forEach((target) => {
             /*        if(target.parent instanceof nodes.TextElement ||

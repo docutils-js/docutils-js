@@ -6,7 +6,7 @@ import * as utils from '../utils';
 import { basename } from '../utils/paths';
 import { UnimplementedError } from '../Exceptions';
 import {Settings} from "../../gen/Settings";
-import {Document, Attributes, NodeInterface, SettingsSpecType} from "../types";
+import {Document, Attributes, NodeInterface, SettingsSpecType, GenericSettings} from "../types";
 import {row, tgroup} from "../nodes";
 import { RSTLanguage } from "../parsers/rst/types";
 import { getLanguage } from "../parsers/rst/languages";
@@ -806,9 +806,9 @@ class HTMLTranslator extends nodes.NodeVisitor {
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
     public visit_definition_list_item(node: NodeInterface): void {
         // pass class arguments, ids and names to definition term:
-        node.children[0].attributes.classes.splice(0, 0, ...(node.attributes.classes || []));
-        node.children[0].attributes.ids.splice(0, 0, ...(node.attributes.ids || []));
-        node.children[0].attributes.names.splice(0, 0, ...(node.attributes.names || []));
+        node.getChild(0).attributes.classes.splice(0, 0, ...(node.attributes.classes || []));
+        node.getChild(0).attributes.ids.splice(0, 0, ...(node.attributes.ids || []));
+        node.getChild(0).attributes.names.splice(0, 0, ...(node.attributes.names || []));
     }
 
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,@typescript-eslint/no-unused-vars,no-unused-vars */
@@ -1040,7 +1040,7 @@ class HTMLTranslator extends nodes.NodeVisitor {
             { CLASS: node.parent!.attributes.classes.join(' ') }));
 
         // prevent misalignment of following content if the field is empty:
-        if (!node.children.length) {
+        if (!node.hasChildren()) {
             this.body.push('<p></p>');
         }
     }
@@ -1978,9 +1978,9 @@ class HTMLTranslator extends nodes.NodeVisitor {
             const headerLevel = this.sectionLevel + this.initialHeaderLevel - 1;
             let atts: Attributes = {};
             // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-            if (node.parent!.children.length >= 2
+            if (node.parent!.getNumChildren() >= 2
             // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-                && node.parent!.children[1] instanceof nodes.subtitle) {
+                && node.parent!.getChild(1) instanceof nodes.subtitle) {
                 atts.CLASS = 'with-subtitle';
             }
             this.body.push(
@@ -2056,7 +2056,7 @@ class HTMLTranslator extends nodes.NodeVisitor {
         if (!((node.parent instanceof nodes.list_item
                || node.parent instanceof nodes.entry)
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-              && node.parent!.children.length === 1)) {
+              && node.parent.getNumChildren() === 1)) {
             this.body.push('\n');
         }
     }
@@ -2101,8 +2101,11 @@ class HTMLBaseWriter extends BaseWriter {
     /*    private defaultTemplateContent: any;*/
     private visitor?: HTMLTranslator;
     /*    private attr: any;*/
-    private translatorClass: typeof HTMLTranslator;
-    private template: TemplateFunction;
+    private translatorClass: typeof HTMLTranslator = HTMLTranslator;
+    private template: TemplateFunction = template;
+    public settingsDefaults: GenericSettings = {
+        outputEncodingErrorHandler: 'xmlcharrefreplace',
+    };
     public settingsSpec: SettingsSpecType[] = [
         [
             "HTML-Specific Options",
@@ -2336,17 +2339,6 @@ class HTMLBaseWriter extends BaseWriter {
         ]
     ];
 
-    /**
-     * Create HTMLBaseWriter.
-     * @param {Object} args - arguments to function
-     */
-    public constructor() {
-        super();
-        //        this.attr = {};
-        this.translatorClass = HTMLTranslator;
-        // this.defaultTemplateContent = defaultTemplate;
-        this.template = template;
-    }
 
     public translate(): void {
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -2367,7 +2359,6 @@ class HTMLBaseWriter extends BaseWriter {
             // @ts-ignore
 	    o[attr] = visitor[attr] ? visitor[attr].join(''): undefined;
         });
-        logger.silly('got', o);
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         this.output = this.template!(o);
     }
@@ -2406,7 +2397,7 @@ class HTMLBaseWriter extends BaseWriter {
             // @ts-ignore
             this.parts[part] = (this[part] || []).join('');
         });
-        logger.silly('HtmlBase.assembleParts', { parts: this.parts });
+        logger.silly('HtmlBase.assembleParts');
     }
 }
 

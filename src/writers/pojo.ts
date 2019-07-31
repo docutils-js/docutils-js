@@ -90,14 +90,6 @@ class POJOWriter extends BaseWriter {
     private visitor?: POJOTranslator;
     private translatorClass: typeof POJOTranslator = POJOTranslator;
     /**
-      * Create POJOWriter
-      * @param {Object} args - Arguments, none right now
-      */
-    public constructor() {
-        super();
-    }
-
-    /**
      * Translate the document to plain old javascript object
      */
     public translate(): void {

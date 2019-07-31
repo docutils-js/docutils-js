@@ -1,8 +1,12 @@
 import { newDocument } from '../src/index';
-import {defaults} from '../gen/defaults';
+import { getDefaultSettings } from '../src/';
+import { LoggerType } from '../src/types';
+import { createNewDocument } from '../src/testUtils';
+
+declare var logger: LoggerType;
 
 test('newDocument', () => {
-    const document = newDocument({ sourcePath: '<undefined>' }, defaults );
+    const document = createNewDocument('<undefined>');
     expect(document).toBeDefined();
     //expect(document.settings).toBe(baseSettings);
     expect(document.reporter).toBeDefined();

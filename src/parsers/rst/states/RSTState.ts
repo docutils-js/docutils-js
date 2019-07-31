@@ -48,12 +48,9 @@ abstract class RSTState extends StateWS {
 
     public constructor(stateMachine: RSTStateMachine, debug: boolean = false) {
         super(stateMachine, debug);
+        this.logger = stateMachine.logger;
+        //this.logger.silly('constructor');
         this.rstStateMachine = stateMachine;
-    }
-
-    // fixme this whole thing needs rework
-    public _init(stateMachine: RSTStateMachine, debug: boolean = false) {
-        super._init(stateMachine, debug);
         this.createNestedStateMachine = () => NestedStateMachine.createStateMachine(this.rstStateMachine);
         //, undefined, this.rstStateMachine.stateFactory!.withStateClasses(["QuotedLiteralBlock"]));
         this.createIndentedStateMachine = this.createNestedStateMachine;
@@ -73,9 +70,11 @@ abstract class RSTState extends StateWS {
         //     /* eslint-disable-next-line no-console */
         //     debugFn: args && stateMachine ? stateMachine.debugFn : console.log,
         // };
+        //this.logger.silly('end constructor');
     }
 
     public runtimeInit() {
+        //  this.logger.silly('runtimeInit');
         super.runtimeInit();
         const {memo} = this.rstStateMachine;
         this.memo = memo;
@@ -176,6 +175,7 @@ abstract class RSTState extends StateWS {
     }
 
     public nestedListParse(block: StringList, args: NestedParseArgs): [ number, boolean ] {
+        this.logger.debug('nestedListParse', { value: block.join('\n')});
         const myargs: NestedParseArgs = {...args};
         if(myargs.createStateMachine !== undefined) {
             throw Error('not expecing that');
@@ -220,6 +220,8 @@ abstract class RSTState extends StateWS {
         stateMachine.run(block, myargs.inputOffset || 0,
             undefined, undefined, undefined, myargs.node, myargs.matchTitles,
             this.memo);
+
+        this.logger.debug(`checking blank finish state of ${myargs.blankFinishState}`);
 
         const {blankFinish} = stateMachine.getState2(myargs.blankFinishState);
         stateMachine.unlink();
@@ -352,6 +354,7 @@ abstract class RSTState extends StateWS {
 
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
     public inline_text(text: string, lineno: number) {
+        this.logger.silly('in transition method inline_text',{ value: text});
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         const r = this.inliner!.parse(text, {lineno, memo: this.memo, parent: this.parent!});
         return r;

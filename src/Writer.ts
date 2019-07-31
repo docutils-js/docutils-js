@@ -10,7 +10,7 @@ const __version__ = '';
  * Base class for all writers.
  */
 export default abstract class Writer extends Component {
-    public parts: WriterParts;
+    public parts: WriterParts = {};
     public document?: Document;
     private language?: {};
     /**
@@ -23,14 +23,6 @@ export default abstract class Writer extends Component {
      * Set by `write`.
      */
     private destination?: Output<string>;
-    /*
-     * @constructor
-     *
-     */
-    public constructor() {
-        super();
-        this.parts = {};
-    }
 
     public write(document: Document, destination: Output<string>|undefined): string|{}|undefined {
         this.document = document;

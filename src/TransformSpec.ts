@@ -1,6 +1,6 @@
 /* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */
 import SettingsSpec from "./SettingsSpec";
-import { TransformType } from "./types";
+import { TransformType, LoggerType } from "./types";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const __docformat__ = 'reStructuredText';
@@ -14,6 +14,11 @@ const __docformat__ = 'reStructuredText';
 
 class TransformSpec extends SettingsSpec {
     public unknownReferenceResolvers: {}[] = [];
+    protected logger: LoggerType;
+    constructor(args: { logger: LoggerType}) {
+        super();
+        this.logger = args.logger;
+    }
 
     /**
      * Get the transforms associated with the instance.

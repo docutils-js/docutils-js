@@ -1,6 +1,6 @@
 import { ApplicationError, InvalidStateError } from "./Exceptions";
 import { ArgumentParser } from 'argparse';
-import { OptionParser } from './Frontend';
+import { OptionParser, OptionParserArgs } from "./Frontend";
 import * as readers from './Readers';
 import * as writers from './Writers';
 import SettingsSpec from './SettingsSpec';
@@ -14,8 +14,7 @@ import Output from "./io/Output";
 import FileInput from "./io/FileInput";
 import FileOutput from "./io/FileOutput";
 import Input from "./io/Input";
-import { DebugFunction, Document, InputConstructor } from "./types";
-import { logger } from './logger';
+import { DebugFunction, Document, InputConstructor, LoggerType } from "./types";
 
 export interface SetupOptionParserArgs
 {
@@ -48,6 +47,7 @@ export interface PublisherArgs {
     settings?: Settings;
     debugFn?: DebugFunction;
     debug?: boolean;
+    logger: LoggerType;
 }
 
 interface OutputConstructor<T> {
@@ -102,13 +102,15 @@ export class Publisher {
    source_class=io.FileInput, destination=None,
    destination_class=io.FileOutput, settings=None */
 
+    private logger: LoggerType;
+
     public constructor(args: PublisherArgs) {
         const {
             reader, parser, writer, source, destination,
-            settings, debugFn, sourceClass, destinationClass,
+            settings, debugFn, sourceClass, destinationClass, logger,
         } = args;
 
-        logger.silly('Publisher.constructor', args);
+        this.logger = logger;
 
         if(debugFn !== undefined) {
             this.debugFn = debugFn;
@@ -118,7 +120,6 @@ export class Publisher {
         this.parser = parser;
         this.writer = writer;
         this.source = source;
-        logger.silly('setting destination to', { destination });
         this.destination = destination;
         // @ts-ignore
         this.sourceClass = sourceClass || FileInput;
@@ -132,9 +133,9 @@ export class Publisher {
             return;
         }
         const ReaderClass = readers.getReaderClass(readerName);
-        // @ts-ignore
         this.reader = new ReaderClass({
             parser, parserName, debug: this.debug, debugFn: this.debugFn,
+	    logger: this.logger,
         });
         if(this.reader !== undefined) {
             this.parser = this.reader.parser;
@@ -145,15 +146,13 @@ export class Publisher {
         if(writerName === undefined) {
             return;
         }
-        const writerClass = writers.getWriterClass(writerName);
+        const WriterClass = writers.getWriterClass(writerName);
         /* not setting document here, the write method takes it, which
          * is confusing */
-        // @ts-ignore
-        this.writer = new writerClass();
+        this.writer = new WriterClass({ logger: this.logger});
     }
 
-    public setComponents(readerName: string|undefined, parserName: string|undefined, writerName: string|undefined): void {
-        logger.silly('setComponents', { readerName, parserName, writerName });
+    public setComponents(readerName?: string, parserName?: string, writerName?: string): void {
         if (!this.reader) {
             this.setReader(readerName, this.parser, parserName);
         }
@@ -171,7 +170,6 @@ export class Publisher {
     public setupOptionParser(
         args: SetupOptionParserArgs,
     ): ArgumentParser {
-        logger.silly('setupOptionParser');
         const { usage, description, settingsSpec, configSection, defaults } = args;
         let settingsSpec2 = settingsSpec;
         if (configSection) {
@@ -186,7 +184,25 @@ export class Publisher {
         }
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         settingsSpec2 = settingsSpec2!;
-        const optionParser = new OptionParser({components: [this.parser, this.reader,this.writer, settingsSpec2], defaults, readConfigFiles:true, usage,description});
+        if(!this.parser) {
+            throw new ApplicationError('no parser');
+        }
+        if(!this.reader) {
+            throw new ApplicationError('no reader');
+        }
+        if(!this.writer) {
+            throw new ApplicationError('no writer');
+        }
+        if(!settingsSpec2) {
+            //throw new Error('no settingsSpec');
+        }
+
+        const components: SettingsSpec[] = [this.parser, this.reader,this.writer]
+        if(settingsSpec2 !== undefined) {
+            components.push(settingsSpec2);
+        }
+        const oArgs: OptionParserArgs = {logger: this.logger, components, defaults, readConfigFiles:true, usage,description}
+        const optionParser = new OptionParser(oArgs);
         return optionParser;
     }
 
@@ -194,7 +210,6 @@ export class Publisher {
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         args: ProcessCommandLineArgs,
     ): void {
-        logger.silly('processCommandLine', { args: args.argv });
         try {
             const argParser: ArgumentParser = this.setupOptionParser({
                 usage: args.usage,
@@ -204,7 +219,7 @@ export class Publisher {
             if (argv === undefined) {
                 argv = process.argv.slice(2);
             }
-	    logger.silly('calling argParser.parseKnownArgs', { argv });
+	    this.logger.silly('calling argParser.parseKnownArgs', { argv });
             const [settings, restArgs] = argParser.parseKnownArgs(argv);
             // @ts-ignore
             this.settings = argParser.checkValues(settings, restArgs);
@@ -216,17 +231,18 @@ export class Publisher {
     }
 
     public setIO(sourcePath?: string, destinationPath?: string): void {
-        logger.silly('setIO', { sourcePath, destinationPath });
+        this.logger.silly('setIO');
         if (this.source === undefined) {
             this.setSource({ sourcePath });
         }
         if (this.destination === undefined) {
             this.setDestination({ destinationPath });
         }
+        this.logger.silly('departing setIO');
     }
 
     public setSource(args: { source?: {}; sourcePath?: string }): void {
-        logger.silly('setSource');
+        this.logger.silly('setSource');
         let sourcePath = args.sourcePath;
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         let source = args.source;
@@ -250,43 +266,49 @@ export class Publisher {
                     sourcePath,
                     encoding:
                     inputEncoding,
+		    logger: this.logger,
                 });
             }
         } catch (error) {
-            logger.error(error);
+            this.logger.error(error);
             // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             throw new ApplicationError(`Unable to instantiate Source class ${this.sourceClass!.constructor.name}: ${error.message}`, { error });
         }
     }
 
     public setDestination(args: { destination?: Output<{}>; destinationPath?: string }): void {
-        logger.silly('setDestination', args);
-        let destinationPath = args.destinationPath;
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        let destination = args.destination;
-        if (destinationPath === undefined) {
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-            destinationPath = this.settings!._destination;
-        } else {
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-            this.settings!._destination = destinationPath;
+        this.logger.silly('setDestination');
+        try {
+            let destinationPath = args.destinationPath;
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            let destination = args.destination;
+            if (destinationPath === undefined) {
+                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                destinationPath = this.settings!._destination;
+            } else {
+                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                this.settings!._destination = destinationPath;
+            }
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            const DestinationClass = this.destinationClass!;
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion,@typescript-eslint/no-unused-vars
+            const outputEncoding = this.settings!.outputEncoding;
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion,@typescript-eslint/no-unused-vars
+            let outputEncodingErrorHandler = this.settings!.outputEncodingErrorHandler;
+            this.destination = new DestinationClass(
+                destination,
+                destinationPath,
+                outputEncoding,
+                outputEncodingErrorHandler,
+            );
+        } catch(error) {
+            console.log(error.message);
+            this.logger.error(`Got error ${error.message}`, { stack: error.stack});
         }
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        const DestinationClass = this.destinationClass!;
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion,@typescript-eslint/no-unused-vars
-        const outputEncoding = this.settings!.outputEncoding;
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion,@typescript-eslint/no-unused-vars
-        let outputEncodingErrorHandler = this.settings!.outputEncodingErrorHandler;
-        this.destination = new DestinationClass(
-            destination,
-            destinationPath,
-            outputEncoding,
-            outputEncodingErrorHandler,
-        );
     }
 
     public applyTransforms(): void {
-        logger.silly('applyTransforms');
+        this.logger.silly('Publisher.applyTransforms');
         const document1 = this.document;
         if(document1 === undefined) {
             throw new InvalidStateError('Document undefined');
@@ -307,7 +329,7 @@ export class Publisher {
     /* This doesnt seem to return anything ? */
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     public publish(args: any, cb: (error: Error | undefined | {}, output: undefined | {}) => void): void {
-        logger.silly('publish');
+        this.logger.silly('Publisher.publish');
 
         const {
             /* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */
@@ -333,7 +355,7 @@ export class Publisher {
             if(this.settings! === undefined) {
                 throw new InvalidStateError('need serttings');
             }
-	    logger.silly('calling reader.read', { reader: this.reader});
+            this.logger.silly('calling read');
             this.reader.read(
                 // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
                 this.source, this.parser, this.settings!,
@@ -366,6 +388,7 @@ export class Publisher {
     public debuggingDumps(): void {
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         if(this.settings!.dumpSettings) {
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             process.stderr.write(JSON.stringify(this.settings!, null, 4));
         }
     }

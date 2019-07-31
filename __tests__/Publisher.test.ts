@@ -1,12 +1,13 @@
 import {Publisher} from '../src/Publisher';
 import { StringInput } from'../src/io';
+import { createPublisher,createLogger } from '../src/testUtils';
 import sinon from 'sinon';
 
-test('1',() => {
-
-const input = new StringInput('');
+test.skip('1',() => {
+const logger = createLogger();
+const input = new StringInput('', logger);
 sinon.spy(input, 'read');
-const p = new Publisher({source: input});
+const p = createPublisher();
 // @ts-ignore
 expect(input.read.calledOnce).toBeTruthy();
 });

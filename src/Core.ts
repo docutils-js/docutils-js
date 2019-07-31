@@ -1,40 +1,26 @@
 import {Publisher} from './Publisher';
-import * as defaults from './defaults';
-import { ConfigSettings, SettingsSpecType } from './types';
+import { ConfigSettings, SettingsSpecType, LoggerType } from './types';
 import Writer from './Writer';
 import Parser from './Parser';
 import Reader from './Reader';
 import { Settings } from '../gen/Settings';
-import { logger } from './logger';
+import { defaultPublisherOptions, defaultUsage, defaultDescription } from './constants';
 export { Publisher };
-
-export const defaultUsage = '%%prog [options] [<source> [<destination>]]';
-export const defaultDescription = ('Reads from <source> (default is stdin) and writes to <destination> (default is stdout).  See <http://docutils.sf.net/docs/user/config.html> for the full reference.');
 
 /* We need a non command-line parsing based function */
 
 /* We should document all the arguments to this function */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function publish(args: any): void {
-    const _defaults = {
-        readerName: defaults.defaultReaderName,
-        parserName: defaults.defaultParserName,
-        usage: defaultUsage,
-        description: defaultDescription,
-        enableExitStatus: defaults.defaultEnableExitStatus,
-    };
-    const myArgs = { ..._defaults, ...args };
+    const myArgs = { ...defaultPublisherOptions, ...args };
     const {
         reader, readerName, parser, parserName, writer, writerName,
         settings,
     } = myArgs;
     const pub = new Publisher({
-        reader, parser, writer, settings,
+        reader, parser, writer, settings, logger:myArgs.logger,
     });
     pub.setComponents(readerName, parserName, writerName);
-    //pub.publish2({
-    //    argv, usage, description, settingsSpec, settingsOverrides, configSection, enableExitStatus,
-    //});
 }
 
 
@@ -53,6 +39,7 @@ export interface PublishCmdLineArgs {
     argv?: string[];
     usage?: string;
     description?: string;
+    logger: LoggerType;
 }
 
 /**
@@ -79,14 +66,14 @@ export function publishCmdLine(args: PublishCmdLineArgs, cb: any): void {
         enableExitStatus: true,
     };
     args = { ..._defaults, ...args };
-    logger.silly('publishCmdLine');
+    args.logger.silly('publishCmdLine');
     const {
         reader, readerName, parser, parserName, writer, writerName,
         settings, settingsSpec, settingsOverrides, configSection,
         enableExitStatus, argv, usage, description,
     } = args;
     const pub = new Publisher({
-        reader, parser, writer, settings,
+        reader, parser, writer, settings, logger:args.logger,
     });
     pub.setComponents(readerName, parserName, writerName);
     pub.publish({

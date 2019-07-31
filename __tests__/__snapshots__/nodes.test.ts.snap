@@ -4,6 +4,32 @@ exports[`paragraph with text 1`] = `"<paragraph>This is my paragraph text.</para
 
 exports[`paragraph with text 2`] = `
 paragraph {
+  "_children": Array [
+    Text {
+      "_children": Array [],
+      "_parent": [Circular],
+      "attributes": Object {},
+      "basicAttributes": Array [
+        "ids",
+        "classes",
+        "names",
+        "dupnames",
+      ],
+      "childTextSeparator": "",
+      "classTypes": Array [],
+      "currentLine": 0,
+      "currentSource": "",
+      "data": "This is my paragraph text.",
+      "isSetup": false,
+      "knownAttributes": Array [],
+      "line": 0,
+      "listAttributes": Array [],
+      "names": Array [],
+      "rawsource": "",
+      "referenced": false,
+      "tagname": "Text",
+    },
+  ],
   "attributes": Object {
     "backrefs": Array [],
     "classes": Array [],
@@ -20,35 +46,12 @@ paragraph {
   "childTextSeparator": "
 
 ",
-  "children": Array [
-    Text {
-      "attributes": Object {},
-      "basicAttributes": Array [
-        "ids",
-        "classes",
-        "names",
-        "dupnames",
-      ],
-      "childTextSeparator": "",
-      "children": Array [],
-      "classTypes": Array [],
-      "currentLine": 0,
-      "currentSource": "",
-      "data": "This is my paragraph text.",
-      "knownAttributes": Array [],
-      "line": 0,
-      "listAttributes": Array [],
-      "names": Array [],
-      "rawsource": "",
-      "referenced": false,
-      "tagname": "Text",
-    },
-  ],
   "classTypes": Array [
     [Function],
   ],
   "currentLine": 0,
   "currentSource": "",
+  "isSetup": false,
   "knownAttributes": Array [
     "ids",
     "classes",

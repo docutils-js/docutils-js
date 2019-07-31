@@ -1,22 +1,19 @@
 import { Publisher } from '../src/Core';
 import { StringInput, StringOutput } from '../src/io';
 import * as nodes from '../src/nodes';
-import { defaults } from "../gen/defaults";
+import { getDefaultSettings } from "../src/";
 import {NodeInterface} from "../src/types";
+import { createLogger } from '../src/testUtils';
 
 const path = require('path');
 const fs = require('fs');
-const micromatch = require('micromatch');
 
 const testFilesRoot = path.join(__dirname, '../testfiles/forms/');
-//const glob = path.join(__dirname, '../testfiles/forms/*.txt');
-// for files we want to return the files
-// dor directories we want to return the directories
 
-const table = fs.readdirSync(testFilesRoot, { withFileTypes: true }).filter((e: any) => !e.isDirectory()).map((e: any) => [e.name, fs.readFileSync(path.join(testFilesRoot, e.name), 'utf-8')]);
-
-//const files = micromatch([glob]);
-//const table = files.map(file => ([file, fs.readFileSync(file, 'utf-8')]));
+const table = fs.readdirSync(testFilesRoot, { withFileTypes: true })
+    .filter((e: any) => !e.isDirectory())
+    .map((e: any) => [e.name,
+        fs.readFileSync(path.join(testFilesRoot, e.name), 'utf-8')]);
 
 const defaultArgs = {
     readerName: 'standalone',
@@ -27,19 +24,20 @@ const defaultArgs = {
     writerName: 'xml',
 };
 
-const defaultSettings = { ...defaults };
+const defaultSettings = { ...getDefaultSettings() };
 
-test.each(table)('%s', (file, input) => {
+test.skip.each(table)('%s', (file, input) => {
+const logger = createLogger();
     const myOpts: any = {};
 
     const settings = { ...defaultSettings };
     const args = { ...defaultArgs };
 
     const { readerName, parserName, writerName } = args;
-    const source = new StringInput( input);
-    const destination = new StringOutput();
+    const source = new StringInput( input, logger);
+    const destination = new StringOutput(logger);
     const pub = new Publisher({
-        source, destination, settings,
+        source, destination, settings, logger,
     });
     pub.setComponents(readerName, parserName, writerName);
     return new Promise((resolve, reject) => {

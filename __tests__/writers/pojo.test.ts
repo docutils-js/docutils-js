@@ -1,6 +1,7 @@
 import { Publisher } from '../../src/Core';
 import { StringInput, StringOutput } from '../../src/io';
-import { defaults } from "../../gen/defaults";
+import { getDefaultSettings } from '../../src/';
+import { createLogger }from '../../src/testUtils';
 
 const currentLogLines = [];
 
@@ -20,11 +21,12 @@ const defaultArgs = {
     writerName: 'pojo',
 };
 
-const defaultSettings = { ...defaults};
+const defaultSettings = { ...getDefaultSettings()};
 
 test('rst2pojo pipeline', () => {
     const settings = { ...defaultSettings };
     const args = { ...defaultArgs };
+    const logger = createLogger();
 
     /* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */
     const debugFn = (msg: string) => {
@@ -38,11 +40,11 @@ test('rst2pojo pipeline', () => {
 I like food.
 
 `,
-    );
+    logger);
 
-    const destination = new StringOutput();
+    const destination = new StringOutput(logger);
     const pub = new Publisher({
-        source, destination, settings, debug: true, debugFn,
+        source, destination, settings, debug: true, debugFn,logger,
     });
     pub.setComponents(readerName, parserName, writerName);
     return new Promise((resolve, reject) => {

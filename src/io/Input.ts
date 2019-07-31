@@ -12,7 +12,7 @@ abstract class Input extends TransformSpec {
     protected source?: any;
     public constructor(
         args: InputConstructorArgs) {
-        super();
+        super({ logger: args.logger });
         const { source, sourcePath, encoding, errorHandler } = args;
         this.encoding = encoding;
         this.errorHandler = errorHandler;

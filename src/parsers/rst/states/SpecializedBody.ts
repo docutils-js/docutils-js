@@ -2,7 +2,14 @@ import Body from './Body';
 import { EOFError } from '../../../Exceptions';
 import RSTStateMachine from "../RSTStateMachine";
 import {RSTStateArgs} from "../types";
-import {RegexpResult, ContextArray, StateType, StateInterface,ParseMethodReturnType} from '../../../types';
+import {
+RegexpResult,
+ContextArray,
+StateType,
+StateInterface,
+ParseMethodReturnType,
+Patterns,
+} from '../../../types';
 class SpecializedBody extends Body {
 
     /* istanbul ignore next */

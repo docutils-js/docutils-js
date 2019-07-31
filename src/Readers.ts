@@ -1,7 +1,7 @@
 import Component from './Component';
 import Reader from './Reader';
 import * as standalone from './readers/standalone';
-import { TransformType } from "./types";
+import { TransformType, ReaderConstructor } from "./types";
 
 export class ReReader extends Reader {
     public getTransforms(): TransformType[] {
@@ -13,7 +13,7 @@ export class ReReader extends Reader {
 /* eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars */
 const _ReaderAliases = {};
 
-export function getReaderClass(readerName: string): {} {
+export function getReaderClass(readerName: string): ReaderConstructor {
 //    console.log(readerName);
     if (readerName === 'standalone') {
         return standalone.default;

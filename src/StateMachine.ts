@@ -24,13 +24,12 @@ import {
     States,
     TransitionsArray,
     StateConstructor,
+    LoggerType,
 } from "./types";
 import State from "./states/State";
 import TransitionCorrection from "./TransitionCorrection";
 import UnexpectedIndentationError from "./error/UnexpectedIndentationError";
 import RSTStateMachine from "./parsers/rst/RSTStateMachine";
-import { child } from './logger';
-const logger = child({'class': 'StateMachine'});
 
 export class StateMachineError extends Error { }
 export class UnknownStateError extends StateMachineError { }
@@ -104,6 +103,8 @@ class StateMachine implements Statemachine {
 
     private initialState?: string;
 
+    public logger: LoggerType;
+
     /*    def __init__(self, state_classes, initial_state, debug=False): */
     /* export interface StateMachineConstructorArgs { stateFactory?: Statefactory; initialState?: string; debug?: boolean; debugFn?: DebugFunction; } */
 
@@ -111,6 +112,7 @@ class StateMachine implements Statemachine {
         args: StateMachineConstructorArgs
     ) {
         const cArgs = { ... args };
+        this.logger = cArgs.logger;
         /* Initialize instance junk that we can't do except through
            this method. */
         if (cArgs.debug === undefined) {
@@ -120,7 +122,7 @@ class StateMachine implements Statemachine {
             // make this unexpected error?
             // throw new Error("unexpected lack of debug function");
             /* eslint-disable-next-line no-console */
-            cArgs.debugFn = logger.debug.bind(logger);
+            cArgs.debugFn = this.logger.debug.bind(this.logger);
         }
         if(cArgs.stateFactory !== undefined) {
             this.stateFactory = cArgs.stateFactory;
@@ -196,6 +198,7 @@ class StateMachine implements Statemachine {
         // eslint-disable-next-line @typescript-eslint/no-unused-vars,@typescript-eslint/no-explicit-any
         initialState?: string, ...rest: any[]):
         (string|{})[] {
+        this.logger.debug('run');
         // RUNTIMEINIT
         let lines: string | string[] | StringList = inputLines;
         this.runtimeInit();
@@ -239,6 +242,7 @@ class StateMachine implements Statemachine {
                 try {
                     try {
                         this.nextLine();
+                        this.logger.debug('line', {value: this.line});
                         if (this.debug) {
                             if (Number.isNaN(this.lineOffset)) {
                                 /* istanbul ignore if */
@@ -484,7 +488,7 @@ class StateMachine implements Statemachine {
      */
     public checkLine(context: {}[], state: StateInterface,
         transitions?: TransitionsArray):  [{}[], (string | StateInterface | undefined), {}[]] {
-	logger.silly({kind: 'enterFunction', function: 'checkLine'});
+        this.logger.silly({kind: 'enterFunction', function: 'checkLine'});
         /* istanbul ignore if */
         if (!Array.isArray(context)) {
             throw new Error('context should be array');
@@ -511,9 +515,10 @@ class StateMachine implements Statemachine {
             if(!pattern.exec){
                 throw new InvalidStateError(`unexpected pattern ${v}`);
             }
-	    logger.silly(`executing pattern ${pattern} on line ${this.line}`,{ pattern, line: this.line });
+	    this.logger.silly(`executing for ${t} pattern ${pattern} on line ${this.line}`);
             const result = pattern.exec(this.line);
             if (result) {
+	    this.logger.debug(`line matched transition ${t}`, { value: t});
                 if (this.debug) {
                     this.debugFn(`\nStateMachine.checkLine: `
                       + `Matched transition '"${t}"`
@@ -541,7 +546,7 @@ class StateMachine implements Statemachine {
         } else {
             stateName = stateClass.stateName;
         }
-        logger.silly(`adding state ${stateName}`, { stateName });
+        //this.logger.silly(`adding state ${stateName}`, { stateName });
 
         if(this.hasState(stateName!)) {
             throw new DuplicateStateError(stateName);
