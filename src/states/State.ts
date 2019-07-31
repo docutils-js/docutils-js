@@ -86,7 +86,7 @@ class State implements StateInterface {
 
     public constructor(stateMachine: StateMachine, debug: boolean = false) {
         this.stateMachine = stateMachine;
-	this.logger = stateMachine.logger;
+        this.logger = stateMachine.logger;
         this.debug = debug;
 
         if(this.createNestedStateMachine === undefined) {

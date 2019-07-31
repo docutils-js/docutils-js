@@ -3,12 +3,12 @@ import { EOFError } from '../../../Exceptions';
 import RSTStateMachine from "../RSTStateMachine";
 import {RSTStateArgs} from "../types";
 import {
-RegexpResult,
-ContextArray,
-StateType,
-StateInterface,
-ParseMethodReturnType,
-Patterns,
+    RegexpResult,
+    ContextArray,
+    StateType,
+    StateInterface,
+    ParseMethodReturnType,
+    Patterns,
 } from '../../../types';
 class SpecializedBody extends Body {
 

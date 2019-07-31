@@ -7,11 +7,11 @@ import roleInterface from "./Roles";
 import { ApplicationError } from "../../Exceptions";
 import unescape from "../../utils/unescape";
 import {
-Document,
-ElementInterface,
-NodeInterface,
-ReporterInterface,
-LoggerType,
+    Document,
+    ElementInterface,
+    NodeInterface,
+    ReporterInterface,
+    LoggerType,
 } from "../../types";
 import { Settings } from "../../../gen/Settings";
 import { InlinerInterface } from "./types";
@@ -125,8 +125,8 @@ class Inliner implements InlinerInterface {
     /**
      * Create Inliner instance
      */
-    public constructor(document: Document, logger:LoggerType) {
-    this.logger = logger;
+    public constructor(document: Document, logger: LoggerType) {
+        this.logger = logger;
         this.dispatch = {
             '*': this.emphasis.bind(this),
             '**': this.strong.bind(this),
@@ -612,8 +612,8 @@ class Inliner implements InlinerInterface {
 	    
         };
 
-	this.implicitDispatch.push(this.patterns.uri);//, this.standaloneUri);
-	/*        if settings.pep_references:
+        this.implicitDispatch.push(this.patterns.uri);//, this.standaloneUri);
+        /*        if settings.pep_references:
             self.implicit_dispatch.append((self.patterns.pep,
                                            self.pep_reference))
         if settings.rfc_references:
@@ -623,14 +623,14 @@ class Inliner implements InlinerInterface {
     }
 
     parse(text: string, args: { lineno: number; memo: any; parent: ElementInterface }) {
-    this.logger.silly('parse');
+        this.logger.silly('parse');
         const { lineno, memo, parent } = args;
         this.reporter = memo.reporter;
         this.document = memo.document;
         this.language = memo.language;
         this.parent = parent;
         let remaining = escape2null(text);
-	this.logger.silly('remaining', { value: remaining });
+        this.logger.silly('remaining', { value: remaining });
         const processed = [];
         let unprocessed = [];
         const messages = [];
@@ -680,7 +680,7 @@ class Inliner implements InlinerInterface {
             }
         }
         if (remaining) {
-	this.logger.silly('have remaining', { value: remaining });
+            this.logger.silly('have remaining', { value: remaining });
             processed.push(...this.implicit_inline(remaining, lineno));
         }
         //      console.log(processed);
@@ -695,7 +695,7 @@ class Inliner implements InlinerInterface {
      */
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase,@typescript-eslint/no-unused-vars,no-unused-vars */
     implicit_inline(text: string, lineno: number) {
-    this.logger.silly('implicit_inline', {value:text});
+        this.logger.silly('implicit_inline', {value:text});
         if (!text) {
             return [];
         }

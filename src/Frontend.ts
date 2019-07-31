@@ -1071,9 +1071,9 @@ export class OptionParser extends ArgumentParser {
         this.components = [this];
         if(args && args.components) {
 	  this.logger.silly(`tacking on supplied components: ${args.components.map(c=>c !== undefined ? c.toString() : 'undefined').join(', ')}`);
- if(args.components.indexOf(undefined) !== -1) {
- throw new InvalidStateError('received undefined component');
- }
+            if(args.components.indexOf(undefined) !== -1) {
+                throw new InvalidStateError('received undefined component');
+            }
 
 	  this.components.push(...args.components);
 	  }

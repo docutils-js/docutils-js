@@ -9,14 +9,14 @@ import {Document, LoggerType} from "../types";
  * @param document
  */
 
-function parse(inputstring: string, document: Document, logger:LoggerType): Document {
+function parse(inputstring: string, document: Document, logger: LoggerType): Document {
     const initialState = 'Body';
     const stateMachine = new RSTStateMachine({
         stateFactory: new StateFactory({logger}),
         initialState,
         /*        debugFn: this.debugFn,
         debug: document.reporter.debugFlag, */ // fixme
-	logger,
+        logger,
     });
     let tabWidth;
     if(document.settings !== undefined) {

@@ -96,7 +96,7 @@ export interface EnumSequencePats {
     upperalpha: string;
     lowerroman: string;
     upperroman: string;
-    [name:string]: string;
+    [name: string]: string;
 }
 export interface EnumConverters {
     arabic: (input: string) => number;
@@ -199,7 +199,7 @@ class Body extends RSTState implements BodyState {
         pats.shortopt = `(-|\\+)${pats.alphanum}( ?${pats.optarg})?`;
         pats.longopt = `(--|/)${pats.optname}([ =]${pats.optarg})?`;
         pats.option = `(${pats.shortopt}|${pats.longopt})`;
-	this.pats = pats;
+        this.pats = pats;
 
         // @ts-ignore
         enum_.formats.forEach((format): void => {
@@ -1364,7 +1364,7 @@ try {
             ));
         }
         if (block.hasChildren()) {
-        const child = block.getChild(0);
+            const child = block.getChild(0);
             // is null something we'll get here?? fixme
             if (child.attributes.indent == null) {
                 child.attributes.indent = 0;
@@ -1399,7 +1399,7 @@ try {
     /* eslint-disable-next-line @typescript-eslint/camelcase,camelcase */
     public nest_line_block_lines(block: NodeInterface): void {
         for (let i = 1; i < block.getNumChildren(); i += 1) {
-        const child = block.getChild(i) as nodes.line;
+            const child = block.getChild(i) as nodes.line;
             if (child.indent === undefined && i !== 0) {
                 child.indent = (block.getChild(i - 1) as nodes.line).indent;
             }
@@ -1441,7 +1441,7 @@ try {
         }
 
         for (let i = 0; i < newItems.length; i += 1) {
-        block.append(newItems[i]);
+            block.append(newItems[i]);
         }
     }
 

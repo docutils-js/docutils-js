@@ -40,7 +40,7 @@ export function createStateMachine() {
 }
 
 export function createStateFactory(): StateFactory {
-return new StateFactory({ logger: createLogger() });
+    return new StateFactory({ logger: createLogger() });
 }
 
 export function createNewDocument(sourcePath: string='default') {
